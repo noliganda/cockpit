@@ -6,6 +6,7 @@ import { WorkspaceProvider } from "@/components/workspace-provider";
 import { TaskProvider } from "@/components/task-provider";
 import { SprintProvider } from "@/components/sprint-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/components/auth-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,20 +31,22 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0F0F0F]`}>
-        <WorkspaceProvider>
-          <TaskProvider>
-            <SprintProvider>
-              <TooltipProvider>
-                <div className="flex h-screen overflow-hidden">
-                  <Sidebar />
-                  <main className="flex-1 ml-[280px] overflow-y-auto">
-                    {children}
-                  </main>
-                </div>
-              </TooltipProvider>
-            </SprintProvider>
-          </TaskProvider>
-        </WorkspaceProvider>
+        <AuthProvider>
+          <WorkspaceProvider>
+            <TaskProvider>
+              <SprintProvider>
+                <TooltipProvider>
+                  <div className="flex h-screen overflow-hidden">
+                    <Sidebar />
+                    <main className="flex-1 ml-[280px] overflow-y-auto">
+                      {children}
+                    </main>
+                  </div>
+                </TooltipProvider>
+              </SprintProvider>
+            </TaskProvider>
+          </WorkspaceProvider>
+        </AuthProvider>
       </body>
     </html>
   );

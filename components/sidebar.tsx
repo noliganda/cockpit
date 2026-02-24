@@ -16,9 +16,11 @@ import {
   BarChart2,
   Timer,
 } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
 import { useWorkspace } from '@/hooks/use-workspace';
+import { useAuth } from '@/components/auth-provider';
 
 interface NavItem {
   href: string;
@@ -47,6 +49,7 @@ const BOTTOM_ITEMS: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const { workspace } = useWorkspace();
+  const { logout } = useAuth();
 
   const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
 
@@ -133,13 +136,19 @@ export function Sidebar() {
             </Link>
           );
         })}
-        {/* Workspace indicator dot */}
-        <div className="mt-3 px-3 flex items-center gap-2">
-          <div
-            className="w-2 h-2 rounded-full"
-            style={{ background: accentColor }}
-          />
-          <span className="text-xs text-[#A0A0A0]">{workspace.name}</span>
+        {/* Workspace indicator + logout */}
+        <div className="mt-3 px-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ background: accentColor }} />
+            <span className="text-xs text-[#A0A0A0]">{workspace.name}</span>
+          </div>
+          <button
+            onClick={logout}
+            title="Lock workspace"
+            className="text-[#6B7280] hover:text-[#EF4444] transition-colors p-1 rounded"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </aside>

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { FolderOpen } from 'lucide-react';
+import Link from 'next/link';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { MOCK_PROJECTS } from '@/lib/data';
 
@@ -31,12 +32,12 @@ export default function ProjectsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((project, i) => (
+          <Link key={project.id} href={`/projects/${project.id}`}>
           <motion.div
-            key={project.id}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
-            className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 hover:border-[#3A3A3A] transition-colors"
+            className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 hover:border-[#3A3A3A] transition-colors cursor-pointer"
           >
             <div className="flex items-start justify-between mb-3">
               <div
@@ -68,6 +69,7 @@ export default function ProjectsPage() {
               )}
             </div>
           </motion.div>
+          </Link>
         ))}
       </div>
     </div>

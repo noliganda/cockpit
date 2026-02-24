@@ -9,11 +9,12 @@ import {
   Users,
   FileText,
   MessageSquare,
-  Lock,
   Sun,
   Settings,
   Zap,
   DollarSign,
+  BarChart2,
+  Timer,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
@@ -30,7 +31,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/projects', label: 'Projects', icon: FolderOpen },
+  { href: '/sprints', label: 'Sprints', icon: Timer },
   { href: '/crm', label: 'CRM', icon: Users },
+  { href: '/metrics', label: 'Metrics', icon: BarChart2 },
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
   { href: '/brief', label: 'Morning Brief', icon: Sun },

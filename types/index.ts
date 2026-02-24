@@ -9,6 +9,7 @@ export interface Workspace {
 export interface Task {
   id: string;
   workspaceId: string;
+  projectId?: string;
   title: string;
   description?: string;
   status: string;
@@ -48,9 +49,24 @@ export interface Contact {
   phone?: string;
   company?: string;
   role?: string;
+  address?: string;
+  website?: string;
+  notes?: string;
   pipelineStage?: string;
   tags: string[];
   lastContact?: string;
+}
+
+export interface Sprint {
+  id: string;
+  workspaceId: string;
+  name: string;
+  goal?: string;
+  startDate: string;
+  endDate: string;
+  status: 'planning' | 'active' | 'completed';
+  taskIds: string[];
+  createdAt: string;
 }
 
 export interface TaskStatus {

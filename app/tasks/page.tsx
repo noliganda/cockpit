@@ -2,12 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, LayoutGrid, List, Filter } from 'lucide-react';
+import { Plus, Search, LayoutGrid, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { TaskDialog } from '@/components/task-dialog';
 import { Task, getStatusesForWorkspace, getStatusById } from '@/types';
+import { MOCK_PROJECTS } from '@/lib/data';
 import { format, parseISO } from 'date-fns';
 
 const PRIORITY_COLORS = {
@@ -30,6 +31,8 @@ export default function TasksPage() {
 
   const statuses = getStatusesForWorkspace(workspace.id);
   const allTasks = getTasksForWorkspace(workspace.id);
+  const workspaceProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState<string | null>(null);
 
   const filteredTasks = useMemo(() => {
     return allTasks.filter(task => {
@@ -137,7 +140,7 @@ export default function TasksPage() {
       </motion.div>
 
       {/* Task list */}
-      <div className="space-y-1.5">
+      <div className="space-y-1.5" onClick={() => setStatusDropdownOpen(null)}>
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12 text-[#A0A0A0]">
             <p className="text-sm">No tasks found</p>
@@ -178,14 +181,32 @@ export default function TasksPage() {
                   )}
                 </div>
 
-                {/* Status badge */}
+                {/* Quick status dropdown */}
                 {status && (
-                  <span
-                    className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{ background: `${status.color}20`, color: status.color }}
-                  >
-                    {status.name}
-                  </span>
+                  <div className="relative hidden sm:block">
+                    <button
+                      onClick={() => setStatusDropdownOpen(statusDropdownOpen === task.id ? null : task.id)}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium hover:opacity-80 transition-opacity"
+                      style={{ background: `${status.color}20`, color: status.color }}
+                    >
+                      {status.name}
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                    {statusDropdownOpen === task.id && (
+                      <div className="absolute right-0 top-full mt-1 z-20 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg shadow-xl py-1 min-w-[160px]">
+                        {statuses.map(s => (
+                          <button
+                            key={s.id}
+                            onClick={() => { updateTask(task.id, { status: s.id }); setStatusDropdownOpen(null); }}
+                            className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-left hover:bg-[#2A2A2A] transition-colors"
+                          >
+                            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />
+                            <span className={s.id === task.status ? 'text-white font-medium' : 'text-[#A0A0A0]'}>{s.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* Due date */}
@@ -229,6 +250,7 @@ export default function TasksPage() {
         onSave={handleSave}
         workspaceId={workspace.id}
         initialTask={editingTask}
+        projects={workspaceProjects}
         accentColor={accentColor}
       />
     </div>

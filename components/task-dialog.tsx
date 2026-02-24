@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus } from 'lucide-react';
-import { Task, getStatusesForWorkspace } from '@/types';
+import { X } from 'lucide-react';
+import { Task, Project, getStatusesForWorkspace } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TaskDialogProps {
@@ -12,6 +12,8 @@ interface TaskDialogProps {
   workspaceId: string;
   initialTask?: Task;
   initialStatus?: string;
+  initialProjectId?: string;
+  projects?: Project[];
   accentColor?: string;
 }
 
@@ -24,6 +26,8 @@ export function TaskDialog({
   workspaceId,
   initialTask,
   initialStatus,
+  initialProjectId,
+  projects = [],
   accentColor = '#C8FF3D',
 }: TaskDialogProps) {
   const statuses = getStatusesForWorkspace(workspaceId);
@@ -36,6 +40,7 @@ export function TaskDialog({
   const [dueDate, setDueDate] = useState('');
   const [assignee, setAssignee] = useState('');
   const [tagsInput, setTagsInput] = useState('');
+  const [projectId, setProjectId] = useState(initialProjectId ?? '');
 
   useEffect(() => {
     if (initialTask) {
@@ -46,6 +51,7 @@ export function TaskDialog({
       setDueDate(initialTask.dueDate ?? '');
       setAssignee(initialTask.assignee ?? '');
       setTagsInput(initialTask.tags.join(', '));
+      setProjectId(initialTask.projectId ?? '');
     } else {
       setTitle('');
       setDescription('');
@@ -54,8 +60,9 @@ export function TaskDialog({
       setDueDate('');
       setAssignee('');
       setTagsInput('');
+      setProjectId(initialProjectId ?? '');
     }
-  }, [initialTask, initialStatus, open]);
+  }, [initialTask, initialStatus, initialProjectId, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +75,7 @@ export function TaskDialog({
 
     onSave({
       workspaceId,
+      projectId: projectId || undefined,
       title: title.trim(),
       description: description.trim() || undefined,
       status,
@@ -135,6 +143,23 @@ export function TaskDialog({
                   className="w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder-[#6B7280] focus:outline-none focus:border-[#3A3A3A] transition-colors resize-none"
                 />
               </div>
+
+              {/* Project */}
+              {projects.length > 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">Project</label>
+                  <select
+                    value={projectId}
+                    onChange={e => setProjectId(e.target.value)}
+                    className="w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#3A3A3A] transition-colors appearance-none"
+                  >
+                    <option value="">No project</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Status + Priority */}
               <div className="grid grid-cols-2 gap-3">

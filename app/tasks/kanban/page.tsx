@@ -9,6 +9,7 @@ import { useTaskStore } from '@/stores/task-store';
 import { KanbanBoard } from '@/components/kanban-board';
 import { TaskDialog } from '@/components/task-dialog';
 import { Task, getStatusesForWorkspace } from '@/types';
+import { MOCK_PROJECTS } from '@/lib/data';
 
 export default function KanbanPage() {
   const { workspace } = useWorkspace();
@@ -21,6 +22,7 @@ export default function KanbanPage() {
 
   const statuses = getStatusesForWorkspace(workspace.id);
   const tasks = getTasksForWorkspace(workspace.id);
+  const workspaceProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
 
   const handleSave = (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (editingTask) {
@@ -99,6 +101,7 @@ export default function KanbanPage() {
         workspaceId={workspace.id}
         initialTask={editingTask}
         initialStatus={newTaskStatus}
+        projects={workspaceProjects}
         accentColor={accentColor}
       />
     </div>

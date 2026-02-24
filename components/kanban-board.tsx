@@ -95,8 +95,10 @@ export function KanbanBoard({
                             <TaskCard
                               task={task}
                               workspaceId={workspaceId}
+                              statuses={statuses}
                               onEdit={onEditTask}
                               onDelete={onDeleteTask}
+                              onMoveTask={onMoveTask}
                               isDragging={snapshot.isDragging}
                             />
                           </div>

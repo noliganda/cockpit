@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { WorkspaceProvider } from "@/components/workspace-provider";
+import { TaskProvider } from "@/components/task-provider";
+import { SprintProvider } from "@/components/sprint-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
@@ -29,14 +31,18 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0F0F0F]`}>
         <WorkspaceProvider>
-          <TooltipProvider>
-            <div className="flex h-screen overflow-hidden">
-              <Sidebar />
-              <main className="flex-1 ml-[280px] overflow-y-auto">
-                {children}
-              </main>
-            </div>
-          </TooltipProvider>
+          <TaskProvider>
+            <SprintProvider>
+              <TooltipProvider>
+                <div className="flex h-screen overflow-hidden">
+                  <Sidebar />
+                  <main className="flex-1 ml-[280px] overflow-y-auto">
+                    {children}
+                  </main>
+                </div>
+              </TooltipProvider>
+            </SprintProvider>
+          </TaskProvider>
         </WorkspaceProvider>
       </body>
     </html>

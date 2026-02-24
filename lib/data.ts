@@ -1,4 +1,4 @@
-import { Task, Project, Area, Contact } from '@/types';
+import { Task, Project, Area, Contact, FileItem } from '@/types';
 
 export const MOCK_TASKS: Task[] = [
   // Byron Film tasks
@@ -280,3 +280,90 @@ export const KORUS_METRICS = {
     label: 'Deals Won (Q1)',
   },
 };
+
+export const MOCK_FILES: FileItem[] = [
+  // ── BYRON FILM ──────────────────────────────────────────────────────
+  // Root folders
+  { id: 'bf-projects',     workspaceId: 'byron-film', name: 'Projects',     type: 'folder', parentId: null, modifiedAt: '2026-02-24T10:00:00Z', owner: 'Charlie' },
+  { id: 'bf-deliverables', workspaceId: 'byron-film', name: 'Deliverables', type: 'folder', parentId: null, modifiedAt: '2026-02-22T14:00:00Z', owner: 'Charlie' },
+  { id: 'bf-contracts',    workspaceId: 'byron-film', name: 'Contracts',    type: 'folder', parentId: null, modifiedAt: '2026-02-15T09:00:00Z', owner: 'Charlie' },
+  { id: 'bf-assets',       workspaceId: 'byron-film', name: 'Assets',       type: 'folder', parentId: null, modifiedAt: '2026-01-30T11:00:00Z', owner: 'Charlie' },
+
+  // Projects / Alpine Commercial
+  { id: 'bf-p-alpine',       workspaceId: 'byron-film', name: 'Alpine Commercial', type: 'folder', parentId: 'bf-projects',  modifiedAt: '2026-02-24T10:00:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-raw',     workspaceId: 'byron-film', name: 'Raw Footage',       type: 'folder', parentId: 'bf-p-alpine',  modifiedAt: '2026-02-20T08:00:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-edits',   workspaceId: 'byron-film', name: 'Edits',             type: 'folder', parentId: 'bf-p-alpine',  modifiedAt: '2026-02-24T10:00:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-brief',   workspaceId: 'byron-film', name: 'creative_brief.pdf',       type: 'pdf',    parentId: 'bf-p-alpine',     size: 1258291,    modifiedAt: '2026-02-01T09:00:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-drone',   workspaceId: 'byron-film', name: 'drone_sunrise_01.mp4',     type: 'video',  parentId: 'bf-alpine-raw',   size: 2254857830, modifiedAt: '2026-02-18T07:30:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-handheld',workspaceId: 'byron-film', name: 'handheld_b_roll.mp4',      type: 'video',  parentId: 'bf-alpine-raw',   size: 933232640,  modifiedAt: '2026-02-18T08:45:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-v1',      workspaceId: 'byron-film', name: 'alpine_v1_rough.mp4',      type: 'video',  parentId: 'bf-alpine-edits', size: 471859200,  modifiedAt: '2026-02-22T16:00:00Z', owner: 'Charlie' },
+  { id: 'bf-alpine-v2',      workspaceId: 'byron-film', name: 'alpine_v2_colour.mp4',     type: 'video',  parentId: 'bf-alpine-edits', size: 545259520,  modifiedAt: '2026-02-24T10:00:00Z', owner: 'Charlie' },
+
+  // Projects / Pacific Wellness
+  { id: 'bf-p-wellness',       workspaceId: 'byron-film', name: 'Pacific Wellness', type: 'folder', parentId: 'bf-projects',      modifiedAt: '2026-02-22T14:00:00Z', owner: 'Charlie' },
+  { id: 'bf-wellness-raw',     workspaceId: 'byron-film', name: 'Raw',              type: 'folder', parentId: 'bf-p-wellness',    modifiedAt: '2026-02-10T09:00:00Z', owner: 'Charlie' },
+  { id: 'bf-wellness-finals',  workspaceId: 'byron-film', name: 'Finals',           type: 'folder', parentId: 'bf-p-wellness',    modifiedAt: '2026-02-22T14:00:00Z', owner: 'Charlie' },
+  { id: 'bf-wellness-day1',    workspaceId: 'byron-film', name: 'wellness_shoot_day1.mp4',   type: 'video', parentId: 'bf-wellness-raw',    size: 3650722816, modifiedAt: '2026-02-10T18:00:00Z', owner: 'Charlie' },
+  { id: 'bf-wellness-hero',    workspaceId: 'byron-film', name: 'hero_90s_final.mp4',        type: 'video', parentId: 'bf-wellness-finals', size: 220200960,  modifiedAt: '2026-02-22T14:00:00Z', owner: 'Charlie' },
+  { id: 'bf-wellness-social',  workspaceId: 'byron-film', name: 'social_15s_x3.mp4',         type: 'video', parentId: 'bf-wellness-finals', size: 89128960,   modifiedAt: '2026-02-22T14:30:00Z', owner: 'Charlie' },
+
+  // Projects / Byron Surf Festival
+  { id: 'bf-p-surf',           workspaceId: 'byron-film', name: 'Byron Surf Festival',     type: 'folder', parentId: 'bf-projects', modifiedAt: '2026-02-15T09:00:00Z', owner: 'Charlie' },
+  { id: 'bf-surf-highlights',  workspaceId: 'byron-film', name: 'surf_event_highlights.mp4', type: 'video', parentId: 'bf-p-surf', size: 1887436288, modifiedAt: '2026-02-14T20:00:00Z', owner: 'Charlie' },
+  { id: 'bf-surf-brief',       workspaceId: 'byron-film', name: 'event_brief.pdf',            type: 'pdf',   parentId: 'bf-p-surf', size: 819200,     modifiedAt: '2026-01-25T10:00:00Z', owner: 'Charlie' },
+
+  // Deliverables
+  { id: 'bf-del-alpine',   workspaceId: 'byron-film', name: 'alpine_commercial_FINAL.mp4',      type: 'video', parentId: 'bf-deliverables', size: 293601280, modifiedAt: '2026-02-24T11:00:00Z', owner: 'Charlie' },
+  { id: 'bf-del-wellness', workspaceId: 'byron-film', name: 'pacific_wellness_hero_FINAL.mp4',  type: 'video', parentId: 'bf-deliverables', size: 220200960, modifiedAt: '2026-02-22T15:00:00Z', owner: 'Charlie' },
+  { id: 'bf-del-thumbs',   workspaceId: 'byron-film', name: 'alpine_thumbnails.zip',            type: 'zip',   parentId: 'bf-deliverables', size: 47185920,  modifiedAt: '2026-02-23T09:00:00Z', owner: 'Charlie' },
+
+  // Contracts
+  { id: 'bf-con-alpine',   workspaceId: 'byron-film', name: 'alpine_commercial_contract.pdf', type: 'pdf', parentId: 'bf-contracts', size: 430080, modifiedAt: '2026-01-15T10:00:00Z', owner: 'Charlie' },
+  { id: 'bf-con-wellness', workspaceId: 'byron-film', name: 'pacific_wellness_agreement.pdf', type: 'pdf', parentId: 'bf-contracts', size: 389120, modifiedAt: '2026-02-08T10:00:00Z', owner: 'Charlie' },
+  { id: 'bf-con-surf',     workspaceId: 'byron-film', name: 'surf_festival_invoice.pdf',      type: 'pdf', parentId: 'bf-contracts', size: 122880, modifiedAt: '2026-02-15T09:00:00Z', owner: 'Charlie' },
+
+  // Assets
+  { id: 'bf-brand',      workspaceId: 'byron-film', name: 'Brand Assets', type: 'folder', parentId: 'bf-assets', modifiedAt: '2026-01-30T11:00:00Z', owner: 'Charlie' },
+  { id: 'bf-music',      workspaceId: 'byron-film', name: 'Music',        type: 'folder', parentId: 'bf-assets', modifiedAt: '2026-01-28T14:00:00Z', owner: 'Charlie' },
+  { id: 'bf-brand-logo', workspaceId: 'byron-film', name: 'byron_film_logo.png', type: 'image', parentId: 'bf-brand', size: 2097152, modifiedAt: '2026-01-30T11:00:00Z', owner: 'Charlie' },
+  { id: 'bf-brand-svg',  workspaceId: 'byron-film', name: 'logo_dark.svg',       type: 'image', parentId: 'bf-brand', size: 49152,   modifiedAt: '2026-01-30T11:00:00Z', owner: 'Charlie' },
+  { id: 'bf-music-1',    workspaceId: 'byron-film', name: 'license_track_01.mp3', type: 'audio', parentId: 'bf-music', size: 8388608, modifiedAt: '2026-01-28T14:00:00Z', owner: 'Charlie' },
+  { id: 'bf-music-2',    workspaceId: 'byron-film', name: 'ambient_loop.mp3',     type: 'audio', parentId: 'bf-music', size: 6291456, modifiedAt: '2026-01-28T14:30:00Z', owner: 'Charlie' },
+
+  // ── KORUS ────────────────────────────────────────────────────────────
+  // Root folders
+  { id: 'ko-proposals', workspaceId: 'korus', name: 'Proposals', type: 'folder', parentId: null, modifiedAt: '2026-02-23T11:00:00Z', owner: 'Charlie' },
+  { id: 'ko-reports',   workspaceId: 'korus', name: 'Reports',   type: 'folder', parentId: null, modifiedAt: '2026-02-20T16:00:00Z', owner: 'Charlie' },
+  { id: 'ko-contracts', workspaceId: 'korus', name: 'Contracts', type: 'folder', parentId: null, modifiedAt: '2026-01-20T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-marketing', workspaceId: 'korus', name: 'Marketing', type: 'folder', parentId: null, modifiedAt: '2026-02-15T09:00:00Z', owner: 'Charlie' },
+  { id: 'ko-internal',  workspaceId: 'korus', name: 'Internal',  type: 'folder', parentId: null, modifiedAt: '2026-02-25T08:00:00Z', owner: 'Charlie' },
+
+  // Proposals
+  { id: 'ko-prop-fittech',     workspaceId: 'korus', name: 'q1_2026_proposal_fittech.docx',      type: 'doc', parentId: 'ko-proposals', size: 2411724, modifiedAt: '2026-02-20T11:00:00Z', owner: 'Charlie' },
+  { id: 'ko-prop-healthworks', workspaceId: 'korus', name: 'healthworks_partnership_v2.docx',    type: 'doc', parentId: 'ko-proposals', size: 1887437, modifiedAt: '2026-02-18T14:00:00Z', owner: 'Charlie' },
+  { id: 'ko-prop-zenflow',     workspaceId: 'korus', name: 'zenflow_onboarding_proposal.pdf',    type: 'pdf', parentId: 'ko-proposals', size: 3250585, modifiedAt: '2026-02-23T11:00:00Z', owner: 'Charlie' },
+
+  // Reports
+  { id: 'ko-rep-q4',       workspaceId: 'korus', name: 'q4_2025_revenue_report.xlsx',   type: 'spreadsheet', parentId: 'ko-reports', size: 1153433, modifiedAt: '2026-01-15T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-rep-pipeline', workspaceId: 'korus', name: 'pipeline_summary_feb2026.xlsx', type: 'spreadsheet', parentId: 'ko-reports', size: 911360,  modifiedAt: '2026-02-20T16:00:00Z', owner: 'Charlie' },
+  { id: 'ko-rep-strategic',workspaceId: 'korus', name: 'strategic_review_2026.pdf',     type: 'pdf',         parentId: 'ko-reports', size: 5452595, modifiedAt: '2026-02-10T10:00:00Z', owner: 'Charlie' },
+
+  // Contracts
+  { id: 'ko-con-fittech',    workspaceId: 'korus', name: 'fittech_services_agreement.pdf', type: 'pdf', parentId: 'ko-contracts', size: 696320, modifiedAt: '2026-01-10T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-con-healthworks',workspaceId: 'korus', name: 'healthworks_nda.pdf',            type: 'pdf', parentId: 'ko-contracts', size: 215040, modifiedAt: '2026-01-15T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-con-zenflow',    workspaceId: 'korus', name: 'zenflow_msa.pdf',                type: 'pdf', parentId: 'ko-contracts', size: 552960, modifiedAt: '2026-01-20T10:00:00Z', owner: 'Charlie' },
+
+  // Marketing
+  { id: 'ko-mkt-brand',     workspaceId: 'korus', name: 'Brand',     type: 'folder', parentId: 'ko-marketing', modifiedAt: '2026-02-15T09:00:00Z', owner: 'Charlie' },
+  { id: 'ko-mkt-campaigns', workspaceId: 'korus', name: 'Campaigns', type: 'folder', parentId: 'ko-marketing', modifiedAt: '2026-02-10T11:00:00Z', owner: 'Charlie' },
+  { id: 'ko-brand-logo',       workspaceId: 'korus', name: 'korus_logo_v3.png',   type: 'image', parentId: 'ko-mkt-brand',     size: 3145728, modifiedAt: '2026-02-15T09:00:00Z', owner: 'Charlie' },
+  { id: 'ko-brand-guidelines', workspaceId: 'korus', name: 'brand_guidelines.pdf',type: 'pdf',   parentId: 'ko-mkt-brand',     size: 8388608, modifiedAt: '2026-02-14T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-camp-q1',          workspaceId: 'korus', name: 'q1_campaign_brief.docx', type: 'doc', parentId: 'ko-mkt-campaigns', size: 1258291, modifiedAt: '2026-02-10T11:00:00Z', owner: 'Charlie' },
+
+  // Internal
+  { id: 'ko-int-handbook',  workspaceId: 'korus', name: 'team_handbook.pdf', type: 'pdf',         parentId: 'ko-internal', size: 4404019, modifiedAt: '2026-01-05T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-int-budget',    workspaceId: 'korus', name: 'budget_2026.xlsx',  type: 'spreadsheet', parentId: 'ko-internal', size: 1572864, modifiedAt: '2026-02-25T08:00:00Z', owner: 'Charlie' },
+  { id: 'ko-int-meetings',  workspaceId: 'korus', name: 'Meeting Notes',     type: 'folder',      parentId: 'ko-internal', modifiedAt: '2026-02-24T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-meet-weekly',   workspaceId: 'korus', name: 'weekly_standup_feb2026.docx', type: 'doc', parentId: 'ko-int-meetings', size: 348160, modifiedAt: '2026-02-24T10:00:00Z', owner: 'Charlie' },
+  { id: 'ko-meet-board',    workspaceId: 'korus', name: 'board_meeting_jan2026.docx',  type: 'doc', parentId: 'ko-int-meetings', size: 911360, modifiedAt: '2026-01-28T15:00:00Z', owner: 'Charlie' },
+];

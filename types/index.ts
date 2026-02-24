@@ -57,6 +57,18 @@ export interface Contact {
   lastContact?: string;
 }
 
+export interface FileItem {
+  id: string;
+  workspaceId: string;
+  name: string;
+  type: 'folder' | 'pdf' | 'doc' | 'video' | 'image' | 'spreadsheet' | 'audio' | 'zip';
+  parentId: string | null;
+  size?: number; // bytes
+  modifiedAt: string;
+  starred?: boolean;
+  owner?: string;
+}
+
 export interface Sprint {
   id: string;
   workspaceId: string;

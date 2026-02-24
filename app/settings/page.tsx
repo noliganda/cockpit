@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Bell } from 'lucide-react';
+import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Bell, Download, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
+import { useWorkspace } from '@/hooks/use-workspace';
+import { useTaskStore } from '@/stores/task-store';
+import { MOCK_PROJECTS, MOCK_CONTACTS } from '@/lib/data';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -28,8 +31,80 @@ function Row({ label, description, children }: { label: string; description?: st
   );
 }
 
+function exportToObsidian(tasks: ReturnType<typeof useTaskStore>['tasks'], projects: typeof MOCK_PROJECTS, contacts: typeof MOCK_CONTACTS, workspaceName: string, workspaceSlug: string) {
+  const lines: string[] = [];
+  const now = new Date().toLocaleString('en-AU', { dateStyle: 'long', timeStyle: 'short' });
+  lines.push(`# ${workspaceName} — Ops OS Export`);
+  lines.push(`> **Exported:** ${now}`);
+  lines.push('');
+
+  if (tasks.length > 0) {
+    lines.push('## Tasks');
+    lines.push('');
+    tasks.forEach(t => {
+      lines.push(`### ${t.title}`);
+      lines.push(`- **Status:** ${t.status.replace(/-/g, ' ')}`);
+      lines.push(`- **Priority:** ${t.priority}`);
+      if (t.dueDate) lines.push(`- **Due:** ${t.dueDate}`);
+      if (t.assignee) lines.push(`- **Assignee:** ${t.assignee}`);
+      if (t.tags.length) lines.push(`- **Tags:** ${t.tags.join(', ')}`);
+      if (t.description) lines.push(`> ${t.description}`);
+      lines.push('');
+    });
+  }
+
+  if (projects.length > 0) {
+    lines.push('## Projects');
+    lines.push('');
+    projects.forEach(p => {
+      lines.push(`### ${p.name}`);
+      lines.push(`- **Status:** ${p.status}`);
+      if (p.startDate) lines.push(`- **Start:** ${p.startDate}`);
+      if (p.endDate) lines.push(`- **End:** ${p.endDate}`);
+      if (p.budget) lines.push(`- **Budget:** $${p.budget.toLocaleString()}`);
+      if (p.description) lines.push(`> ${p.description}`);
+      lines.push('');
+    });
+  }
+
+  if (contacts.length > 0) {
+    lines.push('## Contacts');
+    lines.push('');
+    contacts.forEach(c => {
+      lines.push(`### ${c.name}`);
+      if (c.company) lines.push(`- **Company:** ${c.company}`);
+      if (c.role) lines.push(`- **Role:** ${c.role}`);
+      if (c.email) lines.push(`- **Email:** ${c.email}`);
+      if (c.phone) lines.push(`- **Phone:** ${c.phone}`);
+      if (c.pipelineStage) lines.push(`- **Stage:** ${c.pipelineStage}`);
+      if (c.notes) lines.push(`> ${c.notes}`);
+      lines.push('');
+    });
+  }
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${workspaceSlug}-export-${new Date().toISOString().split('T')[0]}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export default function SettingsPage() {
   const { logout, sessionExpiresAt } = useAuth();
+  const { workspace } = useWorkspace();
+  const { tasks: allTasks } = useTaskStore();
+  const wsTasks = allTasks.filter(t => t.workspaceId === workspace.id);
+  const wsProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
+  const wsContacts = MOCK_CONTACTS.filter(c => c.workspaceId === workspace.id);
+
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
+  const [lastExport, setLastExport] = useState<string | null>(() => {
+    try { return localStorage.getItem('last_obsidian_export'); } catch { return null; }
+  });
 
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
@@ -202,6 +277,51 @@ export default function SettingsPage() {
                 <span className="w-4 h-4 rounded-full bg-[#3B82F6]" />
                 Blue (#3B82F6)
               </span>
+            </Row>
+          </Section>
+        </motion.div>
+
+        {/* Ops OS Sync */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.18 }}>
+          <Section title="Ops OS Sync">
+            <Row
+              label="Export to Obsidian"
+              description={`Tasks, projects & contacts as Markdown · ${wsTasks.length} tasks, ${wsProjects.length} projects, ${wsContacts.length} contacts`}
+            >
+              <button
+                onClick={() => {
+                  setSyncStatus('syncing');
+                  setTimeout(() => {
+                    exportToObsidian(wsTasks, wsProjects, wsContacts, workspace.name, workspace.slug);
+                    const ts = new Date().toLocaleTimeString('en-AU', { timeStyle: 'short' });
+                    setLastExport(ts);
+                    try { localStorage.setItem('last_obsidian_export', ts); } catch { /* ignore */ }
+                    setSyncStatus('done');
+                    setTimeout(() => setSyncStatus('idle'), 3000);
+                  }, 600);
+                }}
+                disabled={syncStatus === 'syncing'}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:border-[#3A3A3A] transition-colors disabled:opacity-50"
+              >
+                {syncStatus === 'syncing' ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : syncStatus === 'done' ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                {syncStatus === 'syncing' ? 'Exporting…' : syncStatus === 'done' ? 'Exported!' : 'Export .md'}
+              </button>
+            </Row>
+            {lastExport && (
+              <Row label="Last export" description={`Today at ${lastExport}`}>
+                <span className="flex items-center gap-1 text-xs text-[#10B981]">
+                  <CheckCircle2 className="w-3 h-3" /> Synced
+                </span>
+              </Row>
+            )}
+            <Row label="Sync format" description="Obsidian Markdown (.md) · one file per workspace">
+              <span className="text-xs text-[#6B7280]">v1</span>
             </Row>
           </Section>
         </motion.div>

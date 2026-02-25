@@ -21,9 +21,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const addProject = useCallback((project: Omit<Project, 'id'>): Project => {
     const newProject: Project = {
       ...project,
-      id: `proj-${nextId++}`,
+      id: `proj-${nextId++}-${Date.now()}`,
     };
-    setProjects(prev => [...prev, newProject]);
+    setProjects(prev => {
+      if (prev.some(p => p.id === newProject.id)) return prev;
+      return [...prev, newProject];
+    });
     return newProject;
   }, []);
 

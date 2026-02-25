@@ -17,8 +17,9 @@ import {
   Timer,
   Zap,
   NotebookPen,
+  Search,
+  LogOut,
 } from 'lucide-react';
-import { LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
 import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
@@ -68,6 +69,18 @@ export function Sidebar() {
           <span className="font-bold text-white text-sm tracking-wide">OPS DASHBOARD</span>
         </div>
         <WorkspaceSwitcher />
+        {/* Search trigger */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('cmd-palette-open'))}
+          className="mt-3 w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#0F0F0F] border border-[#2A2A2A] text-[#6B7280] hover:text-white hover:border-[#3A3A3A] transition-colors text-xs"
+        >
+          <Search className="w-3.5 h-3.5 shrink-0" />
+          <span className="flex-1 text-left">Search…</span>
+          <span className="flex items-center gap-0.5 font-mono text-[10px] text-[#4A4A4A]">
+            <kbd className="bg-[#1A1A1A] px-1 rounded">⌘</kbd>
+            <kbd className="bg-[#1A1A1A] px-1 rounded">K</kbd>
+          </span>
+        </button>
       </div>
 
       {/* Navigation */}

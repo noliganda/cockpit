@@ -12,6 +12,7 @@ import { OrganisationProvider } from "@/components/organisation-provider";
 import { ProjectProvider } from "@/components/project-provider";
 import { AreaProvider } from "@/components/area-provider";
 import { NoteProvider } from "@/components/note-provider";
+import { CommandPalette } from "@/components/command-palette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,6 +52,7 @@ export default function RootLayout({
                     <main className="flex-1 ml-[280px] overflow-y-auto">
                       {children}
                     </main>
+                    <CommandPalette />
                   </div>
                 </TooltipProvider>
               </NoteProvider>

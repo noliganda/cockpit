@@ -1,7 +1,7 @@
 // KORUS APAC Metrics — updated by nightly cron
 // Last manual update: 2026-02-25
 
-export const KORUS_APAC_LAST_UPDATED = '2026-02-25T00:00:00+11:00';
+export const KORUS_APAC_LAST_UPDATED = '2026-02-25T23:55:00+11:00';
 
 // ─── Recruitment Pipeline ──────────────────────────────────────────────────
 
@@ -46,8 +46,8 @@ export const KORUS_APAC_ENTITIES: EntityItem[] = [
 // ─── Documents & Admin ─────────────────────────────────────────────────────
 
 export const KORUS_APAC_DOCUMENTS = {
-  translated: 2,
-  translatedDetail: 'K n Finance shareholders list, EDF bill',
+  translated: 4,
+  translatedDetail: 'K n Finance shareholders list (FR→EN), EDF bill (FR→EN), previous: org chart, certificates',
   businessPlan: 'Draft Complete' as const,
   financialModel: 'Complete' as const,
   competitorCaseStudies: 5,
@@ -65,8 +65,9 @@ export interface SystemItem {
 
 export const KORUS_APAC_SYSTEMS: SystemItem[] = [
   { name: 'KORUS Email', detail: 'charlie.apac@korusgroup.com', status: 'Active' },
-  { name: 'Dashboard', detail: 'dashboard.oliviermarcolin.com', status: 'Live' },
-  { name: 'CRM Pipeline', detail: null, status: 'Configured' },
+  { name: 'Dashboard', detail: 'dashboard.oliviermarcolin.com — Bruno metrics live', status: 'Live' },
+  { name: 'Recruitment Engine', detail: 'LinkedIn Sales Nav + Apollo + follow-up cron', status: 'Active' },
+  { name: 'CRM Pipeline', detail: 'Notion DB with Stage tracking', status: 'Configured' },
   { name: 'Notion Workspace', detail: 'Tasks, Projects, Sprints', status: 'Active' },
 ];
 
@@ -78,7 +79,12 @@ export interface TimelineEvent {
 }
 
 export const KORUS_APAC_TIMELINE: TimelineEvent[] = [
-  { date: 'Feb 25', description: '16 recruitment candidates contacted via LinkedIn Sales Navigator' },
+  { date: 'Feb 25', description: 'Dashboard strategic reset — focused on real data for Bruno view' },
+  { date: 'Feb 25', description: 'KORUS documents translated (K n Finance shareholders list + EDF bill FR→EN)' },
+  { date: 'Feb 25', description: 'Recruitment follow-up engine deployed — daily 9am cron with 3-day nudges' },
+  { date: 'Feb 25', description: 'Daily rhythm time-blocked — KORUS gets 3pm-6pm window' },
+  { date: 'Feb 25', description: 'Richard Salloum (Schneider) + Joel (entity) recurring reminders active' },
+  { date: 'Feb 25', description: 'LinkedIn Sales Navigator activated — 16 candidates contacted via InMail' },
   { date: 'Feb 24', description: 'Recruitment database enriched with Apollo (4 verified emails found)' },
   { date: 'Feb 24', description: 'LinkedIn outreach messages drafted for all candidates' },
   { date: 'Feb 22', description: 'KORUS AU business plan draft completed' },

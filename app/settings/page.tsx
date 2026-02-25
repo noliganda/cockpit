@@ -472,6 +472,61 @@ export default function SettingsPage() {
           </Section>
         </motion.div>
 
+        {/* Seed Data */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.19 }}>
+          <Section title="Data Management">
+            <Row
+              label="Import Seed Data"
+              description="Populate dashboard with Byron Film, KORUS, and Personal projects & tasks"
+            >
+              <button
+                onClick={async () => {
+                  if (!confirm('This will add seed projects, tasks, and organisations. Existing data will NOT be overwritten. Continue?')) return;
+                  try {
+                    const res = await fetch('/api/seed');
+                    const data = await res.json();
+                    // Merge with existing localStorage
+                    const merge = (key: string, newItems: any[]) => {
+                      try {
+                        const existing = JSON.parse(localStorage.getItem(key) || '[]');
+                        const existingIds = new Set(existing.map((e: any) => e.id));
+                        const toAdd = newItems.filter((n: any) => !existingIds.has(n.id));
+                        localStorage.setItem(key, JSON.stringify([...existing, ...toAdd]));
+                        return toAdd.length;
+                      } catch { return 0; }
+                    };
+                    const pCount = merge('ops_projects', data.projects);
+                    const tCount = merge('ops_tasks', data.tasks);
+                    const oCount = merge('ops_organisations', data.organisations);
+                    alert(`Imported: ${pCount} projects, ${tCount} tasks, ${oCount} organisations. Refresh the page to see them.`);
+                    window.location.reload();
+                  } catch (err) {
+                    alert('Failed to import seed data');
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:border-[#3A3A3A] transition-colors"
+              >
+                Import
+              </button>
+            </Row>
+            <Row
+              label="Clear All Data"
+              description="Remove all tasks, projects, contacts, organisations from this browser"
+            >
+              <button
+                onClick={() => {
+                  if (!confirm('⚠️ This will delete ALL dashboard data from localStorage. This cannot be undone. Are you sure?')) return;
+                  ['ops_tasks', 'ops_projects', 'ops_contacts', 'ops_organisations', 'ops_sprints', 'ops_areas'].forEach(k => localStorage.removeItem(k));
+                  window.location.reload();
+                }}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                Clear All
+              </button>
+            </Row>
+          </Section>
+        </motion.div>
+
         {/* About */}
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
           <Section title="About">

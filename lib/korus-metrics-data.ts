@@ -1,7 +1,7 @@
 // KORUS APAC Metrics — updated by nightly cron
 // Last manual update: 2026-02-25
 
-export const KORUS_APAC_LAST_UPDATED = '2026-02-25T23:55:00+11:00';
+export const KORUS_APAC_LAST_UPDATED = '2026-02-26T01:50:00+11:00';
 
 // ─── Recruitment Pipeline ──────────────────────────────────────────────────
 
@@ -79,6 +79,7 @@ export interface TimelineEvent {
 }
 
 export const KORUS_APAC_TIMELINE: TimelineEvent[] = [
+  { date: 'Feb 26', description: 'Thomas Choulot contract termination — drafted hybrid legal strategy + termination letter (completion framing, supersession of both contracts)' },
   { date: 'Feb 25', description: 'Dashboard strategic reset — focused on real data for Bruno view' },
   { date: 'Feb 25', description: 'KORUS documents translated (K n Finance shareholders list + EDF bill FR→EN)' },
   { date: 'Feb 25', description: 'Recruitment follow-up engine deployed — daily 9am cron with 3-day nudges' },

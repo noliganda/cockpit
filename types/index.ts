@@ -76,6 +76,24 @@ export interface FileItem {
   owner?: string;
 }
 
+export interface ProjectNote {
+  id: string;
+  projectId: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectDocument {
+  id: string;
+  projectId: string;
+  name: string;
+  type: 'pdf' | 'doc' | 'sheet' | 'image' | 'link' | 'other';
+  url: string;
+  addedAt: string;
+}
+
 export interface Sprint {
   id: string;
   workspaceId: string;

@@ -498,7 +498,8 @@ export default function SettingsPage() {
                     const pCount = merge('ops_projects', data.projects);
                     const tCount = merge('ops_tasks', data.tasks);
                     const oCount = merge('ops_organisations', data.organisations);
-                    alert(`Imported: ${pCount} projects, ${tCount} tasks, ${oCount} organisations. Refresh the page to see them.`);
+                    const sCount = merge('ops_sprints', data.sprints || []);
+                    alert(`Imported: ${pCount} projects, ${tCount} tasks, ${oCount} organisations, ${sCount} sprints. Refresh the page to see them.`);
                     window.location.reload();
                   } catch (err) {
                     alert('Failed to import seed data');

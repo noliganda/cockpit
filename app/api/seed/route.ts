@@ -58,23 +58,43 @@ const SEED_TASKS = [
 
   // Byron Film tasks
   { id: 'task-bf-leads', workspaceId: 'byron-film', projectId: 'proj-bf-content', title: 'Q1 content calendar — first 4 videos planned', status: 'todo', priority: 'high', tags: ['content'] },
-  { id: 'task-bf-hire-stripe', workspaceId: 'byron-film', projectId: 'proj-bf-hire', title: 'Stripe integration for hire.byronfilm.com', status: 'in-progress', priority: 'high', tags: ['dev'] },
-  { id: 'task-bf-vimeo-dl', workspaceId: 'byron-film', projectId: 'proj-bf-vimeo', title: 'Download remaining Vimeo videos & upload to YouTube', status: 'in-progress', priority: 'medium', tags: ['migration'] },
-  { id: 'task-bf-crm-audit', workspaceId: 'byron-film', title: 'CRM audit — clean up contacts & pipeline', status: 'todo', priority: 'medium', tags: ['ops'] },
 
   // KORUS tasks
-  { id: 'task-ko-pm-search', workspaceId: 'korus', projectId: 'proj-ko-recruit', title: 'PM recruitment — LinkedIn outreach round 2', status: 'in-progress', priority: 'high', tags: ['recruitment'] },
-  { id: 'task-ko-bizplan-fin', workspaceId: 'korus', projectId: 'proj-ko-bizplan', title: 'Finalize KORUS AU business plan', status: 'in-progress', priority: 'urgent', tags: ['strategy'] },
-  { id: 'task-ko-bruno', workspaceId: 'korus', title: 'Reply to Bruno LEAL DE SOUSA — dashboard access', status: 'todo', priority: 'medium', tags: ['comms'] },
-  { id: 'task-ko-sky', workspaceId: 'korus', title: 'Reply to Sky Ong — presentation deck acknowledgment', status: 'todo', priority: 'medium', tags: ['comms'] },
-  { id: 'task-ko-bas', workspaceId: 'korus', title: 'Bas de Lange — Teams meeting invite', status: 'todo', priority: 'medium', tags: ['comms'] },
-  { id: 'task-ko-email-sig', workspaceId: 'korus', title: 'Fix KORUS email signature', status: 'in-progress', priority: 'low', tags: ['ops'] },
-  { id: 'task-ko-thomas', workspaceId: 'korus', projectId: 'proj-ko-recruit', title: 'Thomas Choulot — contract termination', status: 'todo', priority: 'high', tags: ['recruitment', 'legal'] },
+  { id: 'task-ko-pm-search', workspaceId: 'korus', projectId: 'proj-ko-recruit', title: 'PM recruitment — LinkedIn outreach round 2', status: 'in-progress', priority: 'high', tags: ['recruitment', 'sprint-1'] },
 
   // More Dashboard features
   { id: 'task-dash-notes-global', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Notes attachable to projects, sprints, areas, AND tasks', status: 'backlog', priority: 'high', tags: ['feature'], description: 'Notes should not be project-only. Every entity (project, sprint, area, task) should support attached notes via the block editor. Think of it as a universal "attach a page" capability.' },
   { id: 'task-dash-tables-global', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Tables (custom databases) attachable to projects, sprints, areas, tasks', status: 'backlog', priority: 'high', tags: ['feature'], description: 'Custom tables/databases should be embeddable anywhere — inside a project, a sprint, an area, or even a task. Like Notion inline databases. User defines columns, rows are editable inline.' },
-  { id: 'task-dash-tables-standalone', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Standalone Tables page — create & manage custom databases', status: 'backlog', priority: 'medium', tags: ['feature'], description: 'Top-level /tables page to create, browse, and manage all custom databases. Each table has its own schema (text, number, date, select, relation, URL columns). Filterable, sortable, groupable views.' },
+  { id: 'task-dash-tables-standalone', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Standalone Tables page — create & manage custom databases', status: 'backlog', priority: 'medium', tags: ['feature'], description: 'Top-level /tables page to create, browse, and manage all custom databases. Each table has its own schema (text, number, date/select/relation/URL columns). Filterable, sortable, groupable views.' },
+
+  // ── SPRINT 1: Close the Loops ──────────────────────────────────
+
+  // 🔴 Infrastructure
+  { id: 'task-infra-tailscale', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Fix Tailscale → Gateway binding for remote TUI access', status: 'todo', priority: 'urgent', tags: ['infra', 'sprint-1'], description: 'Gateway bound to loopback (127.0.0.1). Need to switch to tailnet so Oli can access web UI remotely. Last attempt crashed gateway (Feb 12). Must do carefully with Oli present.' },
+  { id: 'task-infra-vps', workspaceId: 'personal', title: 'Get SSH/RDP access to Microsoft VPS for MT5 monitoring', status: 'todo', priority: 'high', tags: ['infra', 'sprint-1'], description: 'VPS at 38.108.112.102:2978. MT5 running. Need to deploy Python monitor script + set up remote access for Charlie to check trades.' },
+  { id: 'task-infra-mt5-monitor', workspaceId: 'personal', title: 'Deploy MT5 Python monitor on VPS', status: 'backlog', priority: 'high', tags: ['infra', 'trading', 'sprint-1'], description: 'Python script to monitor open positions, P&L, and alert via Telegram. Depends on VPS access.' },
+  { id: 'task-infra-notion-token', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Re-auth Notion API token (expired 401)', status: 'todo', priority: 'high', tags: ['infra', 'sprint-1'], description: 'Notion integration token expired. Re-auth at notion.so/my-integrations. Needed for any Notion API work.' },
+  { id: 'task-infra-anthropic-billing', workspaceId: 'personal', title: 'Update Anthropic billing — card needs updating', status: 'todo', priority: 'urgent', tags: ['infra', 'sprint-1'], description: 'Payment failed. Need to update card on console.anthropic.com. Without this, API access will be cut off.' },
+
+  // 🟠 KORUS comms (all sprint-1)
+  { id: 'task-ko-bruno-s1', workspaceId: 'korus', title: 'Reply to Bruno LEAL DE SOUSA — dashboard password issue', status: 'todo', priority: 'high', tags: ['comms', 'sprint-1'], description: 'Bruno cannot access the KORUS metrics dashboard. Needs password reset or new credentials.' },
+  { id: 'task-ko-sky-s1', workspaceId: 'korus', title: 'Reply to Sky Ong — acknowledge presentation deck', status: 'todo', priority: 'medium', tags: ['comms', 'sprint-1'], description: 'Sky sent a deck. Need Oli to approve draft reply before sending.' },
+  { id: 'task-ko-bas-s1', workspaceId: 'korus', title: 'Bas de Lange — send Teams meeting invite', status: 'todo', priority: 'medium', tags: ['comms', 'sprint-1'], description: 'Meeting agreed but no invite sent yet. Need to create Teams link and send.' },
+  { id: 'task-ko-thomas-s1', workspaceId: 'korus', projectId: 'proj-ko-recruit', title: 'Thomas Choulot — contract termination letter', status: 'todo', priority: 'high', tags: ['recruitment', 'legal', 'sprint-1'], description: 'Draft and send termination. Need eSignatures template or formal letter.' },
+  { id: 'task-ko-email-sig-s1', workspaceId: 'korus', title: 'Fix KORUS email signature — OWA panel issues', status: 'in-progress', priority: 'medium', tags: ['ops', 'sprint-1'] },
+  { id: 'task-ko-bizplan-s1', workspaceId: 'korus', projectId: 'proj-ko-bizplan', title: 'Finalize KORUS AU business plan', status: 'in-progress', priority: 'urgent', tags: ['strategy', 'sprint-1'] },
+
+  // 🟡 Byron Film (sprint-1)
+  { id: 'task-bf-hire-stripe-s1', workspaceId: 'byron-film', projectId: 'proj-bf-hire', title: 'hire.byronfilm.com Phase 2 — Stripe + product photos', status: 'in-progress', priority: 'high', tags: ['dev', 'sprint-1'] },
+  { id: 'task-bf-vimeo-s1', workspaceId: 'byron-film', projectId: 'proj-bf-vimeo', title: 'Complete Vimeo → YouTube migration', status: 'in-progress', priority: 'medium', tags: ['migration', 'sprint-1'] },
+  { id: 'task-bf-crm-s1', workspaceId: 'byron-film', title: 'Byron Film CRM audit — clean contacts & pipeline', status: 'todo', priority: 'medium', tags: ['ops', 'sprint-1'] },
+
+  // 🔵 Personal (sprint-1)
+  { id: 'task-p-om-coming', workspaceId: 'personal', projectId: 'proj-p-om', title: 'Build oliviermarcolin.com coming soon page', status: 'todo', priority: 'low', tags: ['dev', 'sprint-1'] },
+
+  // 🟣 Charlie Ops (sprint-1)
+  { id: 'task-charlie-xero-skills', workspaceId: 'personal', title: 'Learn Xero properly — reconcile, invoice, create projects', status: 'todo', priority: 'high', tags: ['ops', 'sprint-1'], description: 'Master Xero API: transaction reconciliation, invoice creation, project management. Become the bookkeeper, not just a reporter.' },
+  { id: 'task-charlie-email-triage', workspaceId: 'personal', title: 'Establish 3x daily email triage across all accounts', status: 'todo', priority: 'high', tags: ['ops', 'sprint-1'], description: 'charlie@byronfilm.com, olivier@byronfilm.com, hey@oliviermarcolin.com. Inbox zero, flag urgent, draft responses.' },
 ];
 
 // Add timestamps to tasks
@@ -92,11 +112,27 @@ const SEED_ORGANISATIONS = [
   { id: 'org-korus-fr', workspaceId: 'korus', name: 'KORUS Group France', industry: 'Premium Fit-Out', website: 'https://korusgroup.com', tags: [], createdAt: now },
 ];
 
+// Sprint 1 — all tasks tagged 'sprint-1'
+const SEED_SPRINTS = [
+  {
+    id: 'sprint-1-close-loops',
+    workspaceId: 'personal',
+    name: 'Sprint 1 — Close the Loops',
+    goal: 'Fix infrastructure, close all open comms, establish reliable ops foundation',
+    startDate: today,
+    endDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0], // 2 weeks
+    status: 'active' as const,
+    taskIds: SEED_TASKS.filter(t => t.tags?.includes('sprint-1')).map(t => t.id),
+    createdAt: now,
+  },
+];
+
 export async function GET() {
   return NextResponse.json({
     projects: SEED_PROJECTS,
     tasks: tasksWithTimestamps,
     organisations: SEED_ORGANISATIONS,
+    sprints: SEED_SPRINTS,
     _meta: {
       generated: now,
       note: 'Import this data via Settings → Developer → Seed Data',

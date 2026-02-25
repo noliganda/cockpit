@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Bell, Download, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Bell, Download, RefreshCw, CheckCircle2, Link2, Unlink2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
@@ -100,6 +100,34 @@ export default function SettingsPage() {
   const wsTasks = allTasks.filter(t => t.workspaceId === workspace.id);
   const wsProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
   const wsContacts = MOCK_CONTACTS.filter(c => c.workspaceId === workspace.id);
+
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('google_connected') === 'true') {
+        setGoogleConnected(true);
+      }
+    } catch { /* ignore */ }
+
+    const params = new URLSearchParams(window.location.search);
+    const gs = params.get('google');
+    if (gs === 'connected') {
+      setGoogleConnected(true);
+      try { localStorage.setItem('google_connected', 'true'); } catch { /* ignore */ }
+      window.history.replaceState({}, '', '/settings');
+    } else if (gs === 'error') {
+      setGoogleError(true);
+      window.history.replaceState({}, '', '/settings');
+      setTimeout(() => setGoogleError(false), 5000);
+    }
+  }, []);
+
+  function handleGoogleDisconnect() {
+    setGoogleConnected(false);
+    try { localStorage.removeItem('google_connected'); } catch { /* ignore */ }
+  }
 
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
   const [lastExport, setLastExport] = useState<string | null>(() => {
@@ -322,6 +350,44 @@ export default function SettingsPage() {
             )}
             <Row label="Sync format" description="Obsidian Markdown (.md) · one file per workspace">
               <span className="text-xs text-[#6B7280]">v1</span>
+            </Row>
+          </Section>
+        </motion.div>
+
+        {/* Integrations */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.19 }}>
+          <Section title="Integrations">
+            {googleError && (
+              <div className="flex items-center gap-2 text-xs text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg px-3 py-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                Google connection failed. Check that GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are set in Vercel, then try again.
+              </div>
+            )}
+            <Row
+              label="Google"
+              description={googleConnected ? 'Account connected — Calendar & Drive access granted' : 'Connect your Google account for Calendar and Drive access'}
+            >
+              {googleConnected ? (
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 text-xs text-[#10B981]">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Connected
+                  </span>
+                  <button
+                    onClick={handleGoogleDisconnect}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-[#2A2A2A] text-[#6B7280] hover:text-[#EF4444] hover:border-[#EF4444]/30 transition-colors"
+                  >
+                    <Unlink2 className="w-3 h-3" />
+                    Disconnect
+                  </button>
+                </div>
+              ) : (
+                <a href="/api/auth/google">
+                  <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:border-[#3A3A3A] transition-colors">
+                    <Link2 className="w-3.5 h-3.5" />
+                    Connect
+                  </button>
+                </a>
+              )}
             </Row>
           </Section>
         </motion.div>

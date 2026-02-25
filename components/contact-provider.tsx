@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useCallback, ReactNode } from 'react';
+import { useCallback, ReactNode } from 'react';
 import { Contact } from '@/types';
 import { MOCK_CONTACTS } from '@/lib/data';
 import { ContactContext } from '@/stores/contact-store';
-
-let nextId = MOCK_CONTACTS.length + 1;
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export function ContactProvider({ children }: { children: ReactNode }) {
-  const [contacts, setContacts] = useState<Contact[]>(MOCK_CONTACTS);
+  const [contacts, setContacts] = useLocalStorage<Contact[]>('ops_contacts', MOCK_CONTACTS);
 
   const getContactsForWorkspace = useCallback((workspaceId: string) => {
     return contacts.filter(c => c.workspaceId === workspaceId);
@@ -21,21 +20,19 @@ export function ContactProvider({ children }: { children: ReactNode }) {
   const addContact = useCallback((contact: Omit<Contact, 'id'>): Contact => {
     const newContact: Contact = {
       ...contact,
-      id: `contact-${nextId++}`,
+      id: `contact-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     };
     setContacts(prev => [...prev, newContact]);
     return newContact;
-  }, []);
+  }, [setContacts]);
 
   const updateContact = useCallback((id: string, updates: Partial<Contact>) => {
-    setContacts(prev => prev.map(c =>
-      c.id === id ? { ...c, ...updates } : c
-    ));
-  }, []);
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+  }, [setContacts]);
 
   const deleteContact = useCallback((id: string) => {
     setContacts(prev => prev.filter(c => c.id !== id));
-  }, []);
+  }, [setContacts]);
 
   return (
     <ContactContext.Provider value={{ contacts, getContactsForWorkspace, getContactById, addContact, updateContact, deleteContact }}>

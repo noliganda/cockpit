@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Plus, Calendar, User, FileText, FolderOpen, Users, LayoutDashboard, CheckSquare, FileEdit, ExternalLink, Trash2, Save, X, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { use } from 'react';
 import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
@@ -46,9 +47,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const { workspace } = useWorkspace();
   const accentColor = getWorkspaceColor(workspace.id);
   const { tasks, addTask, updateTask, deleteTask } = useTaskStore();
-  const { getProjectById } = useProjectStore();
+  const { getProjectById, deleteProject } = useProjectStore();
   const { contacts } = useContactStore();
   const statuses = TASK_STATUSES;
+  const router = useRouter();
   const project = getProjectById(id);
   const projectTasks = tasks.filter(t => t.projectId === id);
   const projectContacts = contacts.filter(c => c.workspaceId === workspace.id && (c.projectIds?.includes(id) || c.tags?.includes(project?.name || '') || c.tags?.includes(id)));
@@ -128,6 +130,18 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               {project.budget && <span className="text-xs font-medium" style={{ color: accentColor }}>${project.budget.toLocaleString()}</span>}
             </div>
           </div>
+          <button
+            onClick={() => {
+              if (confirm(`Delete "${project.name}"? This will remove the project and unlink all tasks. This cannot be undone.`)) {
+                deleteProject(id);
+                router.push('/projects');
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Delete
+          </button>
         </div>
       </motion.div>
 

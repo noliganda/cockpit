@@ -15,7 +15,21 @@ import {
   CheckCircle2,
   Clock,
   Circle,
+  Activity,
+  Zap,
 } from 'lucide-react';
+
+// ── Live action types ───────────────────────────────────────────────────────
+
+type LiveAction = {
+  id: string;
+  created_at: string;
+  category: string;
+  description: string;
+  outcome?: string;
+  duration_minutes?: number;
+  human_intervention: boolean;
+};
 import {
   KORUS_APAC_LAST_UPDATED,
   KORUS_APAC_RECRUITMENT,
@@ -246,6 +260,124 @@ function GuestLockScreen({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
+// ─── live activity feed ─────────────────────────────────────────────────────
+
+function LiveActivityFeed() {
+  const [actions, setActions] = useState<LiveAction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/actions?workspace=korus&limit=15')
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+      .then(json => {
+        if (json?.data) setActions(json.data);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5">
+        <div className="flex items-center gap-2 animate-pulse">
+          <div className="w-4 h-4 rounded bg-[#2A2A2A]" />
+          <div className="h-3 w-32 rounded bg-[#2A2A2A]" />
+        </div>
+        <div className="mt-4 space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="h-10 rounded bg-[#2A2A2A] animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (actions.length === 0) {
+    return (
+      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 text-center">
+        <Zap className="w-5 h-5 text-[#3A3A3A] mx-auto mb-2" />
+        <p className="text-xs text-[#6B7280]">No actions logged yet.</p>
+        <p className="text-[10px] text-[#3A3A3A] mt-1">POST to /api/actions with workspace=&quot;korus&quot; to populate this feed.</p>
+      </div>
+    );
+  }
+
+  const CATEGORY_COLORS: Record<string, string> = {
+    email: '#3B82F6',
+    research: '#8B5CF6',
+    admin: '#6B7280',
+    coordination: '#F59E0B',
+    recruitment: '#10B981',
+    legal: '#EF4444',
+    creative: '#EC4899',
+    development: '#6366F1',
+    finance: '#F97316',
+    translation: '#14B8A6',
+    sales: TEAL,
+    marketing: '#D4A017',
+    operations: '#A0A0A0',
+  };
+
+  return (
+    <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4" style={{ color: TEAL }} />
+          <span className="text-sm font-semibold text-white">Live Activity Feed</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#10B98120] text-[#10B981] font-medium">Supabase</span>
+        </div>
+        <span className="text-xs text-[#6B7280]">{actions.length} recent</span>
+      </div>
+      <div className="space-y-0">
+        {actions.map((action, i) => {
+          const catColor = CATEGORY_COLORS[action.category] ?? '#6B7280';
+          const date = new Date(action.created_at);
+          const dateStr = date.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+          const timeStr = date.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+          return (
+            <motion.div
+              key={action.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.22, delay: i * 0.03 }}
+              className="flex gap-3 py-3 border-b border-[#2A2A2A] last:border-0"
+            >
+              {/* Category dot */}
+              <div className="mt-1.5 w-2 h-2 rounded-full shrink-0" style={{ background: i === 0 ? TEAL : catColor }} />
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2">
+                  <p className={`text-sm leading-snug ${i === 0 ? 'text-white font-medium' : 'text-[#A0A0A0]'}`}>
+                    {action.description}
+                  </p>
+                  <span className="text-[10px] text-[#6B7280] shrink-0 mt-0.5">{dateStr} {timeStr}</span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                    style={{ background: `${catColor}20`, color: catColor }}
+                  >
+                    {action.category}
+                  </span>
+                  {action.duration_minutes && (
+                    <span className="text-[10px] text-[#6B7280]">{action.duration_minutes}m</span>
+                  )}
+                  {action.human_intervention && (
+                    <span className="text-[10px] text-[#F59E0B]">human</span>
+                  )}
+                  {action.outcome && (
+                    <span className="text-[10px] text-[#6B7280] truncate">{action.outcome}</span>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── timeline dot ──────────────────────────────────────────────────────────
 
 function TimelineDot({ isFirst }: { isFirst: boolean }) {
@@ -424,6 +556,12 @@ function KorusDashboard() {
               </div>
             ))}
           </motion.div>
+        </section>
+
+        {/* ── Live Activity Feed (Supabase) ─────────────────── */}
+        <section className="mb-10">
+          <SectionHeader icon={<Activity className="w-3.5 h-3.5" />} title="Live Activity Feed" index={6} />
+          <LiveActivityFeed />
         </section>
 
         {/* ── Activity Timeline ─────────────────────────────── */}

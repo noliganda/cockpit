@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckSquare, FolderOpen, Users, Timer, TrendingUp, BarChart3, ArrowRight } from 'lucide-react';
+import { CheckSquare, FolderOpen, Users, Timer, TrendingUp, BarChart3, ArrowRight, Zap, DollarSign, Bot, Activity } from 'lucide-react';
 import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
@@ -11,6 +11,30 @@ import { useContactStore } from '@/stores/contact-store';
 import { TASK_STATUSES, getPipelineForWorkspace } from '@/types';
 import Link from 'next/link';
 import { format, subDays, isAfter } from 'date-fns';
+
+// ── Supabase metrics types ─────────────────────────────────────────────────
+
+type LiveMetrics = {
+  total_actions: number;
+  total_duration_minutes: number;
+  avg_duration_minutes: number;
+  total_api_cost_usd: number;
+  total_api_tokens: number;
+  human_interventions: number;
+  automation_rate: number;
+  category_breakdown: Record<string, number>;
+  recent_actions: Array<{ id: string; created_at: string; category: string; description: string; workspace: string }>;
+};
+
+type CompareMetrics = {
+  workspaces: Record<string, {
+    workspace: string;
+    total_actions: number;
+    automation_rate: number;
+    total_api_cost_usd: number;
+    top_category: string | null;
+  } | null>;
+};
 
 // ── Mini stat card ────────────────────────────────────────────────────────────
 
@@ -61,6 +85,25 @@ function HBar({ label, value, max, color, count }: { label: string; value: numbe
 export default function MetricsPage() {
   const { workspace } = useWorkspace();
   const accentColor = getWorkspaceColor(workspace.id);
+
+  // ── Live Supabase metrics ──────────────────────────────────────────────
+  const [liveMetrics, setLiveMetrics] = useState<LiveMetrics | null>(null);
+  const [compareMetrics, setCompareMetrics] = useState<CompareMetrics | null>(null);
+  const [liveLoading, setLiveLoading] = useState(true);
+
+  useEffect(() => {
+    setLiveLoading(true);
+    const wsParam = workspace.id === 'byron-film' ? 'byron-film' : workspace.id === 'korus' ? 'korus' : 'personal';
+    Promise.all([
+      fetch(`/api/metrics?workspace=${wsParam}`).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/metrics/compare').then(r => r.ok ? r.json() : null).catch(() => null),
+    ]).then(([live, compare]) => {
+      setLiveMetrics(live);
+      setCompareMetrics(compare);
+      setLiveLoading(false);
+    });
+  }, [workspace.id]);
+
   const { tasks } = useTaskStore();
   const { projects } = useProjectStore();
   const { sprints } = useSprintStore();
@@ -157,6 +200,134 @@ export default function MetricsPage() {
           </Link>
         )}
       </motion.div>
+
+      {/* ── Live Operations (Supabase) ─────────────────────────────────────── */}
+      {!liveLoading && liveMetrics && liveMetrics.total_actions > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="mb-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-4 h-4" style={{ color: accentColor }} />
+            <h2 className="text-sm font-semibold text-white">Live Operations</h2>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#10B98120] text-[#10B981] font-medium ml-1">Supabase</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            <div className="bg-[#0F0F0F] rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Zap className="w-3.5 h-3.5 text-[#6B7280]" />
+                <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">Actions</span>
+              </div>
+              <p className="text-xl font-bold text-white">{liveMetrics.total_actions}</p>
+              <p className="text-[10px] text-[#6B7280] mt-0.5">logged total</p>
+            </div>
+            <div className="bg-[#0F0F0F] rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Bot className="w-3.5 h-3.5 text-[#6B7280]" />
+                <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">Automation</span>
+              </div>
+              <p className="text-xl font-bold" style={{ color: liveMetrics.automation_rate >= 80 ? '#10B981' : accentColor }}>
+                {liveMetrics.automation_rate}%
+              </p>
+              <p className="text-[10px] text-[#6B7280] mt-0.5">{liveMetrics.human_interventions} human</p>
+            </div>
+            <div className="bg-[#0F0F0F] rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Timer className="w-3.5 h-3.5 text-[#6B7280]" />
+                <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">Avg Duration</span>
+              </div>
+              <p className="text-xl font-bold text-white">{liveMetrics.avg_duration_minutes}m</p>
+              <p className="text-[10px] text-[#6B7280] mt-0.5">{liveMetrics.total_duration_minutes}m total</p>
+            </div>
+            <div className="bg-[#0F0F0F] rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <DollarSign className="w-3.5 h-3.5 text-[#6B7280]" />
+                <span className="text-[10px] text-[#6B7280] uppercase tracking-wide">API Cost</span>
+              </div>
+              <p className="text-xl font-bold text-white">${liveMetrics.total_api_cost_usd.toFixed(4)}</p>
+              <p className="text-[10px] text-[#6B7280] mt-0.5">{liveMetrics.total_api_tokens.toLocaleString()} tokens</p>
+            </div>
+          </div>
+          {/* Category breakdown */}
+          {Object.keys(liveMetrics.category_breakdown).length > 0 && (
+            <div>
+              <p className="text-[10px] text-[#6B7280] uppercase tracking-wide font-semibold mb-2">By Category</p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(liveMetrics.category_breakdown)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 8)
+                  .map(([cat, count]) => (
+                    <span
+                      key={cat}
+                      className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ background: `${accentColor}20`, color: accentColor }}
+                    >
+                      {cat} · {count}
+                    </span>
+                  ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* ── Workspace Comparison (Supabase) ───────────────────────────────── */}
+      {!liveLoading && compareMetrics && Object.values(compareMetrics.workspaces).some(w => w && w.total_actions > 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.07 }}
+          className="mb-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-4 h-4 text-[#6B7280]" />
+            <h2 className="text-sm font-semibold text-white">Workspace Comparison</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {([
+              { key: 'byron-film', label: 'Byron Film', color: '#D4A017' },
+              { key: 'korus', label: 'KORUS', color: '#008080' },
+              { key: 'personal', label: 'Personal', color: '#F97316' },
+            ] as const).map(({ key, label, color }) => {
+              const ws = compareMetrics.workspaces[key];
+              return (
+                <div key={key} className="bg-[#0F0F0F] rounded-lg p-3 border border-[#2A2A2A]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: color }} />
+                    <span className="text-xs font-semibold text-white">{label}</span>
+                  </div>
+                  {ws && ws.total_actions > 0 ? (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-[#6B7280]">Actions</span>
+                        <span className="text-white font-medium">{ws.total_actions}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-[#6B7280]">Automation</span>
+                        <span className="font-medium" style={{ color: ws.automation_rate >= 80 ? '#10B981' : color }}>{ws.automation_rate}%</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-[#6B7280]">API cost</span>
+                        <span className="text-white">${ws.total_api_cost_usd.toFixed(4)}</span>
+                      </div>
+                      {ws.top_category && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[#6B7280]">Top</span>
+                          <span className="text-[#A0A0A0]">{ws.top_category}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-[#3A3A3A] italic">No actions yet</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

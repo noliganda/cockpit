@@ -161,7 +161,8 @@ export default function TasksPage() {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.03 }}
-                className="flex items-center gap-3 p-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#3A3A3A] transition-colors group"
+                onClick={() => openEdit(task)}
+                className="flex items-center gap-3 p-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#3A3A3A] transition-colors group cursor-pointer"
               >
                 {/* Priority dot */}
                 <div
@@ -183,7 +184,7 @@ export default function TasksPage() {
 
                 {/* Quick status dropdown */}
                 {status && (
-                  <div className="relative hidden sm:block">
+                  <div className="relative hidden sm:block" onClick={e => e.stopPropagation()}>
                     <button
                       onClick={() => setStatusDropdownOpen(statusDropdownOpen === task.id ? null : task.id)}
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium hover:opacity-80 transition-opacity"
@@ -224,7 +225,7 @@ export default function TasksPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
                   <button
                     onClick={() => openEdit(task)}
                     className="px-2.5 py-1 text-xs text-[#A0A0A0] hover:text-white hover:bg-[#2A2A2A] rounded transition-colors"

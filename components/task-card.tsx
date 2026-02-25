@@ -33,8 +33,9 @@ export function TaskCard({ task, workspaceId, statuses = [], onEdit, onDelete, o
       layout
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: isDragging ? 0.8 : 1, scale: isDragging ? 1.02 : 1 }}
-      className={`bg-[#222222] border rounded-lg p-3 cursor-grab active:cursor-grabbing group ${
-        isDragging ? 'border-[#3A3A3A] shadow-xl' : 'border-[#2A2A2A] hover:border-[#3A3A3A]'
+      onClick={() => !isDragging && onEdit(task)}
+      className={`bg-[#222222] border rounded-lg p-3 cursor-pointer group ${
+        isDragging ? 'border-[#3A3A3A] shadow-xl cursor-grabbing' : 'border-[#2A2A2A] hover:border-[#3A3A3A]'
       } transition-colors`}
     >
       {/* Priority bar */}

@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, User, Tag, Trash2, Pencil } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
+import { useProjectStore } from '@/stores/project-store';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, getStatusesForWorkspace, getStatusById } from '@/types';
-import { MOCK_PROJECTS } from '@/lib/data';
+import { Task, getStatusesForWorkspace } from '@/types';
 import { format, parseISO } from 'date-fns';
 
 const PRIORITY_COLORS = {
@@ -31,9 +31,10 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const { workspace } = useWorkspace();
   const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
   const { tasks, addTask, updateTask, deleteTask } = useTaskStore();
+  const { getProjectById } = useProjectStore();
   const statuses = getStatusesForWorkspace(workspace.id);
 
-  const project = MOCK_PROJECTS.find(p => p.id === id);
+  const project = getProjectById(id);
   const projectTasks = tasks.filter(t => t.projectId === id);
 
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -5,7 +5,7 @@ import { ArrowLeft, Mail, Phone, Globe, MapPin, Tag, ExternalLink, Building2, Us
 import Link from 'next/link';
 import { use } from 'react';
 import { useWorkspace } from '@/hooks/use-workspace';
-import { MOCK_CONTACTS } from '@/lib/data';
+import { useContactStore } from '@/stores/contact-store';
 
 const STAGE_COLORS: Record<string, string> = {
   lead: '#6B7280',
@@ -22,8 +22,9 @@ export default function ContactDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const { workspace } = useWorkspace();
   const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const { getContactById } = useContactStore();
 
-  const contact = MOCK_CONTACTS.find(c => c.id === id);
+  const contact = getContactById(id);
 
   if (!contact) {
     return (

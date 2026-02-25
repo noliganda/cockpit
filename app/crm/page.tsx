@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Mail, Phone, Globe, MapPin, Tag, ExternalLink } from 'lucide-react';
+import { Search, Mail, Phone, Globe, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useWorkspace } from '@/hooks/use-workspace';
-import { MOCK_CONTACTS } from '@/lib/data';
-import { KORUS_STATUSES, BYRON_FILM_STATUSES } from '@/types';
+import { useContactStore } from '@/stores/contact-store';
+import { ContactDialog } from '@/components/contact-dialog';
+import { Contact, KORUS_STATUSES, BYRON_FILM_STATUSES } from '@/types';
 
 const STAGE_COLORS: Record<string, string> = {
   lead: '#6B7280',
@@ -22,11 +23,15 @@ const STAGE_COLORS: Record<string, string> = {
 export default function CRMPage() {
   const { workspace } = useWorkspace();
   const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const { getContactsForWorkspace, addContact, updateContact, deleteContact } = useContactStore();
+
   const [search, setSearch] = useState('');
   const [filterStage, setFilterStage] = useState('all');
   const [view, setView] = useState<'list' | 'pipeline'>('list');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | undefined>();
 
-  const allContacts = MOCK_CONTACTS.filter(c => c.workspaceId === workspace.id);
+  const allContacts = getContactsForWorkspace(workspace.id);
   const stages = workspace.slug === 'korus' ? KORUS_STATUSES : BYRON_FILM_STATUSES;
 
   const filteredContacts = useMemo(() => {
@@ -39,6 +44,25 @@ export default function CRMPage() {
       return matchSearch && matchStage;
     });
   }, [allContacts, search, filterStage]);
+
+  const handleSave = (contactData: Omit<Contact, 'id'>) => {
+    if (editingContact) {
+      updateContact(editingContact.id, contactData);
+    } else {
+      addContact(contactData);
+    }
+    setEditingContact(undefined);
+  };
+
+  const openEdit = (contact: Contact) => {
+    setEditingContact(contact);
+    setDialogOpen(true);
+  };
+
+  const openCreate = () => {
+    setEditingContact(undefined);
+    setDialogOpen(true);
+  };
 
   return (
     <div className="p-6">
@@ -65,6 +89,14 @@ export default function CRMPage() {
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${view === 'pipeline' ? 'text-white bg-[#2A2A2A]' : 'text-[#A0A0A0] hover:text-white'}`}
           >
             Pipeline
+          </button>
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+            style={{ background: accentColor, color: '#0F0F0F' }}
+          >
+            <Plus className="w-4 h-4" />
+            New Contact
           </button>
         </div>
       </motion.div>
@@ -103,6 +135,13 @@ export default function CRMPage() {
           {filteredContacts.length === 0 ? (
             <div className="text-center py-12 text-[#A0A0A0]">
               <p className="text-sm">No contacts found</p>
+              <button
+                onClick={openCreate}
+                className="mt-3 text-xs font-medium"
+                style={{ color: accentColor }}
+              >
+                + Add your first contact
+              </button>
             </div>
           ) : (
             filteredContacts.map((contact, i) => {
@@ -179,6 +218,22 @@ export default function CRMPage() {
                         )}
                       </div>
 
+                      {/* Hover actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={e => { e.preventDefault(); openEdit(contact); }}
+                          className="px-2.5 py-1 text-xs text-[#A0A0A0] hover:text-white hover:bg-[#2A2A2A] rounded transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={e => { e.preventDefault(); deleteContact(contact.id); }}
+                          className="px-2.5 py-1 text-xs text-[#A0A0A0] hover:text-red-400 hover:bg-[#2A2A2A] rounded transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+
                       {contact.lastContact && (
                         <span className="hidden xl:block text-xs text-[#6B7280] shrink-0">
                           Last: {contact.lastContact}
@@ -239,6 +294,16 @@ export default function CRMPage() {
           })}
         </div>
       )}
+
+      <ContactDialog
+        open={dialogOpen}
+        onClose={() => { setDialogOpen(false); setEditingContact(undefined); }}
+        onSave={handleSave}
+        workspaceId={workspace.id}
+        initialContact={editingContact}
+        stages={stages}
+        accentColor={accentColor}
+      />
     </div>
   );
 }

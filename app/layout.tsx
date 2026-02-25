@@ -7,6 +7,8 @@ import { TaskProvider } from "@/components/task-provider";
 import { SprintProvider } from "@/components/sprint-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/components/auth-provider";
+import { ContactProvider } from "@/components/contact-provider";
+import { ProjectProvider } from "@/components/project-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +36,8 @@ export default function RootLayout({
         <AuthProvider>
           <WorkspaceProvider>
             <TaskProvider>
+              <ProjectProvider>
+              <ContactProvider>
               <SprintProvider>
                 <TooltipProvider>
                   <div className="flex h-screen overflow-hidden">
@@ -44,6 +48,8 @@ export default function RootLayout({
                   </div>
                 </TooltipProvider>
               </SprintProvider>
+              </ContactProvider>
+              </ProjectProvider>
             </TaskProvider>
           </WorkspaceProvider>
         </AuthProvider>

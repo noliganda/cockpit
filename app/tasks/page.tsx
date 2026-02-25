@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, getStatusesForWorkspace, getStatusById } from '@/types';
+import { Task, TASK_STATUSES, getStatusById } from '@/types';
 import { MOCK_PROJECTS } from '@/lib/data';
 import { format, parseISO } from 'date-fns';
 
@@ -29,7 +29,7 @@ export default function TasksPage() {
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  const statuses = getStatusesForWorkspace(workspace.id);
+  const statuses = TASK_STATUSES;
   const allTasks = getTasksForWorkspace(workspace.id);
   const workspaceProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState<string | null>(null);

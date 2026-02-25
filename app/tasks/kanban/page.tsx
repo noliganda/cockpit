@@ -8,7 +8,7 @@ import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { KanbanBoard } from '@/components/kanban-board';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, getStatusesForWorkspace } from '@/types';
+import { Task, TASK_STATUSES } from '@/types';
 import { MOCK_PROJECTS } from '@/lib/data';
 
 export default function KanbanPage() {
@@ -20,7 +20,7 @@ export default function KanbanPage() {
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [newTaskStatus, setNewTaskStatus] = useState<string | undefined>();
 
-  const statuses = getStatusesForWorkspace(workspace.id);
+  const statuses = TASK_STATUSES;
   const tasks = getTasksForWorkspace(workspace.id);
   const workspaceProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
 

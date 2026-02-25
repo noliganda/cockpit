@@ -112,8 +112,18 @@ export interface TaskStatus {
   color: string;
 }
 
-export const BYRON_FILM_STATUSES: TaskStatus[] = [
+// ─── TASK STATUSES (universal, all workspaces) ───
+export const TASK_STATUSES: TaskStatus[] = [
   { id: 'backlog', name: 'Backlog', color: '#6B7280' },
+  { id: 'todo', name: 'To Do', color: '#8B5CF6' },
+  { id: 'in-progress', name: 'In Progress', color: '#F59E0B' },
+  { id: 'review', name: 'Review', color: '#3B82F6' },
+  { id: 'done', name: 'Done', color: '#10B981' },
+];
+
+// ─── PROJECT PIPELINE STAGES (workspace-specific, for CRM/pipeline views) ───
+export const BYRON_FILM_PIPELINE: TaskStatus[] = [
+  { id: 'lead', name: 'Lead', color: '#6B7280' },
   { id: 'pre-prod', name: 'Pre-Production', color: '#8B5CF6' },
   { id: 'in-prod', name: 'In Production', color: '#F59E0B' },
   { id: 'post-prod', name: 'Post-Production', color: '#3B82F6' },
@@ -123,7 +133,7 @@ export const BYRON_FILM_STATUSES: TaskStatus[] = [
   { id: 'paid', name: 'Paid', color: '#C8FF3D' },
 ];
 
-export const KORUS_STATUSES: TaskStatus[] = [
+export const KORUS_PIPELINE: TaskStatus[] = [
   { id: 'lead', name: 'Lead', color: '#6B7280' },
   { id: 'qualification', name: 'Qualification', color: '#8B5CF6' },
   { id: 'proposal', name: 'Proposal', color: '#F59E0B' },
@@ -133,15 +143,34 @@ export const KORUS_STATUSES: TaskStatus[] = [
   { id: 'on-hold', name: 'On Hold', color: '#EC4899' },
 ];
 
+// Legacy aliases — keep backward compat for CRM/pipeline pages
+export const BYRON_FILM_STATUSES = BYRON_FILM_PIPELINE;
+export const KORUS_STATUSES = KORUS_PIPELINE;
+
 export const WORKSPACES: Workspace[] = [
   { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
   { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🏢' },
 ];
 
+/** Task statuses — same for all workspaces */
+export function getTaskStatuses(): TaskStatus[] {
+  return TASK_STATUSES;
+}
+
+/** Pipeline stages — workspace-specific (for CRM, project pipeline views) */
+export function getPipelineForWorkspace(workspaceId: string): TaskStatus[] {
+  return workspaceId === 'korus' ? KORUS_PIPELINE : BYRON_FILM_PIPELINE;
+}
+
+/** @deprecated Use getTaskStatuses() for tasks or getPipelineForWorkspace() for pipeline */
 export function getStatusesForWorkspace(workspaceId: string): TaskStatus[] {
-  return workspaceId === 'korus' ? KORUS_STATUSES : BYRON_FILM_STATUSES;
+  return TASK_STATUSES;
 }
 
 export function getStatusById(workspaceId: string, statusId: string): TaskStatus | undefined {
-  return getStatusesForWorkspace(workspaceId).find(s => s.id === statusId);
+  return TASK_STATUSES.find(s => s.id === statusId);
+}
+
+export function getPipelineStageById(workspaceId: string, stageId: string): TaskStatus | undefined {
+  return getPipelineForWorkspace(workspaceId).find(s => s.id === stageId);
 }

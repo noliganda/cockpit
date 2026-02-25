@@ -1,18 +1,122 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { ArrowLeft, Plus, Calendar, Target, Search, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, differenceInDays, addDays } from 'date-fns';
 import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useSprintStore } from '@/stores/sprint-store';
 import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
 import { TaskDialog } from '@/components/task-dialog';
 import { Task, TASK_STATUSES } from '@/types';
+
+// ── Burndown chart (SVG sparkline) ────────────────────────────────────────────
+
+function BurndownChart({
+  totalTasks, doneTasks, startDate, endDate, accentColor,
+}: {
+  totalTasks: number; doneTasks: number; startDate: string; endDate: string; accentColor: string;
+}) {
+  const today = new Date();
+  const start = parseISO(startDate);
+  const end = parseISO(endDate);
+  const totalDays = Math.max(differenceInDays(end, start), 1);
+  const daysPassed = Math.min(Math.max(differenceInDays(today, start), 0), totalDays);
+  const remaining = totalTasks - doneTasks;
+  const pctDone = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const daysLeft = Math.max(differenceInDays(end, today), 0);
+
+  // SVG dimensions
+  const W = 260; const H = 70;
+  const PL = 28; const PR = 8; const PT = 6; const PB = 20;
+  const cW = W - PL - PR; const cH = H - PT - PB;
+
+  const xS = (d: number) => PL + (d / totalDays) * cW;
+  const yS = (t: number) => PT + cH - (totalTasks > 0 ? (t / totalTasks) : 0) * cH;
+
+  // Ideal burndown points
+  const idealPts = `${xS(0)},${yS(totalTasks)} ${xS(totalDays)},${yS(0)}`;
+  // Actual line: from sprint start at total, to today at remaining
+  const actualPts = `${xS(0)},${yS(totalTasks)} ${xS(daysPassed)},${yS(remaining)}`;
+  // Projection: from today to end at 0
+  const projPts = `${xS(daysPassed)},${yS(remaining)} ${xS(totalDays)},${yS(0)}`;
+
+  // Y-axis labels
+  const yLabels = [0, Math.round(totalTasks / 2), totalTasks].filter((v, i, a) => a.indexOf(v) === i);
+  // X-axis: start, midpoint, end
+  const xMid = Math.round(totalDays / 2);
+
+  const isOnTrack = remaining <= Math.round(totalTasks * (1 - daysPassed / totalDays)) + 1;
+
+  return (
+    <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 shrink-0">
+      <div className="flex items-start gap-6">
+        {/* Stats */}
+        <div className="space-y-1 shrink-0">
+          <p className="text-[10px] text-[#6B7280] uppercase tracking-wide font-semibold">Burndown</p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-bold text-white">{remaining}</span>
+            <span className="text-xs text-[#6B7280]">/{totalTasks} remaining</span>
+          </div>
+          <div className="flex items-center gap-3 text-xs">
+            <span style={{ color: '#10B981' }}>{doneTasks} done</span>
+            <span className="text-[#6B7280]">{daysLeft}d left</span>
+            <span style={{ color: isOnTrack ? '#10B981' : '#F59E0B' }}>{isOnTrack ? 'On track' : 'Behind'}</span>
+          </div>
+          {/* Progress bar */}
+          <div className="h-1.5 w-32 bg-[#2A2A2A] rounded-full overflow-hidden mt-1">
+            <div className="h-full rounded-full transition-all" style={{ width: `${pctDone}%`, background: isOnTrack ? '#10B981' : accentColor }} />
+          </div>
+        </div>
+
+        {/* SVG chart */}
+        <svg width={W} height={H} className="shrink-0" viewBox={`0 0 ${W} ${H}`}>
+          {/* Grid lines */}
+          {yLabels.map(v => (
+            <g key={v}>
+              <line x1={PL} y1={yS(v)} x2={W - PR} y2={yS(v)} stroke="#2A2A2A" strokeWidth="1" />
+              <text x={PL - 4} y={yS(v) + 3.5} fontSize="8" fill="#6B7280" textAnchor="end">{v}</text>
+            </g>
+          ))}
+          {/* X axis */}
+          <line x1={PL} y1={PT + cH} x2={W - PR} y2={PT + cH} stroke="#2A2A2A" strokeWidth="1" />
+          {/* X labels */}
+          {[
+            { d: 0, label: format(start, 'MMM d') },
+            { d: xMid, label: format(addDays(start, xMid), 'MMM d') },
+            { d: totalDays, label: format(end, 'MMM d') },
+          ].map(({ d, label }) => (
+            <text key={d} x={xS(d)} y={H - 4} fontSize="8" fill="#6B7280" textAnchor="middle">{label}</text>
+          ))}
+          {/* Ideal burndown (dashed gray) */}
+          <polyline points={idealPts} fill="none" stroke="#3A3A3A" strokeWidth="1.5" strokeDasharray="4 3" />
+          {/* Actual line (solid accent) */}
+          {daysPassed > 0 && (
+            <polyline points={actualPts} fill="none" stroke={accentColor} strokeWidth="2" strokeLinecap="round" />
+          )}
+          {/* Projection (dashed accent) */}
+          {daysPassed > 0 && daysPassed < totalDays && (
+            <polyline points={projPts} fill="none" stroke={accentColor} strokeWidth="1.5" strokeDasharray="3 3" opacity="0.4" />
+          )}
+          {/* Today marker */}
+          {daysPassed > 0 && daysPassed <= totalDays && (
+            <>
+              <line x1={xS(daysPassed)} y1={PT} x2={xS(daysPassed)} y2={PT + cH} stroke="#4A4A4A" strokeWidth="1" strokeDasharray="2 2" />
+              <circle cx={xS(daysPassed)} cy={yS(remaining)} r="3" fill={accentColor} />
+              <circle cx={xS(daysPassed)} cy={yS(remaining)} r="5" fill={accentColor} opacity="0.2" />
+            </>
+          )}
+          {/* Start dot */}
+          <circle cx={xS(0)} cy={yS(totalTasks)} r="3" fill="#6B7280" />
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 const PRIORITY_COLORS: Record<string, string> = { low: '#6B7280', medium: '#3B82F6', high: '#F59E0B', urgent: '#EF4444' };
 const SPRINT_STATUS_COLORS: Record<string, string> = { planning: '#6B7280', active: '#10B981', completed: '#6366F1' };
@@ -42,6 +146,7 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
 
   const sprintTaskIds = new Set(sprint.taskIds);
   const sprintTasks = tasks.filter(t => sprintTaskIds.has(t.id));
+  const doneCount = useMemo(() => sprintTasks.filter(t => t.status === 'done').length, [sprintTasks]);
   const allWorkspaceTasks = getTasksForWorkspace(workspace.id);
   const backlogTasks = allWorkspaceTasks
     .filter(t => !sprintTaskIds.has(t.id))
@@ -106,6 +211,17 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
             <Plus className="w-4 h-4" /> New Task
           </button>
         </div>
+      </motion.div>
+
+      {/* Burndown chart */}
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-4 shrink-0">
+        <BurndownChart
+          totalTasks={sprintTasks.length}
+          doneTasks={doneCount}
+          startDate={sprint.startDate}
+          endDate={sprint.endDate}
+          accentColor={accentColor}
+        />
       </motion.div>
 
       {/* Split Layout */}

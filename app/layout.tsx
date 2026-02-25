@@ -11,6 +11,7 @@ import { ContactProvider } from "@/components/contact-provider";
 import { OrganisationProvider } from "@/components/organisation-provider";
 import { ProjectProvider } from "@/components/project-provider";
 import { AreaProvider } from "@/components/area-provider";
+import { NoteProvider } from "@/components/note-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
               <ContactProvider>
               <OrganisationProvider>
               <SprintProvider>
+              <NoteProvider>
                 <TooltipProvider>
                   <div className="flex h-screen overflow-hidden">
                     <Sidebar />
@@ -51,6 +53,7 @@ export default function RootLayout({
                     </main>
                   </div>
                 </TooltipProvider>
+              </NoteProvider>
               </SprintProvider>
               </OrganisationProvider>
               </ContactProvider>

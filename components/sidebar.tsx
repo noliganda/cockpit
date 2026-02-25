@@ -16,6 +16,7 @@ import {
   BarChart2,
   Timer,
   Zap,
+  NotebookPen,
 } from 'lucide-react';
 import { LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -40,6 +41,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/metrics', label: 'Metrics', icon: BarChart2 },
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
+  { href: '/notes', label: 'Notes', icon: NotebookPen },
   { href: '/brief', label: 'Morning Brief', icon: Sun },
   { href: '/costs', label: 'Costs', icon: DollarSign },
 ];

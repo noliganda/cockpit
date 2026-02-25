@@ -102,6 +102,16 @@ export interface ProjectNote {
   updatedAt: string;
 }
 
+export interface Note {
+  id: string;
+  workspaceId: string;
+  title: string;
+  content: string;
+  pinned?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ProjectDocument {
   id: string;
   projectId: string;

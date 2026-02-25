@@ -1,13 +1,13 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import { ProjectNote } from '@/types';
+import { Note } from '@/types';
 
 export interface NoteStoreValue {
-  notes: ProjectNote[];
-  getNotesForProject: (projectId: string) => ProjectNote[];
-  addNote: (note: Omit<ProjectNote, 'id' | 'createdAt' | 'updatedAt'>) => ProjectNote;
-  updateNote: (id: string, updates: Partial<ProjectNote>) => void;
+  notes: Note[];
+  getNotesForWorkspace: (workspaceId: string) => Note[];
+  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => Note;
+  updateNote: (id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => void;
   deleteNote: (id: string) => void;
 }
 

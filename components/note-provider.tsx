@@ -1,32 +1,32 @@
 'use client';
 
 import { useCallback, ReactNode } from 'react';
-import { ProjectNote } from '@/types';
+import { Note } from '@/types';
 import { NoteContext } from '@/stores/note-store';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export function NoteProvider({ children }: { children: ReactNode }) {
-  const [notes, setNotes] = useLocalStorage<ProjectNote[]>('ops_project_notes', []);
+  const [notes, setNotes] = useLocalStorage<Note[]>('ops_notes', []);
 
-  const getNotesForProject = useCallback((projectId: string) => {
-    return notes.filter(n => n.projectId === projectId);
+  const getNotesForWorkspace = useCallback((workspaceId: string) => {
+    return notes.filter(n => n.workspaceId === workspaceId);
   }, [notes]);
 
-  const addNote = useCallback((note: Omit<ProjectNote, 'id' | 'createdAt' | 'updatedAt'>): ProjectNote => {
+  const addNote = useCallback((note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Note => {
     const now = new Date().toISOString();
-    const newNote: ProjectNote = {
+    const newNote: Note = {
       ...note,
       id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       createdAt: now,
       updatedAt: now,
     };
-    setNotes(prev => [...prev, newNote]);
+    setNotes(prev => [newNote, ...prev]);
     return newNote;
   }, [setNotes]);
 
-  const updateNote = useCallback((id: string, updates: Partial<ProjectNote>) => {
+  const updateNote = useCallback((id: string, updates: Partial<Omit<Note, 'id' | 'createdAt'>>) => {
     setNotes(prev => prev.map(n =>
-      n.id === id ? { ...n, ...updates, updatedAt: new Date().toISOString() } : n
+      n.id === id ? { ...n, ...updates, updatedAt: new Date().toISOString() } : n,
     ));
   }, [setNotes]);
 
@@ -35,7 +35,7 @@ export function NoteProvider({ children }: { children: ReactNode }) {
   }, [setNotes]);
 
   return (
-    <NoteContext.Provider value={{ notes, getNotesForProject, addNote, updateNote, deleteNote }}>
+    <NoteContext.Provider value={{ notes, getNotesForWorkspace, addNote, updateNote, deleteNote }}>
       {children}
     </NoteContext.Provider>
   );

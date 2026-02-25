@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, User, FileText, FolderOpen, Users, LayoutDashboard, CheckSquare, FileEdit, ExternalLink, Trash2, Save, X, Mail, Phone } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, User, FileText, FolderOpen, Users, LayoutDashboard, CheckSquare, FileEdit, ExternalLink, Trash2, Save, X, Mail, Phone, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
@@ -47,7 +47,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const { workspace } = useWorkspace();
   const accentColor = getWorkspaceColor(workspace.id);
   const { tasks, addTask, updateTask, deleteTask } = useTaskStore();
-  const { getProjectById, deleteProject } = useProjectStore();
+  const { getProjectById, deleteProject, updateProject } = useProjectStore();
   const { contacts } = useContactStore();
   const statuses = TASK_STATUSES;
   const router = useRouter();
@@ -58,6 +58,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
+  const [editProjectOpen, setEditProjectOpen] = useState(false);
 
   // Notes
   const [notes, setNotes] = useLocalStorage<ProjectNote[]>(`project_notes_${id}`, []);
@@ -130,18 +131,27 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               {project.budget && <span className="text-xs font-medium" style={{ color: accentColor }}>${project.budget.toLocaleString()}</span>}
             </div>
           </div>
-          <button
-            onClick={() => {
-              if (confirm(`Delete "${project.name}"? This will remove the project and unlink all tasks. This cannot be undone.`)) {
-                deleteProject(id);
-                router.push('/projects');
-              }
-            }}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            Delete
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setEditProjectOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:border-[#3A3A3A] transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                if (confirm(`Delete "${project.name}"? This cannot be undone.`)) {
+                  deleteProject(id);
+                  router.push('/projects');
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -401,6 +411,84 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         projects={[project]}
         accentColor={accentColor}
       />
+
+      {/* Edit Project Dialog */}
+      {editProjectOpen && (() => {
+        const EditDialog = () => {
+          const [name, setName] = useState(project.name);
+          const [description, setDescription] = useState(project.description || '');
+          const [status, setStatus] = useState(project.status);
+          const [startDate, setStartDate] = useState(project.startDate || '');
+          const [endDate, setEndDate] = useState(project.endDate || '');
+          const [budget, setBudget] = useState(project.budget?.toString() || '');
+
+          const handleSave = () => {
+            if (!name.trim()) return;
+            updateProject(id, {
+              name: name.trim(),
+              description: description.trim() || undefined,
+              status,
+              startDate: startDate || undefined,
+              endDate: endDate || undefined,
+              budget: budget ? parseFloat(budget) : undefined,
+            });
+            setEditProjectOpen(false);
+          };
+
+          const INP = 'w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder:text-[#6B7280] focus:outline-none focus:border-[#3A3A3A]';
+          const LBL = 'block text-xs font-medium text-[#A0A0A0] mb-1.5';
+
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditProjectOpen(false)} />
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-6 w-full max-w-lg shadow-2xl">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-base font-semibold text-white">Edit Project</h2>
+                  <button onClick={() => setEditProjectOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[#2A2A2A]"><X className="w-4 h-4 text-[#A0A0A0]" /></button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className={LBL}>Name *</label>
+                    <input autoFocus value={name} onChange={e => setName(e.target.value)} className={INP} />
+                  </div>
+                  <div>
+                    <label className={LBL}>Description</label>
+                    <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className={`${INP} resize-none`} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className={LBL}>Status</label>
+                      <select value={status} onChange={e => setStatus(e.target.value as typeof status)} className={INP}>
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="completed">Completed</option>
+                        <option value="archived">Archived</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={LBL}>Start Date</label>
+                      <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={INP} />
+                    </div>
+                    <div>
+                      <label className={LBL}>End Date</label>
+                      <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={INP} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className={LBL}>Budget (AUD)</label>
+                    <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="0" className={INP} />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-5">
+                  <button onClick={() => setEditProjectOpen(false)} className="px-4 py-2 text-sm text-[#A0A0A0] hover:text-white hover:bg-[#2A2A2A] rounded-lg">Cancel</button>
+                  <button onClick={handleSave} disabled={!name.trim()} className="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-40" style={{ background: accentColor, color: '#0F0F0F' }}>Save Changes</button>
+                </div>
+              </motion.div>
+            </div>
+          );
+        };
+        return <EditDialog />;
+      })()}
     </div>
   );
 }

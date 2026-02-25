@@ -1,16 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Browser client (anon key)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Lazy browser client — created on first use so missing env vars don't crash at build time
+let _client: ReturnType<typeof createClient> | null = null;
+export function getSupabaseClient() {
+  if (!_client) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) throw new Error('NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are required');
+    _client = createClient(url, key);
+  }
+  return _client;
+}
 
 // Server client (service role key — full access, server-side only)
 export function createServerClient() {
-  return createClient(supabaseUrl, supabaseServiceRoleKey);
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+  return createClient(url, key);
 }
+
+// Convenience re-export for browser usage
+export const supabase = { get: getSupabaseClient };
 
 export type Action = {
   id: string;

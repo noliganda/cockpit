@@ -2,13 +2,14 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Cloud, Waves, Wind, CheckSquare, Mail, Calendar, Youtube, Rss, AlertCircle, ArrowRight, Check, Clock } from 'lucide-react';
+import { Sun, Cloud, Waves, Wind, CheckSquare, Mail, Calendar, Youtube, Rss, AlertCircle, ArrowRight, Check, Clock, Timer, TriangleAlert } from 'lucide-react';
 import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
+import { useSprintStore } from '@/stores/sprint-store';
 import { WORKSPACES } from '@/types';
 import Link from 'next/link';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, differenceInDays, parseISO } from 'date-fns';
 
 // ── Weather helpers ───────────────────────────────────────────────────────────
 
@@ -78,6 +79,7 @@ export default function BriefPage() {
   const accentColor = getWorkspaceColor(workspace.id);
   const { tasks } = useTaskStore();
   const { projects } = useProjectStore();
+  const { sprints } = useSprintStore();
 
   const now = new Date();
   const hour = now.getHours();
@@ -122,6 +124,29 @@ export default function BriefPage() {
   }, [tasks]);
 
   const hasOvernightWork = overnightWork.done.length > 0 || overnightWork.started.length > 0;
+
+  // Overdue tasks — past due date, not done, across all workspaces
+  const overdueTasks = useMemo(() => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    return tasks
+      .filter(t => t.dueDate && t.dueDate < today && t.status !== 'done')
+      .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''));
+  }, [tasks]);
+
+  // Active sprint progress across all workspaces
+  const sprintProgress = useMemo(() => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    return sprints
+      .filter(s => s.status === 'active')
+      .map(sprint => {
+        const sprintTasks = tasks.filter(t => sprint.taskIds.includes(t.id));
+        const done = sprintTasks.filter(t => t.status === 'done').length;
+        const pct = sprintTasks.length > 0 ? Math.round((done / sprintTasks.length) * 100) : 0;
+        const daysLeft = sprint.endDate ? differenceInDays(parseISO(sprint.endDate), new Date()) : null;
+        const ws = WORKSPACES.find(w => w.id === sprint.workspaceId);
+        return { sprint, total: sprintTasks.length, done, pct, daysLeft, ws };
+      });
+  }, [sprints, tasks]);
 
   // Surf data to display (prefer swell height over wave height for quality)
   const surfH = weather.data?.swellHeight ?? weather.data?.waveHeight ?? null;
@@ -359,6 +384,90 @@ export default function BriefPage() {
             </div>
           )}
         </motion.div>
+
+        {/* ── Overdue Tasks ──────────────────────────────────────── */}
+        {overdueTasks.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="bg-[#1A1A1A] border border-[#EF4444]/20 rounded-xl p-5"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <TriangleAlert className="w-4 h-4 text-[#EF4444]" />
+                <h2 className="text-sm font-semibold text-white">Overdue</h2>
+                <span className="text-[10px] text-[#EF4444] bg-[#EF4444]/10 px-1.5 py-0.5 rounded-full">{overdueTasks.length}</span>
+              </div>
+              <Link href="/tasks" className="text-xs text-[#6B7280] hover:text-white flex items-center gap-1">
+                View all <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="space-y-1">
+              {overdueTasks.slice(0, 6).map(t => {
+                const ws = WORKSPACES.find(w => w.id === t.workspaceId);
+                const daysAgo = t.dueDate ? differenceInDays(new Date(), parseISO(t.dueDate)) : 0;
+                return (
+                  <div key={t.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[#2A2A2A] transition-colors">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#EF4444] shrink-0" />
+                    <span className="text-xs text-white flex-1 truncate">{t.title}</span>
+                    <span className="text-[10px] text-[#EF4444] shrink-0">{daysAgo}d overdue</span>
+                    {ws && <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ws.color }} />}
+                  </div>
+                );
+              })}
+              {overdueTasks.length > 6 && (
+                <p className="text-[10px] text-[#6B7280] px-2">+{overdueTasks.length - 6} more overdue</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Active Sprints ─────────────────────────────────────── */}
+        {sprintProgress.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.24 }}
+            className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Timer className="w-4 h-4 text-[#6B7280]" />
+              <h2 className="text-sm font-semibold text-white">Active Sprints</h2>
+            </div>
+            <div className="space-y-4">
+              {sprintProgress.map(({ sprint, total, done, pct, daysLeft, ws }) => (
+                <div key={sprint.id}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      {ws && <div className="w-2 h-2 rounded-full" style={{ background: ws.color }} />}
+                      <Link href={`/sprints/${sprint.id}`} className="text-xs font-medium text-white hover:underline">
+                        {sprint.name}
+                      </Link>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-[#6B7280]">
+                      <span>{done}/{total} done</span>
+                      {daysLeft !== null && (
+                        <span className={daysLeft <= 2 ? 'text-[#EF4444]' : daysLeft <= 5 ? 'text-[#F59E0B]' : ''}>
+                          {daysLeft > 0 ? `${daysLeft}d left` : daysLeft === 0 ? 'Due today' : `${Math.abs(daysLeft)}d over`}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="h-1.5 bg-[#2A2A2A] rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${pct}%`, background: pct === 100 ? '#10B981' : accentColor }}
+                    />
+                  </div>
+                  {sprint.goal && (
+                    <p className="text-[10px] text-[#6B7280] mt-1 truncate">{sprint.goal}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* ── Today's Agenda ─────────────────────────────────────── */}
         <motion.div

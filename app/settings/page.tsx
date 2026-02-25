@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Bell, Download, RefreshCw, CheckCircle2, Link2, Unlink2, AlertCircle } from 'lucide-react';
+import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Download, RefreshCw, CheckCircle2, Link2, Unlink2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { MOCK_PROJECTS, MOCK_CONTACTS } from '@/lib/data';
+import { WORKSPACES } from '@/types';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -103,16 +104,19 @@ export default function SettingsPage() {
 
   const [googleConnected, setGoogleConnected] = useState(false);
   const [googleError, setGoogleError] = useState(false);
+  const [msConnected, setMsConnected] = useState(false);
+  const [msError, setMsError] = useState(false);
 
   useEffect(() => {
     try {
-      if (localStorage.getItem('google_connected') === 'true') {
-        setGoogleConnected(true);
-      }
+      if (localStorage.getItem('google_connected') === 'true') setGoogleConnected(true);
+      if (localStorage.getItem('microsoft_connected') === 'true') setMsConnected(true);
     } catch { /* ignore */ }
 
     const params = new URLSearchParams(window.location.search);
     const gs = params.get('google');
+    const ms = params.get('microsoft');
+
     if (gs === 'connected') {
       setGoogleConnected(true);
       try { localStorage.setItem('google_connected', 'true'); } catch { /* ignore */ }
@@ -122,11 +126,26 @@ export default function SettingsPage() {
       window.history.replaceState({}, '', '/settings');
       setTimeout(() => setGoogleError(false), 5000);
     }
+
+    if (ms === 'connected') {
+      setMsConnected(true);
+      try { localStorage.setItem('microsoft_connected', 'true'); } catch { /* ignore */ }
+      window.history.replaceState({}, '', '/settings');
+    } else if (ms === 'error') {
+      setMsError(true);
+      window.history.replaceState({}, '', '/settings');
+      setTimeout(() => setMsError(false), 5000);
+    }
   }, []);
 
   function handleGoogleDisconnect() {
     setGoogleConnected(false);
     try { localStorage.removeItem('google_connected'); } catch { /* ignore */ }
+  }
+
+  function handleMicrosoftDisconnect() {
+    setMsConnected(false);
+    try { localStorage.removeItem('microsoft_connected'); } catch { /* ignore */ }
   }
 
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'done'>('idle');
@@ -144,6 +163,22 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true);
   const [animations, setAnimations] = useState(true);
   const [compactView, setCompactView] = useState(false);
+
+  const [workspaceColors, setWorkspaceColors] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('workspace_colors');
+      if (saved) return JSON.parse(saved) as Record<string, string>;
+    } catch { /* ignore */ }
+    return {};
+  });
+
+  function updateWorkspaceColor(id: string, color: string) {
+    const next = { ...workspaceColors, [id]: color };
+    setWorkspaceColors(next);
+    try { localStorage.setItem('workspace_colors', JSON.stringify(next)); } catch { /* ignore */ }
+  }
+
+  const accentColor = workspaceColors[workspace.id] ?? workspace.color;
 
   function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -184,8 +219,8 @@ export default function SettingsPage() {
     return (
       <button
         onClick={() => onChange(!value)}
-        className={`relative w-10 h-5.5 rounded-full transition-colors ${value ? 'bg-[#C8FF3D]' : 'bg-[#3A3A3A]'}`}
-        style={{ height: '22px' }}
+        className={`relative w-10 rounded-full transition-colors ${value ? '' : 'bg-[#3A3A3A]'}`}
+        style={{ height: '22px', background: value ? accentColor : undefined }}
       >
         <span
           className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
@@ -294,18 +329,27 @@ export default function SettingsPage() {
                 Dark
               </span>
             </Row>
-            <Row label="Accent — Byron Film">
-              <span className="flex items-center gap-2 text-xs text-[#6B7280]">
-                <span className="w-4 h-4 rounded-full bg-[#C8FF3D]" />
-                Lime (#C8FF3D)
-              </span>
-            </Row>
-            <Row label="Accent — KORUS Group">
-              <span className="flex items-center gap-2 text-xs text-[#6B7280]">
-                <span className="w-4 h-4 rounded-full bg-[#3B82F6]" />
-                Blue (#3B82F6)
-              </span>
-            </Row>
+            {WORKSPACES.map(ws => {
+              const currentColor = workspaceColors[ws.id] ?? ws.color;
+              return (
+                <Row key={ws.id} label={`Accent — ${ws.name}`}>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-4 h-4 rounded-full border border-[#3A3A3A] shrink-0"
+                      style={{ background: currentColor }}
+                    />
+                    <span className="text-xs text-[#6B7280] font-mono">{currentColor.toUpperCase()}</span>
+                    <input
+                      type="color"
+                      value={currentColor}
+                      onChange={e => updateWorkspaceColor(ws.id, e.target.value)}
+                      className="w-6 h-6 rounded cursor-pointer border-0 p-0 bg-transparent"
+                      title={`Pick accent color for ${ws.name}`}
+                    />
+                  </div>
+                </Row>
+              );
+            })}
           </Section>
         </motion.div>
 
@@ -382,6 +426,39 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <a href="/api/auth/google">
+                  <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:border-[#3A3A3A] transition-colors">
+                    <Link2 className="w-3.5 h-3.5" />
+                    Connect
+                  </button>
+                </a>
+              )}
+            </Row>
+
+            {msError && (
+              <div className="flex items-center gap-2 text-xs text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20 rounded-lg px-3 py-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                Microsoft connection failed. Check that MICROSOFT_CLIENT_ID, MICROSOFT_TENANT_ID and MICROSOFT_CLIENT_SECRET are set in Vercel, then try again.
+              </div>
+            )}
+            <Row
+              label="Microsoft"
+              description={msConnected ? 'Account connected — Entra ID access granted' : 'Connect your Microsoft account for Entra ID access'}
+            >
+              {msConnected ? (
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 text-xs text-[#10B981]">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Connected
+                  </span>
+                  <button
+                    onClick={handleMicrosoftDisconnect}
+                    className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-[#2A2A2A] text-[#6B7280] hover:text-[#EF4444] hover:border-[#EF4444]/30 transition-colors"
+                  >
+                    <Unlink2 className="w-3 h-3" />
+                    Disconnect
+                  </button>
+                </div>
+              ) : (
+                <a href="/api/auth/microsoft">
                   <button className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:border-[#3A3A3A] transition-colors">
                     <Link2 className="w-3.5 h-3.5" />
                     Connect

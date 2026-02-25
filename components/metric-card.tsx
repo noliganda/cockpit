@@ -19,7 +19,7 @@ export function MetricCard({
   subValue,
   trend,
   icon,
-  accentColor = '#C8FF3D',
+  accentColor = '#D4A017',
   index = 0,
 }: MetricCardProps) {
   const isPositive = trend !== undefined && trend >= 0;

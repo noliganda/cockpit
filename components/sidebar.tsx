@@ -19,7 +19,7 @@ import {
 import { LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { WorkspaceSwitcher } from '@/components/workspace-switcher';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useAuth } from '@/components/auth-provider';
 
 interface NavItem {
@@ -51,7 +51,7 @@ export function Sidebar() {
   const { workspace } = useWorkspace();
   const { logout } = useAuth();
 
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
 
   return (
     <aside className="fixed left-0 top-0 h-full w-[280px] bg-[#1A1A1A] border-r border-[#2A2A2A] flex flex-col z-30">

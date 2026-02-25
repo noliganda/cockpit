@@ -16,3 +16,15 @@ export const WorkspaceContext = createContext<WorkspaceContextValue>({
 export function useWorkspace() {
   return useContext(WorkspaceContext);
 }
+
+/** Returns the workspace accent color, checking localStorage overrides first. */
+export function getWorkspaceColor(id: string): string {
+  try {
+    const saved = localStorage.getItem('workspace_colors');
+    if (saved) {
+      const colors: Record<string, string> = JSON.parse(saved);
+      if (colors[id]) return colors[id];
+    }
+  } catch { /* ignore */ }
+  return WORKSPACES.find(w => w.id === id)?.color ?? '#D4A017';
+}

@@ -26,7 +26,7 @@ export function ContactDialog({
   workspaceId,
   initialContact,
   stages,
-  accentColor = '#C8FF3D',
+  accentColor = '#D4A017',
 }: ContactDialogProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

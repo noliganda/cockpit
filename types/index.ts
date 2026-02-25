@@ -116,8 +116,8 @@ export const KORUS_STATUSES: TaskStatus[] = [
 ];
 
 export const WORKSPACES: Workspace[] = [
-  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#C8FF3D', icon: '🎬' },
-  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#3B82F6', icon: '🏢' },
+  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
+  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🏢' },
 ];
 
 export function getStatusesForWorkspace(workspaceId: string): TaskStatus[] {

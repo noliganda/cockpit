@@ -32,7 +32,7 @@ export function TaskDialog({
   initialStatus,
   initialProjectId,
   projects = [],
-  accentColor = '#C8FF3D',
+  accentColor = '#D4A017',
 }: TaskDialogProps) {
   const { getSprintsForWorkspace } = useSprintStore();
   const statuses = getStatusesForWorkspace(workspaceId);

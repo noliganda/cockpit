@@ -70,6 +70,11 @@ const SEED_TASKS = [
   { id: 'task-ko-bas', workspaceId: 'korus', title: 'Bas de Lange — Teams meeting invite', status: 'todo', priority: 'medium', tags: ['comms'] },
   { id: 'task-ko-email-sig', workspaceId: 'korus', title: 'Fix KORUS email signature', status: 'in-progress', priority: 'low', tags: ['ops'] },
   { id: 'task-ko-thomas', workspaceId: 'korus', projectId: 'proj-ko-recruit', title: 'Thomas Choulot — contract termination', status: 'todo', priority: 'high', tags: ['recruitment', 'legal'] },
+
+  // More Dashboard features
+  { id: 'task-dash-notes-global', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Notes attachable to projects, sprints, areas, AND tasks', status: 'backlog', priority: 'high', tags: ['feature'], description: 'Notes should not be project-only. Every entity (project, sprint, area, task) should support attached notes via the block editor. Think of it as a universal "attach a page" capability.' },
+  { id: 'task-dash-tables-global', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Tables (custom databases) attachable to projects, sprints, areas, tasks', status: 'backlog', priority: 'high', tags: ['feature'], description: 'Custom tables/databases should be embeddable anywhere — inside a project, a sprint, an area, or even a task. Like Notion inline databases. User defines columns, rows are editable inline.' },
+  { id: 'task-dash-tables-standalone', workspaceId: 'personal', projectId: 'proj-p-dashboard', title: 'Standalone Tables page — create & manage custom databases', status: 'backlog', priority: 'medium', tags: ['feature'], description: 'Top-level /tables page to create, browse, and manage all custom databases. Each table has its own schema (text, number, date, select, relation, URL columns). Filterable, sortable, groupable views.' },
 ];
 
 // Add timestamps to tasks

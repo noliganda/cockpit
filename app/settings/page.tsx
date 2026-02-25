@@ -6,7 +6,8 @@ import { Lock, LogOut, Eye, EyeOff, Check, Shield, Palette, Download, RefreshCw,
 import { useAuth } from '@/components/auth-provider';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
-import { MOCK_PROJECTS, MOCK_CONTACTS } from '@/lib/data';
+import { useProjectStore } from '@/stores/project-store';
+import { useContactStore } from '@/stores/contact-store';
 import { WORKSPACES } from '@/types';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -32,7 +33,7 @@ function Row({ label, description, children }: { label: string; description?: st
   );
 }
 
-function exportToObsidian(tasks: ReturnType<typeof useTaskStore>['tasks'], projects: typeof MOCK_PROJECTS, contacts: typeof MOCK_CONTACTS, workspaceName: string, workspaceSlug: string) {
+function exportToObsidian(tasks: ReturnType<typeof useTaskStore>['tasks'], projects: any[], contacts: any[], workspaceName: string, workspaceSlug: string) {
   const lines: string[] = [];
   const now = new Date().toLocaleString('en-AU', { dateStyle: 'long', timeStyle: 'short' });
   lines.push(`# ${workspaceName} — Ops OS Export`);
@@ -99,8 +100,10 @@ export default function SettingsPage() {
   const { workspace } = useWorkspace();
   const { tasks: allTasks } = useTaskStore();
   const wsTasks = allTasks.filter(t => t.workspaceId === workspace.id);
-  const wsProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
-  const wsContacts = MOCK_CONTACTS.filter(c => c.workspaceId === workspace.id);
+  const { projects } = useProjectStore();
+  const wsProjects = projects.filter(p => p.workspaceId === workspace.id);
+  const { contacts } = useContactStore();
+  const wsContacts = contacts.filter(c => c.workspaceId === workspace.id);
 
   const [googleConnected, setGoogleConnected] = useState(false);
   const [googleError, setGoogleError] = useState(false);

@@ -8,7 +8,7 @@ import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { TaskDialog } from '@/components/task-dialog';
 import { Task, TASK_STATUSES, getStatusById } from '@/types';
-import { MOCK_PROJECTS } from '@/lib/data';
+import { useProjectStore } from '@/stores/project-store';
 import { format, parseISO } from 'date-fns';
 
 const PRIORITY_COLORS = {
@@ -31,7 +31,8 @@ export default function TasksPage() {
 
   const statuses = TASK_STATUSES;
   const allTasks = getTasksForWorkspace(workspace.id);
-  const workspaceProjects = MOCK_PROJECTS.filter(p => p.workspaceId === workspace.id);
+  const { projects } = useProjectStore();
+  const workspaceProjects = projects.filter(p => p.workspaceId === workspace.id);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState<string | null>(null);
 
   const filteredTasks = useMemo(() => {

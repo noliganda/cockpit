@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, Calendar, Target, Zap } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, Target, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
 import { format, parseISO } from 'date-fns';
@@ -121,14 +121,23 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
               <span className="text-xs text-[#6B7280]">· {sprintTasks.length} tasks</span>
             </div>
           </div>
-          <button
-            onClick={() => openCreate()}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors shrink-0"
-            style={{ background: accentColor, color: '#0F0F0F' }}
-          >
-            <Plus className="w-4 h-4" />
-            Add Task
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href={`/sprints/${id}/plan`}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg bg-[#2A2A2A] text-[#A0A0A0] hover:text-white hover:bg-[#3A3A3A] transition-colors"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              Plan Sprint
+            </Link>
+            <button
+              onClick={() => openCreate()}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors"
+              style={{ background: accentColor, color: '#0F0F0F' }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Task
+            </button>
+          </div>
         </div>
       </motion.div>
 

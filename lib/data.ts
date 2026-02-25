@@ -1,5 +1,14 @@
 import { Task, Project, Area, Contact, FileItem } from '@/types';
 
+export const MOCK_AREAS: Area[] = [
+  { id: 'area-bf-1', workspaceId: 'byron-film', name: 'Production', color: '#F59E0B' },
+  { id: 'area-bf-2', workspaceId: 'byron-film', name: 'Post-Production', color: '#3B82F6' },
+  { id: 'area-bf-3', workspaceId: 'byron-film', name: 'Business Dev', color: '#10B981' },
+  { id: 'area-ko-1', workspaceId: 'korus', name: 'Sales', color: '#8B5CF6' },
+  { id: 'area-ko-2', workspaceId: 'korus', name: 'Operations', color: '#3B82F6' },
+  { id: 'area-ko-3', workspaceId: 'korus', name: 'Marketing', color: '#EC4899' },
+];
+
 export const MOCK_TASKS: Task[] = [
   // Byron Film tasks
   {

@@ -10,10 +10,17 @@ export interface Task {
   id: string;
   workspaceId: string;
   projectId?: string;
+  areaId?: string;
+  sprintId?: string;
   title: string;
   description?: string;
   status: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
+  impact?: 'low' | 'medium' | 'high';
+  effort?: 'low' | 'medium' | 'high';
+  duration?: string;
+  urgent?: boolean;
+  important?: boolean;
   dueDate?: string;
   assignee?: string;
   tags: string[];

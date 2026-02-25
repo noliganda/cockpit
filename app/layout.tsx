@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar, SidebarProvider, MobileHeader } from "@/components/sidebar";
 import { WorkspaceProvider } from "@/components/workspace-provider";
 import { TaskProvider } from "@/components/task-provider";
 import { SprintProvider } from "@/components/sprint-provider";
@@ -13,6 +13,7 @@ import { ProjectProvider } from "@/components/project-provider";
 import { AreaProvider } from "@/components/area-provider";
 import { NoteProvider } from "@/components/note-provider";
 import { CommandPalette } from "@/components/command-palette";
+import { MainContent } from "@/components/main-content";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,6 +40,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0F0F0F]`}>
         <AuthProvider>
           <WorkspaceProvider>
+            <SidebarProvider>
             <TaskProvider>
               <ProjectProvider>
               <AreaProvider>
@@ -49,9 +51,10 @@ export default function RootLayout({
                 <TooltipProvider>
                   <div className="flex h-screen overflow-hidden">
                     <Sidebar />
-                    <main className="flex-1 ml-[280px] overflow-y-auto">
+                    <MobileHeader />
+                    <MainContent>
                       {children}
-                    </main>
+                    </MainContent>
                     <CommandPalette />
                   </div>
                 </TooltipProvider>
@@ -62,6 +65,7 @@ export default function RootLayout({
               </AreaProvider>
               </ProjectProvider>
             </TaskProvider>
+            </SidebarProvider>
           </WorkspaceProvider>
         </AuthProvider>
       </body>

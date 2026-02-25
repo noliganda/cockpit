@@ -8,6 +8,7 @@ import { SprintProvider } from "@/components/sprint-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/components/auth-provider";
 import { ContactProvider } from "@/components/contact-provider";
+import { OrganisationProvider } from "@/components/organisation-provider";
 import { ProjectProvider } from "@/components/project-provider";
 import { AreaProvider } from "@/components/area-provider";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
               <ProjectProvider>
               <AreaProvider>
               <ContactProvider>
+              <OrganisationProvider>
               <SprintProvider>
                 <TooltipProvider>
                   <div className="flex h-screen overflow-hidden">
@@ -50,6 +52,7 @@ export default function RootLayout({
                   </div>
                 </TooltipProvider>
               </SprintProvider>
+              </OrganisationProvider>
               </ContactProvider>
               </AreaProvider>
               </ProjectProvider>

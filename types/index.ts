@@ -55,13 +55,30 @@ export interface Contact {
   email?: string;
   phone?: string;
   company?: string;
+  organisationId?: string;
   role?: string;
   address?: string;
   website?: string;
   notes?: string;
   pipelineStage?: string;
+  projectIds?: string[];
   tags: string[];
   lastContact?: string;
+}
+
+export interface Organisation {
+  id: string;
+  workspaceId: string;
+  name: string;
+  industry?: string;
+  website?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+  pipelineStage?: string;
+  tags: string[];
+  createdAt: string;
 }
 
 export interface FileItem {

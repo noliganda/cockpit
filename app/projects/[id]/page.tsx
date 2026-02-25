@@ -51,7 +51,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const statuses = TASK_STATUSES;
   const project = getProjectById(id);
   const projectTasks = tasks.filter(t => t.projectId === id);
-  const projectContacts = contacts.filter(c => c.workspaceId === workspace.id && (c.tags?.includes(project?.name || '') || c.tags?.includes(id)));
+  const projectContacts = contacts.filter(c => c.workspaceId === workspace.id && (c.projectIds?.includes(id) || c.tags?.includes(project?.name || '') || c.tags?.includes(id)));
 
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [dialogOpen, setDialogOpen] = useState(false);

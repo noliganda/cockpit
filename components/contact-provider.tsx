@@ -2,12 +2,11 @@
 
 import { useCallback, ReactNode } from 'react';
 import { Contact } from '@/types';
-import { MOCK_CONTACTS } from '@/lib/data';
 import { ContactContext } from '@/stores/contact-store';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export function ContactProvider({ children }: { children: ReactNode }) {
-  const [contacts, setContacts] = useLocalStorage<Contact[]>('ops_contacts', MOCK_CONTACTS);
+  const [contacts, setContacts] = useLocalStorage<Contact[]>('ops_contacts', []);
 
   const getContactsForWorkspace = useCallback((workspaceId: string) => {
     return contacts.filter(c => c.workspaceId === workspaceId);

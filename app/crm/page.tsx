@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Mail, Phone, Globe, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useContactStore } from '@/stores/contact-store';
 import { ContactDialog } from '@/components/contact-dialog';
 import { Contact, KORUS_STATUSES, BYRON_FILM_STATUSES } from '@/types';
@@ -22,7 +22,7 @@ const STAGE_COLORS: Record<string, string> = {
 
 export default function CRMPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const { getContactsForWorkspace, addContact, updateContact, deleteContact } = useContactStore();
 
   const [search, setSearch] = useState('');

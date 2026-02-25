@@ -7,7 +7,7 @@ import {
   Sun, AlertCircle, ArrowRight, TrendingUp, FolderOpen,
   CheckSquare, Clock, Users, DollarSign, Target,
 } from 'lucide-react';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { MOCK_PROJECTS, MOCK_CONTACTS, KORUS_METRICS } from '@/lib/data';
 import { BYRON_FILM_STATUSES, KORUS_STATUSES } from '@/types';
@@ -81,7 +81,7 @@ function SectionHeader({ icon: Icon, title, href }: { icon: React.ElementType; t
 export default function BriefPage() {
   const { workspace } = useWorkspace();
   const { tasks: allTasks } = useTaskStore();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const isKorus = workspace.slug === 'korus';
 
   const tasks = useMemo(

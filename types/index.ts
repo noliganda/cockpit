@@ -1,7 +1,7 @@
 export interface Workspace {
   id: string;
   name: string;
-  slug: 'byron-film' | 'korus';
+  slug: 'byron-film' | 'korus' | 'personal';
   color: string;
   icon: string;
 }
@@ -150,6 +150,7 @@ export const KORUS_STATUSES = KORUS_PIPELINE;
 export const WORKSPACES: Workspace[] = [
   { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
   { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🏢' },
+  { id: 'personal', name: 'Personal', slug: 'personal', color: '#F97316', icon: '🏠' },
 ];
 
 /** Task statuses — same for all workspaces */

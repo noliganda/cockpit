@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Timer, Calendar, Target, X, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO, isPast } from 'date-fns';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useSprintStore } from '@/stores/sprint-store';
 import { useTaskStore } from '@/stores/task-store';
 
@@ -17,7 +17,7 @@ const STATUS_COLORS = {
 
 export default function SprintsPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const { getSprintsForWorkspace, addSprint, deleteSprint, updateSprint } = useSprintStore();
   const { getTasksForWorkspace } = useTaskStore();
 

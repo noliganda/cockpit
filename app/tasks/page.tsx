@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, LayoutGrid, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { TaskDialog } from '@/components/task-dialog';
 import { Task, TASK_STATUSES, getStatusById } from '@/types';
@@ -20,7 +20,7 @@ const PRIORITY_COLORS = {
 
 export default function TasksPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const { getTasksForWorkspace, addTask, updateTask, deleteTask } = useTaskStore();
 
   const [dialogOpen, setDialogOpen] = useState(false);

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { MOCK_PROJECTS, KORUS_METRICS } from '@/lib/data';
 
 // ─── types ────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function CostsPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const isKorus = workspace.slug === 'korus';
 
   const [filterCategory, setFilterCategory] = useState('all');

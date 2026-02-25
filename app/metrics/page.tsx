@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { DollarSign, FolderOpen, Users, TrendingUp, CheckSquare, AlertCircle, Award, Target } from 'lucide-react';
 import { MetricCard } from '@/components/metric-card';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { KORUS_METRICS, MOCK_PROJECTS, MOCK_CONTACTS } from '@/lib/data';
 import { KORUS_STATUSES, BYRON_FILM_STATUSES } from '@/types';
@@ -19,7 +19,7 @@ function formatCurrency(amount: number) {
 
 export default function MetricsPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const { getTasksForWorkspace } = useTaskStore();
 
   const tasks = getTasksForWorkspace(workspace.id);

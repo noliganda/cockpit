@@ -7,7 +7,7 @@ import {
   FileSpreadsheet, Search, Upload, LayoutGrid, List, ChevronRight,
   ChevronDown, Star, Download, Home, Clock, X, File,
 } from 'lucide-react';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { MOCK_FILES } from '@/lib/data';
 import type { FileItem } from '@/types';
 
@@ -118,7 +118,7 @@ function FolderTreeNode({
 
 export default function DocumentsPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
 
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);

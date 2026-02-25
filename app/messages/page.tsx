@@ -6,7 +6,7 @@ import {
   MessageSquare, AtSign, CheckSquare, RefreshCw, Paperclip,
   AlertCircle, Bell, Send, ArrowUpRight, Search, Pencil,
 } from 'lucide-react';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -181,7 +181,7 @@ function relativeTime(ts: string): string {
 
 export default function MessagesPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
 
   const allMsgs = useMemo(
     () => MOCK_MESSAGES.filter(m => m.workspaceId === workspace.id),

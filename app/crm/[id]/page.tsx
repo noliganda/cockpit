@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Mail, Phone, Globe, MapPin, Tag, ExternalLink, Building2, User, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useContactStore } from '@/stores/contact-store';
 
 const STAGE_COLORS: Record<string, string> = {
@@ -21,7 +21,7 @@ const STAGE_COLORS: Record<string, string> = {
 export default function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const { getContactById } = useContactStore();
 
   const contact = getContactById(id);

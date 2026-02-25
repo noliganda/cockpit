@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, List } from 'lucide-react';
 import Link from 'next/link';
-import { useWorkspace } from '@/hooks/use-workspace';
+import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { KanbanBoard } from '@/components/kanban-board';
 import { TaskDialog } from '@/components/task-dialog';
@@ -13,7 +13,7 @@ import { MOCK_PROJECTS } from '@/lib/data';
 
 export default function KanbanPage() {
   const { workspace } = useWorkspace();
-  const accentColor = workspace.slug === 'korus' ? '#3B82F6' : '#C8FF3D';
+  const accentColor = getWorkspaceColor(workspace.id);
   const { getTasksForWorkspace, addTask, updateTask, deleteTask, moveTask } = useTaskStore();
 
   const [dialogOpen, setDialogOpen] = useState(false);

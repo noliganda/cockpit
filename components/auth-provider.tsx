@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, useEffect, createContext, useContext } from 'react';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+
+// Routes that handle their own auth and bypass the main lock screen
+const STANDALONE_ROUTES = ['/metrics/korus'];
 
 // ─── types ────────────────────────────────────────────────────────────────────
 
@@ -164,6 +168,9 @@ function LockScreen({ onUnlock }: { onUnlock: (expires: number) => void }) {
 // ─── provider ─────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isStandalone = STANDALONE_ROUTES.includes(pathname);
+
   const [authed, setAuthed] = useState(false);
   const [sessionExpiresAt, setSessionExpiresAt] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
@@ -186,6 +193,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearSession();
     setAuthed(false);
     setSessionExpiresAt(null);
+  }
+
+  // Standalone routes handle their own auth — skip the main lock screen entirely
+  if (isStandalone) {
+    return <AuthContext.Provider value={{ logout, sessionExpiresAt }}>{children}</AuthContext.Provider>;
   }
 
   // Don't render anything until we've checked localStorage (avoids flash)

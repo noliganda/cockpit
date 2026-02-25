@@ -6,15 +6,16 @@ import {
   LayoutDashboard,
   CheckSquare,
   FolderOpen,
+  Layers,
   Users,
   FileText,
   MessageSquare,
   Sun,
   Settings,
-  Zap,
   DollarSign,
   BarChart2,
   Timer,
+  Zap,
 } from 'lucide-react';
 import { LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -33,6 +34,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
   { href: '/projects', label: 'Projects', icon: FolderOpen },
+  { href: '/areas', label: 'Areas', icon: Layers },
   { href: '/sprints', label: 'Sprints', icon: Timer },
   { href: '/crm', label: 'CRM', icon: Users },
   { href: '/metrics', label: 'Metrics', icon: BarChart2 },

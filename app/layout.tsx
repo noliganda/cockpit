@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/components/auth-provider";
 import { ContactProvider } from "@/components/contact-provider";
 import { ProjectProvider } from "@/components/project-provider";
+import { AreaProvider } from "@/components/area-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
           <WorkspaceProvider>
             <TaskProvider>
               <ProjectProvider>
+              <AreaProvider>
               <ContactProvider>
               <SprintProvider>
                 <TooltipProvider>
@@ -49,6 +51,7 @@ export default function RootLayout({
                 </TooltipProvider>
               </SprintProvider>
               </ContactProvider>
+              </AreaProvider>
               </ProjectProvider>
             </TaskProvider>
           </WorkspaceProvider>

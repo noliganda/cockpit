@@ -11,12 +11,6 @@ import { useProjectStore } from '@/stores/project-store';
 import { ContactDialog } from '@/components/contact-dialog';
 import { Contact, Organisation, getPipelineForWorkspace } from '@/types';
 
-const STAGE_COLORS: Record<string, string> = {
-  lead: '#6B7280', qualification: '#8B5CF6', proposal: '#F59E0B', negotiation: '#3B82F6',
-  won: '#10B981', lost: '#EF4444', 'on-hold': '#EC4899', active: '#10B981',
-  'pre-prod': '#8B5CF6', 'in-prod': '#F59E0B', 'post-prod': '#3B82F6',
-  review: '#EC4899', delivered: '#10B981', invoiced: '#6366F1', paid: '#C8FF3D',
-};
 
 type Tab = 'people' | 'organisations';
 type View = 'list' | 'pipeline';
@@ -151,7 +145,8 @@ export default function CRMPage() {
           {filteredContacts.length === 0 ? (
             <div className="text-center py-12"><p className="text-sm text-[#A0A0A0]">No contacts found</p><button onClick={openCreateContact} className="mt-3 text-xs font-medium" style={{ color: accentColor }}>+ Add your first contact</button></div>
           ) : filteredContacts.map((contact, i) => {
-            const stageColor = STAGE_COLORS[contact.pipelineStage ?? ''] ?? '#6B7280';
+            const stageDef = stages.find(s => s.id === contact.pipelineStage);
+            const stageColor = stageDef?.color ?? '#6B7280';
             const orgName = getOrgName(contact.organisationId);
             const linkedProjects = getProjectNames(contact.projectIds);
             return (
@@ -164,7 +159,7 @@ export default function CRMPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-white">{contact.name}</span>
-                        {contact.pipelineStage && <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize" style={{ background: `${stageColor}20`, color: stageColor }}>{contact.pipelineStage.replace('-', ' ')}</span>}
+                        {contact.pipelineStage && <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: `${stageColor}20`, color: stageColor }}>{stageDef?.name ?? contact.pipelineStage}</span>}
                       </div>
                       <div className="text-xs text-[#A0A0A0] mt-0.5 flex items-center gap-1 flex-wrap">
                         {contact.role && <span>{contact.role}</span>}

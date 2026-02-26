@@ -209,3 +209,10 @@ export function getStatusById(workspaceId: string, statusId: string): TaskStatus
 export function getPipelineStageById(workspaceId: string, stageId: string): TaskStatus | undefined {
   return getPipelineForWorkspace(workspaceId).find(s => s.id === stageId);
 }
+
+/** Status IDs that count as completed/done for a workspace */
+export function getTerminalStatusIds(workspaceId: string): string[] {
+  if (workspaceId === 'byron-film') return ['paid', 'delivered'];
+  if (workspaceId === 'korus') return ['won', 'lost'];
+  return ['done'];
+}

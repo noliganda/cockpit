@@ -8,7 +8,7 @@ import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
 import { useSprintStore } from '@/stores/sprint-store';
 import { useContactStore } from '@/stores/contact-store';
-import { TASK_STATUSES, getPipelineForWorkspace } from '@/types';
+import { getTaskStatusesForWorkspace, getTerminalStatusIds, getPipelineForWorkspace } from '@/types';
 import Link from 'next/link';
 import { format, subDays, isAfter } from 'date-fns';
 
@@ -115,15 +115,19 @@ export default function MetricsPage() {
   const wsContacts = useMemo(() => getContactsForWorkspace(workspace.id), [getContactsForWorkspace, workspace.id]);
 
   // ── Task metrics ──────────────────────────────────────────────────────
-  const doneTasks = useMemo(() => wsTasks.filter(t => t.status === 'done'), [wsTasks]);
+  const wsStatuses = useMemo(() => getTaskStatusesForWorkspace(workspace.id), [workspace.id]);
+  const terminalIds = useMemo(() => getTerminalStatusIds(workspace.id), [workspace.id]);
+  const firstStatusId = wsStatuses[0]?.id;
+
+  const doneTasks = useMemo(() => wsTasks.filter(t => terminalIds.includes(t.status)), [wsTasks, terminalIds]);
   const completionRate = wsTasks.length > 0 ? Math.round((doneTasks.length / wsTasks.length) * 100) : 0;
 
   const tasksByStatus = useMemo(() => {
-    return TASK_STATUSES.map(s => ({
+    return wsStatuses.map(s => ({
       ...s,
       count: wsTasks.filter(t => t.status === s.id).length,
     }));
-  }, [wsTasks]);
+  }, [wsStatuses, wsTasks]);
 
   const tasksByPriority = useMemo(() => {
     const prios = [
@@ -138,14 +142,14 @@ export default function MetricsPage() {
   // Last 7 days completions
   const recentDone = useMemo(() => {
     const cutoff = subDays(new Date(), 7);
-    return wsTasks.filter(t => t.status === 'done' && isAfter(new Date(t.updatedAt), cutoff)).length;
-  }, [wsTasks]);
+    return wsTasks.filter(t => terminalIds.includes(t.status) && isAfter(new Date(t.updatedAt), cutoff)).length;
+  }, [wsTasks, terminalIds]);
 
   // Last 30 days completions
   const monthDone = useMemo(() => {
     const cutoff = subDays(new Date(), 30);
-    return wsTasks.filter(t => t.status === 'done' && isAfter(new Date(t.updatedAt), cutoff)).length;
-  }, [wsTasks]);
+    return wsTasks.filter(t => terminalIds.includes(t.status) && isAfter(new Date(t.updatedAt), cutoff)).length;
+  }, [wsTasks, terminalIds]);
 
   // ── Project metrics ────────────────────────────────────────────────────
   const projectByStatus = useMemo(() => {
@@ -165,7 +169,7 @@ export default function MetricsPage() {
       .slice(-5)
       .map(sprint => {
         const sprintTasks = tasks.filter(t => sprint.taskIds.includes(t.id));
-        const done = sprintTasks.filter(t => t.status === 'done').length;
+        const done = sprintTasks.filter(t => terminalIds.includes(t.status)).length;
         return { sprint, done, total: sprintTasks.length };
       });
   }, [wsSprints, tasks]);
@@ -432,7 +436,7 @@ export default function MetricsPage() {
                 {[
                   { label: 'Total', value: wsTasks.length },
                   { label: 'Done', value: doneTasks.length },
-                  { label: 'Active', value: wsTasks.filter(t => t.status === 'in-progress').length },
+                  { label: 'Active', value: wsTasks.filter(t => !terminalIds.includes(t.status) && t.status !== firstStatusId).length },
                 ].map(item => (
                   <div key={item.label} className="text-center">
                     <p className="text-base font-bold text-white">{item.value}</p>

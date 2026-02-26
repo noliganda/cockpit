@@ -1,7 +1,7 @@
 // KORUS APAC Metrics — updated by nightly cron
-// Last manual update: 2026-02-25
+// Last manual update: 2026-02-26
 
-export const KORUS_APAC_LAST_UPDATED = '2026-02-26T01:50:00+11:00';
+export const KORUS_APAC_LAST_UPDATED = '2026-02-26T23:55:00+11:00';
 
 // ─── Recruitment Pipeline ──────────────────────────────────────────────────
 
@@ -79,6 +79,12 @@ export interface TimelineEvent {
 }
 
 export const KORUS_APAC_TIMELINE: TimelineEvent[] = [
+  { date: 'Feb 26', description: 'Bruno LEAL DE SOUSA — replied to metrics dashboard access request, provided new credentials (korus-guest), explained static vs dynamic dashboard roadmap' },
+  { date: 'Feb 26', description: 'Bruno email correction — fixed password error (sent korus2026 initially, corrected to korus-guest)' },
+  { date: 'Feb 26', description: 'Charlie APAC Dashboard — rebuilt with live Supabase metrics, Byron Film vs KORUS capability comparison, automation rate tracking' },
+  { date: 'Feb 26', description: 'Security audit — dashboard repo clean, no critical issues, fixed token exposure in memory files' },
+  { date: 'Feb 26', description: 'Supabase backend LIVE — actions table logging all KORUS work, 11 actions backfilled, pgvector enabled for semantic search' },
+  { date: 'Feb 26', description: 'Action logger script — automated categorization via keyword matching + Ollama fallback, shortcuts for bf/k/p workspaces' },
   { date: 'Feb 26', description: 'Thomas Choulot contract termination — drafted hybrid legal strategy + termination letter (completion framing, supersession of both contracts)' },
   { date: 'Feb 25', description: 'Dashboard strategic reset — focused on real data for Bruno view' },
   { date: 'Feb 25', description: 'KORUS documents translated (K n Finance shareholders list + EDF bill FR→EN)' },

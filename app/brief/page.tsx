@@ -7,7 +7,7 @@ import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
 import { useSprintStore } from '@/stores/sprint-store';
-import { WORKSPACES } from '@/types';
+import { WORKSPACES, getTerminalStatusIds, getTaskStatusesForWorkspace } from '@/types';
 import Link from 'next/link';
 import { format, formatDistanceToNow, differenceInDays, parseISO } from 'date-fns';
 
@@ -106,8 +106,9 @@ export default function BriefPage() {
   // Urgent tasks across ALL workspaces
   const urgentByWorkspace = useMemo(() => {
     return WORKSPACES.map(ws => {
+      const termIds = getTerminalStatusIds(ws.id);
       const wsTasks = tasks.filter(
-        t => t.workspaceId === ws.id && (t.priority === 'urgent' || t.priority === 'high') && t.status !== 'done',
+        t => t.workspaceId === ws.id && (t.priority === 'urgent' || t.priority === 'high') && !termIds.includes(t.status),
       );
       return { workspace: ws, tasks: wsTasks };
     }).filter(g => g.tasks.length > 0);
@@ -116,20 +117,24 @@ export default function BriefPage() {
   // Overnight work — tasks updated or created in the last 8 hours
   const overnightWork = useMemo(() => {
     const cutoff = new Date(Date.now() - 8 * 60 * 60 * 1000);
-    const recentDone = tasks.filter(t => t.status === 'done' && new Date(t.updatedAt) > cutoff);
-    const recentStarted = tasks.filter(
-      t => t.status === 'in-progress' && new Date(t.updatedAt) > cutoff && new Date(t.createdAt) > cutoff,
-    );
+    const recentDone = tasks.filter(t => getTerminalStatusIds(t.workspaceId).includes(t.status) && new Date(t.updatedAt) > cutoff);
+    const recentStarted = tasks.filter(t => {
+      const wsStatuses = getTaskStatusesForWorkspace(t.workspaceId);
+      const firstId = wsStatuses[0]?.id;
+      const termIds = getTerminalStatusIds(t.workspaceId);
+      const isMidPipeline = !termIds.includes(t.status) && t.status !== firstId;
+      return isMidPipeline && new Date(t.updatedAt) > cutoff && new Date(t.createdAt) > cutoff;
+    });
     return { done: recentDone, started: recentStarted };
   }, [tasks]);
 
   const hasOvernightWork = overnightWork.done.length > 0 || overnightWork.started.length > 0;
 
-  // Overdue tasks — past due date, not done, across all workspaces
+  // Overdue tasks — past due date, not terminal, across all workspaces
   const overdueTasks = useMemo(() => {
     const today = format(new Date(), 'yyyy-MM-dd');
     return tasks
-      .filter(t => t.dueDate && t.dueDate < today && t.status !== 'done')
+      .filter(t => t.dueDate && t.dueDate < today && !getTerminalStatusIds(t.workspaceId).includes(t.status))
       .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? ''));
   }, [tasks]);
 
@@ -140,7 +145,7 @@ export default function BriefPage() {
       .filter(s => s.status === 'active')
       .map(sprint => {
         const sprintTasks = tasks.filter(t => sprint.taskIds.includes(t.id));
-        const done = sprintTasks.filter(t => t.status === 'done').length;
+        const done = sprintTasks.filter(t => getTerminalStatusIds(sprint.workspaceId).includes(t.status)).length;
         const pct = sprintTasks.length > 0 ? Math.round((done / sprintTasks.length) * 100) : 0;
         const daysLeft = sprint.endDate ? differenceInDays(parseISO(sprint.endDate), new Date()) : null;
         const ws = WORKSPACES.find(w => w.id === sprint.workspaceId);

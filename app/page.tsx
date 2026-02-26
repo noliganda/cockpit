@@ -9,6 +9,7 @@ import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
 import { useSprintStore } from '@/stores/sprint-store';
 import { format, parseISO, differenceInDays, isPast, startOfDay, isToday } from 'date-fns';
+import { getTaskStatusesForWorkspace, getTerminalStatusIds, getStatusById } from '@/types';
 import Link from 'next/link';
 
 function isOverdue(dateStr: string | undefined) {
@@ -27,9 +28,11 @@ export default function DashboardPage() {
   const wsTasks = useMemo(() => tasks.filter(t => t.workspaceId === workspace.id), [tasks, workspace.id]);
   const wsProjects = useMemo(() => projects.filter(p => p.workspaceId === workspace.id), [projects, workspace.id]);
   const activeProjects = useMemo(() => wsProjects.filter(p => p.status === 'active'), [wsProjects]);
-  const inProgressTasks = useMemo(() => wsTasks.filter(t => t.status === 'in-progress'), [wsTasks]);
-  const doneTasks = useMemo(() => wsTasks.filter(t => t.status === 'done'), [wsTasks]);
-  const overdueTasks = useMemo(() => wsTasks.filter(t => isOverdue(t.dueDate) && t.status !== 'done'), [wsTasks]);
+  const terminalIds = useMemo(() => getTerminalStatusIds(workspace.id), [workspace.id]);
+  const firstStatusId = useMemo(() => getTaskStatusesForWorkspace(workspace.id)[0]?.id, [workspace.id]);
+  const inProgressTasks = useMemo(() => wsTasks.filter(t => !terminalIds.includes(t.status) && t.status !== firstStatusId), [wsTasks, terminalIds, firstStatusId]);
+  const doneTasks = useMemo(() => wsTasks.filter(t => terminalIds.includes(t.status)), [wsTasks, terminalIds]);
+  const overdueTasks = useMemo(() => wsTasks.filter(t => isOverdue(t.dueDate) && !terminalIds.includes(t.status)), [wsTasks, terminalIds]);
   const recentTasks = useMemo(() => [...wsTasks].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 6), [wsTasks]);
 
   const activeSprint = useMemo(
@@ -40,7 +43,7 @@ export default function DashboardPage() {
     () => activeSprint ? tasks.filter(t => activeSprint.taskIds.includes(t.id)) : [],
     [activeSprint, tasks],
   );
-  const sprintDone = useMemo(() => sprintTasks.filter(t => t.status === 'done').length, [sprintTasks]);
+  const sprintDone = useMemo(() => sprintTasks.filter(t => terminalIds.includes(t.status)).length, [sprintTasks, terminalIds]);
   const sprintPct = sprintTasks.length > 0 ? Math.round((sprintDone / sprintTasks.length) * 100) : 0;
   const sprintDaysLeft = activeSprint ? Math.max(differenceInDays(parseISO(activeSprint.endDate), new Date()), 0) : 0;
 
@@ -131,7 +134,7 @@ export default function DashboardPage() {
                 <div key={task.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors">
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: task.priority === 'urgent' ? '#EF4444' : task.priority === 'high' ? '#F59E0B' : task.priority === 'medium' ? '#3B82F6' : '#6B7280' }} />
                   <span className="text-sm text-white flex-1 truncate">{task.title}</span>
-                  <span className="text-xs text-[#A0A0A0] shrink-0 capitalize">{task.status.replace('-', ' ')}</span>
+                  <span className="text-xs text-[#A0A0A0] shrink-0">{getStatusById(workspace.id, task.status)?.name ?? task.status}</span>
                 </div>
               ))}
             </div>

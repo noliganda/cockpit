@@ -11,7 +11,7 @@ import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
 import { useContactStore } from '@/stores/contact-store';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, TASK_STATUSES, ProjectNote, ProjectDocument } from '@/types';
+import { Task, getTaskStatusesForWorkspace, ProjectNote, ProjectDocument } from '@/types';
 import { format, parseISO } from 'date-fns';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
@@ -49,7 +49,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const { tasks, addTask, updateTask, deleteTask } = useTaskStore();
   const { getProjectById, deleteProject, updateProject } = useProjectStore();
   const { contacts } = useContactStore();
-  const statuses = TASK_STATUSES;
+  const statuses = getTaskStatusesForWorkspace(workspace.id);
   const router = useRouter();
   const project = getProjectById(id);
   const projectTasks = tasks.filter(t => t.projectId === id);

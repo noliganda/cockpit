@@ -12,7 +12,7 @@ import { useSprintStore } from '@/stores/sprint-store';
 import { useTaskStore } from '@/stores/task-store';
 import { useProjectStore } from '@/stores/project-store';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, TASK_STATUSES } from '@/types';
+import { Task, getTaskStatusesForWorkspace } from '@/types';
 
 // ── Burndown chart (SVG sparkline) ────────────────────────────────────────────
 
@@ -184,6 +184,7 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
     setEditingTask(undefined);
   };
 
+  const statuses = getTaskStatusesForWorkspace(workspace.id);
   const workspaceProjects = projects.filter(p => p.workspaceId === workspace.id);
 
   return (
@@ -238,7 +239,7 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
               </div>
               <div className="flex gap-1 mt-2 flex-wrap">
                 <button onClick={() => setStatusFilter('all')} className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${statusFilter === 'all' ? 'bg-[#3A3A3A] text-white' : 'text-[#6B7280] hover:text-[#A0A0A0]'}`}>All</button>
-                {TASK_STATUSES.map(s => (
+                {statuses.map(s => (
                   <button key={s.id} onClick={() => setStatusFilter(s.id)} className={`px-2 py-0.5 text-[10px] rounded-full transition-colors ${statusFilter === s.id ? 'text-white' : 'text-[#6B7280] hover:text-[#A0A0A0]'}`} style={statusFilter === s.id ? { background: `${s.color}30`, color: s.color } : {}}>
                     {s.name}
                   </button>
@@ -260,7 +261,7 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
                             <p className="text-xs text-white truncate">{task.title}</p>
                             {task.assignee && <p className="text-[10px] text-[#6B7280] mt-0.5">{task.assignee}</p>}
                           </div>
-                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: TASK_STATUSES.find(s => s.id === task.status)?.color || '#6B7280' }} />
+                          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: statuses.find(s => s.id === task.status)?.color || '#6B7280' }} />
                         </div>
                       )}
                     </Draggable>
@@ -273,7 +274,7 @@ export default function SprintBoardPage({ params }: { params: Promise<{ id: stri
 
           {/* RIGHT: Sprint Kanban */}
           <div className="flex-1 flex gap-3 overflow-x-auto pb-2">
-            {TASK_STATUSES.map((status, ci) => {
+            {statuses.map((status, ci) => {
               const col = sprintTasks.filter(t => t.status === status.id);
               return (
                 <div key={status.id} className="flex-shrink-0 w-[220px] flex flex-col">

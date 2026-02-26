@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useWorkspace } from '@/hooks/use-workspace';
 import { useSprintStore } from '@/stores/sprint-store';
 import { useTaskStore } from '@/stores/task-store';
-import { TASK_STATUSES } from '@/types';
+import { getTaskStatusesForWorkspace } from '@/types';
 import { getWorkspaceColor } from '@/hooks/use-workspace';
 
 const PRIORITY_COLORS = {
@@ -24,7 +24,7 @@ export default function SprintPlanPage({ params }: { params: Promise<{ id: strin
   const accentColor = getWorkspaceColor(workspace.id);
   const { sprints, addTaskToSprint, removeTaskFromSprint } = useSprintStore();
   const { getTasksForWorkspace, updateTask } = useTaskStore();
-  const statuses = TASK_STATUSES;
+  const statuses = getTaskStatusesForWorkspace(workspace.id);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');

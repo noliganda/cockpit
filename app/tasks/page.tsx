@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, TASK_STATUSES, getStatusById } from '@/types';
+import { Task, getTaskStatusesForWorkspace, getStatusById } from '@/types';
 import { useProjectStore } from '@/stores/project-store';
 import { format, parseISO, isToday, isTomorrow, isPast, isThisWeek, startOfDay } from 'date-fns';
 
@@ -55,7 +55,7 @@ export default function TasksPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDue, setFilterDue] = useState<DueFilter>('all');
 
-  const statuses = TASK_STATUSES;
+  const statuses = getTaskStatusesForWorkspace(workspace.id);
   const allTasks = getTasksForWorkspace(workspace.id);
   const { projects } = useProjectStore();
   const workspaceProjects = projects.filter(p => p.workspaceId === workspace.id);

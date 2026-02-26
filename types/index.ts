@@ -148,9 +148,9 @@ export const TASK_STATUSES: TaskStatus[] = [
   { id: 'done', name: 'Done', color: '#10B981' },
 ];
 
-// ─── PROJECT PIPELINE STAGES (workspace-specific, for CRM/pipeline views) ───
+// ─── TASK STATUSES — workspace-specific (kanban columns) ───────────────────
 export const BYRON_FILM_PIPELINE: TaskStatus[] = [
-  { id: 'lead', name: 'Lead', color: '#6B7280' },
+  { id: 'backlog', name: 'Backlog', color: '#6B7280' },
   { id: 'pre-prod', name: 'Pre-Production', color: '#8B5CF6' },
   { id: 'in-prod', name: 'In Production', color: '#F59E0B' },
   { id: 'post-prod', name: 'Post-Production', color: '#3B82F6' },
@@ -185,18 +185,25 @@ export function getTaskStatuses(): TaskStatus[] {
   return TASK_STATUSES;
 }
 
+/** Workspace-specific task statuses for kanban/list views */
+export function getTaskStatusesForWorkspace(workspaceId: string): TaskStatus[] {
+  if (workspaceId === 'byron-film') return BYRON_FILM_PIPELINE;
+  if (workspaceId === 'korus') return KORUS_PIPELINE;
+  return TASK_STATUSES;
+}
+
 /** Pipeline stages — workspace-specific (for CRM, project pipeline views) */
 export function getPipelineForWorkspace(workspaceId: string): TaskStatus[] {
   return workspaceId === 'korus' ? KORUS_PIPELINE : BYRON_FILM_PIPELINE;
 }
 
-/** @deprecated Use getTaskStatuses() for tasks or getPipelineForWorkspace() for pipeline */
+/** @deprecated Use getTaskStatusesForWorkspace() for tasks or getPipelineForWorkspace() for pipeline */
 export function getStatusesForWorkspace(workspaceId: string): TaskStatus[] {
-  return TASK_STATUSES;
+  return getTaskStatusesForWorkspace(workspaceId);
 }
 
 export function getStatusById(workspaceId: string, statusId: string): TaskStatus | undefined {
-  return TASK_STATUSES.find(s => s.id === statusId);
+  return getTaskStatusesForWorkspace(workspaceId).find(s => s.id === statusId);
 }
 
 export function getPipelineStageById(workspaceId: string, stageId: string): TaskStatus | undefined {

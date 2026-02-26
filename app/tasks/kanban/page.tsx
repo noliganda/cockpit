@@ -8,7 +8,7 @@ import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
 import { useTaskStore } from '@/stores/task-store';
 import { KanbanBoard } from '@/components/kanban-board';
 import { TaskDialog } from '@/components/task-dialog';
-import { Task, TASK_STATUSES } from '@/types';
+import { Task, getTaskStatusesForWorkspace } from '@/types';
 import { useProjectStore } from '@/stores/project-store';
 
 export default function KanbanPage() {
@@ -20,7 +20,7 @@ export default function KanbanPage() {
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [newTaskStatus, setNewTaskStatus] = useState<string | undefined>();
 
-  const statuses = TASK_STATUSES;
+  const statuses = getTaskStatusesForWorkspace(workspace.id);
   const tasks = getTasksForWorkspace(workspace.id);
   const { projects } = useProjectStore();
   const workspaceProjects = projects.filter(p => p.workspaceId === workspace.id);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Zap, Star } from 'lucide-react';
-import { Task, Project, TASK_STATUSES } from '@/types';
+import { Task, Project, getTaskStatusesForWorkspace } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSprintStore } from '@/stores/sprint-store';
 import { MOCK_AREAS } from '@/lib/data';
@@ -35,7 +35,7 @@ export function TaskDialog({
   accentColor = '#D4A017',
 }: TaskDialogProps) {
   const { getSprintsForWorkspace } = useSprintStore();
-  const statuses = TASK_STATUSES;
+  const statuses = getTaskStatusesForWorkspace(workspaceId);
   const sprints = getSprintsForWorkspace(workspaceId);
   const areas = MOCK_AREAS.filter(a => a.workspaceId === workspaceId);
 

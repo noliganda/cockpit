@@ -177,6 +177,16 @@ export type WorkspaceConfig = {
   statuses: string[];
 };
 
+export const BYRON_FILM_PIPELINE = ['Prospect', 'Outreach', 'Meeting', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'];
+export const KORUS_PIPELINE = ['Lead', 'Qualification', 'Proposal', 'Negotiation', 'Won', 'Lost', 'On Hold'];
+export const PERSONAL_PIPELINE = ['Contact', 'Active', 'Inactive'];
+
+export const PIPELINE_STAGES: Record<string, string[]> = {
+  'byron-film': BYRON_FILM_PIPELINE,
+  'korus': KORUS_PIPELINE,
+  'personal': PERSONAL_PIPELINE,
+};
+
 export const WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'byron-film',

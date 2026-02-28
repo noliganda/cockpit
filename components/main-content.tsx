@@ -3,6 +3,8 @@
 import { type ReactNode } from 'react';
 import { NotionSyncButton } from './notion-sync-button';
 import { CommandPalette } from './command-palette';
+import { SearchBar } from './search-bar';
+import { CharlieChat } from './charlie-chat';
 
 export function MainContent({ children }: { children: ReactNode }) {
   return (
@@ -13,6 +15,7 @@ export function MainContent({ children }: { children: ReactNode }) {
           <kbd className="border border-[#2A2A2A] rounded px-1 py-0.5">⌘K</kbd>
           <span className="ml-1">command palette</span>
         </span>
+        <SearchBar />
         <NotionSyncButton />
       </div>
 
@@ -22,6 +25,7 @@ export function MainContent({ children }: { children: ReactNode }) {
       </div>
 
       <CommandPalette />
+      <CharlieChat />
     </main>
   );
 }

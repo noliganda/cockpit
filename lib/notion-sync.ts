@@ -10,7 +10,7 @@
  */
 
 const NOTION_API_BASE = 'https://api.notion.com/v1';
-const NOTION_VERSION = '2022-06-28';
+const NOTION_VERSION = '2025-02-19';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -173,7 +173,7 @@ interface DbPropertyMap {
 }
 
 async function getDbPropertyMap(dbId: string, knownTitleProp?: string): Promise<DbPropertyMap> {
-  const data = await notionFetch(`/data_sources/${dbId}`) as {
+  const data = await notionFetch(`/databases/${dbId}`) as {
     properties: Record<string, PropDef>;
   };
 
@@ -324,7 +324,7 @@ async function queryAllPages(dbId: string): Promise<NotionPage[]> {
     const body: Record<string, unknown> = { page_size: 100 };
     if (cursor) body.start_cursor = cursor;
 
-    const data = await notionFetch(`/data_sources/${dbId}/query`, 'POST', body) as {
+    const data = await notionFetch(`/databases/${dbId}/query`, 'POST', body) as {
       results: NotionPage[];
       has_more: boolean;
       next_cursor: string | null;

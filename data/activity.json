@@ -1,0 +1,96 @@
+[
+  {
+    "id": "act-1772200760317",
+    "timestamp": "2026-02-27T13:59:20.000Z",
+    "type": "integration",
+    "action": "Slack \u2194 Notion Bridge deployed",
+    "details": "Full serverless bridge on Vercel \u2014 task creation, project linking, workspace routing (BF/KORUS/Oli). URL: notion-slack-bridge.vercel.app"
+  },
+  {
+    "id": "act-1772200760318",
+    "timestamp": "2026-02-27T13:59:20.000Z",
+    "type": "project",
+    "action": "BF Outbound Sales Sprint Q1 created",
+    "details": "Notion project + Slack #bf-outbound-q1 channel created and linked. 16 tasks populated across 4-week sprint. Goal: close 2-3 new clients by end Q1."
+  },
+  {
+    "id": "act-1772200760319",
+    "timestamp": "2026-02-27T13:59:20.000Z",
+    "type": "system",
+    "action": "Cron jobs configured",
+    "details": "\ud83c\udfd7\ufe0f Dashboard Build (11pm nightly) + \ud83c\udfac YouTube Migration Check (2am nightly). 44/67 videos already on YouTube."
+  },
+  {
+    "id": "act-1772200760320",
+    "timestamp": "2026-02-27T13:59:20.000Z",
+    "type": "system",
+    "action": "YouTube migration status: 44/67 uploaded",
+    "details": "44 videos uploaded to Byron Film YouTube (all unlisted). 23 remaining from Frame.io inventory. 2am cron will handle remaining uploads."
+  },
+  {
+    "id": "act-1769774864478",
+    "timestamp": "2026-01-30T12:07:44.478Z",
+    "type": "system",
+    "action": "Nightly Build #2 Complete",
+    "details": "Dashboard API backend built and committed (062b848)"
+  },
+  {
+    "id": "act-1769774785680",
+    "timestamp": "2026-01-30T12:06:25.680Z",
+    "type": "system",
+    "action": "API Backend Complete",
+    "details": "Built REST API for projects, tasks, activity, status, and jobs"
+  },
+  {
+    "id": "act-nightly-2",
+    "timestamp": "2026-01-30T23:00:00Z",
+    "type": "system",
+    "action": "Nightly Build #2 started",
+    "details": "Building dashboard API backend"
+  },
+  {
+    "id": "act-hiring",
+    "timestamp": "2026-01-30T15:21:00Z",
+    "type": "project",
+    "action": "Research completed",
+    "details": "KORUS hiring: MD, Designer, and PM profiles created",
+    "projectId": "file-korus-hiring"
+  },
+  {
+    "id": "act-whatsapp",
+    "timestamp": "2026-01-30T13:32:00Z",
+    "type": "system",
+    "action": "WhatsApp connected",
+    "details": "Native Clawdbot WhatsApp channel linked to +61494618984"
+  },
+  {
+    "id": "act-dashboard",
+    "timestamp": "2026-01-30T21:10:00Z",
+    "type": "project",
+    "action": "Project created",
+    "details": "Charlie Dashboard project started - Next.js + Tailwind",
+    "projectId": "api-charlie-dashboard"
+  },
+  {
+    "id": "act-port",
+    "timestamp": "2026-01-30T20:45:00Z",
+    "type": "system",
+    "action": "Gateway port changed",
+    "details": "Security: Changed from 18789 to 45632"
+  },
+  {
+    "id": "act-gamma",
+    "timestamp": "2026-01-30T20:00:00Z",
+    "type": "project",
+    "action": "Account created",
+    "details": "Gamma account: charliemoltbot@icloud.com (needs Pro for API)",
+    "projectId": "api-gamma-integration"
+  },
+  {
+    "id": "act-email",
+    "timestamp": "2026-01-30T04:30:00Z",
+    "type": "system",
+    "action": "Email setup confirmed",
+    "details": "gog mail send working for charliemoltbot@icloud.com"
+  }
+]

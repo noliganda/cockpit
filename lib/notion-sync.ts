@@ -9,8 +9,7 @@
  *   NOTION_OC_TASKS_DB     — Oli & Charlie (private) tasks Notion DB ID
  */
 
-const NOTION_API_BASE = 'https://api.notion.com/v1';
-const NOTION_VERSION = '2022-06-28';
+import { Client } from '@notionhq/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -127,28 +126,10 @@ function getWorkspaceConfigs(): WorkspaceConfig[] {
 
 // ─── Notion API helpers ───────────────────────────────────────────────────────
 
-function getApiKey(): string {
+function getNotionClient(): Client {
   const key = process.env.NOTION_API_KEY || process.env.NOTION_API_TOKEN;
   if (!key) throw new Error('NOTION_API_KEY not configured');
-  return key;
-}
-
-async function notionFetch(endpoint: string, method = 'GET', body?: unknown): Promise<unknown> {
-  const res = await fetch(`${NOTION_API_BASE}${endpoint}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${getApiKey()}`,
-      'Notion-Version': NOTION_VERSION,
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Notion API ${res.status}: ${err.slice(0, 200)}`);
-  }
-  return res.json();
+  return new Client({ auth: key });
 }
 
 // ─── DB schema retrieval (auto-detect property names) ────────────────────────
@@ -173,7 +154,8 @@ interface DbPropertyMap {
 }
 
 async function getDbPropertyMap(dbId: string, knownTitleProp?: string): Promise<DbPropertyMap> {
-  const data = await notionFetch(`/databases/${dbId}`) as {
+  const notion = getNotionClient();
+  const data = await notion.dataSources.retrieve({ data_source_id: dbId }) as {
     properties: Record<string, PropDef>;
   };
 
@@ -317,14 +299,18 @@ interface NotionPage {
 }
 
 async function queryAllPages(dbId: string): Promise<NotionPage[]> {
+  const notion = getNotionClient();
   const pages: NotionPage[] = [];
   let cursor: string | undefined;
 
   do {
-    const body: Record<string, unknown> = { page_size: 100 };
-    if (cursor) body.start_cursor = cursor;
+    const params: { data_source_id: string; page_size: number; start_cursor?: string } = {
+      data_source_id: dbId,
+      page_size: 100,
+    };
+    if (cursor) params.start_cursor = cursor;
 
-    const data = await notionFetch(`/databases/${dbId}/query`, 'POST', body) as {
+    const data = await notion.dataSources.query(params) as unknown as {
       results: NotionPage[];
       has_more: boolean;
       next_cursor: string | null;

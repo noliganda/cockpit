@@ -1,35 +1,27 @@
 'use client';
 
-import { useSidebar } from '@/components/sidebar';
-import { NotionSyncButton } from '@/components/notion-sync-button';
+import { type ReactNode } from 'react';
+import { NotionSyncButton } from './notion-sync-button';
+import { CommandPalette } from './command-palette';
 
-export function MainContent({ children }: { children: React.ReactNode }) {
-  const { isMobile, isCollapsed } = useSidebar();
-
-  // Mobile: no left margin, add top padding for header bar
-  if (isMobile) {
-    return (
-      <main className="flex-1 overflow-y-auto pt-14 w-full relative">
-        <div className="fixed top-2 right-3 z-50">
-          <NotionSyncButton />
-        </div>
-        {children}
-      </main>
-    );
-  }
-
-  // Desktop/tablet: margin matches sidebar width
-  const marginLeft = isCollapsed ? 64 : 280;
-
+export function MainContent({ children }: { children: ReactNode }) {
   return (
-    <main
-      className="flex-1 overflow-y-auto transition-all duration-200 relative"
-      style={{ marginLeft }}
-    >
-      <div className="fixed top-3 right-4 z-50">
+    <main className="flex-1 min-w-0 overflow-y-auto">
+      {/* Top bar */}
+      <div className="sticky top-0 z-30 flex items-center justify-end gap-2 px-4 py-2 border-b border-[#2A2A2A] bg-[#0F0F0F]/90 backdrop-blur-sm">
+        <span className="text-xs text-[#6B7280] mr-auto hidden sm:block">
+          <kbd className="border border-[#2A2A2A] rounded px-1 py-0.5">⌘K</kbd>
+          <span className="ml-1">command palette</span>
+        </span>
         <NotionSyncButton />
       </div>
-      {children}
+
+      {/* Page content */}
+      <div className="p-4 md:p-6">
+        {children}
+      </div>
+
+      <CommandPalette />
     </main>
   );
 }

@@ -2,376 +2,137 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect, createContext, useContext } from 'react';
 import {
-  LayoutDashboard,
-  CheckSquare,
-  FolderOpen,
-  Layers,
-  Users,
-  FileText,
-  MessageSquare,
-  Sun,
-  Settings,
-  DollarSign,
-  BarChart2,
-  Timer,
-  Zap,
-  NotebookPen,
-  Search,
-  LogOut,
-  Menu,
-  X,
-  ChevronLeft,
-  ChevronRight,
+  Home, CheckSquare, FolderOpen, Target, Zap, Users, FileText,
+  Files, MessageSquare, BookOpen, BarChart2, Settings, PanelLeft, X, Kanban,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { WorkspaceSwitcher } from '@/components/workspace-switcher';
-import { useWorkspace, getWorkspaceColor } from '@/hooks/use-workspace';
-import { useAuth } from '@/components/auth-provider';
+import { cn } from '@/lib/utils';
+import { WorkspaceSwitcher } from './workspace-switcher';
+import { useSidebar } from '@/hooks/use-sidebar';
+import { Button } from '@/components/ui/button';
 
-// ─── Sidebar context for layout coordination ─────────────────────────────────
-
-interface SidebarContextType {
-  isOpen: boolean;
-  isCollapsed: boolean;
-  isMobile: boolean;
-  toggle: () => void;
-  close: () => void;
-  toggleCollapse: () => void;
-}
-
-const SidebarContext = createContext<SidebarContextType>({
-  isOpen: false,
-  isCollapsed: false,
-  isMobile: false,
-  toggle: () => {},
-  close: () => {},
-  toggleCollapse: () => {},
-});
-
-export const useSidebar = () => useContext(SidebarContext);
-
-export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) {
-        setIsCollapsed(false);
-        setIsOpen(false);
-      }
-    };
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  return (
-    <SidebarContext.Provider
-      value={{
-        isOpen,
-        isCollapsed,
-        isMobile,
-        toggle: () => setIsOpen((v) => !v),
-        close: () => setIsOpen(false),
-        toggleCollapse: () => setIsCollapsed((v) => !v),
-      }}
-    >
-      {children}
-    </SidebarContext.Provider>
-  );
-}
-
-// ─── Mobile header bar ───────────────────────────────────────────────────────
-
-export function MobileHeader() {
-  const { isMobile, toggle } = useSidebar();
-  const { workspace } = useWorkspace();
-  const accentColor = getWorkspaceColor(workspace.id);
-
-  if (!isMobile) return null;
-
-  return (
-    <div className="fixed top-0 left-0 right-0 h-14 bg-[#1A1A1A] border-b border-[#2A2A2A] flex items-center justify-between px-4 z-40">
-      <button onClick={toggle} className="text-white p-1">
-        <Menu className="w-5 h-5" />
-      </button>
-      <div className="flex items-center gap-2">
-        <div
-          className="w-6 h-6 rounded-md flex items-center justify-center"
-          style={{ background: accentColor }}
-        >
-          <Zap className="w-3 h-3 text-black" />
-        </div>
-        <span className="font-bold text-white text-xs tracking-wide">OPS DASHBOARD</span>
-      </div>
-      <button
-        onClick={() => window.dispatchEvent(new CustomEvent('cmd-palette-open'))}
-        className="text-[#6B7280] p-1"
-      >
-        <Search className="w-5 h-5" />
-      </button>
-    </div>
-  );
-}
-
-// ─── Nav items ───────────────────────────────────────────────────────────────
-
-interface NavItem {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+const NAV_ITEMS = [
+  { href: '/', label: 'Home', icon: Home },
   { href: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { href: '/tasks/kanban', label: 'Kanban', icon: Kanban },
   { href: '/projects', label: 'Projects', icon: FolderOpen },
-  { href: '/areas', label: 'Areas', icon: Layers },
-  { href: '/sprints', label: 'Sprints', icon: Timer },
+  { href: '/areas', label: 'Areas', icon: Target },
+  { href: '/sprints', label: 'Sprints', icon: Zap },
   { href: '/crm', label: 'CRM', icon: Users },
-  { href: '/metrics', label: 'Metrics', icon: BarChart2 },
-  { href: '/documents', label: 'Documents', icon: FileText },
+  { href: '/notes', label: 'Notes', icon: FileText },
+  { href: '/documents', label: 'Documents', icon: Files },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/notes', label: 'Notes', icon: NotebookPen },
-  { href: '/brief', label: 'Morning Brief', icon: Sun },
-  { href: '/costs', label: 'Costs', icon: DollarSign },
-];
-
-const BOTTOM_ITEMS: NavItem[] = [
+  { href: '/brief', label: 'Brief', icon: BookOpen },
+  { href: '/metrics', label: 'Metrics', icon: BarChart2 },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-// ─── Sidebar component ──────────────────────────────────────────────────────
-
 export function Sidebar() {
   const pathname = usePathname();
-  const { workspace } = useWorkspace();
-  const { logout } = useAuth();
-  const { isOpen, isCollapsed, isMobile, close, toggleCollapse } = useSidebar();
-
-  const accentColor = getWorkspaceColor(workspace.id);
-  const collapsed = !isMobile && isCollapsed;
-  const sidebarWidth = collapsed ? 64 : 280;
-
-  // Close mobile sidebar on navigation
-  useEffect(() => {
-    if (isMobile) close();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  const { collapsed, toggle, mobileOpen, setMobileOpen } = useSidebar();
 
   const sidebarContent = (
-    <aside
-      className={`h-full bg-[#1A1A1A] border-r border-[#2A2A2A] flex flex-col transition-all duration-200 ${
-        isMobile ? 'w-[280px]' : ''
-      }`}
-      style={!isMobile ? { width: sidebarWidth } : undefined}
-    >
+    <div className="flex h-full flex-col">
       {/* Header */}
-      <div className={`border-b border-[#2A2A2A] ${collapsed ? 'p-2' : 'p-4'}`}>
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-2 mb-4'}`}>
-          {isMobile && (
-            <button onClick={close} className="text-[#6B7280] hover:text-white mr-2">
-              <X className="w-5 h-5" />
-            </button>
-          )}
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: accentColor }}
-          >
-            <Zap className="w-4 h-4 text-black" />
-          </div>
-          {!collapsed && (
-            <span className="font-bold text-white text-sm tracking-wide">OPS DASHBOARD</span>
-          )}
-        </div>
+      <div className="flex items-center justify-between px-3 py-3 border-b border-[#2A2A2A]">
         {!collapsed && (
-          <>
-            <WorkspaceSwitcher />
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('cmd-palette-open'))}
-              className="mt-3 w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-[#0F0F0F] border border-[#2A2A2A] text-[#6B7280] hover:text-white hover:border-[#3A3A3A] transition-colors text-xs"
-            >
-              <Search className="w-3.5 h-3.5 shrink-0" />
-              <span className="flex-1 text-left">Search…</span>
-              <span className="flex items-center gap-0.5 font-mono text-[10px] text-[#4A4A4A]">
-                <kbd className="bg-[#1A1A1A] px-1 rounded">⌘</kbd>
-                <kbd className="bg-[#1A1A1A] px-1 rounded">K</kbd>
-              </span>
-            </button>
-          </>
+          <span className="text-sm font-semibold text-white tracking-wide">OPS</span>
         )}
+        <button
+          onClick={toggle}
+          className="ml-auto rounded-md p-1.5 text-[#6B7280] hover:bg-[#222222] hover:text-white transition-colors"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Navigation */}
-      <nav className={`flex-1 overflow-y-auto ${collapsed ? 'p-1.5' : 'p-3'}`}>
-        <div className="space-y-0.5">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined}>
-                <div className="relative">
-                  {isActive && (
-                    <motion.div
-                      layoutId="sidebar-active"
-                      className="absolute inset-0 rounded-lg"
-                      style={{ background: `${accentColor}15` }}
-                      transition={{ duration: 0.2 }}
-                    />
-                  )}
-                  <div
-                    className={`relative flex items-center ${
-                      collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2'
-                    } rounded-lg text-sm transition-colors ${
-                      isActive
-                        ? 'text-white font-medium'
-                        : 'text-[#A0A0A0] hover:text-white hover:bg-[#2A2A2A]'
-                    }`}
-                  >
-                    <span style={isActive ? { color: accentColor } : undefined}>
-                      <Icon className="w-4 h-4 shrink-0" />
-                    </span>
-                    {!collapsed && <span>{item.label}</span>}
-                    {!collapsed && item.badge && (
-                      <span
-                        className="ml-auto text-xs px-1.5 py-0.5 rounded-full font-medium"
-                        style={{ background: accentColor, color: '#0F0F0F' }}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                    {isActive && !collapsed && (
-                      <div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full"
-                        style={{ background: accentColor }}
-                      />
-                    )}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      {/* Workspace switcher */}
+      <div className="px-2 py-2 border-b border-[#2A2A2A]">
+        <WorkspaceSwitcher collapsed={collapsed} />
+      </div>
 
-      {/* Bottom */}
-      <div className={`border-t border-[#2A2A2A] ${collapsed ? 'p-1.5' : 'p-3'}`}>
-        {BOTTOM_ITEMS.map((item) => {
-          const isActive = pathname === item.href;
-          const Icon = item.icon;
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5">
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          const active = href === '/' ? pathname === '/' : pathname.startsWith(href);
           return (
-            <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined}>
-              <div
-                className={`flex items-center ${
-                  collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2'
-                } rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? 'text-white bg-[#2A2A2A]'
-                    : 'text-[#A0A0A0] hover:text-white hover:bg-[#2A2A2A]'
-                }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                {!collapsed && <span>{item.label}</span>}
-              </div>
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setMobileOpen(false)}
+              className={cn(
+                'flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm transition-colors',
+                active
+                  ? 'bg-[#222222] text-white'
+                  : 'text-[#A0A0A0] hover:bg-[#1A1A1A] hover:text-white'
+              )}
+            >
+              <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-white' : 'text-[#6B7280]')} />
+              {!collapsed && <span>{label}</span>}
             </Link>
           );
         })}
+      </nav>
 
-        {/* Collapse toggle (desktop/tablet only) */}
-        {!isMobile && (
-          <button
-            onClick={toggleCollapse}
-            className={`mt-2 w-full flex items-center ${
-              collapsed ? 'justify-center' : 'gap-3 px-3'
-            } py-2 rounded-lg text-xs text-[#6B7280] hover:text-white hover:bg-[#2A2A2A] transition-colors`}
-          >
-            {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <>
-                <ChevronLeft className="w-4 h-4 shrink-0" />
-                <span>Collapse</span>
-              </>
-            )}
-          </button>
-        )}
-
-        {/* Workspace indicator + logout */}
-        {!collapsed && (
-          <div className="mt-3 px-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ background: accentColor }} />
-              <span className="text-xs text-[#A0A0A0]">{workspace.name}</span>
-            </div>
-            <button
-              onClick={logout}
-              title="Lock workspace"
-              className="text-[#6B7280] hover:text-[#EF4444] transition-colors p-1 rounded"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-        {collapsed && (
-          <div className="mt-2 flex justify-center">
-            <button
-              onClick={logout}
-              title="Lock workspace"
-              className="text-[#6B7280] hover:text-[#EF4444] transition-colors p-1 rounded"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-      </div>
-    </aside>
+      {/* Footer */}
+      {!collapsed && (
+        <div className="border-t border-[#2A2A2A] px-3 py-3">
+          <p className="text-xs text-[#6B7280]">Ops Dashboard v3</p>
+        </div>
+      )}
+    </div>
   );
 
-  // Mobile: overlay drawer
-  if (isMobile) {
-    return (
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={close}
-              className="fixed inset-0 bg-black/60 z-40"
-            />
-            {/* Drawer */}
-            <motion.div
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: 'tween', duration: 0.2 }}
-              className="fixed left-0 top-0 h-full z-50"
-            >
-              {sidebarContent}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    );
-  }
-
-  // Desktop/tablet: fixed sidebar
   return (
-    <div
-      className="fixed left-0 top-0 h-full z-30 transition-all duration-200"
-      style={{ width: sidebarWidth }}
-    >
-      {sidebarContent}
-    </div>
+    <>
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          'hidden md:flex flex-col h-screen border-r border-[#2A2A2A] bg-[#0F0F0F] transition-all duration-300 shrink-0',
+          collapsed ? 'w-16' : 'w-70'
+        )}
+        style={{ width: collapsed ? 64 : 280 }}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile hamburger */}
+      <div className="md:hidden fixed top-3 left-3 z-40">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setMobileOpen(true)}
+          className="h-8 w-8"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/60"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className={cn(
+          'md:hidden fixed inset-y-0 left-0 z-50 w-72 flex flex-col border-r border-[#2A2A2A] bg-[#0F0F0F] transition-transform duration-300',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="absolute right-3 top-3">
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="rounded-md p-1.5 text-[#6B7280] hover:bg-[#222222] hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

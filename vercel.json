@@ -1,20 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/brief",
-      "schedule": "0 19 * * *"
-    },
-    {
-      "path": "/api/cron/task-sync-poll",
-      "schedule": "0 21 * * *"
-    },
-    {
-      "path": "/api/cron/metrics-snapshot",
-      "schedule": "0 20 * * *"
-    },
-    {
       "path": "/api/cron/notion-sync",
-      "schedule": "0 22 * * *"
+      "schedule": "0 12 * * *"
     }
   ]
 }

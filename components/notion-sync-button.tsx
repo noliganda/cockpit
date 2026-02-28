@@ -2,48 +2,53 @@
 
 import { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function NotionSyncButton() {
   const [syncing, setSyncing] = useState(false);
-  const [lastCount, setLastCount] = useState<number | null>(null);
+  const [result, setResult] = useState<string | null>(null);
 
   const handleSync = async () => {
-    if (syncing) return;
     setSyncing(true);
+    setResult(null);
     try {
-      // 1. Trigger Notion → Postgres sync
-      await fetch('/api/sync/notion', { method: 'POST' });
-
-      // 2. Fetch synced tasks from Postgres
-      const res = await fetch('/api/tasks/synced');
-      const data = await res.json();
-
-      if (data.tasks?.length > 0) {
-        // 3. Merge into localStorage (keep local-only, replace Notion tasks)
-        const existing = JSON.parse(localStorage.getItem('ops_tasks') || '[]');
-        const localOnly = existing.filter((t: Record<string, unknown>) => !t.notionId);
-        localStorage.setItem('ops_tasks', JSON.stringify([...localOnly, ...data.tasks]));
-        setLastCount(data.count);
-        window.location.reload();
+      const res = await fetch('/api/sync/notion', { method: 'POST' });
+      const json = await res.json();
+      if (json.data) {
+        setResult(`Synced ${json.data.synced} tasks (${json.data.created} new)`);
       } else {
-        setLastCount(0);
+        setResult('Sync failed');
       }
     } catch {
-      setLastCount(-1);
+      setResult('Sync error');
     } finally {
       setSyncing(false);
+      setTimeout(() => setResult(null), 4000);
     }
   };
 
   return (
-    <button
-      onClick={handleSync}
-      disabled={syncing}
-      title={lastCount !== null ? `Last sync: ${lastCount} tasks` : 'Sync tasks from Notion'}
-      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border border-[#2A2A2A] text-[#6B7280] hover:text-white hover:border-[#3A3A3A] transition-colors disabled:opacity-50"
-    >
-      <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-      {syncing ? 'Syncing…' : 'Notion'}
-    </button>
+    <TooltipProvider>
+      <div className="flex items-center gap-2">
+        {result && (
+          <span className="text-xs text-[#A0A0A0]">{result}</span>
+        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSync}
+              disabled={syncing}
+              className="h-8 w-8"
+            >
+              <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Sync from Notion</TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   );
 }

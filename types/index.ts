@@ -1,218 +1,202 @@
-export interface Workspace {
+// ALL TypeScript types for Ops Dashboard v3
+
+export type WorkspaceId = 'byron-film' | 'korus' | 'personal';
+
+export type Workspace = {
   id: string;
   name: string;
-  slug: 'byron-film' | 'korus' | 'personal';
+  slug: WorkspaceId;
   color: string;
   icon: string;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface Task {
+export type TaskStatus =
+  // Byron Film
+  | 'Backlog' | 'Pre-Prod' | 'In Prod' | 'Post-Prod' | 'Review' | 'Delivered' | 'Invoiced' | 'Paid'
+  // KORUS
+  | 'Lead' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost' | 'On Hold'
+  // Personal
+  | 'To Do' | 'In Progress' | 'Completed'
+  // Generic
+  | 'todo' | 'in-progress' | 'done' | 'cancelled';
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export type Task = {
   id: string;
   workspaceId: string;
-  projectId?: string;
-  areaId?: string;
-  sprintId?: string;
   title: string;
-  description?: string;
+  description: string | null;
   status: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  impact?: 'low' | 'medium' | 'high';
-  effort?: 'low' | 'medium' | 'high';
-  duration?: string;
-  urgent?: boolean;
-  important?: boolean;
-  dueDate?: string;
-  assignee?: string;
+  priority: string | null;
+  impact: string | null;
+  effort: string | null;
+  urgent: boolean;
+  important: boolean;
+  dueDate: Date | null;
+  assignee: string | null;
   tags: string[];
-  createdAt: string;
-  updatedAt: string;
-}
+  areaId: string | null;
+  projectId: string | null;
+  sprintId: string | null;
+  notionId: string | null;
+  notionLastSynced: Date | null;
+  region: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface Project {
+export type Project = {
   id: string;
   workspaceId: string;
   name: string;
-  description?: string;
-  status: 'active' | 'paused' | 'completed' | 'archived';
-  areaId?: string;
-  startDate?: string;
-  endDate?: string;
-  budget?: number;
-}
+  description: string | null;
+  status: string;
+  areaId: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  budget: number | null;
+  region: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface Area {
+export type Area = {
   id: string;
   workspaceId: string;
   name: string;
-  description?: string;
-  color: string;
-}
+  description: string | null;
+  color: string | null;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface Contact {
+export type Sprint = {
   id: string;
   workspaceId: string;
   name: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  organisationId?: string;
-  role?: string;
-  address?: string;
-  website?: string;
-  notes?: string;
-  pipelineStage?: string;
-  projectIds?: string[];
+  goal: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Contact = {
+  id: string;
+  workspaceId: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  company: string | null;
+  organisationId: string | null;
+  role: string | null;
+  address: string | null;
+  website: string | null;
+  notes: string | null;
+  pipelineStage: string | null;
   tags: string[];
-  lastContact?: string;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface Organisation {
+export type Organisation = {
   id: string;
   workspaceId: string;
   name: string;
-  industry?: string;
-  website?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  notes?: string;
-  pipelineStage?: string;
+  industry: string | null;
+  website: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  notes: string | null;
+  pipelineStage: string | null;
   tags: string[];
-  createdAt: string;
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface FileItem {
+export type Note = {
   id: string;
   workspaceId: string;
-  name: string;
-  type: 'folder' | 'pdf' | 'doc' | 'video' | 'image' | 'spreadsheet' | 'audio' | 'zip';
-  parentId: string | null;
-  size?: number; // bytes
-  modifiedAt: string;
-  starred?: boolean;
-  owner?: string;
-}
-
-export interface ProjectNote {
-  id: string;
-  projectId: string;
   title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  content: string | null;
+  pinned: boolean;
+  projectId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export interface Note {
+export type ActivityLog = {
   id: string;
   workspaceId: string;
-  title: string;
-  content: string;
-  pinned?: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+  actor: 'system' | 'user' | 'charlie';
+  action: 'created' | 'updated' | 'deleted' | 'synced' | 'exported';
+  entityType: 'task' | 'project' | 'contact' | 'organisation' | 'note' | 'sprint' | 'area';
+  entityId: string;
+  entityTitle: string;
+  metadata: Record<string, unknown> | null;
+  timestamp: Date;
+};
 
-export interface ProjectDocument {
-  id: string;
-  projectId: string;
-  name: string;
-  type: 'pdf' | 'doc' | 'sheet' | 'image' | 'link' | 'other';
-  url: string;
-  addedAt: string;
-}
-
-export interface Sprint {
-  id: string;
+export type ActivityLogParams = {
   workspaceId: string;
-  name: string;
-  goal?: string;
-  startDate: string;
-  endDate: string;
-  status: 'planning' | 'active' | 'completed';
-  taskIds: string[];
-  createdAt: string;
-}
+  actor: 'system' | 'user' | 'charlie';
+  action: 'created' | 'updated' | 'deleted' | 'synced' | 'exported';
+  entityType: 'task' | 'project' | 'contact' | 'organisation' | 'note' | 'sprint' | 'area';
+  entityId: string;
+  entityTitle: string;
+  metadata?: Record<string, unknown>;
+};
 
-export interface TaskStatus {
-  id: string;
+export type ApiResponse<T> = {
+  data: T;
+  error?: never;
+} | {
+  data?: never;
+  error: string;
+};
+
+export type NotionSyncResult = {
+  synced: number;
+  created: number;
+  updated: number;
+  errors: string[];
+  workspace: string;
+};
+
+export type WorkspaceConfig = {
+  id: WorkspaceId;
   name: string;
   color: string;
-}
+  icon: string;
+  statuses: string[];
+};
 
-// ─── TASK STATUSES (universal, all workspaces) ───
-export const TASK_STATUSES: TaskStatus[] = [
-  { id: 'backlog', name: 'Backlog', color: '#6B7280' },
-  { id: 'todo', name: 'To Do', color: '#8B5CF6' },
-  { id: 'in-progress', name: 'In Progress', color: '#F59E0B' },
-  { id: 'review', name: 'Review', color: '#3B82F6' },
-  { id: 'done', name: 'Done', color: '#10B981' },
+export const WORKSPACES: WorkspaceConfig[] = [
+  {
+    id: 'byron-film',
+    name: 'Byron Film',
+    color: '#D4A017',
+    icon: '🎬',
+    statuses: ['Backlog', 'Pre-Prod', 'In Prod', 'Post-Prod', 'Review', 'Delivered', 'Invoiced', 'Paid'],
+  },
+  {
+    id: 'korus',
+    name: 'KORUS',
+    color: '#008080',
+    icon: '🌏',
+    statuses: ['Lead', 'Qualification', 'Proposal', 'Negotiation', 'Won', 'Lost', 'On Hold'],
+  },
+  {
+    id: 'personal',
+    name: 'Personal',
+    color: '#F97316',
+    icon: '👤',
+    statuses: ['To Do', 'In Progress', 'Completed'],
+  },
 ];
-
-// ─── TASK STATUSES — workspace-specific (kanban columns) ───────────────────
-export const BYRON_FILM_PIPELINE: TaskStatus[] = [
-  { id: 'backlog', name: 'Backlog', color: '#6B7280' },
-  { id: 'pre-prod', name: 'Pre-Production', color: '#8B5CF6' },
-  { id: 'in-prod', name: 'In Production', color: '#F59E0B' },
-  { id: 'post-prod', name: 'Post-Production', color: '#3B82F6' },
-  { id: 'review', name: 'Review', color: '#EC4899' },
-  { id: 'delivered', name: 'Delivered', color: '#10B981' },
-  { id: 'invoiced', name: 'Invoiced', color: '#6366F1' },
-  { id: 'paid', name: 'Paid', color: '#C8FF3D' },
-];
-
-export const KORUS_PIPELINE: TaskStatus[] = [
-  { id: 'lead', name: 'Lead', color: '#6B7280' },
-  { id: 'qualification', name: 'Qualification', color: '#8B5CF6' },
-  { id: 'proposal', name: 'Proposal', color: '#F59E0B' },
-  { id: 'negotiation', name: 'Negotiation', color: '#3B82F6' },
-  { id: 'won', name: 'Won', color: '#10B981' },
-  { id: 'lost', name: 'Lost', color: '#EF4444' },
-  { id: 'on-hold', name: 'On Hold', color: '#EC4899' },
-];
-
-// Legacy aliases — keep backward compat for CRM/pipeline pages
-export const BYRON_FILM_STATUSES = BYRON_FILM_PIPELINE;
-export const KORUS_STATUSES = KORUS_PIPELINE;
-
-export const WORKSPACES: Workspace[] = [
-  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
-  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🏢' },
-  { id: 'personal', name: 'Personal', slug: 'personal', color: '#F97316', icon: '🏠' },
-];
-
-/** Task statuses — same for all workspaces */
-export function getTaskStatuses(): TaskStatus[] {
-  return TASK_STATUSES;
-}
-
-/** Workspace-specific task statuses for kanban/list views */
-export function getTaskStatusesForWorkspace(workspaceId: string): TaskStatus[] {
-  if (workspaceId === 'byron-film') return BYRON_FILM_PIPELINE;
-  if (workspaceId === 'korus') return KORUS_PIPELINE;
-  return TASK_STATUSES;
-}
-
-/** Pipeline stages — workspace-specific (for CRM, project pipeline views) */
-export function getPipelineForWorkspace(workspaceId: string): TaskStatus[] {
-  return workspaceId === 'korus' ? KORUS_PIPELINE : BYRON_FILM_PIPELINE;
-}
-
-/** @deprecated Use getTaskStatusesForWorkspace() for tasks or getPipelineForWorkspace() for pipeline */
-export function getStatusesForWorkspace(workspaceId: string): TaskStatus[] {
-  return getTaskStatusesForWorkspace(workspaceId);
-}
-
-export function getStatusById(workspaceId: string, statusId: string): TaskStatus | undefined {
-  return getTaskStatusesForWorkspace(workspaceId).find(s => s.id === statusId);
-}
-
-export function getPipelineStageById(workspaceId: string, stageId: string): TaskStatus | undefined {
-  return getPipelineForWorkspace(workspaceId).find(s => s.id === stageId);
-}
-
-/** Status IDs that count as completed/done for a workspace */
-export function getTerminalStatusIds(workspaceId: string): string[] {
-  if (workspaceId === 'byron-film') return ['paid', 'delivered'];
-  if (workspaceId === 'korus') return ['won', 'lost'];
-  return ['done'];
-}

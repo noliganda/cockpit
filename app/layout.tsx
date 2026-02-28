@@ -1,73 +1,35 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Sidebar, SidebarProvider, MobileHeader } from "@/components/sidebar";
-import { WorkspaceProvider } from "@/components/workspace-provider";
-import { TaskProvider } from "@/components/task-provider";
-import { SprintProvider } from "@/components/sprint-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/components/auth-provider";
-import { ContactProvider } from "@/components/contact-provider";
-import { OrganisationProvider } from "@/components/organisation-provider";
-import { ProjectProvider } from "@/components/project-provider";
-import { AreaProvider } from "@/components/area-provider";
-import { NoteProvider } from "@/components/note-provider";
-import { CommandPalette } from "@/components/command-palette";
-import { MainContent } from "@/components/main-content";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { AuthGate } from '@/components/auth-gate';
+import { Sidebar } from '@/components/sidebar';
+import { MainContent } from '@/components/main-content';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "Ops Dashboard",
-  description: "Unified operations dashboard for Byron Film & KORUS Group",
+  title: 'Ops Dashboard',
+  description: 'Unified operations dashboard for Byron Film, KORUS, and Personal workspaces',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0F0F0F]`}>
-        <AuthProvider>
-          <WorkspaceProvider>
-            <SidebarProvider>
-            <TaskProvider>
-              <ProjectProvider>
-              <AreaProvider>
-              <ContactProvider>
-              <OrganisationProvider>
-              <SprintProvider>
-              <NoteProvider>
-                <TooltipProvider>
-                  <div className="flex h-screen overflow-hidden">
-                    <Sidebar />
-                    <MobileHeader />
-                    <MainContent>
-                      {children}
-                    </MainContent>
-                    <CommandPalette />
-                  </div>
-                </TooltipProvider>
-              </NoteProvider>
-              </SprintProvider>
-              </OrganisationProvider>
-              </ContactProvider>
-              </AreaProvider>
-              </ProjectProvider>
-            </TaskProvider>
-            </SidebarProvider>
-          </WorkspaceProvider>
-        </AuthProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0F0F0F] text-white`}>
+        <AuthGate>
+          <div className="flex h-screen overflow-hidden">
+            <Sidebar />
+            <MainContent>{children}</MainContent>
+          </div>
+        </AuthGate>
       </body>
     </html>
   );

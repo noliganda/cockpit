@@ -476,6 +476,41 @@ export default function SettingsPage() {
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.19 }}>
           <Section title="Data Management">
             <Row
+              label="Sync from Notion"
+              description="Pull real tasks from Notion (KORUS, Byron Film, Personal) into the dashboard"
+            >
+              <button
+                onClick={async () => {
+                  try {
+                    // 1. Trigger sync from Notion → Postgres
+                    const syncRes = await fetch('/api/sync/notion', { method: 'POST' });
+                    const syncData = await syncRes.json();
+                    
+                    // 2. Fetch synced tasks from Postgres
+                    const tasksRes = await fetch('/api/tasks/synced');
+                    const tasksData = await tasksRes.json();
+                    
+                    if (tasksData.tasks && tasksData.tasks.length > 0) {
+                      // 3. Merge into localStorage (replace Notion tasks, keep local-only tasks)
+                      const existing = JSON.parse(localStorage.getItem('ops_tasks') || '[]');
+                      const localOnly = existing.filter((t: any) => !t.notionId);
+                      const merged = [...localOnly, ...tasksData.tasks];
+                      localStorage.setItem('ops_tasks', JSON.stringify(merged));
+                      alert(`✅ Synced ${tasksData.count} tasks from Notion!\n\nKORUS: ${syncData.report?.workspaces?.[0]?.created + syncData.report?.workspaces?.[0]?.updated || '?'}\nByron Film: ${syncData.report?.workspaces?.[1]?.created + syncData.report?.workspaces?.[1]?.updated || '?'}\nPersonal: ${syncData.report?.workspaces?.[2]?.created + syncData.report?.workspaces?.[2]?.updated || '?'}\n\nRefreshing...`);
+                      window.location.reload();
+                    } else {
+                      alert('Sync completed but no tasks returned. Check Notion integration access.');
+                    }
+                  } catch (err) {
+                    alert('Sync failed: ' + (err instanceof Error ? err.message : String(err)));
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-blue-500/30 text-blue-400 hover:bg-blue-500/10 transition-colors"
+              >
+                Sync Now
+              </button>
+            </Row>
+            <Row
               label="Import Seed Data"
               description="Populate dashboard with Byron Film, KORUS, and Personal projects & tasks"
             >

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0F0F0F] text-white`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[#0F0F0F] text-white`}>
         <AuthGate>
           <div className="flex h-screen overflow-hidden">
             <Sidebar />

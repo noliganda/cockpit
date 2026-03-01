@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { ArrowLeft, CheckSquare, FileText, Database, Users, FolderOpen, Zap, Star } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { type Project, type Task, type Area, type Note } from '@/types'
+import dynamic from 'next/dynamic'
+
+const BlockEditor = dynamic(() => import('@/components/block-editor').then(m => m.BlockEditor), { ssr: false })
 
 interface ProjectDetailClientProps {
   project: Project
@@ -122,7 +125,13 @@ export function ProjectDetailClient({ project, projectTasks, projectNotes, area,
           {project.description && (
             <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
               <h3 className="text-xs text-[#6B7280] uppercase tracking-wide mb-2">Description</h3>
-              <p className="text-sm text-[#A0A0A0] whitespace-pre-wrap">{project.description}</p>
+              <div className="text-sm [&_.bn-editor]:pointer-events-none">
+                <BlockEditor
+                  initialContent={project.description}
+                  onChange={() => {}}
+                  className="[&_.bn-editor]:min-h-0"
+                />
+              </div>
             </div>
           )}
           <div className="grid grid-cols-2 gap-3">

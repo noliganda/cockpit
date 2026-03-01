@@ -7,6 +7,9 @@ import { useWorkspace } from '@/hooks/use-workspace'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import dynamic from 'next/dynamic'
+
+const BlockEditor = dynamic(() => import('@/components/block-editor').then(m => m.BlockEditor), { ssr: false })
 
 interface ProjectsClientProps {
   initialProjects: Project[]
@@ -33,7 +36,7 @@ interface ProjectDialogProps {
 
 function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete }: ProjectDialogProps) {
   const [name, setName] = useState(project?.name ?? '')
-  const [description, setDescription] = useState(project?.description ?? '')
+  const [description, setDescription] = useState<unknown>(project?.description ?? undefined)
   const [status, setStatus] = useState(project?.status ?? 'Planning')
   const [areaId, setAreaId] = useState(project?.areaId ?? '')
   const [startDate, setStartDate] = useState(project?.startDate ?? '')
@@ -49,9 +52,12 @@ function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete 
     if (!name.trim()) return
     setSaving(true)
     try {
+      const descString = description
+        ? (typeof description === 'string' ? description : JSON.stringify(description))
+        : undefined
       await onSave({
         name: name.trim(),
-        description: description || undefined,
+        description: descString,
         status,
         areaId: areaId || undefined,
         startDate: startDate || undefined,
@@ -82,8 +88,16 @@ function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete 
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           <input value={name} onChange={e => setName(e.target.value)} placeholder="Project name" autoFocus
             className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
-          <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (optional)" rows={3}
-            className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] resize-none" />
+          <div>
+            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Description</label>
+            <div className="rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] overflow-hidden max-h-40 overflow-y-auto">
+              <BlockEditor
+                initialContent={project?.description}
+                onChange={(blocks) => setDescription(blocks)}
+                className="text-sm [&_.bn-editor]:min-h-[72px] [&_.bn-editor]:px-3 [&_.bn-editor]:py-2"
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Status</label>
@@ -266,7 +280,16 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, workspaceI
                   </div>
                 </div>
                 {project.description && (
-                  <p className="text-xs text-[#6B7280] mb-4 line-clamp-2">{project.description}</p>
+                  <p className="text-xs text-[#6B7280] mb-4 line-clamp-2">
+                    {project.description.trimStart().startsWith('[')
+                      ? (() => {
+                          try {
+                            const blocks = JSON.parse(project.description!) as Array<{ content?: Array<{ text?: string }> }>
+                            return blocks.map(b => b.content?.map(c => c.text ?? '').join('') ?? '').filter(Boolean).join(' ')
+                          } catch { return project.description }
+                        })()
+                      : project.description}
+                  </p>
                 )}
                 <div className="mb-3">
                   <div className="flex items-center justify-between mb-1">

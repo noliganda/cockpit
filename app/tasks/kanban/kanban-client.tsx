@@ -3,16 +3,12 @@ import { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TASK_STATUSES, type WorkspaceId, type Task } from '@/types'
-import { Plus } from 'lucide-react'
+import { Plus, Zap, Star } from 'lucide-react'
 import { TaskDialog } from '@/components/task-dialog'
 
 interface KanbanClientProps {
   initialTasks: Task[]
   workspaceId: WorkspaceId
-}
-
-const PRIORITY_COLORS: Record<string, string> = {
-  urgent: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#6B7280'
 }
 
 export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
@@ -111,14 +107,20 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
                               'p-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] cursor-pointer transition-all',
                               snapshot.isDragging && 'border-[rgba(255,255,255,0.16)] bg-[#1A1A1A]'
                             )}
-                            style={{
-                              ...provided.draggableProps.style,
-                              borderLeftColor: PRIORITY_COLORS[task.priority ?? 'medium'],
-                              borderLeftWidth: 2,
-                            }}
+                            style={provided.draggableProps.style}
                           >
                             <p className="text-sm font-medium text-[#F5F5F5] mb-2 leading-snug">{task.title}</p>
                             <div className="flex items-center gap-2 flex-wrap">
+                              {task.urgent && (
+                                <span className="flex items-center gap-0.5 text-xs text-[#EF4444]">
+                                  <Zap className="w-3 h-3" /> Urgent
+                                </span>
+                              )}
+                              {task.important && (
+                                <span className="flex items-center gap-0.5 text-xs text-[#F59E0B]">
+                                  <Star className="w-3 h-3" /> Important
+                                </span>
+                              )}
                               {task.dueDate && (
                                 <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
                                   {formatDate(task.dueDate)}

@@ -15,7 +15,6 @@ interface TaskDialogProps {
   sprints?: Sprint[]
 }
 
-const PRIORITIES = ['low', 'medium', 'high', 'urgent']
 const IMPACT_OPTIONS = ['low', 'medium', 'high']
 const EFFORT_OPTIONS = ['low', 'medium', 'high']
 
@@ -30,7 +29,6 @@ export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
   const [status, setStatus] = useState(task?.status ?? 'Backlog')
-  const [priority, setPriority] = useState(task?.priority ?? 'medium')
   const [impact, setImpact] = useState(task?.impact ?? '')
   const [effort, setEffort] = useState(task?.effort ?? '')
   const [urgent, setUrgent] = useState(task?.urgent ?? false)
@@ -69,7 +67,6 @@ export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas
         title: title.trim(),
         description: description || undefined,
         status,
-        priority,
         impact: impact || undefined,
         effort: effort || undefined,
         urgent,
@@ -163,9 +160,6 @@ export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas
           <div className="grid grid-cols-2 gap-3">
             <Select label="Status" value={status} onChange={setStatus}>
               {TASK_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-            </Select>
-            <Select label="Priority" value={priority} onChange={setPriority}>
-              {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
             </Select>
             <Select label="Impact" value={impact} onChange={setImpact}>
               <option value="">— None —</option>

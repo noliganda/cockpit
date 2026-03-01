@@ -14,10 +14,6 @@ interface TasksClientProps {
   sprints?: Sprint[]
 }
 
-const PRIORITY_DOT: Record<string, string> = {
-  urgent: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#6B7280'
-}
-
 export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
@@ -153,14 +149,13 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
               <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
               <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Priority</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due Date</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Assignee</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
             ) : filtered.map(task => (
               <tr
                 key={task.id}
@@ -168,10 +163,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                 className="border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)] cursor-pointer transition-colors"
               >
                 <td className="px-4 py-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-0.5 h-4 rounded-full shrink-0" style={{ backgroundColor: PRIORITY_DOT[task.priority ?? 'medium'] }} />
-                    <span className="text-sm text-[#F5F5F5]">{task.title}</span>
-                  </div>
+                  <span className="text-sm text-[#F5F5F5]">{task.title}</span>
                 </td>
                 <td className="px-2 py-2.5 text-center">
                   <button
@@ -205,9 +197,6 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                   <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className="text-xs capitalize" style={{ color: PRIORITY_DOT[task.priority ?? 'medium'] }}>{task.priority ?? 'medium'}</span>
-                </td>
-                <td className="px-4 py-2.5">
                   <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
                     {task.dueDate ? formatDate(task.dueDate) : '—'}
                   </span>
@@ -230,7 +219,6 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
             key={task.id}
             onClick={() => { setEditingTask(task); setShowDialog(true) }}
             className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] cursor-pointer"
-            style={{ borderLeftColor: PRIORITY_DOT[task.priority ?? 'medium'], borderLeftWidth: 2 }}
           >
             <div className="flex items-start justify-between mb-2 gap-2">
               <p className="text-sm font-medium text-[#F5F5F5] flex-1">{task.title}</p>

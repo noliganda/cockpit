@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { Plus, ExternalLink, Edit2, Trash2, X } from 'lucide-react'
 import Link from 'next/link'
-import { type WorkspaceId, type Project, type Task, type Area, PROJECT_STATUSES } from '@/types'
+import { type WorkspaceId, type Project, type Task, type Area, type Contact, PROJECT_STATUSES } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -15,6 +15,7 @@ interface ProjectsClientProps {
   initialProjects: Project[]
   allTasks: Task[]
   allAreas: Area[]
+  allContacts: Contact[]
   workspaceId: WorkspaceId
 }
 
@@ -29,24 +30,30 @@ interface ProjectDialogProps {
   project?: Project | null
   workspaceId: WorkspaceId
   areas: Area[]
+  contacts: Contact[]
   onClose: () => void
   onSave: (data: Partial<Project>) => Promise<void>
   onDelete?: () => Promise<void>
 }
 
-function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete }: ProjectDialogProps) {
+function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave, onDelete }: ProjectDialogProps) {
   const [name, setName] = useState(project?.name ?? '')
   const [description, setDescription] = useState<unknown>(project?.description ?? undefined)
   const [status, setStatus] = useState(project?.status ?? 'Planning')
   const [areaId, setAreaId] = useState(project?.areaId ?? '')
-  const [startDate, setStartDate] = useState(project?.startDate ?? '')
   const [endDate, setEndDate] = useState(project?.endDate ?? '')
   const [budget, setBudget] = useState(project?.budget ?? '')
   const [region, setRegion] = useState(project?.region ?? '')
+  const [projectManagerId, setProjectManagerId] = useState(project?.projectManagerId ?? '')
+  const [clientId, setClientId] = useState(project?.clientId ?? '')
+  const [leadGenId, setLeadGenId] = useState(project?.leadGenId ?? '')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isKorus = workspaceId === 'korus'
+
+  const selectCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none focus:border-[rgba(255,255,255,0.16)]'
+  const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
 
   async function handleSave() {
     if (!name.trim()) return
@@ -60,10 +67,12 @@ function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete 
         description: descString,
         status,
         areaId: areaId || undefined,
-        startDate: startDate || undefined,
         endDate: endDate || undefined,
-        budget: budget ? String(budget) : undefined,
+        budget: budget !== '' ? String(budget) : undefined,
         region: isKorus && region ? region : undefined,
+        projectManagerId: projectManagerId || undefined,
+        clientId: clientId || undefined,
+        leadGenId: leadGenId || undefined,
       })
       onClose()
     } finally { setSaving(false) }
@@ -86,10 +95,92 @@ function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete 
           </button>
         </div>
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
+          {/* Row 1: Name */}
           <input value={name} onChange={e => setName(e.target.value)} placeholder="Project name" autoFocus
             className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
+
+          {/* Row 2: Status + Region (KORUS) */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Status</label>
+              <select value={status} onChange={e => setStatus(e.target.value)} className={selectCls}>
+                {PROJECT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            {isKorus ? (
+              <div>
+                <label className={labelCls}>Region</label>
+                <select value={region} onChange={e => setRegion(e.target.value)} className={selectCls}>
+                  <option value="">— None —</option>
+                  {KORUS_REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className={labelCls}>End Date</label>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]" />
+              </div>
+            )}
+          </div>
+
+          {/* Row 3: Area + Budget */}
+          <div className="grid grid-cols-2 gap-3">
+            {areas.length > 0 && (
+              <div>
+                <label className={labelCls}>Area</label>
+                <select value={areaId} onChange={e => setAreaId(e.target.value)} className={selectCls}>
+                  <option value="">— None —</option>
+                  {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
+                </select>
+              </div>
+            )}
+            <div>
+              <label className={labelCls}>Budget (+ revenue / − cost)</label>
+              <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. -3200 or 12500"
+                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
+            </div>
+          </div>
+
+          {/* Row 4: Project Manager + Client */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Project Manager</label>
+              <select value={projectManagerId} onChange={e => setProjectManagerId(e.target.value)} className={selectCls}>
+                <option value="">— None —</option>
+                {contacts.map(c => <option key={c.id} value={c.id}>{c.name}{c.role ? ` · ${c.role}` : ''}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Client</label>
+              <select value={clientId} onChange={e => setClientId(e.target.value)} className={selectCls}>
+                <option value="">— None —</option>
+                {contacts.map(c => <option key={c.id} value={c.id}>{c.name}{c.role ? ` · ${c.role}` : ''}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Row 5: Lead Gen (optional) */}
           <div>
-            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Description</label>
+            <label className={labelCls}>Lead Gen Contact (optional)</label>
+            <select value={leadGenId} onChange={e => setLeadGenId(e.target.value)} className={selectCls}>
+              <option value="">— None —</option>
+              {contacts.map(c => <option key={c.id} value={c.id}>{c.name}{c.role ? ` · ${c.role}` : ''}</option>)}
+            </select>
+          </div>
+
+          {/* KORUS: End Date below region */}
+          {isKorus && (
+            <div>
+              <label className={labelCls}>End Date</label>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]" />
+            </div>
+          )}
+
+          {/* Description */}
+          <div>
+            <label className={labelCls}>Description</label>
             <div className="rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] overflow-hidden max-h-40 overflow-y-auto">
               <BlockEditor
                 initialContent={project?.description}
@@ -97,50 +188,6 @@ function ProjectDialog({ project, workspaceId, areas, onClose, onSave, onDelete 
                 className="text-sm [&_.bn-editor]:min-h-[72px] [&_.bn-editor]:px-3 [&_.bn-editor]:py-2"
               />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Status</label>
-              <select value={status} onChange={e => setStatus(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none">
-                {PROJECT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            {areas.length > 0 && (
-              <div>
-                <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Area</label>
-                <select value={areaId} onChange={e => setAreaId(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none">
-                  <option value="">— None —</option>
-                  {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
-                </select>
-              </div>
-            )}
-            <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Start Date</label>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]" />
-            </div>
-            <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">End Date</label>
-              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]" />
-            </div>
-            <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Budget</label>
-              <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="0.00"
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
-            </div>
-            {isKorus && (
-              <div>
-                <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Region</label>
-                <select value={region} onChange={e => setRegion(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none">
-                  <option value="">— None —</option>
-                  {KORUS_REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                </select>
-              </div>
-            )}
           </div>
         </div>
         <div className="flex items-center justify-between px-5 py-4 border-t border-[rgba(255,255,255,0.06)] shrink-0">
@@ -183,7 +230,7 @@ const STATUS_COLORS: Record<string, string> = {
   Archived: 'text-[#4B5563] bg-[rgba(75,85,99,0.12)]',
 }
 
-export function ProjectsClient({ initialProjects, allTasks, allAreas, workspaceId }: ProjectsClientProps) {
+export function ProjectsClient({ initialProjects, allTasks, allAreas, allContacts, workspaceId }: ProjectsClientProps) {
   const [projects, setProjects] = useState(initialProjects)
   const [showDialog, setShowDialog] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
@@ -261,6 +308,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, workspaceI
           {projects.map(project => {
             const progress = getProgress(project.id)
             const taskCount = getTaskCount(project.id)
+            const budgetNum = project.budget ? Number(project.budget) : null
             return (
               <div key={project.id} className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group">
                 <div className="flex items-start justify-between mb-3">
@@ -306,8 +354,10 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, workspaceI
                       {project.status}
                     </span>
                   )}
-                  {project.budget && (
-                    <span className="text-xs text-[#6B7280]">${Number(project.budget).toLocaleString()}</span>
+                  {budgetNum !== null && (
+                    <span className={cn('text-xs', budgetNum < 0 ? 'text-[#EF4444]' : 'text-[#22C55E]')}>
+                      {budgetNum < 0 ? `-$${Math.abs(budgetNum).toLocaleString()}` : `$${budgetNum.toLocaleString()}`}
+                    </span>
                   )}
                 </div>
               </div>
@@ -321,6 +371,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, workspaceI
           project={editingProject}
           workspaceId={workspaceId}
           areas={allAreas}
+          contacts={allContacts}
           onClose={() => { setShowDialog(false); setEditingProject(null) }}
           onSave={editingProject ? (d) => handleUpdate(editingProject.id, d) : handleCreate}
           onDelete={editingProject ? () => handleDelete(editingProject.id) : undefined}

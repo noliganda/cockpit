@@ -16,6 +16,11 @@ interface AreasClientProps {
 const AREA_ICONS = ['📁', '🎬', '💰', '⚙️', '📈', '🎯', '👥', '📣', '🤖', '🔒', '🌏', '🏗️']
 const AREA_COLORS = ['#D4A017', '#008080', '#F97316', '#3B82F6', '#22C55E', '#EF4444', '#8B5CF6', '#EC4899', '#6B7280']
 
+const PRESET_SPHERES = [
+  'Insurance', 'Contracts', 'HR', 'Design', 'Content', 'Brand',
+  'Operations', 'Finance', 'Marketing', 'Legal',
+]
+
 interface AreaDialogProps {
   area?: Area | null
   workspaceId: WorkspaceId
@@ -32,15 +37,38 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
   const [icon, setIcon] = useState(area?.icon ?? '📁')
   const [color, setColor] = useState(area?.color ?? '#6B7280')
   const [status, setStatus] = useState(area?.status ?? 'active')
+  const [context, setContext] = useState(area?.context ?? '')
+  const [spheres, setSpheres] = useState<string[]>(area?.spheresOfResponsibility ?? [])
+  const [sphereInput, setSphereInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  function addSphere(value: string) {
+    const trimmed = value.trim()
+    if (!trimmed || spheres.includes(trimmed)) return
+    setSpheres(prev => [...prev, trimmed])
+    setSphereInput('')
+  }
+
+  function removeSphere(sphere: string) {
+    setSpheres(prev => prev.filter(s => s !== sphere))
+  }
 
   async function handleSave() {
     if (!name.trim()) return
     setSaving(true)
     try {
-      await onSave({ name: name.trim(), description: description || undefined, icon, color, status, workspaceId })
+      await onSave({
+        name: name.trim(),
+        description: description || undefined,
+        icon,
+        color,
+        status,
+        workspaceId,
+        context: context || undefined,
+        spheresOfResponsibility: spheres.length > 0 ? spheres : undefined,
+      })
       onClose()
     } finally { setSaving(false) }
   }
@@ -62,7 +90,7 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <input
             value={name}
             onChange={e => setName(e.target.value)}
@@ -77,6 +105,75 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
             rows={2}
             className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] resize-none"
           />
+
+          {/* Context toggle */}
+          <div>
+            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Context</label>
+            <div className="flex items-center gap-2">
+              {['Internal', 'External'].map(ctx => (
+                <button
+                  key={ctx}
+                  type="button"
+                  onClick={() => setContext(context === ctx ? '' : ctx)}
+                  className={cn(
+                    'flex-1 py-2 text-sm rounded-[6px] border transition-colors',
+                    context === ctx
+                      ? 'bg-[rgba(255,255,255,0.08)] border-[rgba(255,255,255,0.16)] text-[#F5F5F5]'
+                      : 'bg-[#0A0A0A] border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                  )}
+                >{ctx}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Spheres of Responsibility */}
+          <div>
+            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Spheres of Responsibility</label>
+            {/* Current spheres */}
+            {spheres.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {spheres.map(sphere => (
+                  <span key={sphere} className="inline-flex items-center gap-1 px-2 py-1 rounded-[4px] bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] text-xs text-[#F5F5F5]">
+                    {sphere}
+                    <button type="button" onClick={() => removeSphere(sphere)} className="text-[#6B7280] hover:text-[#EF4444] transition-colors">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Text input + add */}
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                value={sphereInput}
+                onChange={e => setSphereInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSphere(sphereInput) } }}
+                placeholder="Add sphere..."
+                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-xs outline-none focus:border-[rgba(255,255,255,0.16)]"
+              />
+              <button
+                type="button"
+                onClick={() => addSphere(sphereInput)}
+                className="px-3 py-2 text-xs rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[rgba(255,255,255,0.16)] transition-colors"
+              >
+                Add
+              </button>
+            </div>
+            {/* Preset chips */}
+            <div className="flex flex-wrap gap-1.5">
+              {PRESET_SPHERES.filter(s => !spheres.includes(s)).map(sphere => (
+                <button
+                  key={sphere}
+                  type="button"
+                  onClick={() => addSphere(sphere)}
+                  className="px-2 py-1 rounded-[4px] text-xs text-[#6B7280] border border-[rgba(255,255,255,0.06)] hover:text-[#A0A0A0] hover:border-[rgba(255,255,255,0.12)] transition-colors"
+                >
+                  + {sphere}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Status</label>
@@ -90,7 +187,7 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
               <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Icon</label>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {AREA_ICONS.map(i => (
-                  <button key={i} onClick={() => setIcon(i)}
+                  <button key={i} type="button" onClick={() => setIcon(i)}
                     className={cn('w-8 h-8 text-base flex items-center justify-center rounded-[4px] transition-colors', icon === i ? 'bg-[rgba(255,255,255,0.12)]' : 'hover:bg-[rgba(255,255,255,0.06)]')}>
                     {i}
                   </button>
@@ -102,7 +199,7 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
             <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Color</label>
             <div className="flex items-center gap-2 flex-wrap">
               {AREA_COLORS.map(c => (
-                <button key={c} onClick={() => setColor(c)}
+                <button key={c} type="button" onClick={() => setColor(c)}
                   className={cn('w-6 h-6 rounded-full transition-all', color === c ? 'ring-2 ring-white ring-offset-2 ring-offset-[#1A1A1A] scale-110' : '')}
                   style={{ backgroundColor: c }} />
               ))}
@@ -228,6 +325,7 @@ export function AreasClient({ initialAreas, allProjects, allTasks, workspaceId }
           {areaList.map(area => {
             const projCount = getLinkedProjects(area.id)
             const taskCount = getLinkedTasks(area.id)
+            const spheres = area.spheresOfResponsibility ?? []
             return (
               <div
                 key={area.id}
@@ -250,6 +348,29 @@ export function AreasClient({ initialAreas, allProjects, allTasks, workspaceId }
                 </div>
                 {area.description && (
                   <p className="text-xs text-[#6B7280] mb-3 line-clamp-2">{area.description}</p>
+                )}
+                {/* Context badge + sphere tags */}
+                {(area.context || spheres.length > 0) && (
+                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                    {area.context && (
+                      <span className={cn(
+                        'text-xs px-1.5 py-0.5 rounded font-medium',
+                        area.context === 'Internal'
+                          ? 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]'
+                          : 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]'
+                      )}>
+                        {area.context}
+                      </span>
+                    )}
+                    {spheres.slice(0, 3).map(sphere => (
+                      <span key={sphere} className="text-xs px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">
+                        {sphere}
+                      </span>
+                    ))}
+                    {spheres.length > 3 && (
+                      <span className="text-xs text-[#6B7280]">+{spheres.length - 3}</span>
+                    )}
+                  </div>
                 )}
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-[#6B7280]">{projCount} projects</span>

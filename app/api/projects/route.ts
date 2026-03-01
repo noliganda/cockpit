@@ -16,6 +16,9 @@ const createSchema = z.object({
   endDate: z.string().optional(),
   budget: z.string().optional(),
   region: z.string().optional(),
+  projectManagerId: z.string().uuid().optional(),
+  clientId: z.string().uuid().optional(),
+  leadGenId: z.string().uuid().optional(),
 })
 
 export async function GET(request: NextRequest) {

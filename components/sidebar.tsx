@@ -19,7 +19,7 @@ const NAV_ITEMS = [
   { href: '/projects', icon: FolderOpen, label: 'Projects', indent: false },
   { href: '/areas', icon: Layout, label: 'Areas', indent: false },
   { href: '/sprints', icon: Zap, label: 'Sprints', indent: false },
-  { href: '/crm', icon: Users, label: 'CRM', indent: false },
+  { href: '/crm', icon: Users, label: 'Contacts', indent: false },
   { href: '/notes', icon: FileText, label: 'Notes', indent: false },
   { href: '/bases', icon: Database, label: 'Bases', indent: false },
   { href: '/documents', icon: FolderArchive, label: 'Documents', indent: false },

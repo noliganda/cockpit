@@ -13,6 +13,8 @@ const createSchema = z.object({
   color: z.string().optional(),
   icon: z.string().optional(),
   order: z.number().optional(),
+  context: z.string().optional(),
+  spheresOfResponsibility: z.array(z.string()).optional(),
 })
 
 export async function GET(request: NextRequest) {

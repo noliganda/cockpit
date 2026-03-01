@@ -40,7 +40,13 @@ export function CommandPalette() {
         e.preventDefault()
         setOpen(o => !o)
       }
-      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as Element).tagName)) {
+      if (e.key === '/') {
+        const el = document.activeElement
+        if (!el) return
+        const tag = el.tagName
+        if (['INPUT', 'TEXTAREA'].includes(tag)) return
+        if ((el as HTMLElement).isContentEditable) return
+        if (el.closest('.bn-editor') || el.closest('[data-blocknote]')) return
         e.preventDefault()
         setOpen(o => !o)
       }

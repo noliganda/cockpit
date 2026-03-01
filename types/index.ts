@@ -1,0 +1,151 @@
+export type WorkspaceId = 'byron-film' | 'korus' | 'personal'
+
+export interface Workspace {
+  id: WorkspaceId
+  name: string
+  slug: string
+  color: string
+  icon: string
+}
+
+export const WORKSPACES: Workspace[] = [
+  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
+  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🌏' },
+  { id: 'personal', name: 'Personal', slug: 'personal', color: '#F97316', icon: '👤' },
+]
+
+export const WORKSPACE_STATUSES: Record<WorkspaceId, string[]> = {
+  'byron-film': ['Backlog', 'Pre-Prod', 'In Prod', 'Post-Prod', 'Review', 'Delivered', 'Invoiced', 'Paid'],
+  'korus': ['Lead', 'Qualification', 'Proposal', 'Negotiation', 'Won', 'Lost', 'On Hold'],
+  'personal': ['To Do', 'In Progress', 'Completed'],
+}
+
+export interface Task {
+  id: string
+  workspaceId: string
+  title: string
+  description?: string | null
+  status: string
+  priority?: string | null
+  impact?: string | null
+  effort?: string | null
+  urgent?: boolean | null
+  important?: boolean | null
+  dueDate?: string | null
+  assignee?: string | null
+  tags?: string[] | null
+  areaId?: string | null
+  projectId?: string | null
+  sprintId?: string | null
+  notionId?: string | null
+  notionLastSynced?: Date | null
+  region?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Project {
+  id: string
+  workspaceId: string
+  name: string
+  description?: string | null
+  status?: string | null
+  areaId?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  budget?: string | null
+  region?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Area {
+  id: string
+  workspaceId: string
+  name: string
+  description?: string | null
+  color?: string | null
+  icon?: string | null
+  order?: number | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Sprint {
+  id: string
+  workspaceId: string
+  name: string
+  goal?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  status?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Contact {
+  id: string
+  workspaceId: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  company?: string | null
+  organisationId?: string | null
+  role?: string | null
+  address?: string | null
+  website?: string | null
+  linkedinUrl?: string | null
+  notes?: string | null
+  pipelineStage?: string | null
+  tags?: string[] | null
+  source?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Organisation {
+  id: string
+  workspaceId: string
+  name: string
+  industry?: string | null
+  website?: string | null
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  notes?: string | null
+  pipelineStage?: string | null
+  tags?: string[] | null
+  size?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Note {
+  id: string
+  workspaceId: string
+  title: string
+  content?: unknown
+  contentPlaintext?: string | null
+  pinned?: boolean | null
+  projectId?: string | null
+  tags?: string[] | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ActivityLogEntry {
+  id: string
+  workspaceId: string
+  actor: string
+  action: string
+  entityType: string
+  entityId?: string | null
+  entityTitle?: string | null
+  description?: string | null
+  metadata?: unknown
+  embeddingModel?: string | null
+  createdAt: Date
+}
+
+export type Priority = 'low' | 'medium' | 'high' | 'urgent'
+export type PipelineStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'

@@ -45,6 +45,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   const isKorus = workspaceId === 'korus'
 
@@ -59,6 +60,18 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
     if (p?.areaId) setAreaId(p.areaId)
   }
 
+  // Validation — only enforced on new tasks
+  const isNew = !task
+  const errors = {
+    title: isNew && !title.trim(),
+    dueDate: isNew && !dueDate,
+    assignee: isNew && !assignee.trim(),
+    allocation: isNew && !projectId && !effectiveAreaId,
+    tags: isNew && tags.length === 0,
+  }
+  const hasErrors = Object.values(errors).some(Boolean)
+  const canSubmit = !isNew || (!hasErrors)
+
   function addTag() {
     const t = tagInput.trim()
     if (t && !tags.includes(t)) {
@@ -72,7 +85,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   }
 
   async function handleSave() {
+    setSubmitted(true)
     if (!title.trim()) return
+    if (isNew && hasErrors) return
     setSaving(true)
     try {
       const data: Partial<Task> = {
@@ -126,13 +141,19 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
         {/* Body */}
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
-          <input
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder="Task title"
-            autoFocus
-            className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors"
-          />
+          <div>
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Task title *"
+              autoFocus
+              className={cn(
+                'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors',
+                submitted && errors.title ? 'border-[rgba(239,68,68,0.5)]' : 'border-[rgba(255,255,255,0.06)]'
+              )}
+            />
+            {submitted && errors.title && <p className="text-xs text-[#EF4444] mt-1">Title is required</p>}
+          </div>
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
@@ -182,51 +203,56 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               {EFFORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </Select>
             <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Due Date</label>
+              <label className={cn('block text-xs uppercase tracking-wide mb-1.5', submitted && errors.dueDate ? 'text-[#EF4444]' : 'text-[#6B7280]')}>Due Date *</label>
               <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] [color-scheme:dark]" />
+                className={cn('w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] [color-scheme:dark]', submitted && errors.dueDate ? 'border-[rgba(239,68,68,0.5)]' : 'border-[rgba(255,255,255,0.06)]')} />
             </div>
             <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Assignee</label>
+              <label className={cn('block text-xs uppercase tracking-wide mb-1.5', submitted && errors.assignee ? 'text-[#EF4444]' : 'text-[#6B7280]')}>Assignee *</label>
               <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="Name"
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
+                className={cn('w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]', submitted && errors.assignee ? 'border-[rgba(239,68,68,0.5)]' : 'border-[rgba(255,255,255,0.06)]')} />
             </div>
           </div>
 
           {/* Project / Area / Sprint */}
-          <div className="grid grid-cols-2 gap-3">
-            {projects.length > 0 && (
-              <Select label="Project" value={projectId} onChange={handleProjectChange}>
-                <option value="">— No project —</option>
-                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </Select>
-            )}
-            {areas.length > 0 && (
-              projectAreaId ? (
-                <div>
-                  <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Area (from project)</label>
-                  <div className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.04)] text-[#6B7280] text-sm">
-                    {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
-                  </div>
-                </div>
-              ) : (
-                <Select label="Area (when no project)" value={areaId} onChange={setAreaId}>
-                  <option value="">— No area —</option>
-                  {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
+          <div>
+            <div className="grid grid-cols-2 gap-3">
+              {projects.length > 0 && (
+                <Select label="Project *" value={projectId} onChange={handleProjectChange}>
+                  <option value="">— No project —</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </Select>
-              )
-            )}
-            {sprints.length > 0 && (
-              <Select label="Sprint" value={sprintId} onChange={setSprintId}>
-                <option value="">— None —</option>
-                {sprints.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </Select>
+              )}
+              {areas.length > 0 && (
+                projectAreaId ? (
+                  <div>
+                    <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Area (from project)</label>
+                    <div className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.04)] text-[#6B7280] text-sm">
+                      {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
+                    </div>
+                  </div>
+                ) : (
+                  <Select label="Area (when no project) *" value={areaId} onChange={setAreaId}>
+                    <option value="">— No area —</option>
+                    {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
+                  </Select>
+                )
+              )}
+              {sprints.length > 0 && (
+                <Select label="Sprint" value={sprintId} onChange={setSprintId}>
+                  <option value="">— None —</option>
+                  {sprints.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </Select>
+              )}
+            </div>
+            {submitted && errors.allocation && (
+              <p className="text-xs text-[#EF4444] mt-1">Select a project or area</p>
             )}
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Tags</label>
+            <label className={cn('block text-xs uppercase tracking-wide mb-1.5', submitted && errors.tags ? 'text-[#EF4444]' : 'text-[#6B7280]')}>Tags * (at least one)</label>
             <div className="flex items-center gap-1.5 flex-wrap mb-2">
               {tags.map(tag => (
                 <span key={tag} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.08)] text-[#A0A0A0]">
@@ -247,6 +273,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 <Plus className="w-4 h-4" />
               </button>
             </div>
+            {submitted && errors.tags && <p className="text-xs text-[#EF4444] mt-1">Add at least one tag</p>}
           </div>
 
           {/* Region — KORUS only */}
@@ -289,7 +316,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           </div>
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors min-h-[44px]">Cancel</button>
-            <button onClick={handleSave} disabled={saving || !title.trim()}
+            <button onClick={handleSave} disabled={saving}
               className="px-4 py-2.5 text-sm font-medium bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors min-h-[44px]">
               {saving ? 'Saving...' : task ? 'Save changes' : 'Create task'}
             </button>

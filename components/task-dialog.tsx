@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { X, Trash2, ExternalLink, Zap, Star, Plus } from 'lucide-react'
-import { WORKSPACE_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
+import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { cn } from '@/lib/utils'
 
 interface TaskDialogProps {
@@ -29,7 +29,7 @@ const KORUS_REGIONS = [
 export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
-  const [status, setStatus] = useState(task?.status ?? WORKSPACE_STATUSES[workspaceId][0])
+  const [status, setStatus] = useState(task?.status ?? 'Backlog')
   const [priority, setPriority] = useState(task?.priority ?? 'medium')
   const [impact, setImpact] = useState(task?.impact ?? '')
   const [effort, setEffort] = useState(task?.effort ?? '')
@@ -47,7 +47,6 @@ export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const statuses = WORKSPACE_STATUSES[workspaceId] ?? ['Backlog']
   const isKorus = workspaceId === 'korus'
 
   function addTag() {
@@ -163,7 +162,7 @@ export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas
 
           <div className="grid grid-cols-2 gap-3">
             <Select label="Status" value={status} onChange={setStatus}>
-              {statuses.map(s => <option key={s} value={s}>{s}</option>)}
+              {TASK_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </Select>
             <Select label="Priority" value={priority} onChange={setPriority}>
               {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}

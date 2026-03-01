@@ -16,7 +16,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   if (!project) notFound()
 
   const projectTasks = await db.select().from(tasks).where(eq(tasks.projectId, id))
-  const completed = projectTasks.filter(t => ['Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)).length
+  const completed = projectTasks.filter(t => ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)).length
   const progress = projectTasks.length > 0 ? Math.round((completed / projectTasks.length) * 100) : 0
 
   return (

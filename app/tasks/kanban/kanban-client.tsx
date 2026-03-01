@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
-import { WORKSPACE_STATUSES, type WorkspaceId, type Task } from '@/types'
+import { TASK_STATUSES, type WorkspaceId, type Task } from '@/types'
 import { Plus } from 'lucide-react'
 import { TaskDialog } from '@/components/task-dialog'
 
@@ -19,7 +19,7 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [showNew, setShowNew] = useState(false)
-  const statuses = WORKSPACE_STATUSES[workspaceId]
+  const statuses = [...TASK_STATUSES]
 
   const columns = statuses.map(status => ({
     status,

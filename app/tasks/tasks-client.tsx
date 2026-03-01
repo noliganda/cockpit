@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import { Plus, Search, Zap, Star } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TaskDialog } from '@/components/task-dialog'
-import { WORKSPACE_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
+import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { useRouter } from 'next/navigation'
 
 interface TasksClientProps {
@@ -27,8 +27,6 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
   const [showDialog, setShowDialog] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const router = useRouter()
-
-  const statuses = WORKSPACE_STATUSES[workspaceId]
 
   const filtered = useMemo(() => {
     return tasks.filter(t => {
@@ -107,7 +105,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
-          {['all', ...statuses].map(s => (
+          {['all', ...TASK_STATUSES].map(s => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}

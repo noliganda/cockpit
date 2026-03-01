@@ -61,10 +61,12 @@ export default async function DashboardPage({
 
   const dueToday = allTasks.filter(t => t.dueDate === todayStr).length
   const dueThisWeek = allTasks.filter(t => t.dueDate && t.dueDate > todayStr && t.dueDate <= weekStr).length
+  const DONE_STATUSES = ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid']
+
   const overdue = allTasks.filter(t =>
     t.dueDate &&
     t.dueDate < todayStr &&
-    !['Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)
+    !DONE_STATUSES.includes(t.status)
   ).length
 
   const workspaceBreakdown = WORKSPACES.map(ws => ({
@@ -72,7 +74,7 @@ export default async function DashboardPage({
     total: allTasks.filter(t => t.workspaceId === ws.id).length,
     completed: allTasks.filter(t =>
       t.workspaceId === ws.id &&
-      ['Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)
+      DONE_STATUSES.includes(t.status)
     ).length,
   }))
 

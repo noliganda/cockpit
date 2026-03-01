@@ -20,6 +20,10 @@ export const WORKSPACE_STATUSES: Record<WorkspaceId, string[]> = {
   'personal': ['To Do', 'In Progress', 'Completed'],
 }
 
+// Universal task statuses — used for all workspaces
+export const TASK_STATUSES = ['Backlog', 'To Do', 'In Progress', 'Needs Review', 'Done', 'Cancelled'] as const
+export type TaskStatus = typeof TASK_STATUSES[number]
+
 export const PROJECT_STATUSES = ['Planning', 'Active', 'On Hold', 'Completed', 'Archived'] as const
 
 export interface Task {

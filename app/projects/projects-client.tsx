@@ -179,7 +179,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, workspaceI
   const getProgress = (projectId: string) => {
     const projectTasks = allTasks.filter(t => t.projectId === projectId)
     if (projectTasks.length === 0) return 0
-    const done = projectTasks.filter(t => ['Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)).length
+    const done = projectTasks.filter(t => ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)).length
     return Math.round((done / projectTasks.length) * 100)
   }
 

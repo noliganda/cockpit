@@ -2,8 +2,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, CheckSquare, Kanban, FolderOpen, Layout, Zap,
-  Users, FileText, FolderArchive, MessageSquare, Newspaper,
+  Home, CheckSquare, Kanban, Grid2X2, FolderOpen, Layout, Zap,
+  Users, FileText, Database, FolderArchive, MessageSquare, Newspaper,
   BarChart2, Settings, ChevronLeft, Menu, X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -15,11 +15,13 @@ const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Home', indent: false },
   { href: '/tasks', icon: CheckSquare, label: 'Tasks', indent: false },
   { href: '/tasks/kanban', icon: Kanban, label: 'Kanban', indent: true },
+  { href: '/tasks/matrix', icon: Grid2X2, label: 'Matrix', indent: true },
   { href: '/projects', icon: FolderOpen, label: 'Projects', indent: false },
   { href: '/areas', icon: Layout, label: 'Areas', indent: false },
   { href: '/sprints', icon: Zap, label: 'Sprints', indent: false },
   { href: '/crm', icon: Users, label: 'CRM', indent: false },
   { href: '/notes', icon: FileText, label: 'Notes', indent: false },
+  { href: '/bases', icon: Database, label: 'Bases', indent: false },
   { href: '/documents', icon: FolderArchive, label: 'Documents', indent: false },
   { href: '/messages', icon: MessageSquare, label: 'Messages', indent: false },
   { href: '/brief', icon: Newspaper, label: 'Brief', indent: false },
@@ -38,6 +40,8 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard'
+    // Exact match for parent routes that have subroutes in the nav
+    if (href === '/tasks') return pathname === '/tasks'
     return pathname === href || pathname.startsWith(href + '/')
   }
 

@@ -1,24 +1,29 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Zap, Star } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TaskDialog } from '@/components/task-dialog'
-import { WORKSPACE_STATUSES, type WorkspaceId, type Task } from '@/types'
+import { WORKSPACE_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { useRouter } from 'next/navigation'
 
 interface TasksClientProps {
   initialTasks: Task[]
   workspaceId: WorkspaceId
+  areas?: Area[]
+  projects?: Project[]
+  sprints?: Sprint[]
 }
 
 const PRIORITY_DOT: Record<string, string> = {
   urgent: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#6B7280'
 }
 
-export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
+export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [urgentFilter, setUrgentFilter] = useState(false)
+  const [importantFilter, setImportantFilter] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const router = useRouter()
@@ -29,9 +34,11 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
     return tasks.filter(t => {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false
       if (statusFilter !== 'all' && t.status !== statusFilter) return false
+      if (urgentFilter && !t.urgent) return false
+      if (importantFilter && !t.important) return false
       return true
     })
-  }, [tasks, search, statusFilter])
+  }, [tasks, search, statusFilter, urgentFilter, importantFilter])
 
   async function handleCreate(data: Partial<Task>) {
     const res = await fetch('/api/tasks', {
@@ -61,6 +68,17 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
   async function handleDelete(id: string) {
     await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
     setTasks(prev => prev.filter(t => t.id !== id))
+  }
+
+  async function toggleFlag(e: React.MouseEvent, task: Task, field: 'urgent' | 'important') {
+    e.stopPropagation()
+    const newVal = !task[field]
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, [field]: newVal } : t))
+    await fetch(`/api/tasks/${task.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: newVal }),
+    })
   }
 
   return (
@@ -101,6 +119,30 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
               )}
             >{s === 'all' ? 'All' : s}</button>
           ))}
+          <button
+            onClick={() => setUrgentFilter(f => !f)}
+            className={cn(
+              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+              urgentFilter
+                ? 'bg-[rgba(239,68,68,0.15)] border-[rgba(239,68,68,0.4)] text-[#EF4444]'
+                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+            )}
+          >
+            <Zap className="w-3 h-3" />
+            Urgent
+          </button>
+          <button
+            onClick={() => setImportantFilter(f => !f)}
+            className={cn(
+              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+              importantFilter
+                ? 'bg-[rgba(245,158,11,0.15)] border-[rgba(245,158,11,0.4)] text-[#F59E0B]'
+                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+            )}
+          >
+            <Star className="w-3 h-3" />
+            Important
+          </button>
         </div>
       </div>
 
@@ -109,14 +151,18 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-[rgba(255,255,255,0.06)]">
-              {['Title', 'Status', 'Priority', 'Due Date', 'Assignee'].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
-              ))}
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
+              <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
+              <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Priority</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Assignee</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
             ) : filtered.map(task => (
               <tr
                 key={task.id}
@@ -128,6 +174,34 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
                     <div className="w-0.5 h-4 rounded-full shrink-0" style={{ backgroundColor: PRIORITY_DOT[task.priority ?? 'medium'] }} />
                     <span className="text-sm text-[#F5F5F5]">{task.title}</span>
                   </div>
+                </td>
+                <td className="px-2 py-2.5 text-center">
+                  <button
+                    onClick={e => toggleFlag(e, task, 'urgent')}
+                    title="Toggle Urgent"
+                    className={cn(
+                      'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
+                      task.urgent
+                        ? 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]'
+                        : 'text-[#4B5563] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)]'
+                    )}
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                  </button>
+                </td>
+                <td className="px-2 py-2.5 text-center">
+                  <button
+                    onClick={e => toggleFlag(e, task, 'important')}
+                    title="Toggle Important"
+                    className={cn(
+                      'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
+                      task.important
+                        ? 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]'
+                        : 'text-[#4B5563] hover:text-[#F59E0B] hover:bg-[rgba(245,158,11,0.08)]'
+                    )}
+                  >
+                    <Star className="w-3.5 h-3.5" />
+                  </button>
                 </td>
                 <td className="px-4 py-2.5">
                   <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
@@ -160,7 +234,23 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
             className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] cursor-pointer"
             style={{ borderLeftColor: PRIORITY_DOT[task.priority ?? 'medium'], borderLeftWidth: 2 }}
           >
-            <p className="text-sm font-medium text-[#F5F5F5] mb-2">{task.title}</p>
+            <div className="flex items-start justify-between mb-2 gap-2">
+              <p className="text-sm font-medium text-[#F5F5F5] flex-1">{task.title}</p>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={e => toggleFlag(e, task, 'urgent')}
+                  className={cn('p-1 rounded transition-colors', task.urgent ? 'text-[#EF4444]' : 'text-[#4B5563]')}
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={e => toggleFlag(e, task, 'important')}
+                  className={cn('p-1 rounded transition-colors', task.important ? 'text-[#F59E0B]' : 'text-[#4B5563]')}
+                >
+                  <Star className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
             <div className="flex items-center gap-3 flex-wrap">
               <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
               {task.dueDate && <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>{formatDate(task.dueDate)}</span>}
@@ -178,6 +268,9 @@ export function TasksClient({ initialTasks, workspaceId }: TasksClientProps) {
           onClose={() => { setShowDialog(false); setEditingTask(null) }}
           onSave={editingTask ? (d) => handleUpdate(editingTask.id, d) : handleCreate}
           onDelete={editingTask ? () => handleDelete(editingTask.id) : undefined}
+          areas={areas}
+          projects={projects}
+          sprints={sprints}
         />
       )}
     </div>

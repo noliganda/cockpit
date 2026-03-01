@@ -14,8 +14,15 @@ const GUEST_COOKIE = 'ops-guest-session'
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
 const GUEST_MAX_AGE = 60 * 60 * 24 // 24 hours
 
-export async function setSessionCookie(value: string = 'authenticated') {
+export interface SessionData {
+  userId: string
+  email: string
+  role: 'admin' | 'collaborator' | 'guest'
+}
+
+export async function setSessionCookie(data: SessionData | string = 'authenticated') {
   const cookieStore = await cookies()
+  const value = typeof data === 'string' ? data : JSON.stringify(data)
   cookieStore.set(SESSION_COOKIE, value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -28,6 +35,20 @@ export async function setSessionCookie(value: string = 'authenticated') {
 export async function getSession(): Promise<string | null> {
   const cookieStore = await cookies()
   return cookieStore.get(SESSION_COOKIE)?.value ?? null
+}
+
+export async function getSessionData(): Promise<SessionData | null> {
+  const cookieStore = await cookies()
+  const raw = cookieStore.get(SESSION_COOKIE)?.value
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as SessionData
+    if (parsed.userId && parsed.email && parsed.role) return parsed
+    return null
+  } catch {
+    // Legacy plain-string session — treat as admin for backward compat
+    return { userId: 'legacy', email: 'admin@local', role: 'admin' }
+  }
 }
 
 export async function clearSession() {

@@ -72,7 +72,7 @@ export const projects = pgTable('projects', {
   workspaceId: text('workspace_id').notNull(),
   name: text('name').notNull(),
   description: text('description'),
-  status: text('status').default('active'),
+  status: text('status').default('Planning'),
   areaId: uuid('area_id'),
   startDate: date('start_date'),
   endDate: date('end_date'),
@@ -90,6 +90,7 @@ export const areas = pgTable('areas', {
   description: text('description'),
   color: text('color'),
   icon: text('icon'),
+  status: text('status').default('active'),
   order: integer('order').default(0),
   ...timestamps,
 }, (t) => [
@@ -189,3 +190,23 @@ export const users = pgTable('users', {
   preferences: jsonb('preferences'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+export const bases = pgTable('bases', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  workspaceId: text('workspace_id').notNull(),
+  name: text('name').notNull(),
+  description: text('description'),
+  schema: jsonb('schema').default([]),
+  ...timestamps,
+}, (t) => [
+  index('bases_workspace_idx').on(t.workspaceId),
+])
+
+export const baseRows = pgTable('base_rows', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  baseId: uuid('base_id').notNull(),
+  data: jsonb('data').default({}),
+  ...timestamps,
+}, (t) => [
+  index('base_rows_base_idx').on(t.baseId),
+])

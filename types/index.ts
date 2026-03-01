@@ -20,6 +20,8 @@ export const WORKSPACE_STATUSES: Record<WorkspaceId, string[]> = {
   'personal': ['To Do', 'In Progress', 'Completed'],
 }
 
+export const PROJECT_STATUSES = ['Planning', 'Active', 'On Hold', 'Completed', 'Archived'] as const
+
 export interface Task {
   id: string
   workspaceId: string
@@ -66,6 +68,7 @@ export interface Area {
   description?: string | null
   color?: string | null
   icon?: string | null
+  status?: string | null
   order?: number | null
   createdAt: Date
   updatedAt: Date
@@ -145,6 +148,30 @@ export interface ActivityLogEntry {
   metadata?: unknown
   embeddingModel?: string | null
   createdAt: Date
+}
+
+export interface BaseColumn {
+  name: string
+  type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'checkbox' | 'url' | 'email' | 'person' | 'relation'
+  options?: string[]
+}
+
+export interface Base {
+  id: string
+  workspaceId: string
+  name: string
+  description?: string | null
+  schema: BaseColumn[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface BaseRow {
+  id: string
+  baseId: string
+  data: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
 }
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'

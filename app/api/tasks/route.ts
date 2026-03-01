@@ -4,7 +4,7 @@ import { tasks } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { logActivity } from '@/lib/activity'
 import { z } from 'zod'
-import { getSession } from '@/lib/auth'
+import { getSession, getSessionData } from '@/lib/auth'
 
 const createSchema = z.object({
   workspaceId: z.string().min(1),
@@ -42,8 +42,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const sessionData = await getSessionData()
+  if (!sessionData) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (sessionData.role === 'guest') return NextResponse.json({ error: 'Forbidden: guests cannot create tasks' }, { status: 403 })
 
   const body = await request.json() as unknown
   const parsed = createSchema.safeParse(body)

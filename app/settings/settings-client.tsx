@@ -11,6 +11,77 @@ interface UserRow {
   createdAt: Date
 }
 
+interface CreateUserFormProps {
+  onCreated: (user: UserRow) => void
+  onCancel: () => void
+}
+
+function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState<'admin' | 'collaborator' | 'guest'>('collaborator')
+  const [creating, setCreating] = useState(false)
+
+  async function handleCreate() {
+    if (!email || !password) return
+    setCreating(true)
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role }),
+      })
+      if (res.ok) {
+        const user = await res.json() as UserRow
+        onCreated(user)
+        toast.success('User created')
+      } else {
+        const data = await res.json() as { error?: string }
+        toast.error(data.error ?? 'Failed to create user')
+      }
+    } catch { toast.error('Error creating user') }
+    finally { setCreating(false) }
+  }
+
+  return (
+    <div className="p-3 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] space-y-3">
+      <input
+        type="email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="Email address"
+        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        placeholder="Password (min 6 chars)"
+        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+      />
+      <select
+        value={role}
+        onChange={e => setRole(e.target.value as 'admin' | 'collaborator' | 'guest')}
+        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none"
+      >
+        <option value="admin">Admin — full access</option>
+        <option value="collaborator">Collaborator — create/edit, no settings</option>
+        <option value="guest">Guest — view only</option>
+      </select>
+      <div className="flex gap-2">
+        <button onClick={handleCreate} disabled={creating || !email || !password}
+          className="px-4 py-2 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] disabled:opacity-40 transition-colors">
+          {creating ? 'Creating...' : 'Create user'}
+        </button>
+        <button onClick={onCancel}
+          className="px-4 py-2 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 interface SettingsClientProps {
   sessionData: SessionData | null
   initialUsers: UserRow[]
@@ -25,10 +96,6 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
   // User management state
   const [userList, setUserList] = useState(initialUsers)
   const [showCreateUser, setShowCreateUser] = useState(false)
-  const [newEmail, setNewEmail] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [newRole, setNewRole] = useState<'admin' | 'collaborator' | 'guest'>('collaborator')
-  const [creatingUser, setCreatingUser] = useState(false)
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
   const [editRole, setEditRole] = useState<'admin' | 'collaborator' | 'guest'>('collaborator')
   const [editPassword, setEditPassword] = useState('')
@@ -83,28 +150,6 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
       }
     } catch { toast.error('Backup error') }
     finally { setBacking(false) }
-  }
-
-  async function handleCreateUser() {
-    if (!newEmail || !newPassword) return
-    setCreatingUser(true)
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newEmail, password: newPassword, role: newRole }),
-      })
-      if (res.ok) {
-        const user = await res.json() as UserRow
-        setUserList(prev => [...prev, user])
-        setNewEmail(''); setNewPassword(''); setShowCreateUser(false)
-        toast.success('User created')
-      } else {
-        const data = await res.json() as { error?: string }
-        toast.error(data.error ?? 'Failed to create user')
-      }
-    } catch { toast.error('Error creating user') }
-    finally { setCreatingUser(false) }
   }
 
   async function handleSaveEdit(userId: string) {
@@ -279,39 +324,10 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
             )}
 
             {showCreateUser ? (
-              <div className="p-3 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] space-y-3">
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
-                  placeholder="Email address"
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
-                />
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  placeholder="Password (min 6 chars)"
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
-                />
-                <select
-                  value={newRole}
-                  onChange={e => setNewRole(e.target.value as 'admin' | 'collaborator' | 'guest')}
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none"
-                >
-                  <option value="admin">Admin — full access</option>
-                  <option value="collaborator">Collaborator — create/edit, no settings</option>
-                  <option value="guest">Guest — view only</option>
-                </select>
-                <div className="flex gap-2">
-                  <Btn onClick={handleCreateUser} disabled={creatingUser || !newEmail || !newPassword}>
-                    {creatingUser ? 'Creating...' : 'Create user'}
-                  </Btn>
-                  <Btn onClick={() => { setShowCreateUser(false); setNewEmail(''); setNewPassword('') }}>
-                    Cancel
-                  </Btn>
-                </div>
-              </div>
+              <CreateUserForm
+                onCreated={user => { setUserList(prev => [...prev, user]); setShowCreateUser(false) }}
+                onCancel={() => setShowCreateUser(false)}
+              />
             ) : (
               <button
                 onClick={() => setShowCreateUser(true)}

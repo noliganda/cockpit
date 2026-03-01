@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 const updateSchema = z.object({
   role: z.enum(['admin', 'collaborator', 'guest']).optional(),
+  name: z.string().optional(),
   password: z.string().min(6).optional(),
 })
 
@@ -22,13 +23,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const updates: Partial<typeof users.$inferInsert> = {}
   if (parsed.data.role) updates.role = parsed.data.role
+  if (parsed.data.name !== undefined) updates.name = parsed.data.name
   if (parsed.data.password) updates.passwordHash = await hashPassword(parsed.data.password)
 
   const [user] = await db
     .update(users)
     .set(updates)
     .where(eq(users.id, id))
-    .returning({ id: users.id, email: users.email, role: users.role, createdAt: users.createdAt })
+    .returning({ id: users.id, email: users.email, name: users.name, role: users.role, createdAt: users.createdAt })
 
   if (!user) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(user)

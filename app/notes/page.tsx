@@ -22,5 +22,5 @@ export default async function NotesPage({
     .where(eq(notes.workspaceId, workspaceId))
     .orderBy(desc(notes.updatedAt))
 
-  return <NotesClient initialNotes={allNotes} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
+  return <NotesClient key={workspaceId} initialNotes={allNotes} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
 }

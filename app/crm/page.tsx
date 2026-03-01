@@ -24,7 +24,7 @@ export default async function CRMPage({
 
   return (
     <div className="flex flex-col h-full">
-      <CRMClient contacts={allContacts} organisations={allOrgs} workspaceId={workspaceId} />
+      <CRMClient key={workspaceId} contacts={allContacts} organisations={allOrgs} workspaceId={workspaceId} />
     </div>
   )
 }

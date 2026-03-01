@@ -25,6 +25,7 @@ export default async function ProjectsPage({
 
   return (
     <ProjectsClient
+      key={workspaceId}
       initialProjects={allProjects}
       allTasks={allTasks}
       allAreas={allAreas}

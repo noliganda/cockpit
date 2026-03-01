@@ -15,7 +15,7 @@ const createSchema = z.object({
   phone: z.string().optional(),
   mobile: z.string().optional(),
   company: z.string().optional(),
-  organisationId: z.string().uuid().optional(),
+  organisationId: z.string().uuid().optional().or(z.literal('')),
   role: z.string().optional(),
   address: z.string().optional(),
   website: z.string().optional(),
@@ -54,7 +54,12 @@ export async function POST(request: NextRequest) {
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const [contact] = await db.insert(contacts).values(parsed.data).returning()
+  const insertData = {
+    ...parsed.data,
+    organisationId: parsed.data.organisationId || undefined,
+    email: parsed.data.email || undefined,
+  }
+  const [contact] = await db.insert(contacts).values(insertData).returning()
 
   await logActivity({
     workspaceId: contact.workspaceId,

@@ -34,5 +34,5 @@ export default async function BasesPage({
     rowCount: countMap[b.id] ?? 0,
   }))
 
-  return <BasesClient initialBases={basesWithCounts} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
+  return <BasesClient key={workspaceId} initialBases={basesWithCounts} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
 }

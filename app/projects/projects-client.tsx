@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Plus, ExternalLink, Edit2, Trash2, X } from 'lucide-react'
+import { Plus, ExternalLink, Edit2, Trash2, X, Download } from 'lucide-react'
 import Link from 'next/link'
 import { type WorkspaceId, type Project, type Task, type Area, type Contact, PROJECT_STATUSES } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
@@ -246,6 +246,30 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
 
   const getTaskCount = (projectId: string) => allTasks.filter(t => t.projectId === projectId).length
 
+  function exportMarkdown() {
+    const date = new Date().toISOString().slice(0, 10)
+    const lines: string[] = [`# Projects — ${workspaceId}\n`]
+    for (const p of projects) {
+      const tasks = allTasks.filter(t => t.projectId === p.id)
+      lines.push(`## ${p.name}`)
+      lines.push(`- **Status:** ${p.status ?? 'Planning'}`)
+      if (p.endDate) lines.push(`- **End Date:** ${p.endDate}`)
+      if (p.budget) lines.push(`- **Budget:** ${p.budget}`)
+      if (tasks.length) {
+        lines.push('\n### Tasks')
+        for (const t of tasks) {
+          lines.push(`- [${t.status}] ${t.title}${t.assignee ? ` _(${t.assignee})_` : ''}`)
+        }
+      }
+      lines.push('')
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `projects-${workspaceId}-${date}.md`
+    a.click()
+  }
+
   async function handleCreate(data: Partial<Project>) {
     const res = await fetch('/api/projects', {
       method: 'POST',
@@ -291,12 +315,21 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Projects</h1>
-        <button
-          onClick={() => { setEditingProject(null); setShowDialog(true) }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
-        >
-          <Plus className="w-4 h-4" /> New project
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportMarkdown}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
+          <button
+            onClick={() => { setEditingProject(null); setShowDialog(true) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
+          >
+            <Plus className="w-4 h-4" /> New project
+          </button>
+        </div>
       </div>
 
       {projects.length === 0 ? (

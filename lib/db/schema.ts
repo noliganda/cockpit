@@ -197,6 +197,7 @@ export const activityLog = pgTable('activity_log', {
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
+  name: text('name'),
   passwordHash: text('password_hash').notNull(),
   role: text('role').default('admin'),
   preferences: jsonb('preferences'),
@@ -254,3 +255,27 @@ export const projectContacts = pgTable('project_contacts', {
   index('project_contacts_project_idx').on(t.projectId),
   index('project_contacts_contact_idx').on(t.contactId),
 ])
+
+export const aiMetrics = pgTable('ai_metrics', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  period: text('period').notNull(), // 'daily' | 'weekly' | 'monthly'
+  periodStart: date('period_start').notNull(),
+  periodEnd: date('period_end').notNull(),
+  tasksCompleted: integer('tasks_completed').default(0),
+  tasksTotal: integer('tasks_total').default(0),
+  avgTaskDurationMins: numeric('avg_task_duration_mins'),
+  automationRate: numeric('automation_rate'), // 0-100 percentage
+  apiCostUsd: numeric('api_cost_usd'),
+  costPerTask: numeric('cost_per_task'),
+  emailsSent: integer('emails_sent').default(0),
+  emailsReceived: integer('emails_received').default(0),
+  avgResponseTimeMins: numeric('avg_response_time_mins'),
+  humanInterventionRate: numeric('human_intervention_rate'), // 0-100 %
+  clientSatisfaction: text('client_satisfaction'), // 'positive' | 'neutral' | 'negative' | null
+  securityIncidents: integer('security_incidents').default(0),
+  notes: text('notes'),
+  reportingPhase: text('reporting_phase'), // 'daily' | 'weekly' | 'copil'
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})

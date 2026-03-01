@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { Plus, Pin, Trash2, ArrowLeft } from 'lucide-react'
+import { Plus, Pin, Trash2, ArrowLeft, Download } from 'lucide-react'
 import { cn, formatRelativeDate } from '@/lib/utils'
 import { type WorkspaceId, type Note } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
@@ -71,6 +71,17 @@ export function NotesClient({ initialNotes, workspaceId }: NotesClientProps) {
     await fetch(`/api/notes/${id}`, { method: 'DELETE' })
     setNotesList(prev => prev.filter(n => n.id !== id))
     if (selectedId === id) setSelectedId(notesList.find(n => n.id !== id)?.id ?? null)
+  }
+
+  function exportNote(note: Note) {
+    const date = new Date().toISOString().slice(0, 10)
+    const plaintext = note.contentPlaintext ?? ''
+    const md = `# ${note.title}\n\n${plaintext}`
+    const blob = new Blob([md], { type: 'text/markdown' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `note-${note.title.toLowerCase().replace(/\s+/g, '-').slice(0, 40)}-${date}.md`
+    a.click()
   }
 
   async function handlePin(id: string, pinned: boolean) {
@@ -150,6 +161,13 @@ export function NotesClient({ initialNotes, workspaceId }: NotesClientProps) {
                 placeholder="Untitled"
               />
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => exportNote(selectedNote)}
+                  className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#141414] transition-colors"
+                  title="Export as Markdown"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={() => handlePin(selectedNote.id, !selectedNote.pinned)}
                   className={cn('w-7 h-7 flex items-center justify-center rounded-[6px] transition-colors',

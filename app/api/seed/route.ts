@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { workspaces, areas } from '@/lib/db/schema'
-import { getSession } from '@/lib/auth'
+import { workspaces, areas, users } from '@/lib/db/schema'
+import { getSession, hashPassword } from '@/lib/auth'
 
 const DEFAULT_WORKSPACES = [
   { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
@@ -44,6 +44,18 @@ export async function POST() {
   for (const area of DEFAULT_AREAS) {
     await db.insert(areas).values(area).onConflictDoNothing()
     areasCreated++
+  }
+
+  // Seed default admin users
+  const DEFAULT_USERS = [
+    { email: 'charlie@byronfilm.com', name: 'Charlie', role: 'admin' as const, password: 'changeme123' },
+    { email: 'olivier@byronfilm.com', name: 'Olivier Marcolin', role: 'admin' as const, password: 'changeme123' },
+  ]
+  for (const u of DEFAULT_USERS) {
+    const passwordHash = await hashPassword(u.password)
+    await db.insert(users)
+      .values({ email: u.email, name: u.name, role: u.role, passwordHash })
+      .onConflictDoNothing()
   }
 
   return NextResponse.json({ success: true, workspacesSeeded: DEFAULT_WORKSPACES.length, areasSeeded: areasCreated })

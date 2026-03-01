@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { href: '/messages', icon: MessageSquare, label: 'Messages', indent: false },
   { href: '/brief', icon: Newspaper, label: 'Brief', indent: false },
   { href: '/metrics', icon: BarChart2, label: 'Metrics', indent: false },
+  { href: '/ai-metrics', icon: Zap, label: 'AI Metrics', indent: true },
   { href: '/settings', icon: Settings, label: 'Settings', indent: false },
 ] as const
 

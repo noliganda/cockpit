@@ -7,6 +7,12 @@ import dynamic from 'next/dynamic'
 
 const BlockEditor = dynamic(() => import('./block-editor').then(m => m.BlockEditor), { ssr: false })
 
+interface UserOption {
+  id: string
+  name: string | null
+  email: string
+}
+
 interface TaskDialogProps {
   task?: Task | null
   workspaceId: WorkspaceId
@@ -17,6 +23,7 @@ interface TaskDialogProps {
   areas?: Area[]
   projects?: Project[]
   sprints?: Sprint[]
+  users?: UserOption[]
 }
 
 const IMPACT_OPTIONS = ['low', 'medium', 'high']
@@ -33,7 +40,7 @@ const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[r
 const selectCls = `${inputCls} appearance-none`
 const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
 
-export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
+export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, areas = [], projects = [], sprints = [], users = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState<unknown>(task?.description ?? undefined)
   const [status, setStatus] = useState(task?.status ?? defaultStatus ?? 'Backlog')
@@ -155,8 +162,17 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Assignee</label>
-              <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="Name"
-                className={inputCls} />
+              {users.length > 0 ? (
+                <select value={assignee} onChange={e => setAssignee(e.target.value)} className={selectCls}>
+                  <option value="">— Unassigned —</option>
+                  {users.map(u => (
+                    <option key={u.id} value={u.name ?? u.email}>{u.name ?? u.email}</option>
+                  ))}
+                </select>
+              ) : (
+                <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="Name"
+                  className={inputCls} />
+              )}
             </div>
             <div>
               <label className={labelCls}>Tags</label>

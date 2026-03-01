@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 const createSchema = z.object({
   email: z.string().email(),
+  name: z.string().optional(),
   password: z.string().min(6),
   role: z.enum(['admin', 'collaborator', 'guest']),
 })
@@ -18,7 +19,7 @@ export async function GET() {
   if (session.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const allUsers = await db
-    .select({ id: users.id, email: users.email, role: users.role, createdAt: users.createdAt })
+    .select({ id: users.id, email: users.email, name: users.name, role: users.role, createdAt: users.createdAt })
     .from(users)
 
   return NextResponse.json(allUsers)
@@ -41,8 +42,8 @@ export async function POST(request: NextRequest) {
   const passwordHash = await hashPassword(parsed.data.password)
   const [user] = await db
     .insert(users)
-    .values({ email: parsed.data.email, passwordHash, role: parsed.data.role })
-    .returning({ id: users.id, email: users.email, role: users.role, createdAt: users.createdAt })
+    .values({ email: parsed.data.email, name: parsed.data.name, passwordHash, role: parsed.data.role })
+    .returning({ id: users.id, email: users.email, name: users.name, role: users.role, createdAt: users.createdAt })
 
   return NextResponse.json(user, { status: 201 })
 }

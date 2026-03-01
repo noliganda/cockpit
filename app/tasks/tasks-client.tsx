@@ -1,10 +1,16 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Plus, Search, Zap, Star } from 'lucide-react'
+import { Plus, Search, Zap, Star, Download } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TaskDialog } from '@/components/task-dialog'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { useRouter } from 'next/navigation'
+
+interface UserOption {
+  id: string
+  name: string | null
+  email: string
+}
 
 interface TasksClientProps {
   initialTasks: Task[]
@@ -12,9 +18,10 @@ interface TasksClientProps {
   areas?: Area[]
   projects?: Project[]
   sprints?: Sprint[]
+  users?: UserOption[]
 }
 
-export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [] }: TasksClientProps) {
+export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -33,6 +40,36 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
       return true
     })
   }, [tasks, search, statusFilter, urgentFilter, importantFilter])
+
+  function exportMarkdown() {
+    const date = new Date().toISOString().slice(0, 10)
+    const lines: string[] = [
+      '---',
+      `workspace: ${workspaceId}`,
+      `exported: ${date}`,
+      `total: ${filtered.length}`,
+      '---',
+      '',
+      `# Tasks — ${workspaceId}`,
+      '',
+    ]
+    for (const t of filtered) {
+      lines.push(`## ${t.title}`)
+      lines.push(`- **Status:** ${t.status}`)
+      if (t.priority) lines.push(`- **Priority:** ${t.priority}`)
+      if (t.dueDate) lines.push(`- **Due:** ${t.dueDate}`)
+      if (t.assignee) lines.push(`- **Assignee:** ${t.assignee}`)
+      if (t.urgent) lines.push('- **Urgent:** Yes')
+      if (t.important) lines.push('- **Important:** Yes')
+      if (t.tags?.length) lines.push(`- **Tags:** ${t.tags.join(', ')}`)
+      lines.push('')
+    }
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `tasks-${workspaceId}-${date}.md`
+    a.click()
+  }
 
   async function handleCreate(data: Partial<Task>) {
     const res = await fetch('/api/tasks', {
@@ -80,13 +117,22 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Tasks</h1>
-        <button
-          onClick={() => { setEditingTask(null); setShowDialog(true) }}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New task
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportMarkdown}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </button>
+          <button
+            onClick={() => { setEditingTask(null); setShowDialog(true) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New task
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -257,6 +303,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
           areas={areas}
           projects={projects}
           sprints={sprints}
+          users={users}
         />
       )}
     </div>

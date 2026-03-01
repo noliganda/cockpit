@@ -7,6 +7,7 @@ import { type SessionData } from '@/lib/auth'
 interface UserRow {
   id: string
   email: string
+  name: string | null
   role: string | null
   createdAt: Date
 }
@@ -18,6 +19,7 @@ interface CreateUserFormProps {
 
 function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<'admin' | 'collaborator' | 'guest'>('collaborator')
   const [creating, setCreating] = useState(false)
@@ -29,7 +31,7 @@ function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, name: name || undefined, password, role }),
       })
       if (res.ok) {
         const user = await res.json() as UserRow
@@ -45,6 +47,13 @@ function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
 
   return (
     <div className="p-3 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] space-y-3">
+      <input
+        type="text"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="Full name (optional)"
+        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+      />
       <input
         type="email"
         value={email}
@@ -242,6 +251,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-[rgba(255,255,255,0.06)]">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Name</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Email</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Role</th>
                       <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Created</th>
@@ -251,7 +261,8 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
                   <tbody>
                     {userList.map(user => (
                       <tr key={user.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0">
-                        <td className="px-3 py-2.5 text-sm text-[#F5F5F5]">{user.email}</td>
+                        <td className="px-3 py-2.5 text-sm text-[#F5F5F5]">{user.name ?? <span className="text-[#4B5563]">—</span>}</td>
+                        <td className="px-3 py-2.5 text-sm text-[#A0A0A0]">{user.email}</td>
                         <td className="px-3 py-2.5">
                           {editingUserId === user.id ? (
                             <select

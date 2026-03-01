@@ -24,6 +24,7 @@ export default async function SprintsPage({
 
   return (
     <SprintsClient
+      key={workspaceId}
       initialSprints={allSprints as Sprint[]}
       workspaceId={workspaceId}
       allTasks={allTasks as Task[]}

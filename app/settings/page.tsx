@@ -10,7 +10,7 @@ export default async function SettingsPage() {
 
   const sessionData = await getSessionData()
   const allUsers = sessionData?.role === 'admin'
-    ? await db.select({ id: users.id, email: users.email, role: users.role, createdAt: users.createdAt }).from(users)
+    ? await db.select({ id: users.id, email: users.email, name: users.name, role: users.role, createdAt: users.createdAt }).from(users)
     : []
 
   return <SettingsClient sessionData={sessionData} initialUsers={allUsers} />

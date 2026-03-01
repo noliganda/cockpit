@@ -7,7 +7,7 @@ export default async function MetricsPage() {
   if (!session) redirect('/login')
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight mb-2">Metrics</h1>
       <p className="text-sm text-[#A0A0A0] mb-8">Cost efficiency and ROI tracking.</p>
 

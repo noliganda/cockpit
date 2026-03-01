@@ -49,7 +49,7 @@ export function ProjectsClient({ initialProjects, allTasks, workspaceId }: Proje
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Projects</h1>
         <button onClick={() => setShowCreate(true)}

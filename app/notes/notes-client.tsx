@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { Plus, Pin, Trash2 } from 'lucide-react'
+import { Plus, Pin, Trash2, ArrowLeft } from 'lucide-react'
 import { cn, formatRelativeDate } from '@/lib/utils'
 import { type WorkspaceId, type Note } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
@@ -21,6 +21,7 @@ export function NotesClient({ initialNotes, workspaceId }: NotesClientProps) {
   const [notesList, setNotesList] = useState(initialNotes)
   const [selectedId, setSelectedId] = useState<string | null>(initialNotes[0]?.id ?? null)
   const [creating, setCreating] = useState(false)
+  const [mobileShowEditor, setMobileShowEditor] = useState(false)
   const { workspace } = useWorkspace()
 
   const selectedNote = notesList.find(n => n.id === selectedId) ?? null
@@ -92,8 +93,12 @@ export function NotesClient({ initialNotes, workspaceId }: NotesClientProps) {
 
   return (
     <div className="flex h-full">
-      {/* Note list sidebar */}
-      <div className="w-64 shrink-0 border-r border-[rgba(255,255,255,0.06)] flex flex-col">
+      {/* Note list sidebar — hidden on mobile when editor is open */}
+      <div className={cn(
+        'shrink-0 border-r border-[rgba(255,255,255,0.06)] flex flex-col',
+        'w-full md:w-64',
+        mobileShowEditor ? 'hidden md:flex' : 'flex'
+      )}>
         <div className="p-3 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
           <h1 className="text-sm font-semibold text-[#F5F5F5]">Notes</h1>
           <button onClick={handleCreate} disabled={creating}
@@ -105,7 +110,7 @@ export function NotesClient({ initialNotes, workspaceId }: NotesClientProps) {
           {sorted.length === 0 ? (
             <p className="text-xs text-[#4B5563] text-center py-8">No notes yet</p>
           ) : sorted.map(note => (
-            <button key={note.id} onClick={() => setSelectedId(note.id)}
+            <button key={note.id} onClick={() => { setSelectedId(note.id); setMobileShowEditor(true) }}
               className={cn(
                 'w-full text-left px-3 py-2.5 rounded-[6px] mb-1 transition-colors group',
                 selectedId === note.id ? 'bg-[#1A1A1A]' : 'hover:bg-[#141414]'
@@ -122,12 +127,21 @@ export function NotesClient({ initialNotes, workspaceId }: NotesClientProps) {
         </div>
       </div>
 
-      {/* Editor area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* Editor area — hidden on mobile when showing list */}
+      <div className={cn(
+        'flex-1 flex flex-col min-w-0 overflow-hidden',
+        mobileShowEditor ? 'flex' : 'hidden md:flex'
+      )}>
         {selectedNote ? (
           <>
             {/* Note header */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-[rgba(255,255,255,0.06)]">
+              <button
+                onClick={() => setMobileShowEditor(false)}
+                className="md:hidden w-8 h-8 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] mr-2 shrink-0"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
               <input
                 key={selectedNote.id}
                 defaultValue={selectedNote.title}

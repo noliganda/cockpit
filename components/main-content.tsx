@@ -2,6 +2,8 @@
 import { useSidebar } from '@/hooks/use-sidebar'
 import { Menu, Search } from 'lucide-react'
 import { useWorkspace } from '@/hooks/use-workspace'
+import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 
 interface MainContentProps {
@@ -12,6 +14,7 @@ interface MainContentProps {
 export function MainContent({ children, onSearchOpen }: MainContentProps) {
   const { setMobileOpen } = useSidebar()
   const { workspace } = useWorkspace()
+  const pathname = usePathname()
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -20,7 +23,7 @@ export function MainContent({ children, onSearchOpen }: MainContentProps) {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="md:hidden w-8 h-8 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#141414] transition-colors mr-2"
+          className="md:hidden w-11 h-11 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#141414] transition-colors mr-1"
         >
           <Menu className="w-4 h-4" />
         </button>
@@ -43,7 +46,18 @@ export function MainContent({ children, onSearchOpen }: MainContentProps) {
       </div>
       {/* Content area */}
       <main className="flex-1 overflow-y-auto">
-        {children}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="h-full"
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   )

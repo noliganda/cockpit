@@ -65,7 +65,7 @@ export function SettingsClient() {
   )
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight mb-8">Settings</h1>
       <div className="space-y-4">
         <Section icon={RefreshCw} title="Notion Sync">

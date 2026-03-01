@@ -77,7 +77,7 @@ export default async function DashboardPage({
   }))
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight mb-6">Dashboard</h1>
 
       {/* Stat cards */}

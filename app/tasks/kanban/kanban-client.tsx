@@ -70,7 +70,7 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
   }
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-4 md:p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Kanban</h1>
         <button
@@ -82,9 +82,9 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
+        <div className="flex gap-4 overflow-x-auto pb-4 flex-1 scroll-smooth snap-x snap-mandatory">
           {columns.map(col => (
-            <div key={col.status} className="flex-shrink-0 w-64 flex flex-col">
+            <div key={col.status} className="flex-shrink-0 w-72 sm:w-64 flex flex-col snap-start">
               <div className="flex items-center gap-2 mb-3">
                 <h2 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide">{col.status}</h2>
                 <span className="text-xs text-[#6B7280] font-mono">{col.tasks.length}</span>

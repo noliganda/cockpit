@@ -23,7 +23,7 @@ export default async function SprintDetailPage({ params }: { params: Promise<{ i
   const statuses = [...new Set(sprintTasks.map(t => t.status))]
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <Link href="/sprints" className="inline-flex items-center gap-1.5 text-sm text-[#6B7280] hover:text-[#F5F5F5] mb-6 transition-colors">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Sprints
       </Link>

@@ -20,7 +20,7 @@ export default async function AreaDetailPage({ params }: { params: Promise<{ id:
   ])
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <Link href="/areas" className="inline-flex items-center gap-1.5 text-sm text-[#6B7280] hover:text-[#F5F5F5] mb-6 transition-colors">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Areas
       </Link>

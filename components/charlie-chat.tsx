@@ -23,6 +23,7 @@ export function CharlieChat() {
   const [listening, setListening] = useState(false)
   const [wsConnected, setWsConnected] = useState(false)
   const [cameraOpen, setCameraOpen] = useState(false)
+  const [hasNewMessage, setHasNewMessage] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -63,6 +64,7 @@ export function CharlieChat() {
           }])
         }
         setSending(false)
+        setHasNewMessage(true)
       }
     } catch { setWsConnected(false) }
   }, [])
@@ -201,14 +203,25 @@ export function CharlieChat() {
   return (
     <>
       {/* Toggle button */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg"
-        style={{ backgroundColor: workspace.color }}
-        aria-label="Open chat"
-      >
-        {open ? <ChevronDown className="w-5 h-5 text-white" /> : <MessageSquare className="w-5 h-5 text-white" />}
-      </button>
+      <div className="fixed bottom-6 right-6 z-40">
+        {hasNewMessage && !open && (
+          <span
+            className="absolute inset-0 rounded-full animate-ping opacity-40"
+            style={{ backgroundColor: workspace.color }}
+          />
+        )}
+        <button
+          onClick={() => { setOpen(o => !o); setHasNewMessage(false) }}
+          className="relative w-12 h-12 rounded-full flex items-center justify-center transition-all"
+          style={{
+            backgroundColor: workspace.color,
+            boxShadow: `0 4px 24px ${workspace.color}40, 0 2px 8px rgba(0,0,0,0.6)`,
+          }}
+          aria-label="Open chat"
+        >
+          {open ? <ChevronDown className="w-5 h-5 text-white" /> : <MessageSquare className="w-5 h-5 text-white" />}
+        </button>
+      </div>
 
       {/* Camera viewfinder overlay */}
       {cameraOpen && (

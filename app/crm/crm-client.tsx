@@ -59,7 +59,7 @@ export function CRMClient({ contacts: initialContacts, organisations, workspaceI
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 pt-6 pb-0 flex items-center justify-between">
+      <div className="px-4 md:px-6 pt-4 md:pt-6 pb-0 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">CRM</h1>
         <div className="flex items-center gap-2">
           <span className="text-xs text-[#6B7280] font-mono">{contacts.length} contacts</span>
@@ -67,7 +67,7 @@ export function CRMClient({ contacts: initialContacts, organisations, workspaceI
       </div>
 
       {/* Tabs */}
-      <div className="px-6 mt-4 border-b border-[rgba(255,255,255,0.06)]">
+      <div className="px-4 md:px-6 mt-4 border-b border-[rgba(255,255,255,0.06)]">
         <div className="flex gap-0">
           {TABS.map(t => (
             <button
@@ -88,7 +88,7 @@ export function CRMClient({ contacts: initialContacts, organisations, workspaceI
       </div>
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-4 md:p-6">
         {tab === 'contacts' && (
           <ContactsTab contacts={contacts} />
         )}
@@ -182,32 +182,52 @@ function OrgsTab({ organisations }: { organisations: Organisation[] }) {
   }
 
   return (
-    <div className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-[rgba(255,255,255,0.06)]">
-            {['Organisation', 'Industry', 'Website', 'Size', 'Stage'].map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {organisations.map(org => (
-            <tr key={org.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0 hover:bg-[rgba(255,255,255,0.02)]">
-              <td className="px-4 py-2.5 text-sm text-[#F5F5F5]">{org.name}</td>
-              <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{org.industry ?? '—'}</td>
-              <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{org.website ?? '—'}</td>
-              <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{org.size ?? '—'}</td>
-              <td className="px-4 py-2.5">
-                {org.pipelineStage && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{org.pipelineStage}</span>
-                )}
-              </td>
+    <>
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-[rgba(255,255,255,0.06)]">
+              {['Organisation', 'Industry', 'Website', 'Size', 'Stage'].map(h => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {organisations.map(org => (
+              <tr key={org.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0 hover:bg-[rgba(255,255,255,0.02)]">
+                <td className="px-4 py-2.5 text-sm text-[#F5F5F5]">{org.name}</td>
+                <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{org.industry ?? '—'}</td>
+                <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{org.website ?? '—'}</td>
+                <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{org.size ?? '—'}</td>
+                <td className="px-4 py-2.5">
+                  {org.pipelineStage && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{org.pipelineStage}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-2">
+        {organisations.map(org => (
+          <div key={org.id} className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] p-4">
+            <div className="flex items-start justify-between mb-2">
+              <p className="text-sm font-medium text-[#F5F5F5]">{org.name}</p>
+              {org.pipelineStage && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0] ml-2 shrink-0">{org.pipelineStage}</span>
+              )}
+            </div>
+            {org.industry && <p className="text-xs text-[#6B7280]">{org.industry}</p>}
+            {org.website && <p className="text-xs text-[#A0A0A0] mt-0.5">{org.website}</p>}
+            {org.size && <p className="text-xs text-[#6B7280] mt-0.5">{org.size}</p>}
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 

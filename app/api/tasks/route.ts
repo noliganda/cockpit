@@ -9,7 +9,7 @@ import { getSession, getSessionData } from '@/lib/auth'
 const createSchema = z.object({
   workspaceId: z.string().min(1),
   title: z.string().min(1),
-  description: z.string().optional(),
+  description: z.union([z.string(), z.array(z.unknown())]).optional(),
   status: z.string().optional(),
   priority: z.string().optional(),
   impact: z.string().optional(),
@@ -50,7 +50,13 @@ export async function POST(request: NextRequest) {
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const [task] = await db.insert(tasks).values(parsed.data).returning()
+  const insertData = {
+    ...parsed.data,
+    description: parsed.data.description !== undefined
+      ? (typeof parsed.data.description === 'string' ? parsed.data.description : JSON.stringify(parsed.data.description))
+      : undefined,
+  }
+  const [task] = await db.insert(tasks).values(insertData).returning()
 
   await logActivity({
     workspaceId: task.workspaceId,

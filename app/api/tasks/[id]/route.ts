@@ -22,11 +22,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (sessionData.role === 'guest') return NextResponse.json({ error: 'Forbidden: guests cannot edit' }, { status: 403 })
 
   const { id } = await params
-  const body = await request.json() as TaskUpdate
+  const body = await request.json() as TaskUpdate & { description?: unknown }
+
+  // Serialize JSON description blocks to string for text column
+  const updateData: TaskUpdate = { ...body as TaskUpdate, updatedAt: new Date() }
+  if (body.description !== undefined && typeof body.description !== 'string') {
+    updateData.description = JSON.stringify(body.description)
+  }
 
   const [task] = await db
     .update(tasks)
-    .set({ ...body, updatedAt: new Date() })
+    .set(updateData)
     .where(eq(tasks.id, id))
     .returning()
 

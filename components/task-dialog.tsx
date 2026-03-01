@@ -1,8 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { X, Trash2, ExternalLink, Zap, Star, Plus } from 'lucide-react'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { cn } from '@/lib/utils'
+import dynamic from 'next/dynamic'
+
+const BlockEditor = dynamic(() => import('./block-editor').then(m => m.BlockEditor), { ssr: false })
 
 interface TaskDialogProps {
   task?: Task | null
@@ -28,7 +31,7 @@ const KORUS_REGIONS = [
 
 export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
-  const [description, setDescription] = useState(task?.description ?? '')
+  const [description, setDescription] = useState<unknown>(task?.description ?? undefined)
   const [status, setStatus] = useState(task?.status ?? defaultStatus ?? 'Backlog')
   const [impact, setImpact] = useState(task?.impact ?? '')
   const [effort, setEffort] = useState(task?.effort ?? '')
@@ -92,7 +95,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
     try {
       const data: Partial<Task> = {
         title: title.trim(),
-        description: description || undefined,
+        description: description
+          ? (typeof description === 'string' ? description : JSON.stringify(description))
+          : undefined,
         status,
         impact: impact || undefined,
         effort: effort || undefined,
@@ -154,13 +159,16 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
             />
             {submitted && errors.title && <p className="text-xs text-[#EF4444] mt-1">Title is required</p>}
           </div>
-          <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            placeholder="Description (optional)"
-            rows={3}
-            className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors resize-none"
-          />
+          <div>
+            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Description</label>
+            <div className="rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] overflow-hidden max-h-48 overflow-y-auto">
+              <BlockEditor
+                initialContent={task?.description}
+                onChange={(blocks) => setDescription(blocks)}
+                className="text-sm [&_.bn-editor]:min-h-[80px] [&_.bn-editor]:px-3 [&_.bn-editor]:py-2"
+              />
+            </div>
+          </div>
 
           {/* Urgent + Important toggles */}
           <div className="flex items-center gap-4">

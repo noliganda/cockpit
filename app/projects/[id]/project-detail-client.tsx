@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, CheckSquare, FileText, Database, Users, FolderOpen, Zap, Star, Plus, X, Download } from 'lucide-react'
+import { ArrowLeft, CheckSquare, FileText, Database, Users, FolderOpen, Zap, Star, Plus, Trash2, Check, ExternalLink } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { type Project, type Task, type Area, type Note, type Milestone, type Bookmark, type ProjectContact, type Contact } from '@/types'
 import dynamic from 'next/dynamic'
@@ -24,9 +24,9 @@ const TABS = [
   { id: 'overview', label: 'Overview', icon: FolderOpen },
   { id: 'tasks', label: 'Tasks', icon: CheckSquare },
   { id: 'notes', label: 'Notes', icon: FileText },
+  { id: 'team', label: 'Team', icon: Users },
   { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'bases', label: 'Bases', icon: Database },
-  { id: 'contacts', label: 'Team', icon: Users },
 ] as const
 
 type TabId = typeof TABS[number]['id']
@@ -39,49 +39,61 @@ const STATUS_COLORS: Record<string, string> = {
   Archived: 'text-[#4B5563] bg-[rgba(75,85,99,0.12)]',
 }
 
-const inputCls = 'px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]'
-const labelCls = 'text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
-const btnSecondary = 'px-3 py-1.5 text-xs rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors'
+const CONTACT_ROLES = ['Team', 'Client', 'Contractor', 'Supplier', 'Consultant']
 
-// ── Milestones Section ──────────────────────────────────────────────────────
+const BOOKMARK_PRESETS = [
+  { title: 'Google Drive', url: 'https://drive.google.com' },
+  { title: 'Slack Channel', url: 'https://slack.com' },
+  { title: 'Frame.io', url: 'https://frame.io' },
+  { title: 'Xero Project', url: 'https://xero.com' },
+]
 
-function MilestonesSection({ projectId, initial }: { projectId: string; initial: Milestone[] }) {
-  const [milestones, setMilestones] = useState<Milestone[]>(initial)
-  const [showForm, setShowForm] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newDate, setNewDate] = useState('')
-  const [adding, setAdding] = useState(false)
-  const today = new Date().toISOString().slice(0, 10)
+export function ProjectDetailClient({
+  project, projectTasks, projectNotes, area, progress,
+  initialMilestones, initialBookmarks, initialProjectContacts, workspaceContacts
+}: ProjectDetailClientProps) {
+  const [activeTab, setActiveTab] = useState<TabId>('overview')
 
-  async function handleAdd() {
-    if (!newTitle.trim()) return
-    setAdding(true)
+  // Milestones state
+  const [milestones, setMilestones] = useState(initialMilestones)
+  const [newMilestoneTitle, setNewMilestoneTitle] = useState('')
+  const [newMilestoneDate, setNewMilestoneDate] = useState('')
+  const [addingMilestone, setAddingMilestone] = useState(false)
+
+  // Bookmarks state
+  const [bookmarks, setBookmarks] = useState(initialBookmarks)
+  const [newBookmarkTitle, setNewBookmarkTitle] = useState('')
+  const [newBookmarkUrl, setNewBookmarkUrl] = useState('')
+  const [addingBookmark, setAddingBookmark] = useState(false)
+
+  // Project contacts state
+  const [projectContacts, setProjectContacts] = useState(initialProjectContacts)
+  const [addContactId, setAddContactId] = useState('')
+  const [addContactRole, setAddContactRole] = useState('Team')
+  const [addingContact, setAddingContact] = useState(false)
+
+  // --- Milestone handlers ---
+  async function addMilestone() {
+    if (!newMilestoneTitle.trim()) return
+    setAddingMilestone(true)
     try {
-      const res = await fetch(`/api/projects/${projectId}/milestones`, {
+      const res = await fetch(`/api/projects/${project.id}/milestones`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newTitle.trim(), date: newDate || undefined }),
+        body: JSON.stringify({ title: newMilestoneTitle.trim(), date: newMilestoneDate || undefined }),
       })
       if (res.ok) {
         const m = await res.json() as Milestone
-        setMilestones(prev => {
-          const next = [...prev, m].sort((a, b) => {
-            if (!a.date) return 1
-            if (!b.date) return -1
-            return a.date.localeCompare(b.date)
-          })
-          return next
-        })
-        setNewTitle('')
-        setNewDate('')
-        setShowForm(false)
+        setMilestones(prev => [...prev, m].sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '')))
+        setNewMilestoneTitle('')
+        setNewMilestoneDate('')
       }
-    } finally { setAdding(false) }
+    } finally { setAddingMilestone(false) }
   }
 
-  async function handleToggle(m: Milestone) {
+  async function toggleMilestone(m: Milestone) {
     const newStatus = m.status === 'completed' ? 'pending' : 'completed'
-    const res = await fetch(`/api/projects/${projectId}/milestones/${m.id}`, {
+    const res = await fetch(`/api/projects/${project.id}/milestones/${m.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
@@ -91,435 +103,85 @@ function MilestonesSection({ projectId, initial }: { projectId: string; initial:
     }
   }
 
-  async function handleDelete(id: string) {
-    const res = await fetch(`/api/projects/${projectId}/milestones/${id}`, { method: 'DELETE' })
+  async function deleteMilestone(id: string) {
+    await fetch(`/api/projects/${project.id}/milestones/${id}`, { method: 'DELETE' })
+    setMilestones(prev => prev.filter(m => m.id !== id))
+  }
+
+  // --- Bookmark handlers ---
+  async function addBookmark(title?: string, url?: string) {
+    const t = title ?? newBookmarkTitle.trim()
+    const u = url ?? newBookmarkUrl.trim()
+    if (!t || !u) return
+    const res = await fetch(`/api/projects/${project.id}/bookmarks`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: t, url: u }),
+    })
     if (res.ok) {
-      setMilestones(prev => prev.filter(x => x.id !== id))
+      const b = await res.json() as Bookmark
+      setBookmarks(prev => [b, ...prev])
+      setNewBookmarkTitle('')
+      setNewBookmarkUrl('')
     }
   }
 
-  return (
-    <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className={labelCls}>Milestones</h3>
-        <button
-          onClick={() => setShowForm(v => !v)}
-          className={btnSecondary + ' flex items-center gap-1'}
-        >
-          <Plus className="w-3 h-3" /> Add Milestone
-        </button>
-      </div>
+  async function deleteBookmark(id: string) {
+    await fetch(`/api/projects/${project.id}/bookmarks/${id}`, { method: 'DELETE' })
+    setBookmarks(prev => prev.filter(b => b.id !== id))
+  }
 
-      {showForm && (
-        <div className="flex items-center gap-2 mb-4 p-3 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)]">
-          <input
-            value={newTitle}
-            onChange={e => setNewTitle(e.target.value)}
-            placeholder="Milestone title"
-            className={inputCls + ' flex-1'}
-            onKeyDown={e => e.key === 'Enter' && handleAdd()}
-          />
-          <input
-            type="date"
-            value={newDate}
-            onChange={e => setNewDate(e.target.value)}
-            className={inputCls + ' w-36 [color-scheme:dark]'}
-          />
-          <button onClick={handleAdd} disabled={adding || !newTitle.trim()} className={btnSecondary + ' shrink-0 disabled:opacity-40'}>
-            {adding ? '...' : 'Add'}
-          </button>
-          <button onClick={() => setShowForm(false)} className="text-[#6B7280] hover:text-[#F5F5F5]">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {milestones.length === 0 ? (
-        <p className="text-xs text-[#4B5563] py-4 text-center">No milestones yet.</p>
-      ) : (
-        <div className="space-y-0">
-          {milestones.map((m, i) => {
-            const isCompleted = m.status === 'completed'
-            const isDateOverdue = m.date && m.date < today && !isCompleted
-            return (
-              <div key={m.id} className="flex items-start gap-3 py-2.5 group relative">
-                {/* timeline line */}
-                {i < milestones.length - 1 && (
-                  <div className="absolute left-[9px] top-[28px] bottom-0 w-px bg-[rgba(255,255,255,0.06)]" />
-                )}
-                <button
-                  onClick={() => handleToggle(m)}
-                  className={cn(
-                    'w-[18px] h-[18px] shrink-0 rounded-full border-2 mt-0.5 transition-colors',
-                    isCompleted
-                      ? 'border-[#22C55E] bg-[#22C55E]'
-                      : 'border-[rgba(255,255,255,0.20)] bg-transparent hover:border-[rgba(255,255,255,0.40)]'
-                  )}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className={cn('text-sm', isCompleted ? 'line-through text-[#6B7280]' : 'text-[#F5F5F5]')}>
-                    {m.title}
-                  </p>
-                  {m.date && (
-                    <p className={cn('text-xs mt-0.5', isDateOverdue ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
-                      {formatDate(m.date)}{isDateOverdue && ' · Overdue'}
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleDelete(m.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-[#4B5563] hover:text-[#EF4444] shrink-0"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Bookmarks / Links Section ───────────────────────────────────────────────
-
-const PRESET_LINKS = ['Google Drive', 'Slack Channel', 'Frame.io', 'Xero Project']
-
-function BookmarksSection({ projectId, initial }: { projectId: string; initial: Bookmark[] }) {
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>(initial)
-  const [showForm, setShowForm] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newUrl, setNewUrl] = useState('')
-  const [adding, setAdding] = useState(false)
-
-  async function handleAdd() {
-    if (!newTitle.trim() || !newUrl.trim()) return
-    setAdding(true)
+  // --- Contact handlers ---
+  async function addContact() {
+    if (!addContactId) return
+    setAddingContact(true)
     try {
-      const res = await fetch(`/api/projects/${projectId}/bookmarks`, {
+      const res = await fetch(`/api/projects/${project.id}/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newTitle.trim(), url: newUrl.trim() }),
+        body: JSON.stringify({ contactId: addContactId, role: addContactRole }),
       })
       if (res.ok) {
-        const b = await res.json() as Bookmark
-        setBookmarks(prev => [...prev, b])
-        setNewTitle('')
-        setNewUrl('')
-        setShowForm(false)
+        const pc = await res.json() as ProjectContact
+        const contact = workspaceContacts.find(c => c.id === addContactId)
+        if (contact) {
+          setProjectContacts(prev => [...prev, { ...pc, contact }])
+        }
+        setAddContactId('')
+        setAddContactRole('Team')
       }
-    } finally { setAdding(false) }
+    } finally { setAddingContact(false) }
   }
 
-  async function handleDelete(id: string) {
-    const res = await fetch(`/api/projects/${projectId}/bookmarks/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      setBookmarks(prev => prev.filter(b => b.id !== id))
-    }
+  async function removeContact(pcId: string) {
+    await fetch(`/api/projects/${project.id}/contacts/${pcId}`, { method: 'DELETE' })
+    setProjectContacts(prev => prev.filter(pc => pc.id !== pcId))
   }
 
-  function openPreset(title: string) {
-    setNewTitle(title)
-    setNewUrl('')
-    setShowForm(true)
-  }
-
-  return (
-    <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className={labelCls}>Links</h3>
-        <button
-          onClick={() => { setNewTitle(''); setNewUrl(''); setShowForm(v => !v) }}
-          className={btnSecondary + ' flex items-center gap-1'}
-        >
-          <Plus className="w-3 h-3" /> Add Link
-        </button>
-      </div>
-
-      {/* Preset buttons */}
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        {PRESET_LINKS.map(label => (
-          <button
-            key={label}
-            onClick={() => openPreset(label)}
-            className="px-2 py-1 text-xs rounded-[4px] bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5] hover:border-[rgba(255,255,255,0.12)] transition-colors"
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {showForm && (
-        <div className="flex items-center gap-2 mb-4 p-3 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)]">
-          <input
-            value={newTitle}
-            onChange={e => setNewTitle(e.target.value)}
-            placeholder="Title"
-            className={inputCls + ' flex-1'}
-          />
-          <input
-            value={newUrl}
-            onChange={e => setNewUrl(e.target.value)}
-            placeholder="https://..."
-            className={inputCls + ' flex-1'}
-            onKeyDown={e => e.key === 'Enter' && handleAdd()}
-          />
-          <button onClick={handleAdd} disabled={adding || !newTitle.trim() || !newUrl.trim()} className={btnSecondary + ' shrink-0 disabled:opacity-40'}>
-            {adding ? '...' : 'Add'}
-          </button>
-          <button onClick={() => setShowForm(false)} className="text-[#6B7280] hover:text-[#F5F5F5]">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {bookmarks.length === 0 ? (
-        <p className="text-xs text-[#4B5563] py-2 text-center">No links yet.</p>
-      ) : (
-        <div className="space-y-1">
-          {bookmarks.map(b => (
-            <div key={b.id} className="flex items-center gap-2 py-1.5 group">
-              <a
-                href={b.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 min-w-0"
-              >
-                <span className="text-sm text-[#F5F5F5] hover:text-[#A0A0A0] transition-colors">{b.title}</span>
-                <span className="block text-xs text-[#4B5563] truncate">{b.url}</span>
-              </a>
-              <button
-                onClick={() => handleDelete(b.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-[#4B5563] hover:text-[#EF4444] shrink-0"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Team / Contacts Tab ──────────────────────────────────────────────────────
-
-const PROJECT_CONTACT_ROLES = ['Team', 'Client', 'Contractor', 'Supplier', 'Consultant']
-
-function TeamTab({
-  projectId,
-  initialProjectContacts,
-  workspaceContacts,
-}: {
-  projectId: string
-  initialProjectContacts: ProjectContact[]
-  workspaceContacts: Contact[]
-}) {
-  const [projectContacts, setProjectContacts] = useState<ProjectContact[]>(initialProjectContacts)
-  const [showAddDialog, setShowAddDialog] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedContactId, setSelectedContactId] = useState('')
-  const [selectedRole, setSelectedRole] = useState('Team')
-  const [adding, setAdding] = useState(false)
-
-  function openAddDialog() {
-    setShowAddDialog(true)
-    setSearchQuery('')
-    setSelectedContactId('')
-    setSelectedRole('Team')
-  }
-
-  async function handleAdd() {
-    if (!selectedContactId) return
-    setAdding(true)
-    try {
-      const res = await fetch(`/api/projects/${projectId}/contacts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contactId: selectedContactId, role: selectedRole }),
-      })
-      if (res.ok) {
-        // Reload contacts
-        const updated = await fetch(`/api/projects/${projectId}/contacts`).then(r => r.json()) as ProjectContact[]
-        setProjectContacts(updated)
-        setShowAddDialog(false)
-      }
-    } finally { setAdding(false) }
-  }
-
-  async function handleRemove(pcid: string) {
-    const res = await fetch(`/api/projects/${projectId}/contacts/${pcid}`, { method: 'DELETE' })
-    if (res.ok) {
-      setProjectContacts(prev => prev.filter(pc => pc.id !== pcid))
-    }
-  }
-
-  function downloadVcf(pc: ProjectContact) {
-    const c = pc.contact
-    if (!c) return
-    const vcf = [
+  function downloadVCF(contact: Contact) {
+    const lines = [
       'BEGIN:VCARD',
       'VERSION:3.0',
-      `FN:${c.name}`,
-      c.phone || c.mobile ? `TEL:${c.phone ?? c.mobile}` : '',
-      c.email ? `EMAIL:${c.email}` : '',
-      c.company ? `ORG:${c.company}` : '',
-      pc.role ? `TITLE:${pc.role}` : '',
+      `FN:${contact.name}`,
+      contact.mobile ? `TEL;TYPE=CELL:${contact.mobile}` : '',
+      contact.phone ? `TEL;TYPE=WORK:${contact.phone}` : '',
+      contact.email ? `EMAIL:${contact.email}` : '',
+      contact.company ? `ORG:${contact.company}` : '',
+      contact.role ? `TITLE:${contact.role}` : '',
+      contact.address ? `ADR:;;${contact.address};;;;` : '',
       'END:VCARD',
     ].filter(Boolean).join('\n')
 
-    const blob = new Blob([vcf], { type: 'text/vcard' })
+    const blob = new Blob([lines], { type: 'text/vcard' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${c.name.replace(/\s+/g, '_')}.vcf`
-    document.body.appendChild(a)
+    a.download = `${contact.name.replace(/\s+/g, '_')}.vcf`
     a.click()
-    document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
-  const filteredContacts = workspaceContacts.filter(c =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.email ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (c.company ?? '').toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-[#6B7280]">{projectContacts.length} team member{projectContacts.length !== 1 ? 's' : ''}</p>
-        <button onClick={openAddDialog} className={btnSecondary + ' flex items-center gap-1'}>
-          <Plus className="w-3 h-3" /> Add Contact
-        </button>
-      </div>
-
-      {projectContacts.length === 0 ? (
-        <p className="text-sm text-[#4B5563] text-center py-12">No team members linked to this project.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {projectContacts.map(pc => {
-            const c = pc.contact
-            if (!c) return null
-            return (
-              <div key={pc.id} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] group">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-medium text-[#F5F5F5]">{c.name}</p>
-                    {pc.role && <p className="text-xs text-[#6B7280]">{pc.role}</p>}
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => downloadVcf(pc)}
-                      title="Download VCF"
-                      className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleRemove(pc.id)}
-                      className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#EF4444] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-                {c.company && <p className="text-xs text-[#6B7280] mb-1">{c.company}</p>}
-                {c.email && (
-                  <a href={`mailto:${c.email}`} className="block text-xs text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors mb-0.5 truncate">
-                    {c.email}
-                  </a>
-                )}
-                {(c.phone ?? c.mobile) && (
-                  <a href={`tel:${c.phone ?? c.mobile}`} className="block text-xs text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors">
-                    {c.phone ?? c.mobile}
-                  </a>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Add Contact Dialog */}
-      {showAddDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddDialog(false)} />
-          <div className="relative w-full max-w-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
-              <h3 className="text-sm font-semibold text-[#F5F5F5]">Add Team Member</h3>
-              <button onClick={() => setShowAddDialog(false)} className="text-[#6B7280] hover:text-[#F5F5F5]">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-4 space-y-3">
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search contacts..."
-                className={inputCls + ' w-full'}
-                autoFocus
-              />
-              <div className="max-h-48 overflow-y-auto space-y-1 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] p-1">
-                {filteredContacts.length === 0 ? (
-                  <p className="text-xs text-[#4B5563] text-center py-4">No contacts found</p>
-                ) : (
-                  filteredContacts.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelectedContactId(c.id)}
-                      className={cn(
-                        'w-full text-left px-2.5 py-2 rounded-[4px] transition-colors',
-                        selectedContactId === c.id
-                          ? 'bg-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
-                          : 'text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#F5F5F5]'
-                      )}
-                    >
-                      <p className="text-sm">{c.name}</p>
-                      {c.company && <p className="text-xs text-[#6B7280]">{c.company}</p>}
-                    </button>
-                  ))
-                )}
-              </div>
-              <div>
-                <label className={labelCls + ' block'}>Role on project</label>
-                <select
-                  value={selectedRole}
-                  onChange={e => setSelectedRole(e.target.value)}
-                  className={inputCls + ' w-full appearance-none'}
-                >
-                  {PROJECT_CONTACT_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
-              </div>
-              <button
-                onClick={handleAdd}
-                disabled={adding || !selectedContactId}
-                className="w-full py-2 text-sm font-medium bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
-              >
-                {adding ? 'Adding...' : 'Add to project'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Main Component ───────────────────────────────────────────────────────────
-
-export function ProjectDetailClient({
-  project,
-  projectTasks,
-  projectNotes,
-  area,
-  progress,
-  initialMilestones,
-  initialBookmarks,
-  initialProjectContacts,
-  workspaceContacts,
-}: ProjectDetailClientProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const today = new Date().toISOString().split('T')[0]
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -551,7 +213,11 @@ export function ProjectDetailClient({
         {[
           { label: 'Tasks', value: String(projectTasks.length) },
           { label: 'Progress', value: `${progress}%` },
-          { label: 'Budget', value: project.budget ? `$${Number(project.budget).toLocaleString()}` : '—' },
+          { label: 'Budget', value: project.budget
+              ? (Number(project.budget) < 0
+                  ? `-$${Math.abs(Number(project.budget)).toLocaleString()}`
+                  : `$${Number(project.budget).toLocaleString()}`)
+              : '—' },
           { label: 'Notes', value: String(projectNotes.length) },
         ].map(s => (
           <div key={s.label} className="p-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
@@ -594,33 +260,32 @@ export function ProjectDetailClient({
               {tab.id === 'tasks' && projectTasks.length > 0 && (
                 <span className="text-xs font-mono text-[#6B7280] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded-full">{projectTasks.length}</span>
               )}
-              {tab.id === 'notes' && projectNotes.length > 0 && (
-                <span className="text-xs font-mono text-[#6B7280] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded-full">{projectNotes.length}</span>
+              {tab.id === 'team' && projectContacts.length > 0 && (
+                <span className="text-xs font-mono text-[#6B7280] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded-full">{projectContacts.length}</span>
               )}
             </button>
           )
         })}
       </div>
 
-      {/* Tab content */}
+      {/* Overview tab */}
       {activeTab === 'overview' && (
         <div className="space-y-4">
+          {/* Description */}
           {project.description && (
             <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
               <h3 className="text-xs text-[#6B7280] uppercase tracking-wide mb-2">Description</h3>
               <div className="text-sm [&_.bn-editor]:pointer-events-none">
-                <BlockEditor
-                  initialContent={project.description}
-                  onChange={() => {}}
-                  className="[&_.bn-editor]:min-h-0"
-                />
+                <BlockEditor initialContent={project.description} onChange={() => {}} className="[&_.bn-editor]:min-h-0" />
               </div>
             </div>
           )}
+
+          {/* Quick info */}
           <div className="grid grid-cols-2 gap-3">
             {project.endDate && (
               <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">Due Date</p>
+                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">End Date</p>
                 <p className="text-sm text-[#F5F5F5]">{formatDate(project.endDate)}</p>
               </div>
             )}
@@ -639,13 +304,142 @@ export function ProjectDetailClient({
           </div>
 
           {/* Milestones */}
-          <MilestonesSection projectId={project.id} initial={initialMilestones} />
+          <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-[#F5F5F5]">Milestones</h3>
+              <span className="text-xs text-[#6B7280]">{milestones.filter(m => m.status === 'completed').length}/{milestones.length} done</span>
+            </div>
+
+            {milestones.length > 0 && (
+              <div className="space-y-2 mb-4">
+                {milestones.map(m => {
+                  const overdue = m.date && m.date < today && m.status !== 'completed'
+                  return (
+                    <div key={m.id} className="flex items-center gap-3 group">
+                      <button
+                        onClick={() => toggleMilestone(m)}
+                        className={cn(
+                          'w-5 h-5 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors',
+                          m.status === 'completed'
+                            ? 'bg-[#22C55E] border-[#22C55E]'
+                            : 'border-[rgba(255,255,255,0.16)] hover:border-[rgba(255,255,255,0.30)]'
+                        )}
+                      >
+                        {m.status === 'completed' && <Check className="w-3 h-3 text-white" />}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <span className={cn('text-sm', m.status === 'completed' ? 'line-through text-[#6B7280]' : overdue ? 'text-[#EF4444]' : 'text-[#F5F5F5]')}>
+                          {m.title}
+                        </span>
+                        {m.date && (
+                          <span className={cn('text-xs ml-2', overdue ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
+                            {formatDate(m.date)}{overdue ? ' · Overdue' : ''}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => deleteMilestone(m.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#EF4444] transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Add milestone inline */}
+            <div className="flex items-center gap-2">
+              <input
+                value={newMilestoneTitle}
+                onChange={e => setNewMilestoneTitle(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') addMilestone() }}
+                placeholder="Add milestone..."
+                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+              />
+              <input
+                type="date"
+                value={newMilestoneDate}
+                onChange={e => setNewMilestoneDate(e.target.value)}
+                className="px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]"
+              />
+              <button
+                onClick={addMilestone}
+                disabled={addingMilestone || !newMilestoneTitle.trim()}
+                className="p-2 rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
           {/* Links */}
-          <BookmarksSection projectId={project.id} initial={initialBookmarks} />
+          <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+            <h3 className="text-sm font-semibold text-[#F5F5F5] mb-4">Links</h3>
+
+            {/* Preset buttons */}
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              {BOOKMARK_PRESETS.map(preset => (
+                <button
+                  key={preset.title}
+                  onClick={() => addBookmark(preset.title, preset.url)}
+                  className="text-xs px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5] hover:border-[rgba(255,255,255,0.10)] transition-colors"
+                >
+                  + {preset.title}
+                </button>
+              ))}
+            </div>
+
+            {bookmarks.length > 0 && (
+              <div className="space-y-1.5 mb-3">
+                {bookmarks.map(b => (
+                  <div key={b.id} className="flex items-center gap-2 group">
+                    <ExternalLink className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+                    <a href={b.url} target="_blank" rel="noopener noreferrer"
+                      className="flex-1 text-sm text-[#F5F5F5] hover:text-[#A0A0A0] truncate transition-colors">
+                      {b.title}
+                    </a>
+                    <span className="text-xs text-[#4B5563] truncate max-w-[120px] hidden sm:block">{b.url}</span>
+                    <button
+                      onClick={() => deleteBookmark(b.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#EF4444] transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add link inline */}
+            <div className="flex items-center gap-2">
+              <input
+                value={newBookmarkTitle}
+                onChange={e => setNewBookmarkTitle(e.target.value)}
+                placeholder="Title"
+                className="w-28 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+              />
+              <input
+                value={newBookmarkUrl}
+                onChange={e => setNewBookmarkUrl(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') addBookmark() }}
+                placeholder="https://..."
+                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+              />
+              <button
+                onClick={() => addBookmark()}
+                disabled={!newBookmarkTitle.trim() || !newBookmarkUrl.trim()}
+                className="p-2 rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Tasks tab */}
       {activeTab === 'tasks' && (
         <div className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
           {projectTasks.length === 0 ? (
@@ -664,9 +458,7 @@ export function ProjectDetailClient({
               <tbody>
                 {projectTasks.map(task => (
                   <tr key={task.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0">
-                    <td className="px-4 py-2.5">
-                      <span className="text-sm text-[#F5F5F5]">{task.title}</span>
-                    </td>
+                    <td className="px-4 py-2.5"><span className="text-sm text-[#F5F5F5]">{task.title}</span></td>
                     <td className="px-4 py-2.5">
                       <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
                     </td>
@@ -675,12 +467,8 @@ export function ProjectDetailClient({
                         {task.dueDate ? formatDate(task.dueDate) : '—'}
                       </span>
                     </td>
-                    <td className="px-2 py-2.5 text-center">
-                      {task.urgent && <Zap className="w-3.5 h-3.5 text-[#EF4444] mx-auto" />}
-                    </td>
-                    <td className="px-2 py-2.5 text-center">
-                      {task.important && <Star className="w-3.5 h-3.5 text-[#F59E0B] mx-auto" />}
-                    </td>
+                    <td className="px-2 py-2.5 text-center">{task.urgent && <Zap className="w-3.5 h-3.5 text-[#EF4444] mx-auto" />}</td>
+                    <td className="px-2 py-2.5 text-center">{task.important && <Star className="w-3.5 h-3.5 text-[#F59E0B] mx-auto" />}</td>
                   </tr>
                 ))}
               </tbody>
@@ -689,23 +477,104 @@ export function ProjectDetailClient({
         </div>
       )}
 
+      {/* Notes tab */}
       {activeTab === 'notes' && (
         <div className="space-y-3">
           {projectNotes.length === 0 ? (
             <p className="text-sm text-[#4B5563] text-center py-12">No notes linked to this project.</p>
-          ) : (
-            projectNotes.map(note => (
-              <div key={note.id} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-                <div className="flex items-center gap-2 mb-1">
-                  {note.pinned && <span className="text-xs text-[#F59E0B]">📌 Pinned</span>}
-                  <h3 className="text-sm font-medium text-[#F5F5F5]">{note.title}</h3>
-                </div>
-                {note.contentPlaintext && (
-                  <p className="text-xs text-[#6B7280] line-clamp-2">{note.contentPlaintext}</p>
-                )}
-                <p className="text-xs text-[#4B5563] mt-1">{formatDate(note.createdAt.toISOString())}</p>
+          ) : projectNotes.map(note => (
+            <div key={note.id} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+              <div className="flex items-center gap-2 mb-1">
+                {note.pinned && <span className="text-xs text-[#F59E0B]">📌 Pinned</span>}
+                <h3 className="text-sm font-medium text-[#F5F5F5]">{note.title}</h3>
               </div>
-            ))
+              {note.contentPlaintext && <p className="text-xs text-[#6B7280] line-clamp-2">{note.contentPlaintext}</p>}
+              <p className="text-xs text-[#4B5563] mt-1">{formatDate(note.createdAt.toISOString())}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Team tab */}
+      {activeTab === 'team' && (
+        <div className="space-y-4">
+          {/* Contact cards */}
+          {projectContacts.length === 0 ? (
+            <p className="text-sm text-[#4B5563] text-center py-8">No team contacts yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {projectContacts.map(pc => {
+                const c = pc.contact!
+                return (
+                  <div key={pc.id} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] group">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="text-sm font-medium text-[#F5F5F5]">{c.name}</p>
+                        <p className="text-xs text-[#6B7280]">{pc.role} {c.company ? `· ${c.company}` : ''}</p>
+                      </div>
+                      <button
+                        onClick={() => removeContact(pc.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#EF4444] transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {(c.mobile ?? c.phone) && (
+                        <a href={`tel:${c.mobile ?? c.phone}`} className="text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+                          {c.mobile ?? c.phone}
+                        </a>
+                      )}
+                      {c.email && (
+                        <a href={`mailto:${c.email}`} className="text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+                          {c.email}
+                        </a>
+                      )}
+                      <button
+                        onClick={() => downloadVCF(c)}
+                        className="text-xs text-[#4B5563] hover:text-[#A0A0A0] transition-colors ml-auto"
+                      >
+                        ↓ VCF
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Add contact */}
+          {workspaceContacts.length > 0 && (
+            <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+              <h3 className="text-xs text-[#6B7280] uppercase tracking-wide mb-3">Add Contact</h3>
+              <div className="flex items-center gap-2">
+                <select
+                  value={addContactId}
+                  onChange={e => setAddContactId(e.target.value)}
+                  className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none"
+                >
+                  <option value="">— Select contact —</option>
+                  {workspaceContacts
+                    .filter(c => !projectContacts.some(pc => pc.contactId === c.id))
+                    .map(c => <option key={c.id} value={c.id}>{c.name}</option>)
+                  }
+                </select>
+                <select
+                  value={addContactRole}
+                  onChange={e => setAddContactRole(e.target.value)}
+                  className="px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none"
+                >
+                  {CONTACT_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+                <button
+                  onClick={addContact}
+                  disabled={!addContactId || addingContact}
+                  className="px-3 py-2 rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] text-sm hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -722,14 +591,6 @@ export function ProjectDetailClient({
           <Database className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
           <p className="text-sm text-[#4B5563]">Linked bases coming soon.</p>
         </div>
-      )}
-
-      {activeTab === 'contacts' && (
-        <TeamTab
-          projectId={project.id}
-          initialProjectContacts={initialProjectContacts}
-          workspaceContacts={workspaceContacts}
-        />
       )}
     </div>
   )

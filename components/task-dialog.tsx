@@ -48,6 +48,17 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
   const isKorus = workspaceId === 'korus'
 
+  // Project → Area logic: when project is selected, auto-fill area from project
+  const selectedProject = projects.find(p => p.id === projectId) ?? null
+  const projectAreaId = selectedProject?.areaId ?? null
+  const effectiveAreaId = projectAreaId ?? areaId
+
+  function handleProjectChange(id: string) {
+    setProjectId(id)
+    const p = projects.find(proj => proj.id === id)
+    if (p?.areaId) setAreaId(p.areaId)
+  }
+
   function addTag() {
     const t = tagInput.trim()
     if (t && !tags.includes(t)) {
@@ -75,7 +86,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
         dueDate: dueDate || undefined,
         assignee: assignee || undefined,
         tags,
-        areaId: areaId || undefined,
+        areaId: effectiveAreaId || undefined,
         projectId: projectId || undefined,
         sprintId: sprintId || undefined,
       }
@@ -182,19 +193,28 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
             </div>
           </div>
 
-          {/* Area / Project / Sprint */}
-          <div className="grid grid-cols-3 gap-3">
-            {areas.length > 0 && (
-              <Select label="Area" value={areaId} onChange={setAreaId}>
-                <option value="">— None —</option>
-                {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
-              </Select>
-            )}
+          {/* Project / Area / Sprint */}
+          <div className="grid grid-cols-2 gap-3">
             {projects.length > 0 && (
-              <Select label="Project" value={projectId} onChange={setProjectId}>
-                <option value="">— None —</option>
+              <Select label="Project" value={projectId} onChange={handleProjectChange}>
+                <option value="">— No project —</option>
                 {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </Select>
+            )}
+            {areas.length > 0 && (
+              projectAreaId ? (
+                <div>
+                  <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Area (from project)</label>
+                  <div className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.04)] text-[#6B7280] text-sm">
+                    {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
+                  </div>
+                </div>
+              ) : (
+                <Select label="Area (when no project)" value={areaId} onChange={setAreaId}>
+                  <option value="">— No area —</option>
+                  {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
+                </Select>
+              )
             )}
             {sprints.length > 0 && (
               <Select label="Sprint" value={sprintId} onChange={setSprintId}>

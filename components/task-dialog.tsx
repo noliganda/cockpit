@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 interface TaskDialogProps {
   task?: Task | null
   workspaceId: WorkspaceId
+  defaultStatus?: string
   onClose: () => void
   onSave: (data: Partial<Task>) => Promise<void>
   onDelete?: () => Promise<void>
@@ -25,10 +26,10 @@ const KORUS_REGIONS = [
   { value: 'Global', label: '🌏 Global' },
 ]
 
-export function TaskDialog({ task, workspaceId, onClose, onSave, onDelete, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
+export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
-  const [status, setStatus] = useState(task?.status ?? 'Backlog')
+  const [status, setStatus] = useState(task?.status ?? defaultStatus ?? 'Backlog')
   const [impact, setImpact] = useState(task?.impact ?? '')
   const [effort, setEffort] = useState(task?.effort ?? '')
   const [urgent, setUrgent] = useState(task?.urgent ?? false)

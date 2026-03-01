@@ -14,7 +14,7 @@ interface KanbanClientProps {
 export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [showNew, setShowNew] = useState(false)
+  const [newTaskStatus, setNewTaskStatus] = useState<string | null>(null)
   const statuses = [...TASK_STATUSES]
 
   const columns = statuses.map(status => ({
@@ -70,7 +70,7 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Kanban</h1>
         <button
-          onClick={() => setShowNew(true)}
+          onClick={() => setNewTaskStatus('Backlog')}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
         >
           <Plus className="w-4 h-4" /> New task
@@ -82,8 +82,14 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
           {columns.map(col => (
             <div key={col.status} className="flex-shrink-0 w-72 sm:w-64 flex flex-col snap-start">
               <div className="flex items-center gap-2 mb-3">
-                <h2 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide">{col.status}</h2>
+                <h2 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide flex-1">{col.status}</h2>
                 <span className="text-xs text-[#6B7280] font-mono">{col.tasks.length}</span>
+                <button
+                  onClick={() => setNewTaskStatus(col.status)}
+                  className="w-5 h-5 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               </div>
               <Droppable droppableId={col.status}>
                 {(provided, snapshot) => (
@@ -102,7 +108,7 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={() => setEditingTask(task)}
+                            onClick={() => { setEditingTask(task); setNewTaskStatus(null) }}
                             className={cn(
                               'p-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] cursor-pointer transition-all',
                               snapshot.isDragging && 'border-[rgba(255,255,255,0.16)] bg-[#1A1A1A]'
@@ -143,11 +149,12 @@ export function KanbanClient({ initialTasks, workspaceId }: KanbanClientProps) {
         </div>
       </DragDropContext>
 
-      {(editingTask || showNew) && (
+      {(editingTask || newTaskStatus !== null) && (
         <TaskDialog
           task={editingTask}
           workspaceId={workspaceId}
-          onClose={() => { setEditingTask(null); setShowNew(false) }}
+          defaultStatus={newTaskStatus ?? undefined}
+          onClose={() => { setEditingTask(null); setNewTaskStatus(null) }}
           onSave={editingTask ? (d) => handleUpdate(editingTask.id, d) : handleCreate}
           onDelete={editingTask ? () => handleDelete(editingTask.id) : undefined}
         />

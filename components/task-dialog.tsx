@@ -29,6 +29,10 @@ const KORUS_REGIONS = [
   { value: 'Global', label: '🌏 Global' },
 ]
 
+const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors'
+const selectCls = `${inputCls} appearance-none`
+const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+
 export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState<unknown>(task?.description ?? undefined)
@@ -48,36 +52,27 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
 
   const isKorus = workspaceId === 'korus'
 
-  // Project → Area logic: when project is selected, auto-fill area from project
+  // Project → Area mutual exclusion logic
   const selectedProject = projects.find(p => p.id === projectId) ?? null
   const projectAreaId = selectedProject?.areaId ?? null
   const effectiveAreaId = projectAreaId ?? areaId
 
   function handleProjectChange(id: string) {
     setProjectId(id)
-    const p = projects.find(proj => proj.id === id)
-    if (p?.areaId) setAreaId(p.areaId)
+    if (id) setAreaId('') // clear area when project selected
   }
 
-  // Validation — only enforced on new tasks
-  const isNew = !task
-  const errors = {
-    title: isNew && !title.trim(),
-    dueDate: isNew && !dueDate,
-    assignee: isNew && !assignee.trim(),
-    allocation: isNew && !projectId && !effectiveAreaId,
-    tags: isNew && tags.length === 0,
+  function handleAreaChange(id: string) {
+    setAreaId(id)
+    if (id) setProjectId('') // clear project when area selected
   }
-  const hasErrors = Object.values(errors).some(Boolean)
+
   function addTag() {
     const t = tagInput.trim()
-    if (t && !tags.includes(t)) {
-      setTags(prev => [...prev, t])
-    }
+    if (t && !tags.includes(t)) setTags(prev => [...prev, t])
     setTagInput('')
   }
 
@@ -86,9 +81,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   }
 
   async function handleSave() {
-    setSubmitted(true)
     if (!title.trim()) return
-    if (isNew && hasErrors) return
     setSaving(true)
     try {
       const data: Partial<Task> = {
@@ -120,16 +113,6 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
     try { await onDelete(); onClose() } finally { setDeleting(false) }
   }
 
-  const Select = ({ label, value, onChange, children }: { label: string; value: string; onChange: (v: string) => void; children: React.ReactNode }) => (
-    <div>
-      <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none">
-        {children}
-      </select>
-    </div>
-  )
-
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
@@ -144,36 +127,99 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
         {/* Body */}
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
-          <div>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Task title *"
-              autoFocus
-              className={cn(
-                'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors',
-                submitted && errors.title ? 'border-[rgba(239,68,68,0.5)]' : 'border-[rgba(255,255,255,0.06)]'
-              )}
-            />
-            {submitted && errors.title && <p className="text-xs text-[#EF4444] mt-1">Title is required</p>}
-          </div>
-          <div>
-            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Description</label>
-            <div className="rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] overflow-hidden max-h-48 overflow-y-auto">
-              <BlockEditor
-                initialContent={task?.description}
-                onChange={(blocks) => setDescription(blocks)}
-                className="text-sm [&_.bn-editor]:min-h-[80px] [&_.bn-editor]:px-3 [&_.bn-editor]:py-2"
-              />
+          {/* Row 1: Title */}
+          <input
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="Task title *"
+            autoFocus
+            className={cn(inputCls, !title.trim() && title !== '' && 'border-[rgba(239,68,68,0.5)]')}
+          />
+
+          {/* Row 2: Status | Due Date */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Status</label>
+              <select value={status} onChange={e => setStatus(e.target.value)} className={selectCls}>
+                {TASK_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Due Date</label>
+              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+                className={cn(inputCls, '[color-scheme:dark]')} />
             </div>
           </div>
 
-          {/* Urgent + Important toggles */}
-          <div className="flex items-center gap-4">
+          {/* Row 3: Assignee | Tags */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Assignee</label>
+              <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="Name"
+                className={inputCls} />
+            </div>
+            <div>
+              <label className={labelCls}>Tags</label>
+              <div className="flex items-center gap-1.5">
+                <input
+                  value={tagInput}
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
+                  placeholder="Add tag..."
+                  className={cn(inputCls, 'flex-1')}
+                />
+                <button onClick={addTag} className="p-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0">
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex items-center gap-1 flex-wrap mt-1.5">
+                  {tags.map(tag => (
+                    <span key={tag} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.08)] text-[#A0A0A0]">
+                      {tag}
+                      <button onClick={() => removeTag(tag)} className="text-[#6B7280] hover:text-[#EF4444] transition-colors">×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Row 4: Project | Area */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Project</label>
+              <select value={projectId} onChange={e => handleProjectChange(e.target.value)} className={selectCls}>
+                <option value="">— No project —</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Area {projectAreaId ? '(from project)' : ''}</label>
+              {projectAreaId ? (
+                <div className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.04)] text-[#6B7280] text-sm">
+                  {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
+                </div>
+              ) : (
+                <select
+                  value={areaId}
+                  onChange={e => handleAreaChange(e.target.value)}
+                  disabled={!!projectId}
+                  className={cn(selectCls, projectId && 'opacity-50 cursor-not-allowed')}
+                >
+                  <option value="">— No area —</option>
+                  {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
+                </select>
+              )}
+            </div>
+          </div>
+
+          {/* Row 5: Urgent/Important | Impact/Effort */}
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setUrgent(u => !u)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-[6px] border text-sm font-medium transition-colors',
+                'flex items-center gap-1.5 px-3 py-2 rounded-[6px] border text-sm font-medium transition-colors',
                 urgent
                   ? 'bg-[rgba(239,68,68,0.12)] border-[rgba(239,68,68,0.30)] text-[#EF4444]'
                   : 'bg-[#0A0A0A] border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5]'
@@ -185,7 +231,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
             <button
               onClick={() => setImportant(i => !i)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-[6px] border text-sm font-medium transition-colors',
+                'flex items-center gap-1.5 px-3 py-2 rounded-[6px] border text-sm font-medium transition-colors',
                 important
                   ? 'bg-[rgba(245,158,11,0.12)] border-[rgba(245,158,11,0.30)] text-[#F59E0B]'
                   : 'bg-[#0A0A0A] border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5]'
@@ -194,101 +240,57 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <Star className="w-3.5 h-3.5" />
               Important
             </button>
+            <div className="flex items-center gap-2 ml-auto">
+              <div>
+                <select value={impact} onChange={e => setImpact(e.target.value)}
+                  className="px-2.5 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-xs outline-none appearance-none focus:border-[rgba(255,255,255,0.16)]">
+                  <option value="">Impact</option>
+                  {IMPACT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <div>
+                <select value={effort} onChange={e => setEffort(e.target.value)}
+                  className="px-2.5 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-xs outline-none appearance-none focus:border-[rgba(255,255,255,0.16)]">
+                  <option value="">Effort</option>
+                  {EFFORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Select label="Status" value={status} onChange={setStatus}>
-              {TASK_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-            </Select>
-            <Select label="Impact" value={impact} onChange={setImpact}>
-              <option value="">— None —</option>
-              {IMPACT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </Select>
-            <Select label="Effort" value={effort} onChange={setEffort}>
-              <option value="">— None —</option>
-              {EFFORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </Select>
+          {/* Row 5b: Sprint (optional) */}
+          {sprints.length > 0 && (
             <div>
-              <label className={cn('block text-xs uppercase tracking-wide mb-1.5', submitted && errors.dueDate ? 'text-[#EF4444]' : 'text-[#6B7280]')}>Due Date *</label>
-              <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-                className={cn('w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] [color-scheme:dark]', submitted && errors.dueDate ? 'border-[rgba(239,68,68,0.5)]' : 'border-[rgba(255,255,255,0.06)]')} />
+              <label className={labelCls}>Sprint</label>
+              <select value={sprintId} onChange={e => setSprintId(e.target.value)} className={selectCls}>
+                <option value="">— No sprint —</option>
+                {sprints.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
             </div>
-            <div>
-              <label className={cn('block text-xs uppercase tracking-wide mb-1.5', submitted && errors.assignee ? 'text-[#EF4444]' : 'text-[#6B7280]')}>Assignee *</label>
-              <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="Name"
-                className={cn('w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]', submitted && errors.assignee ? 'border-[rgba(239,68,68,0.5)]' : 'border-[rgba(255,255,255,0.06)]')} />
-            </div>
-          </div>
-
-          {/* Project / Area / Sprint */}
-          <div>
-            <div className="grid grid-cols-2 gap-3">
-              {projects.length > 0 && (
-                <Select label="Project *" value={projectId} onChange={handleProjectChange}>
-                  <option value="">— No project —</option>
-                  {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </Select>
-              )}
-              {areas.length > 0 && (
-                projectAreaId ? (
-                  <div>
-                    <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Area (from project)</label>
-                    <div className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.04)] text-[#6B7280] text-sm">
-                      {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
-                    </div>
-                  </div>
-                ) : (
-                  <Select label="Area (when no project) *" value={areaId} onChange={setAreaId}>
-                    <option value="">— No area —</option>
-                    {areas.map(a => <option key={a.id} value={a.id}>{a.icon} {a.name}</option>)}
-                  </Select>
-                )
-              )}
-              {sprints.length > 0 && (
-                <Select label="Sprint" value={sprintId} onChange={setSprintId}>
-                  <option value="">— None —</option>
-                  {sprints.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </Select>
-              )}
-            </div>
-            {submitted && errors.allocation && (
-              <p className="text-xs text-[#EF4444] mt-1">Select a project or area</p>
-            )}
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className={cn('block text-xs uppercase tracking-wide mb-1.5', submitted && errors.tags ? 'text-[#EF4444]' : 'text-[#6B7280]')}>Tags * (at least one)</label>
-            <div className="flex items-center gap-1.5 flex-wrap mb-2">
-              {tags.map(tag => (
-                <span key={tag} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.08)] text-[#A0A0A0]">
-                  {tag}
-                  <button onClick={() => removeTag(tag)} className="text-[#6B7280] hover:text-[#EF4444] transition-colors ml-0.5">×</button>
-                </span>
-              ))}
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                value={tagInput}
-                onChange={e => setTagInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
-                placeholder="Add tag..."
-                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
-              />
-              <button onClick={addTag} className="p-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-            {submitted && errors.tags && <p className="text-xs text-[#EF4444] mt-1">Add at least one tag</p>}
-          </div>
-
-          {/* Region — KORUS only */}
-          {isKorus && (
-            <Select label="Region" value={region} onChange={setRegion}>
-              <option value="">— No region —</option>
-              {KORUS_REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-            </Select>
           )}
+
+          {/* Row 6: Region — KORUS only */}
+          {isKorus && (
+            <div>
+              <label className={labelCls}>Region</label>
+              <select value={region} onChange={e => setRegion(e.target.value)} className={selectCls}>
+                <option value="">— No region —</option>
+                {KORUS_REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Row 7: Description */}
+          <div>
+            <label className={labelCls}>Description</label>
+            <div className="rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] overflow-hidden max-h-48 overflow-y-auto">
+              <BlockEditor
+                initialContent={task?.description}
+                onChange={(blocks) => setDescription(blocks)}
+                className="text-sm [&_.bn-editor]:min-h-[80px] [&_.bn-editor]:px-3 [&_.bn-editor]:py-2"
+              />
+            </div>
+          </div>
 
           {task?.notionId && (
             <div className="flex items-center gap-2 text-xs text-[#6B7280]">
@@ -322,7 +324,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           </div>
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors min-h-[44px]">Cancel</button>
-            <button onClick={handleSave} disabled={saving}
+            <button onClick={handleSave} disabled={saving || !title.trim()}
               className="px-4 py-2.5 text-sm font-medium bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors min-h-[44px]">
               {saving ? 'Saving...' : task ? 'Save changes' : 'Create task'}
             </button>

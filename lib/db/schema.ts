@@ -78,6 +78,9 @@ export const projects = pgTable('projects', {
   endDate: date('end_date'),
   budget: numeric('budget', { precision: 12, scale: 2 }),
   region: text('region'),
+  projectManagerId: uuid('project_manager_id'),
+  clientId: uuid('client_id'),
+  leadGenId: uuid('lead_gen_id'),
   ...timestamps,
 }, (t) => [
   index('projects_workspace_idx').on(t.workspaceId),
@@ -92,6 +95,8 @@ export const areas = pgTable('areas', {
   icon: text('icon'),
   status: text('status').default('active'),
   order: integer('order').default(0),
+  context: text('context'),
+  spheresOfResponsibility: text('spheres_of_responsibility').array().default([]),
   ...timestamps,
 }, (t) => [
   index('areas_workspace_idx').on(t.workspaceId),
@@ -114,16 +119,23 @@ export const contacts = pgTable('contacts', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: text('workspace_id').notNull(),
   name: text('name').notNull(),
+  firstName: text('first_name'),
+  lastName: text('last_name'),
   email: text('email'),
   phone: text('phone'),
+  mobile: text('mobile'),
   company: text('company'),
   organisationId: uuid('organisation_id'),
   role: text('role'),
   address: text('address'),
   website: text('website'),
   linkedinUrl: text('linkedin_url'),
+  instagramUrl: text('instagram_url'),
+  facebookUrl: text('facebook_url'),
+  portfolioUrl: text('portfolio_url'),
   notes: text('notes'),
   pipelineStage: text('pipeline_stage'),
+  nextReachDate: date('next_reach_date'),
   tags: text('tags').array().default([]),
   source: text('source'),
   ...timestamps,
@@ -209,4 +221,36 @@ export const baseRows = pgTable('base_rows', {
   ...timestamps,
 }, (t) => [
   index('base_rows_base_idx').on(t.baseId),
+])
+
+export const milestones = pgTable('milestones', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id').notNull(),
+  title: text('title').notNull(),
+  date: date('date'),
+  status: text('status').default('pending'),
+  ...timestamps,
+}, (t) => [
+  index('milestones_project_idx').on(t.projectId),
+])
+
+export const bookmarks = pgTable('bookmarks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id').notNull(),
+  title: text('title').notNull(),
+  url: text('url').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('bookmarks_project_idx').on(t.projectId),
+])
+
+export const projectContacts = pgTable('project_contacts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id').notNull(),
+  contactId: uuid('contact_id').notNull(),
+  role: text('role').default('Team'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('project_contacts_project_idx').on(t.projectId),
+  index('project_contacts_contact_idx').on(t.contactId),
 ])

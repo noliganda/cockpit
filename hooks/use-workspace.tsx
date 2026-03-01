@@ -18,9 +18,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [workspaceId, setWorkspaceId] = useState<WorkspaceId>('byron-film')
 
   useEffect(() => {
+    // Read workspace from URL searchParams first, then fall back to localStorage
+    const params = new URLSearchParams(window.location.search)
+    const urlWorkspace = params.get('workspace') as WorkspaceId | null
     const stored = localStorage.getItem('workspace') as WorkspaceId | null
-    if (stored && WORKSPACES.find(w => w.id === stored)) {
-      setWorkspaceId(stored)
+
+    const resolved = urlWorkspace ?? stored
+    if (resolved && WORKSPACES.find(w => w.id === resolved)) {
+      setWorkspaceId(resolved)
+      localStorage.setItem('workspace', resolved)
     }
   }, [])
 

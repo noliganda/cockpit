@@ -26,6 +26,8 @@ export type TaskStatus = typeof TASK_STATUSES[number]
 
 export const PROJECT_STATUSES = ['Planning', 'Active', 'On Hold', 'Completed', 'Archived'] as const
 
+export const PIPELINE_STAGES = ['Lead', 'Qualified', 'Proposal', 'Signature', 'Won', 'Lost', 'On Hold'] as const
+
 export interface Task {
   id: string
   workspaceId: string
@@ -61,6 +63,9 @@ export interface Project {
   endDate?: string | null
   budget?: string | null
   region?: string | null
+  projectManagerId?: string | null
+  clientId?: string | null
+  leadGenId?: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -74,6 +79,8 @@ export interface Area {
   icon?: string | null
   status?: string | null
   order?: number | null
+  context?: string | null
+  spheresOfResponsibility?: string[] | null
   createdAt: Date
   updatedAt: Date
 }
@@ -94,16 +101,23 @@ export interface Contact {
   id: string
   workspaceId: string
   name: string
+  firstName?: string | null
+  lastName?: string | null
   email?: string | null
   phone?: string | null
+  mobile?: string | null
   company?: string | null
   organisationId?: string | null
   role?: string | null
   address?: string | null
   website?: string | null
   linkedinUrl?: string | null
+  instagramUrl?: string | null
+  facebookUrl?: string | null
+  portfolioUrl?: string | null
   notes?: string | null
   pipelineStage?: string | null
+  nextReachDate?: string | null
   tags?: string[] | null
   source?: string | null
   createdAt: Date
@@ -152,6 +166,33 @@ export interface ActivityLogEntry {
   metadata?: unknown
   embeddingModel?: string | null
   createdAt: Date
+}
+
+export interface Milestone {
+  id: string
+  projectId: string
+  title: string
+  date?: string | null
+  status?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface Bookmark {
+  id: string
+  projectId: string
+  title: string
+  url: string
+  createdAt: Date
+}
+
+export interface ProjectContact {
+  id: string
+  projectId: string
+  contactId: string
+  role?: string | null
+  createdAt: Date
+  contact?: Contact
 }
 
 export interface BaseColumn {

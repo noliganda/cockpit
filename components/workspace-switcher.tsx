@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { ChevronDown, Check } from 'lucide-react'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { WORKSPACES, type WorkspaceId } from '@/types'
@@ -8,6 +9,15 @@ import { cn } from '@/lib/utils'
 export function WorkspaceSwitcher() {
   const [open, setOpen] = useState(false)
   const { workspace, setWorkspace } = useWorkspace()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  function handleSwitch(id: WorkspaceId) {
+    setWorkspace(id)
+    setOpen(false)
+    // Navigate to current page with new workspace param to trigger server re-fetch
+    router.push(`${pathname}?workspace=${id}`)
+  }
 
   return (
     <div className="relative">
@@ -29,7 +39,7 @@ export function WorkspaceSwitcher() {
             {WORKSPACES.map(ws => (
               <button
                 key={ws.id}
-                onClick={() => { setWorkspace(ws.id as WorkspaceId); setOpen(false) }}
+                onClick={() => handleSwitch(ws.id as WorkspaceId)}
                 className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[rgba(255,255,255,0.04)] text-left transition-colors"
               >
                 <div

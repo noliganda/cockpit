@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { X, Trash2, ExternalLink, Zap, Star, Plus } from 'lucide-react'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { cn } from '@/lib/utils'
@@ -73,8 +73,6 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
     tags: isNew && tags.length === 0,
   }
   const hasErrors = Object.values(errors).some(Boolean)
-  const canSubmit = !isNew || (!hasErrors)
-
   function addTag() {
     const t = tagInput.trim()
     if (t && !tags.includes(t)) {

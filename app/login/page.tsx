@@ -40,6 +40,11 @@ export default function LoginPage() {
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">OPS Dashboard</h1>
           <p className="text-sm text-[#A0A0A0] mt-1">Enter your password to continue</p>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            {[{ color: '#D4A017' }, { color: '#008080' }, { color: '#F97316' }].map((ws, i) => (
+              <div key={i} className="w-2 h-2 rounded-full opacity-60" style={{ backgroundColor: ws.color }} />
+            ))}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

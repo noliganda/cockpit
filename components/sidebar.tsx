@@ -106,6 +106,7 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
       {!collapsed && (
         <div className="p-3 border-t border-[rgba(255,255,255,0.06)]">
           <p className="text-xs text-[#4B5563]">OPS Dashboard v4</p>
+          <p className="text-xs text-[#4B5563] mt-0.5">{new Date().toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
         </div>
       )}
     </div>

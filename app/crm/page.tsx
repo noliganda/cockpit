@@ -33,44 +33,72 @@ export default async function CRMPage({
           <p className="text-sm text-[#4B5563]">No contacts yet.</p>
         </div>
       ) : (
-        <div className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[rgba(255,255,255,0.06)]">
-                {['Name', 'Company', 'Email', 'Phone', 'Pipeline Stage'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {allContacts.map(contact => (
-                <tr key={contact.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0">
-                  <td className="px-4 py-2.5">
-                    <Link href={`/crm/${contact.id}`} className="text-sm text-[#F5F5F5] hover:text-white transition-colors">
-                      {contact.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className="text-sm text-[#A0A0A0]">{contact.company ?? '—'}</span>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className="text-sm text-[#A0A0A0]">{contact.email ?? '—'}</span>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className="text-sm text-[#A0A0A0]">{contact.phone ?? '—'}</span>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    {contact.pipelineStage ? (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{contact.pipelineStage}</span>
-                    ) : (
-                      <span className="text-sm text-[#4B5563]">—</span>
-                    )}
-                  </td>
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[rgba(255,255,255,0.06)]">
+                  {['Name', 'Company', 'Email', 'Phone', 'Pipeline Stage'].map(h => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {allContacts.map(contact => (
+                  <tr key={contact.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0">
+                    <td className="px-4 py-2.5">
+                      <Link href={`/crm/${contact.id}`} className="text-sm text-[#F5F5F5] hover:text-white transition-colors">
+                        {contact.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="text-sm text-[#A0A0A0]">{contact.company ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="text-sm text-[#A0A0A0]">{contact.email ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <span className="text-sm text-[#A0A0A0]">{contact.phone ?? '—'}</span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {contact.pipelineStage ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{contact.pipelineStage}</span>
+                      ) : (
+                        <span className="text-sm text-[#4B5563]">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-2">
+            {allContacts.map(contact => (
+              <div key={contact.id} className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <Link href={`/crm/${contact.id}`} className="text-sm font-medium text-[#F5F5F5] hover:text-white transition-colors">
+                    {contact.name}
+                  </Link>
+                  {contact.pipelineStage && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{contact.pipelineStage}</span>
+                  )}
+                </div>
+                {contact.company && (
+                  <p className="text-xs text-[#6B7280] mb-1">{contact.company}</p>
+                )}
+                {contact.email && (
+                  <p className="text-xs text-[#A0A0A0]">{contact.email}</p>
+                )}
+                {contact.phone && (
+                  <p className="text-xs text-[#A0A0A0] mt-0.5">{contact.phone}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

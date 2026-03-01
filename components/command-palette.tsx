@@ -40,6 +40,10 @@ export function CommandPalette() {
         e.preventDefault()
         setOpen(o => !o)
       }
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as Element).tagName)) {
+        e.preventDefault()
+        setOpen(o => !o)
+      }
       if (!open) return
       if (e.key === 'Escape') { setOpen(false); setQuery(''); return }
       if (e.key === 'ArrowDown') { e.preventDefault(); setSelected(s => Math.min(s + 1, filtered.length - 1)) }

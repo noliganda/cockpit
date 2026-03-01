@@ -8,6 +8,7 @@ import { MainContent } from '@/components/main-content'
 import { CommandPalette } from '@/components/command-palette'
 import { SearchOverlay } from '@/components/search-overlay'
 import { CharlieChat } from '@/components/charlie-chat'
+import { Toaster } from 'sonner'
 import type { ReactNode } from 'react'
 
 const NO_SHELL_PATHS = ['/login', '/metrics/korus']
@@ -31,6 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <CommandPalette />
         {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
         <CharlieChat />
+        <Toaster theme="dark" position="bottom-right" />
       </SidebarProvider>
     </WorkspaceProvider>
   )

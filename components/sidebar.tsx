@@ -33,7 +33,7 @@ interface SidebarInnerProps {
 
 function SidebarInner({ onClose }: SidebarInnerProps) {
   const pathname = usePathname()
-  const { workspace } = useWorkspace()
+  const { workspace, workspaceId } = useWorkspace()
   const { collapsed, toggleCollapsed } = useSidebar()
 
   const isActive = (href: string) => {
@@ -72,7 +72,7 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
             return (
               <li key={item.href}>
                 <Link
-                  href={item.href}
+                  href={`${item.href}?workspace=${workspaceId}`}
                   onClick={onClose}
                   className={cn(
                     'flex items-center gap-2.5 rounded-[6px] h-8 transition-colors relative group',

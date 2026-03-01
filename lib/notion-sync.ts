@@ -20,31 +20,74 @@ interface SyncResult {
   errors: string[]
 }
 
-interface NotionPage {
-  id: string
-  object: string
-  properties: Record<string, unknown>
-  parent?: { type?: string; database_id?: string }
+interface DbSchema {
+  titleProperty: string
+  statusProperty: string | null
 }
 
-function extractTitle(properties: Record<string, unknown>): string {
-  for (const key of ['Name', 'Title', 'Task', 'name', 'title']) {
-    const prop = properties[key] as { title?: Array<{ plain_text: string }> } | undefined
-    const text = prop?.title?.map(t => t.plain_text).join('') ?? ''
-    if (text) return text
+// Cache schema per database to avoid repeated API calls
+const schemaCache = new Map<string, DbSchema>()
+
+async function detectDatabaseSchema(databaseId: string): Promise<DbSchema> {
+  if (schemaCache.has(databaseId)) return schemaCache.get(databaseId)!
+
+  const dbInfo = await notion.databases.retrieve({ database_id: databaseId })
+  let titleProperty = 'Name'
+  let statusProperty: string | null = null
+
+  // PartialDatabaseObjectResponse may not have properties — check first
+  const properties = ('properties' in dbInfo && dbInfo.properties)
+    ? (dbInfo.properties as Record<string, { type: string }>)
+    : ({} as Record<string, { type: string }>)
+
+  for (const [key, prop] of Object.entries(properties)) {
+    if (prop.type === 'title') titleProperty = key
+    if ((prop.type === 'status' || prop.type === 'select') && !statusProperty) {
+      const lower = key.toLowerCase()
+      if (['status', 'stage', 'state', 'progress'].includes(lower)) {
+        statusProperty = key
+      }
+    }
   }
-  // Try any title-type property
+
+  // Fallback: any status/select property
+  if (!statusProperty) {
+    for (const [key, prop] of Object.entries(properties)) {
+      if (prop.type === 'status' || prop.type === 'select') {
+        statusProperty = key
+        break
+      }
+    }
+  }
+
+  const schema: DbSchema = { titleProperty, statusProperty }
+  schemaCache.set(databaseId, schema)
+  return schema
+}
+
+function extractTitle(properties: Record<string, unknown>, titleKey: string): string {
+  const prop = properties[titleKey] as { title?: Array<{ plain_text: string }> } | undefined
+  const text = prop?.title?.map(t => t.plain_text).join('') ?? ''
+  if (text) return text
+
+  // Fallback: scan all title-type properties
   for (const [, value] of Object.entries(properties)) {
-    const prop = value as { type?: string; title?: Array<{ plain_text: string }> }
-    if (prop?.type === 'title') {
-      const text = prop.title?.map(t => t.plain_text).join('') ?? ''
-      if (text) return text
+    const p = value as { type?: string; title?: Array<{ plain_text: string }> }
+    if (p?.type === 'title') {
+      const t = p.title?.map(item => item.plain_text).join('') ?? ''
+      if (t) return t
     }
   }
   return 'Untitled'
 }
 
-function extractStatus(properties: Record<string, unknown>): string {
+function extractStatus(properties: Record<string, unknown>, statusKey: string | null): string {
+  if (statusKey) {
+    const prop = properties[statusKey] as { status?: { name: string }; select?: { name: string } } | undefined
+    if (prop?.status?.name) return prop.status.name
+    if (prop?.select?.name) return prop.select.name
+  }
+
   for (const key of ['Status', 'status', 'Stage', 'stage', 'State']) {
     const prop = properties[key] as { status?: { name: string }; select?: { name: string } } | undefined
     if (prop?.status?.name) return prop.status.name
@@ -67,30 +110,34 @@ export async function syncNotionDatabase(databaseId: string): Promise<SyncResult
 
   const result: SyncResult = { workspaceId, created: 0, updated: 0, skipped: 0, errors: [] }
 
+  // Auto-detect schema
+  let schema: DbSchema
+  try {
+    schema = await detectDatabaseSchema(databaseId)
+  } catch (err) {
+    result.errors.push(`Schema detection failed: ${String(err)}`)
+    schema = { titleProperty: 'Name', statusProperty: 'Status' }
+  }
+
   let hasMore = true
   let cursor: string | undefined
 
   while (hasMore) {
-    // v5 Notion uses search to query pages in a database
-    const response = await notion.search({
-      filter: { property: 'object', value: 'page' },
+    // v5 API: dataSources.query() with data_source_id
+    const response = await notion.dataSources.query({
+      data_source_id: databaseId,
       start_cursor: cursor,
       page_size: 100,
     })
 
-    const pages = response.results
-      .map(page => page as unknown as NotionPage)
-      .filter(page => {
-        if (page.object !== 'page') return false
-        return page.parent?.type === 'database_id' && page.parent?.database_id === databaseId
-      })
+    for (const page of response.results) {
+      if (page.object !== 'page') continue
 
-    for (const page of pages) {
       try {
-        const props = page.properties
-        const title = extractTitle(props)
-        const status = extractStatus(props)
-        const dueDate = extractDate(props, ['Due Date', 'Due', 'Date', 'Deadline'])
+        const props = (page as { properties: Record<string, unknown> }).properties
+        const title = extractTitle(props, schema.titleProperty)
+        const status = extractStatus(props, schema.statusProperty)
+        const dueDate = extractDate(props, ['Due Date', 'Due', 'Date', 'Deadline', 'due_date'])
 
         const [existing] = await db
           .select({ id: tasks.id, title: tasks.title, status: tasks.status })
@@ -124,13 +171,8 @@ export async function syncNotionDatabase(databaseId: string): Promise<SyncResult
       }
     }
 
-    hasMore = response.has_more && pages.length > 0
+    hasMore = response.has_more
     cursor = response.next_cursor ?? undefined
-
-    // If no matching pages in this batch but more results, continue
-    if (response.results.length === 0) {
-      hasMore = false
-    }
   }
 
   if (result.created > 0 || result.updated > 0) {
@@ -158,7 +200,11 @@ export async function syncAllNotionDatabases(): Promise<SyncResult[]> {
     try {
       results.push(await syncNotionDatabase(dbId))
     } catch (err) {
-      results.push({ workspaceId: DB_WORKSPACE_MAP[dbId] ?? 'unknown', created: 0, updated: 0, skipped: 0, errors: [String(err)] })
+      results.push({
+        workspaceId: DB_WORKSPACE_MAP[dbId] ?? 'unknown',
+        created: 0, updated: 0, skipped: 0,
+        errors: [String(err)],
+      })
     }
   }
   return results

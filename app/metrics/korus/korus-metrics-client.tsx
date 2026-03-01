@@ -3,6 +3,11 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContai
 import { formatRelativeDate } from '@/lib/utils'
 import type { Task, Project, Contact, ActivityLogEntry } from '@/types'
 
+interface DailyCount {
+  day: string
+  count: number
+}
+
 interface KorusMetricsProps {
   metrics: {
     tasksCompleted: number
@@ -20,6 +25,8 @@ interface KorusMetricsProps {
   allContacts: Contact[]
   pipeline: Array<{ stage: string; count: number }>
   regionData: Array<{ region: string; tasks: number }>
+  taskVolumeData: DailyCount[]
+  activityVolumeData: DailyCount[]
 }
 
 const KORUS_TEAL = '#008080'
@@ -44,18 +51,12 @@ function SectionTitle({ n, title }: { n: number; title: string }) {
   )
 }
 
-export function KorusMetricsClient({ metrics, recentActivity, allProjects, allContacts, pipeline }: KorusMetricsProps) {
-  // Mock 30-day data for charts
-  const taskVolumeData = Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    tasks: Math.floor(Math.random() * 8) + 1,
-  }))
+const TOOLTIP_STYLE = {
+  contentStyle: { background: '#222222', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 6, color: '#F5F5F5', fontSize: 12 },
+  cursor: { fill: 'rgba(255,255,255,0.04)' },
+}
 
-  const costData = Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    cost: 150 + Math.floor(Math.random() * 50),
-  }))
-
+export function KorusMetricsClient({ metrics, recentActivity, allProjects, allContacts, pipeline, taskVolumeData, activityVolumeData }: KorusMetricsProps) {
   const milestones = [
     { date: '2026-Q1', title: 'KORUS SG entity setup', status: 'done' },
     { date: '2026-Q2', title: 'Recruitment: 3 hires', status: allContacts.filter(c => c.tags?.includes('hired')).length >= 3 ? 'done' : 'in-progress' },
@@ -70,7 +71,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
     <div className="min-h-screen bg-[#0F0F0F] text-[#F5F5F5]">
       {/* Header bar */}
       <div className="border-b border-[rgba(255,255,255,0.06)] bg-[#0F0F0F] sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-[6px] bg-[#008080] flex items-center justify-center text-sm">🌏</div>
             <div>
@@ -82,12 +83,12 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
         {/* Section 1: Key Metrics */}
         <section>
           <SectionTitle n={1} title="Key Metrics" />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <StatCard label="Tasks Completed" value={metrics.tasksCompleted} />
             <StatCard label="Hours Saved" value={metrics.hoursSaved} sub="Est. @$300/hr" />
             <StatCard label="Emails Processed" value={metrics.emailsProcessed} />
@@ -97,18 +98,22 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
           </div>
         </section>
 
-        {/* Section 2: Task Volume */}
+        {/* Section 2: Task Volume — real data */}
         <section>
           <SectionTitle n={2} title="Task Volume — Last 30 Days" />
           <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={taskVolumeData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} interval={4} />
-                <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#222222', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 6, color: '#F5F5F5', fontSize: 12 }} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-                <Bar dataKey="tasks" fill={KORUS_TEAL} radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {taskVolumeData.length === 0 ? (
+              <p className="text-sm text-[#4B5563] py-4 text-center">No task data yet</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={taskVolumeData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} interval={4} />
+                  <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Tooltip {...TOOLTIP_STYLE} />
+                  <Bar dataKey="count" name="Tasks" fill={KORUS_TEAL} radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </section>
 
@@ -116,7 +121,9 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         <section>
           <SectionTitle n={3} title="Category Analysis" />
           <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-            {pipeline.map((item, i) => (
+            {pipeline.length === 0 ? (
+              <p className="text-sm text-[#4B5563] py-4 text-center">No task data</p>
+            ) : pipeline.map((item, i) => (
               <div key={item.stage} className="flex items-center gap-3 mb-3 last:mb-0">
                 <span className="text-xs text-[#A0A0A0] w-28 shrink-0">{item.stage}</span>
                 <div className="flex-1 h-2 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
@@ -128,18 +135,22 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
           </div>
         </section>
 
-        {/* Section 4: Cost Trend */}
+        {/* Section 4: Operational Cost Trend — real activity data */}
         <section>
-          <SectionTitle n={4} title="Operational Cost Trend" />
+          <SectionTitle n={4} title="Operational Activity Trend" />
           <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-            <ResponsiveContainer width="100%" height={140}>
-              <LineChart data={costData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} interval={4} />
-                <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#222222', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 6, color: '#F5F5F5', fontSize: 12 }} />
-                <Line type="monotone" dataKey="cost" stroke={KORUS_TEAL} strokeWidth={1.5} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            {activityVolumeData.length === 0 ? (
+              <p className="text-sm text-[#4B5563] py-4 text-center">No activity data yet</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={140}>
+                <LineChart data={activityVolumeData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} interval={4} />
+                  <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Tooltip {...TOOLTIP_STYLE} />
+                  <Line type="monotone" dataKey="count" name="Actions" stroke={KORUS_TEAL} strokeWidth={1.5} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </section>
 
@@ -161,7 +172,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
                       <span className="text-xs font-mono text-[#6B7280] ml-auto">{item.bf}</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)]">
-                      <div className="h-full rounded-full" style={{ width: `${Math.min((item.bf / Math.max(item.bf, item.korus)) * 100, 100)}%`, background: '#D4A017' }} />
+                      <div className="h-full rounded-full" style={{ width: `${Math.min((item.bf / Math.max(item.bf, item.korus, 1)) * 100, 100)}%`, background: '#D4A017' }} />
                     </div>
                   </div>
                   <div className="flex-1">
@@ -170,7 +181,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
                       <span className="text-xs font-mono text-[#6B7280] ml-auto">{item.korus}</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)]">
-                      <div className="h-full rounded-full" style={{ width: `${Math.min((item.korus / Math.max(item.bf, item.korus)) * 100, 100)}%`, background: '#008080' }} />
+                      <div className="h-full rounded-full" style={{ width: `${Math.min((item.korus / Math.max(item.bf, item.korus, 1)) * 100, 100)}%`, background: '#008080' }} />
                     </div>
                   </div>
                 </div>
@@ -192,7 +203,8 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
                     <div className="w-1.5 h-1.5 rounded-full bg-[#008080] mt-2 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-[#F5F5F5]">
-                        <span className="text-[#A0A0A0]">{entry.actor}</span> {entry.action} {entry.entityType}
+                        <span className="text-[#A0A0A0]">{entry.actor}</span>{' '}
+                        {entry.action} {entry.entityType}
                         {entry.entityTitle && `: ${entry.entityTitle}`}
                       </p>
                       <p className="text-xs text-[#6B7280]">{formatRelativeDate(entry.createdAt)}</p>
@@ -220,7 +232,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
                 {allContacts.filter(c => c.tags?.includes('candidate') || c.tags?.includes('recruitment')).length === 0 ? (
                   <tr><td colSpan={4} className="px-4 py-8 text-center text-sm text-[#4B5563]">No candidates tracked yet</td></tr>
                 ) : allContacts.filter(c => c.tags?.includes('candidate') || c.tags?.includes('recruitment')).map(c => (
-                  <tr key={c.id} className="border-b border-[rgba(255,255,255,0.04)]">
+                  <tr key={c.id} className="border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)]">
                     <td className="px-4 py-2.5 text-sm text-[#F5F5F5]">{c.name}</td>
                     <td className="px-4 py-2.5 text-xs text-[#A0A0A0]">{c.role ?? '—'}</td>
                     <td className="px-4 py-2.5"><span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{c.pipelineStage ?? 'Active'}</span></td>
@@ -248,7 +260,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
                 {allProjects.length === 0 ? (
                   <tr><td colSpan={4} className="px-4 py-8 text-center text-sm text-[#4B5563]">No projects yet</td></tr>
                 ) : allProjects.slice(0, 8).map(p => (
-                  <tr key={p.id} className="border-b border-[rgba(255,255,255,0.04)]">
+                  <tr key={p.id} className="border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)]">
                     <td className="px-4 py-2.5 text-sm text-[#F5F5F5]">{p.name}</td>
                     <td className="px-4 py-2.5"><span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{p.status ?? 'active'}</span></td>
                     <td className="px-4 py-2.5 text-xs text-[#6B7280]">{p.region ?? 'Global'}</td>

@@ -8,6 +8,7 @@ import { MainContent } from '@/components/main-content'
 import { CommandPalette } from '@/components/command-palette'
 import { SearchOverlay } from '@/components/search-overlay'
 import { CharlieChat } from '@/components/charlie-chat'
+import { QuickNoteModal } from '@/components/quick-note-modal'
 import { Toaster } from 'sonner'
 import type { ReactNode } from 'react'
 
@@ -32,6 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <CommandPalette />
         {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
         <CharlieChat />
+        <QuickNoteModal />
         <Toaster theme="dark" position="bottom-right" />
       </SidebarProvider>
     </WorkspaceProvider>

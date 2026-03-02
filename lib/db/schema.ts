@@ -169,6 +169,8 @@ export const notes = pgTable('notes', {
   contentPlaintext: text('content_plaintext'),
   pinned: boolean('pinned').default(false),
   projectId: uuid('project_id'),
+  areaId: uuid('area_id'),
+  sprintId: uuid('sprint_id'),
   tags: text('tags').array().default([]),
   ...timestamps,
 }, (t) => [

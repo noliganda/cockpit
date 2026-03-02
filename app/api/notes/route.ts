@@ -12,7 +12,9 @@ const createSchema = z.object({
   content: z.unknown().optional(),
   contentPlaintext: z.string().optional(),
   pinned: z.boolean().optional(),
-  projectId: z.string().uuid().optional(),
+  projectId: z.string().uuid().nullable().optional(),
+  areaId: z.string().uuid().nullable().optional(),
+  sprintId: z.string().uuid().nullable().optional(),
   tags: z.array(z.string()).optional(),
 })
 

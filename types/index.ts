@@ -149,6 +149,8 @@ export interface Note {
   contentPlaintext?: string | null
   pinned?: boolean | null
   projectId?: string | null
+  areaId?: string | null
+  sprintId?: string | null
   tags?: string[] | null
   createdAt: Date
   updatedAt: Date

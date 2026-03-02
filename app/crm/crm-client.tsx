@@ -1,12 +1,79 @@
 'use client'
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
-import { User, Building2, Plus, X, Search, Linkedin, Instagram, Globe, ExternalLink } from 'lucide-react'
+import { User, Building2, Plus, X, Search, Linkedin, Instagram, Globe, ExternalLink, Download, Trash2, Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contact, Organisation, WorkspaceId } from '@/types'
 import { PIPELINE_STAGES } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
+
+// ─── VCF Generation ─────────────────────────────────────────────────────────
+function escapeVcf(s: string) {
+  return s.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n')
+}
+
+function contactToVCard(c: Contact): string {
+  const lines: string[] = ['BEGIN:VCARD', 'VERSION:3.0']
+  const fn = [c.firstName, c.lastName].filter(Boolean).join(' ') || c.name
+  lines.push(`FN:${escapeVcf(fn)}`)
+  const n = `${escapeVcf(c.lastName ?? '')};${escapeVcf(c.firstName ?? '')};;;`
+  lines.push(`N:${n}`)
+  if (c.company) lines.push(`ORG:${escapeVcf(c.company)}`)
+  if (c.role) lines.push(`TITLE:${escapeVcf(c.role)}`)
+  if (c.email) lines.push(`EMAIL;TYPE=WORK:${escapeVcf(c.email)}`)
+  if (c.mobile) lines.push(`TEL;TYPE=CELL:${escapeVcf(c.mobile)}`)
+  if (c.phone) lines.push(`TEL;TYPE=WORK:${escapeVcf(c.phone)}`)
+  if (c.address) lines.push(`ADR;TYPE=WORK:;;${escapeVcf(c.address)};;;;`)
+  if (c.linkedinUrl) lines.push(`URL:${escapeVcf(c.linkedinUrl)}`)
+  else if (c.portfolioUrl) lines.push(`URL:${escapeVcf(c.portfolioUrl)}`)
+  lines.push('END:VCARD')
+  return lines.join('\r\n')
+}
+
+function downloadVCF(selected: Contact[]) {
+  const vcf = selected.map(contactToVCard).join('\r\n')
+  const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = selected.length === 1
+    ? `${(selected[0].firstName ?? selected[0].name).toLowerCase().replace(/\s+/g, '-')}-${(selected[0].lastName ?? '').toLowerCase().replace(/\s+/g, '-')}.vcf`.replace(/-+/g, '-').replace(/-\./, '.')
+    : 'contacts-export.vcf'
+  a.click()
+}
+
+// ─── Portal Dropdown ─────────────────────────────────────────────────────────
+function PortalDropdown({
+  anchorRef,
+  isOpen,
+  onClose,
+  children,
+  minWidth = 160,
+}: {
+  anchorRef: React.RefObject<HTMLElement | null>
+  isOpen: boolean
+  onClose: () => void
+  children: React.ReactNode
+  minWidth?: number
+}) {
+  if (!isOpen || typeof document === 'undefined') return null
+  const rect = anchorRef.current?.getBoundingClientRect()
+  if (!rect) return null
+
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div
+        className="fixed z-50 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[6px] overflow-hidden shadow-lg"
+        style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
+      >
+        {children}
+      </div>
+    </>,
+    document.body
+  )
+}
 
 const PIPELINE_STAGES_LIST = [...PIPELINE_STAGES]
 
@@ -493,6 +560,14 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Contacts</h1>
         <div className="flex items-center gap-2">
           <span className="text-xs text-[#6B7280] font-mono">{contacts.length} contacts</span>
+          <button
+            onClick={() => downloadVCF(contacts)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+            title="Export all contacts as VCF"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export All
+          </button>
         </div>
       </div>
 
@@ -526,6 +601,7 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
             workspaceId={workspaceId}
             onAdd={c => setContacts(prev => [c, ...prev])}
             onUpdate={c => setContacts(prev => prev.map(x => x.id === c.id ? c : x))}
+            onDelete={ids => setContacts(prev => prev.filter(x => !ids.includes(x.id)))}
           />
         )}
         {tab === 'organisations' && (
@@ -557,16 +633,25 @@ function ContactsTab({
   workspaceId,
   onAdd,
   onUpdate,
+  onDelete,
 }: {
   contacts: Contact[]
   organisations: Organisation[]
   workspaceId: WorkspaceId
   onAdd: (c: Contact) => void
   onUpdate: (c: Contact) => void
+  onDelete?: (ids: string[]) => void
 }) {
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [editing, setEditing] = useState<Contact | null>(null)
+
+  // Batch selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [lastClickedIdx, setLastClickedIdx] = useState<number | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [batchStageOpen, setBatchStageOpen] = useState(false)
+  const batchStageRef = useRef<HTMLButtonElement>(null)
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -580,9 +665,62 @@ function ContactsTab({
     )
   }, [contacts, search])
 
+  const selectedCount = selectedIds.size
+  const allFilteredSelected = filtered.length > 0 && filtered.every(c => selectedIds.has(c.id))
+
+  function toggleSelectAll() {
+    if (allFilteredSelected) setSelectedIds(new Set())
+    else setSelectedIds(new Set(filtered.map(c => c.id)))
+    setLastClickedIdx(null)
+  }
+
+  function toggleSelect(e: React.MouseEvent, idx: number, contactId: string) {
+    e.stopPropagation()
+    if (e.shiftKey && lastClickedIdx !== null) {
+      const from = Math.min(lastClickedIdx, idx)
+      const to = Math.max(lastClickedIdx, idx)
+      const rangeIds = filtered.slice(from, to + 1).map(c => c.id)
+      const newSet = new Set(selectedIds)
+      rangeIds.forEach(id => newSet.add(id))
+      setSelectedIds(newSet)
+    } else {
+      const newSet = new Set(selectedIds)
+      if (newSet.has(contactId)) newSet.delete(contactId)
+      else newSet.add(contactId)
+      setSelectedIds(newSet)
+      setLastClickedIdx(idx)
+    }
+  }
+
+  async function batchSetStage(stage: string) {
+    const ids = Array.from(selectedIds)
+    await fetch('/api/contacts/batch', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids, updates: { pipelineStage: stage } }),
+    })
+    // Optimistically update via onUpdate — trigger a page refresh instead
+    ids.forEach(id => {
+      const c = contacts.find(x => x.id === id)
+      if (c) onUpdate({ ...c, pipelineStage: stage })
+    })
+  }
+
+  async function batchDelete() {
+    const ids = Array.from(selectedIds)
+    await fetch('/api/contacts/batch', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    })
+    setSelectedIds(new Set())
+    setShowDeleteConfirm(false)
+    onDelete?.(ids)
+  }
+
   return (
     <>
-      {/* Toolbar */}
+      {/* Search + New */}
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4B5563]" />
@@ -601,6 +739,63 @@ function ContactsTab({
         </button>
       </div>
 
+      {/* Batch Toolbar */}
+      {selectedCount > 0 && (
+        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-[8px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)]">
+          <span className="text-xs text-[#A0A0A0] font-medium mr-1">{selectedCount} selected</span>
+
+          {/* Change Pipeline Stage */}
+          <div className="relative">
+            <button
+              ref={batchStageRef}
+              onClick={() => setBatchStageOpen(v => !v)}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+            >
+              Pipeline Stage <ChevronDown className="w-3 h-3" />
+            </button>
+            <PortalDropdown anchorRef={batchStageRef} isOpen={batchStageOpen} onClose={() => setBatchStageOpen(false)}>
+              {PIPELINE_STAGES_LIST.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setBatchStageOpen(false); void batchSetStage(s) }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5] transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </PortalDropdown>
+          </div>
+
+          {/* Export VCF */}
+          <button
+            onClick={() => {
+              const selected = contacts.filter(c => selectedIds.has(c.id))
+              downloadVCF(selected)
+            }}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+          >
+            <Download className="w-3 h-3" /> Export VCF
+          </button>
+
+          {/* Delete */}
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors"
+          >
+            <Trash2 className="w-3 h-3" /> Delete
+          </button>
+
+          {/* Deselect All */}
+          <button
+            onClick={() => { setSelectedIds(new Set()); setLastClickedIdx(null) }}
+            className="ml-auto flex items-center p-1 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            title="Deselect all"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {filtered.length === 0 ? (
         <div className="text-center py-16">
           <User className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
@@ -613,18 +808,38 @@ function ContactsTab({
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(255,255,255,0.06)]">
+                  <th className="px-3 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAll}
+                      className="w-3.5 h-3.5 cursor-pointer accent-white"
+                    />
+                  </th>
                   {['Name', 'Position', 'Mobile', 'Email', 'Links', 'Pipeline Stage'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(contact => (
+                {filtered.map((contact, idx) => (
                   <tr
                     key={contact.id}
-                    className="border-b border-[rgba(255,255,255,0.04)] last:border-0 hover:bg-[rgba(255,255,255,0.02)] cursor-pointer"
+                    className={cn(
+                      'border-b border-[rgba(255,255,255,0.04)] last:border-0 hover:bg-[rgba(255,255,255,0.02)] cursor-pointer',
+                      selectedIds.has(contact.id) && 'bg-[rgba(255,255,255,0.03)]'
+                    )}
                     onClick={() => setEditing(contact)}
                   >
+                    <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(contact.id)}
+                        onChange={() => {}}
+                        onClick={e => toggleSelect(e as React.MouseEvent, idx, contact.id)}
+                        className="w-3.5 h-3.5 cursor-pointer accent-white"
+                      />
+                    </td>
                     <td className="px-4 py-2.5">
                       <span className="text-sm text-[#F5F5F5] hover:text-white transition-colors">
                         {contact.name}
@@ -682,25 +897,56 @@ function ContactsTab({
 
           {/* Mobile cards */}
           <div className="md:hidden space-y-2">
-            {filtered.map(contact => (
+            {filtered.map((contact, idx) => (
               <div
                 key={contact.id}
-                className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] p-4 cursor-pointer hover:border-[rgba(255,255,255,0.10)]"
-                onClick={() => setEditing(contact)}
+                className={cn(
+                  'rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] p-4 hover:border-[rgba(255,255,255,0.10)]',
+                  selectedIds.has(contact.id) && 'border-[rgba(255,255,255,0.10)] bg-[#1A1A1A]'
+                )}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <span className="text-sm font-medium text-[#F5F5F5]">{contact.name}</span>
+                <div className="flex items-start gap-2 mb-2">
+                  <div className="pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(contact.id)}
+                      onChange={() => {}}
+                      onClick={e => toggleSelect(e as React.MouseEvent, idx, contact.id)}
+                      className="w-3.5 h-3.5 cursor-pointer accent-white"
+                    />
+                  </div>
+                  <p
+                    className="text-sm font-medium text-[#F5F5F5] flex-1 cursor-pointer"
+                    onClick={() => setEditing(contact)}
+                  >
+                    {contact.name}
+                  </p>
                   {contact.pipelineStage && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{contact.pipelineStage}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0] shrink-0">{contact.pipelineStage}</span>
                   )}
                 </div>
-                {contact.role && <p className="text-xs text-[#6B7280] mb-1">{contact.role}</p>}
-                {contact.email && <p className="text-xs text-[#A0A0A0]">{contact.email}</p>}
-                {contact.mobile && <p className="text-xs text-[#A0A0A0] mt-0.5">{contact.mobile}</p>}
+                {contact.role && <p className="text-xs text-[#6B7280] mb-1 ml-5">{contact.role}</p>}
+                {contact.email && <p className="text-xs text-[#A0A0A0] ml-5">{contact.email}</p>}
+                {contact.mobile && <p className="text-xs text-[#A0A0A0] mt-0.5 ml-5">{contact.mobile}</p>}
               </div>
             ))}
           </div>
         </>
+      )}
+
+      {/* Delete confirmation */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-6 max-w-sm w-full">
+            <h2 className="text-sm font-semibold text-[#F5F5F5] mb-2">Delete {selectedCount} contact{selectedCount !== 1 ? 's' : ''}?</h2>
+            <p className="text-xs text-[#6B7280] mb-4">This cannot be undone.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
+              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#EF4444] text-white rounded-[6px] hover:bg-red-500 transition-colors">Delete</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showCreate && (

@@ -1,6 +1,7 @@
 'use client'
-import { useState, useMemo } from 'react'
-import { Plus, Search, Zap, Star, Download } from 'lucide-react'
+import { useState, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { Plus, Search, Zap, Star, Download, Trash2, X, Check, ChevronDown } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TaskDialog } from '@/components/task-dialog'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
@@ -21,6 +22,161 @@ interface TasksClientProps {
   users?: UserOption[]
 }
 
+function statusColor(status: string) {
+  switch (status) {
+    case 'Done': return 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]'
+    case 'In Progress': return 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]'
+    case 'Needs Review': return 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]'
+    case 'Cancelled': return 'text-[#6B7280] bg-[rgba(107,114,128,0.08)]'
+    default: return 'text-[#A0A0A0] bg-[rgba(255,255,255,0.06)]'
+  }
+}
+
+// Portal dropdown — bypasses overflow:hidden on the table container
+function PortalDropdown({
+  anchorRef,
+  isOpen,
+  onClose,
+  children,
+  minWidth = 140,
+}: {
+  anchorRef: React.RefObject<HTMLElement | null>
+  isOpen: boolean
+  onClose: () => void
+  children: React.ReactNode
+  minWidth?: number
+}) {
+  if (!isOpen || typeof document === 'undefined') return null
+  const rect = anchorRef.current?.getBoundingClientRect()
+  if (!rect) return null
+
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+      <div
+        className="fixed z-50 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[6px] overflow-hidden shadow-lg"
+        style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
+      >
+        {children}
+      </div>
+    </>,
+    document.body
+  )
+}
+
+// Inline status — clickable badge opens a portal dropdown
+function InlineStatus({ task, onUpdate }: { task: Task; onUpdate: (id: string, data: Partial<Task>) => Promise<void> }) {
+  const [open, setOpen] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <div onClick={e => e.stopPropagation()}>
+      <button
+        ref={btnRef}
+        onClick={() => setOpen(v => !v)}
+        className={cn('text-xs px-2 py-0.5 rounded-full flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity', statusColor(task.status))}
+      >
+        {task.status}
+        <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+      </button>
+      <PortalDropdown anchorRef={btnRef} isOpen={open} onClose={() => setOpen(false)}>
+        {TASK_STATUSES.map(s => (
+          <button
+            key={s}
+            onClick={async () => { setOpen(false); await onUpdate(task.id, { status: s }) }}
+            className={cn(
+              'w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] transition-colors flex items-center gap-2',
+              task.status === s ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]'
+            )}
+          >
+            {task.status === s ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
+            {s}
+          </button>
+        ))}
+      </PortalDropdown>
+    </div>
+  )
+}
+
+// Inline due date — click to reveal a date input
+function InlineDueDate({ task, onUpdate }: { task: Task; onUpdate: (id: string, data: Partial<Task>) => Promise<void> }) {
+  const [editing, setEditing] = useState(false)
+
+  if (editing) {
+    return (
+      <input
+        type="date"
+        defaultValue={task.dueDate ?? ''}
+        autoFocus
+        onClick={e => e.stopPropagation()}
+        onBlur={async e => {
+          setEditing(false)
+          const newVal = e.target.value || null
+          if (newVal !== (task.dueDate ?? null)) {
+            await onUpdate(task.id, { dueDate: newVal })
+          }
+        }}
+        onKeyDown={e => { if (e.key === 'Escape') setEditing(false) }}
+        className="text-xs bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[4px] px-1 py-0.5 outline-none w-32"
+      />
+    )
+  }
+
+  return (
+    <button
+      onClick={e => { e.stopPropagation(); setEditing(true) }}
+      className={cn('text-xs hover:underline transition-colors text-left', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280] hover:text-[#A0A0A0]')}
+    >
+      {task.dueDate ? formatDate(task.dueDate) : <span className="text-[#4B5563]">—</span>}
+    </button>
+  )
+}
+
+// Inline assignee — click to open portal dropdown
+function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOption[]; onUpdate: (id: string, data: Partial<Task>) => Promise<void> }) {
+  const [open, setOpen] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  return (
+    <div onClick={e => e.stopPropagation()}>
+      <button
+        ref={btnRef}
+        onClick={() => setOpen(v => !v)}
+        className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors flex items-center gap-1"
+      >
+        {task.assignee ?? '—'}
+        <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+      </button>
+      <PortalDropdown anchorRef={btnRef} isOpen={open} onClose={() => setOpen(false)} minWidth={160}>
+        <button
+          onClick={async () => { setOpen(false); await onUpdate(task.id, { assignee: null }) }}
+          className="w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2 text-[#6B7280]"
+        >
+          {!task.assignee ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
+          — Unassigned
+        </button>
+        {users.map(u => {
+          const label = u.name ?? u.email
+          const isSelected = task.assignee === label
+          return (
+            <button
+              key={u.id}
+              onClick={async () => { setOpen(false); await onUpdate(task.id, { assignee: label }) }}
+              className={cn(
+                'w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2',
+                isSelected ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]'
+              )}
+            >
+              {isSelected ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
+              {label}
+            </button>
+          )
+        })}
+      </PortalDropdown>
+    </div>
+  )
+}
+
 export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
@@ -29,6 +185,16 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
   const [importantFilter, setImportantFilter] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+
+  // Batch selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [lastClickedIdx, setLastClickedIdx] = useState<number | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [batchStatusOpen, setBatchStatusOpen] = useState(false)
+  const [batchAssigneeOpen, setBatchAssigneeOpen] = useState(false)
+  const batchStatusRef = useRef<HTMLButtonElement>(null)
+  const batchAssigneeRef = useRef<HTMLButtonElement>(null)
+
   const router = useRouter()
 
   const filtered = useMemo(() => {
@@ -42,17 +208,41 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
     })
   }, [tasks, search, statusFilter, urgentFilter, importantFilter])
 
+  const selectedCount = selectedIds.size
+  const allFilteredSelected = filtered.length > 0 && filtered.every(t => selectedIds.has(t.id))
+
+  function toggleSelectAll() {
+    if (allFilteredSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(filtered.map(t => t.id)))
+    }
+    setLastClickedIdx(null)
+  }
+
+  function toggleSelect(e: React.MouseEvent, idx: number, taskId: string) {
+    e.stopPropagation()
+    if (e.shiftKey && lastClickedIdx !== null) {
+      const from = Math.min(lastClickedIdx, idx)
+      const to = Math.max(lastClickedIdx, idx)
+      const rangeIds = filtered.slice(from, to + 1).map(t => t.id)
+      const newSet = new Set(selectedIds)
+      rangeIds.forEach(id => newSet.add(id))
+      setSelectedIds(newSet)
+    } else {
+      const newSet = new Set(selectedIds)
+      if (newSet.has(taskId)) newSet.delete(taskId)
+      else newSet.add(taskId)
+      setSelectedIds(newSet)
+      setLastClickedIdx(idx)
+    }
+  }
+
   function exportMarkdown() {
     const date = new Date().toISOString().slice(0, 10)
     const lines: string[] = [
-      '---',
-      `workspace: ${workspaceId}`,
-      `exported: ${date}`,
-      `total: ${filtered.length}`,
-      '---',
-      '',
-      `# Tasks — ${workspaceId}`,
-      '',
+      '---', `workspace: ${workspaceId}`, `exported: ${date}`, `total: ${filtered.length}`, '---', '',
+      `# Tasks — ${workspaceId}`, '',
     ]
     for (const t of filtered) {
       lines.push(`## ${t.title}`)
@@ -113,6 +303,35 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
     })
   }
 
+  // Batch operations
+  async function batchUpdate(updates: Record<string, unknown>) {
+    const ids = Array.from(selectedIds)
+    setTasks(prev => prev.map(t => selectedIds.has(t.id) ? { ...t, ...updates } : t))
+    await fetch('/api/tasks/batch', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids, updates }),
+    })
+  }
+
+  async function batchDelete() {
+    const ids = Array.from(selectedIds)
+    setTasks(prev => prev.filter(t => !selectedIds.has(t.id)))
+    setSelectedIds(new Set())
+    setShowDeleteConfirm(false)
+    await fetch('/api/tasks/batch', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    })
+  }
+
+  async function batchToggle(field: 'urgent' | 'important') {
+    const selectedTasks = tasks.filter(t => selectedIds.has(t.id))
+    const allActive = selectedTasks.every(t => t[field])
+    await batchUpdate({ [field]: !allActive })
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -169,8 +388,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                 : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
             )}
           >
-            <Zap className="w-3 h-3" />
-            Urgent
+            <Zap className="w-3 h-3" />Urgent
           </button>
           <button
             onClick={() => setImportantFilter(f => !f)}
@@ -181,17 +399,109 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                 : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
             )}
           >
-            <Star className="w-3 h-3" />
-            Important
+            <Star className="w-3 h-3" />Important
           </button>
         </div>
       </div>
+
+      {/* Batch Toolbar */}
+      {selectedCount > 0 && (
+        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-[8px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] sticky top-2 z-10">
+          <span className="text-xs text-[#A0A0A0] font-medium mr-1">{selectedCount} of {filtered.length} selected</span>
+
+          {/* Change Status */}
+          <div className="relative">
+            <button
+              ref={batchStatusRef}
+              onClick={() => { setBatchStatusOpen(v => !v); setBatchAssigneeOpen(false) }}
+              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+            >
+              Status <ChevronDown className="w-3 h-3" />
+            </button>
+            <PortalDropdown anchorRef={batchStatusRef} isOpen={batchStatusOpen} onClose={() => setBatchStatusOpen(false)}>
+              {TASK_STATUSES.map(s => (
+                <button
+                  key={s}
+                  onClick={() => { setBatchStatusOpen(false); void batchUpdate({ status: s }) }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5] transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </PortalDropdown>
+          </div>
+
+          {/* Change Assignee */}
+          {users.length > 0 && (
+            <div className="relative">
+              <button
+                ref={batchAssigneeRef}
+                onClick={() => { setBatchAssigneeOpen(v => !v); setBatchStatusOpen(false) }}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+              >
+                Assignee <ChevronDown className="w-3 h-3" />
+              </button>
+              <PortalDropdown anchorRef={batchAssigneeRef} isOpen={batchAssigneeOpen} onClose={() => setBatchAssigneeOpen(false)} minWidth={160}>
+                <button
+                  onClick={() => { setBatchAssigneeOpen(false); void batchUpdate({ assignee: null }) }}
+                  className="w-full text-left px-3 py-1.5 text-xs text-[#6B7280] hover:bg-[rgba(255,255,255,0.04)] transition-colors"
+                >
+                  — Unassigned
+                </button>
+                {users.map(u => (
+                  <button
+                    key={u.id}
+                    onClick={() => { setBatchAssigneeOpen(false); void batchUpdate({ assignee: u.name ?? u.email }) }}
+                    className="w-full text-left px-3 py-1.5 text-xs text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5] transition-colors"
+                  >
+                    {u.name ?? u.email}
+                  </button>
+                ))}
+              </PortalDropdown>
+            </div>
+          )}
+
+          <button
+            onClick={() => void batchToggle('urgent')}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors"
+          >
+            <Zap className="w-3 h-3" /> Urgent
+          </button>
+          <button
+            onClick={() => void batchToggle('important')}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#F59E0B] hover:bg-[rgba(245,158,11,0.10)] transition-colors"
+          >
+            <Star className="w-3 h-3" /> Important
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors"
+          >
+            <Trash2 className="w-3 h-3" /> Delete
+          </button>
+          <button
+            onClick={() => { setSelectedIds(new Set()); setLastClickedIdx(null) }}
+            className="ml-auto flex items-center gap-1 p-1 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            title="Deselect all"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* Desktop table */}
       <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-[rgba(255,255,255,0.06)]">
+              <th className="px-3 py-3 w-8">
+                <input
+                  type="checkbox"
+                  checked={allFilteredSelected}
+                  onChange={toggleSelectAll}
+                  className="w-3.5 h-3.5 cursor-pointer accent-white"
+                />
+              </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
               <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
               <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
@@ -202,13 +512,25 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
-            ) : filtered.map(task => (
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
+            ) : filtered.map((task, idx) => (
               <tr
                 key={task.id}
                 onClick={() => { setEditingTask(task); setShowDialog(true) }}
-                className="border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)] cursor-pointer transition-colors"
+                className={cn(
+                  'border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)] cursor-pointer transition-colors',
+                  selectedIds.has(task.id) && 'bg-[rgba(255,255,255,0.03)]'
+                )}
               >
+                <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(task.id)}
+                    onChange={() => {}}
+                    onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
+                    className="w-3.5 h-3.5 cursor-pointer accent-white"
+                  />
+                </td>
                 <td className="px-4 py-2.5">
                   <span className="text-sm text-[#F5F5F5]">{task.title}</span>
                 </td>
@@ -218,9 +540,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                     title="Toggle Urgent"
                     className={cn(
                       'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
-                      task.urgent
-                        ? 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]'
-                        : 'text-[#4B5563] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)]'
+                      task.urgent ? 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]' : 'text-[#4B5563] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)]'
                     )}
                   >
                     <Zap className="w-3.5 h-3.5" />
@@ -232,24 +552,20 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                     title="Toggle Important"
                     className={cn(
                       'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
-                      task.important
-                        ? 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]'
-                        : 'text-[#4B5563] hover:text-[#F59E0B] hover:bg-[rgba(245,158,11,0.08)]'
+                      task.important ? 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]' : 'text-[#4B5563] hover:text-[#F59E0B] hover:bg-[rgba(245,158,11,0.08)]'
                     )}
                   >
                     <Star className="w-3.5 h-3.5" />
                   </button>
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
+                  <InlineStatus task={task} onUpdate={handleUpdate} />
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
-                    {task.dueDate ? formatDate(task.dueDate) : '—'}
-                  </span>
+                  <InlineDueDate task={task} onUpdate={handleUpdate} />
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className="text-xs text-[#6B7280]">{task.assignee ?? '—'}</span>
+                  <InlineAssignee task={task} users={users} onUpdate={handleUpdate} />
                 </td>
               </tr>
             ))}
@@ -261,37 +577,62 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
       <div className="md:hidden space-y-2">
         {filtered.length === 0 ? (
           <p className="text-center text-sm text-[#4B5563] py-12">No tasks found</p>
-        ) : filtered.map(task => (
+        ) : filtered.map((task, idx) => (
           <div
             key={task.id}
-            onClick={() => { setEditingTask(task); setShowDialog(true) }}
-            className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] cursor-pointer"
+            className={cn(
+              'p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]',
+              selectedIds.has(task.id) && 'border-[rgba(255,255,255,0.10)] bg-[#1A1A1A]'
+            )}
           >
-            <div className="flex items-start justify-between mb-2 gap-2">
-              <p className="text-sm font-medium text-[#F5F5F5] flex-1">{task.title}</p>
+            <div className="flex items-start gap-2 mb-2">
+              <div className="pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(task.id)}
+                  onChange={() => {}}
+                  onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
+                  className="w-3.5 h-3.5 cursor-pointer accent-white"
+                />
+              </div>
+              <p
+                className="text-sm font-medium text-[#F5F5F5] flex-1 cursor-pointer"
+                onClick={() => { setEditingTask(task); setShowDialog(true) }}
+              >
+                {task.title}
+              </p>
               <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={e => toggleFlag(e, task, 'urgent')}
-                  className={cn('p-1 rounded transition-colors', task.urgent ? 'text-[#EF4444]' : 'text-[#4B5563]')}
-                >
+                <button onClick={e => toggleFlag(e, task, 'urgent')} className={cn('p-1 rounded transition-colors', task.urgent ? 'text-[#EF4444]' : 'text-[#4B5563]')}>
                   <Zap className="w-3.5 h-3.5" />
                 </button>
-                <button
-                  onClick={e => toggleFlag(e, task, 'important')}
-                  className={cn('p-1 rounded transition-colors', task.important ? 'text-[#F59E0B]' : 'text-[#4B5563]')}
-                >
+                <button onClick={e => toggleFlag(e, task, 'important')} className={cn('p-1 rounded transition-colors', task.important ? 'text-[#F59E0B]' : 'text-[#4B5563]')}>
                   <Star className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
-              {task.dueDate && <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>{formatDate(task.dueDate)}</span>}
+              <InlineStatus task={task} onUpdate={handleUpdate} />
+              <InlineDueDate task={task} onUpdate={handleUpdate} />
               {task.assignee && <span className="text-xs text-[#6B7280]">{task.assignee}</span>}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-6 max-w-sm w-full">
+            <h2 className="text-sm font-semibold text-[#F5F5F5] mb-2">Delete {selectedCount} task{selectedCount !== 1 ? 's' : ''}?</h2>
+            <p className="text-xs text-[#6B7280] mb-4">This cannot be undone.</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
+              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#EF4444] text-white rounded-[6px] hover:bg-red-500 transition-colors">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Task dialog */}
       {showDialog && (

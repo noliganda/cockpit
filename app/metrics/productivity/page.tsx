@@ -7,17 +7,17 @@ import { ProductivityClient } from './productivity-client'
 const WS_META: Record<string, { label: string; color: string; systems: string[] }> = {
   'byron-film': {
     label: 'Byron Film',
-    color: '#3B82F6',
+    color: '#D4A017',
     systems: ['Gmail', 'Notion', 'CRM', 'Xero', 'Google Drive'],
   },
   personal: {
     label: 'Personal',
-    color: '#10B981',
+    color: '#F97316',
     systems: ['Gmail', 'Calendar', 'Google Drive'],
   },
   korus: {
     label: 'KORUS',
-    color: '#F97316',
+    color: '#008080',
     systems: ['Notion (read-only)', 'Dashboard'],
   },
 }

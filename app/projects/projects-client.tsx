@@ -47,6 +47,8 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
   const [projectManagerId, setProjectManagerId] = useState(project?.projectManagerId ?? '')
   const [clientId, setClientId] = useState(project?.clientId ?? '')
   const [leadGenId, setLeadGenId] = useState(project?.leadGenId ?? '')
+  const [slackChannelId, setSlackChannelId] = useState(project?.slackChannelId ?? '')
+  const [slackChannelName, setSlackChannelName] = useState(project?.slackChannelName ?? '')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -73,6 +75,8 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
         projectManagerId: projectManagerId || undefined,
         clientId: clientId || undefined,
         leadGenId: leadGenId || undefined,
+        slackChannelId: slackChannelId || undefined,
+        slackChannelName: slackChannelName || undefined,
       })
       onClose()
     } finally { setSaving(false) }
@@ -177,6 +181,20 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
                 className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]" />
             </div>
           )}
+
+          {/* Slack Channel */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Slack Channel Name (optional)</label>
+              <input value={slackChannelName} onChange={e => setSlackChannelName(e.target.value)} placeholder="#channel-name"
+                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
+            </div>
+            <div>
+              <label className={labelCls}>Slack Channel ID (optional)</label>
+              <input value={slackChannelId} onChange={e => setSlackChannelId(e.target.value)} placeholder="C0XXXXXXXX"
+                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
+            </div>
+          </div>
 
           {/* Description */}
           <div>

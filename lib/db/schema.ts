@@ -81,6 +81,8 @@ export const projects = pgTable('projects', {
   projectManagerId: uuid('project_manager_id'),
   clientId: uuid('client_id'),
   leadGenId: uuid('lead_gen_id'),
+  slackChannelId: text('slack_channel_id'),
+  slackChannelName: text('slack_channel_name'),
   ...timestamps,
 }, (t) => [
   index('projects_workspace_idx').on(t.workspaceId),

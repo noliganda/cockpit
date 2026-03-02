@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, CheckSquare, FileText, Database, Users, FolderOpen, Zap, Star, Plus, Trash2, Check, ExternalLink } from 'lucide-react'
+import { ArrowLeft, CheckSquare, FileText, Database, Users, FolderOpen, Zap, Star, Plus, Trash2, Check, ExternalLink, Hash } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { type Project, type Task, type Area, type Note, type Milestone, type Bookmark, type ProjectContact, type Contact } from '@/types'
 import dynamic from 'next/dynamic'
@@ -299,6 +299,20 @@ export function ProjectDetailClient({
               <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
                 <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">Region</p>
                 <p className="text-sm text-[#F5F5F5]">{project.region}</p>
+              </div>
+            )}
+            {project.slackChannelName && (
+              <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">Slack Channel</p>
+                <a
+                  href={project.slackChannelId ? `slack://channel?team=&id=${project.slackChannelId}` : '#'}
+                  className="inline-flex items-center gap-1.5 text-sm text-[#4A90E2] hover:text-[#74B0F4] transition-colors"
+                  title="Open in Slack"
+                >
+                  <Hash className="w-3.5 h-3.5" />
+                  {project.slackChannelName.replace(/^#/, '')}
+                  <ExternalLink className="w-3 h-3 opacity-60" />
+                </a>
               </div>
             )}
           </div>

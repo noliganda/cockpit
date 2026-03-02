@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import {
   Home, CheckSquare, Kanban, Grid2X2, FolderOpen, Layout, Zap,
   Users, FileText, Database, FolderArchive, MessageSquare, Newspaper,
-  BarChart2, Settings, ChevronLeft, Menu, X,
+  BarChart2, Settings, ChevronLeft, Menu, X, CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/hooks/use-workspace'
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/projects', icon: FolderOpen, label: 'Projects', indent: false },
   { href: '/areas', icon: Layout, label: 'Areas', indent: false },
   { href: '/sprints', icon: Zap, label: 'Sprints', indent: false },
+  { href: '/calendar', icon: CalendarDays, label: 'Calendar', indent: false },
   { href: '/crm', icon: Users, label: 'Contacts', indent: false },
   { href: '/notes', icon: FileText, label: 'Notes', indent: false },
   { href: '/bases', icon: Database, label: 'Bases', indent: false },

@@ -19,6 +19,8 @@ const createSchema = z.object({
   projectManagerId: z.string().uuid().optional(),
   clientId: z.string().uuid().optional(),
   leadGenId: z.string().uuid().optional(),
+  slackChannelId: z.string().optional(),
+  slackChannelName: z.string().optional(),
 })
 
 export async function GET(request: NextRequest) {

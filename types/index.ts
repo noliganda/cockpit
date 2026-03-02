@@ -66,6 +66,8 @@ export interface Project {
   projectManagerId?: string | null
   clientId?: string | null
   leadGenId?: string | null
+  slackChannelId?: string | null
+  slackChannelName?: string | null
   createdAt: Date
   updatedAt: Date
 }

@@ -1,5 +1,5 @@
 import {
-  pgTable, text, timestamp, boolean, jsonb, uuid, integer, numeric, date, index, customType
+  pgTable, text, timestamp, boolean, jsonb, uuid, integer, numeric, date, real, index, customType, unique
 } from 'drizzle-orm/pg-core'
 
 // Custom vector type for pgvector
@@ -258,6 +258,7 @@ export const projectContacts = pgTable('project_contacts', {
 
 export const aiMetrics = pgTable('ai_metrics', {
   id: uuid('id').defaultRandom().primaryKey(),
+  workspace: text('workspace').notNull().default('all'),
   period: text('period').notNull(), // 'daily' | 'weekly' | 'monthly'
   periodStart: date('period_start').notNull(),
   periodEnd: date('period_end').notNull(),
@@ -279,3 +280,47 @@ export const aiMetrics = pgTable('ai_metrics', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+export const actions = pgTable('actions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  workspace: text('workspace').notNull(), // 'korus' | 'byron-film' | 'personal'
+  category: text('category').notNull(), // 'email' | 'research' | 'admin' | etc.
+  description: text('description').notNull(),
+  outcome: text('outcome'),
+  durationMinutes: real('duration_minutes'),
+  estimatedManualMinutes: real('estimated_manual_minutes'),
+  humanIntervention: boolean('human_intervention').notNull().default(false),
+  interventionType: text('intervention_type'), // 'tone' | 'content' | 'timing' | 'recipient' | 'other'
+  apiCostUsd: real('api_cost_usd').default(0),
+  apiTokensUsed: integer('api_tokens_used').default(0),
+  apiModel: text('api_model'),
+  metadata: jsonb('metadata'),
+}, (t) => [
+  index('actions_workspace_idx').on(t.workspace),
+  index('actions_created_idx').on(t.createdAt),
+])
+
+export const baselines = pgTable('baselines', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  category: text('category').notNull(),
+  workspace: text('workspace').notNull(),
+  estimatedManualMinutes: real('estimated_manual_minutes').notNull(),
+  hourlyRateUsd: real('hourly_rate_usd').notNull().default(75),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  unique('baselines_category_workspace_uniq').on(t.category, t.workspace),
+])
+
+export const emailStats = pgTable('email_stats', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  date: date('date').notNull(),
+  workspace: text('workspace').notNull(),
+  emailsSent: integer('emails_sent').default(0),
+  emailsReceived: integer('emails_received').default(0),
+  avgResponseTimeMinutes: real('avg_response_time_minutes'),
+  autonomousResponses: integer('autonomous_responses').default(0),
+  escalated: integer('escalated').default(0),
+}, (t) => [
+  unique('email_stats_date_workspace_uniq').on(t.date, t.workspace),
+])

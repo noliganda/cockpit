@@ -199,29 +199,6 @@ export interface ProjectContact {
   contact?: Contact
 }
 
-export interface BaseColumn {
-  name: string
-  type: 'text' | 'number' | 'date' | 'select' | 'multiselect' | 'checkbox' | 'url' | 'email' | 'person' | 'relation'
-  options?: string[]
-}
-
-export interface Base {
-  id: string
-  workspaceId: string
-  name: string
-  description?: string | null
-  schema: BaseColumn[]
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface BaseRow {
-  id: string
-  baseId: string
-  data: Record<string, unknown>
-  createdAt: Date
-  updatedAt: Date
-}
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 export type PipelineStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'

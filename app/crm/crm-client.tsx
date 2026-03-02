@@ -2,7 +2,7 @@
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
-import { User, Building2, Plus, X, Search, Linkedin, Instagram, Globe, ExternalLink, Download, Trash2, ChevronDown } from 'lucide-react'
+import { User, Building2, Plus, X, Search, Linkedin, Instagram, Globe, ExternalLink, Download, Trash2, Check, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Contact, Organisation, WorkspaceId } from '@/types'
 import { PIPELINE_STAGES } from '@/types'

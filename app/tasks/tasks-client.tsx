@@ -24,7 +24,7 @@ interface TasksClientProps {
 export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('active')
   const [urgentFilter, setUrgentFilter] = useState(false)
   const [importantFilter, setImportantFilter] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
@@ -34,7 +34,8 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
   const filtered = useMemo(() => {
     return tasks.filter(t => {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false
-      if (statusFilter !== 'all' && t.status !== statusFilter) return false
+      if (statusFilter === 'active' && (t.status === 'Done' || t.status === 'Cancelled')) return false
+      else if (statusFilter !== 'all' && statusFilter !== 'active' && t.status !== statusFilter) return false
       if (urgentFilter && !t.urgent) return false
       if (importantFilter && !t.important) return false
       return true
@@ -147,7 +148,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
-          {['all', ...TASK_STATUSES].map(s => (
+          {['active', 'all', ...TASK_STATUSES].map(s => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
@@ -157,7 +158,7 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
                   ? 'bg-[#222222] border-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
                   : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
               )}
-            >{s === 'all' ? 'All' : s}</button>
+            >{s === 'all' ? 'All' : s === 'active' ? 'Active' : s}</button>
           ))}
           <button
             onClick={() => setUrgentFilter(f => !f)}

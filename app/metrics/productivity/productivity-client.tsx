@@ -34,9 +34,9 @@ interface ProductivityClientProps {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const WS_COLORS: Record<string, string> = {
-  'byron-film': '#3B82F6',
-  personal: '#10B981',
-  korus: '#F97316',
+  'byron-film': '#D4A017',
+  personal: '#F97316',
+  korus: '#008080',
 }
 
 const WS_LABELS: Record<string, string> = {
@@ -553,7 +553,7 @@ function Section6Email({ byWorkspace }: { byWorkspace: WorkspaceMetrics[] }) {
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: ws.color }} />
               <span className="text-sm font-semibold text-[#F5F5F5]">{ws.label}</span>
               {ws.workspace === 'korus' && (
-                <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(249,115,22,0.12)] text-[#F97316] ml-auto">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(0,128,128,0.12)] text-[#008080] ml-auto">
                   Limited
                 </span>
               )}
@@ -585,7 +585,7 @@ function Section6Email({ byWorkspace }: { byWorkspace: WorkspaceMetrics[] }) {
 
       {/* Access note */}
       <div className="p-4 rounded-[8px] bg-[rgba(249,115,22,0.06)] border border-[rgba(249,115,22,0.15)]">
-        <p className="text-xs text-[#F97316] font-medium mb-1">Access gap — KORUS</p>
+        <p className="text-xs text-[#008080] font-medium mb-1">Access gap — KORUS</p>
         <p className="text-xs text-[#A0A0A0]">
           KORUS has no direct Gmail access. Email operations are handled via manual forwarding only.
           Byron Film & Personal have full Gmail API access enabling autonomous email drafting, sending, and classification.
@@ -601,7 +601,7 @@ const ACCESS_CONFIGS = [
   {
     workspace: 'byron-film',
     label: 'Byron Film',
-    color: '#3B82F6',
+    color: '#D4A017',
     level: 'Full Access',
     levelColor: '#22C55E',
     icon: '🎬',
@@ -617,7 +617,7 @@ const ACCESS_CONFIGS = [
   {
     workspace: 'personal',
     label: 'Personal',
-    color: '#10B981',
+    color: '#F97316',
     level: 'Full Access',
     levelColor: '#22C55E',
     icon: '👤',
@@ -632,9 +632,9 @@ const ACCESS_CONFIGS = [
   {
     workspace: 'korus',
     label: 'KORUS',
-    color: '#F97316',
+    color: '#008080',
     level: 'Limited Access',
-    levelColor: '#F97316',
+    levelColor: '#008080',
     icon: '🌏',
     systems: ['Notion (read-only)', 'OPS Dashboard'],
     capabilities: [
@@ -770,9 +770,9 @@ export function ProductivityClient({ byWorkspace }: ProductivityClientProps) {
           </div>
           <div className="flex items-center gap-3">
             {[
-              { label: 'Byron Film', color: '#3B82F6' },
-              { label: 'Personal', color: '#10B981' },
-              { label: 'KORUS', color: '#F97316' },
+              { label: 'Byron Film', color: '#D4A017' },
+              { label: 'Personal', color: '#F97316' },
+              { label: 'KORUS', color: '#008080' },
             ].map(ws => (
               <div key={ws.label} className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ws.color }} />

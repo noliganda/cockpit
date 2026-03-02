@@ -25,11 +25,16 @@ export default async function MetricsPage() {
         ))}
       </div>
 
-      <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-        <p className="text-sm text-[#A0A0A0] mb-4">View the full board-level executive dashboard:</p>
-        <Link href="/metrics/korus" className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] text-sm font-medium hover:bg-[#222222] transition-colors">
-          🌏 KORUS APAC Board Dashboard
-        </Link>
+      <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] space-y-3">
+        <p className="text-sm text-[#A0A0A0]">View the full board-level dashboards:</p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link href="/metrics/productivity" className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] text-sm font-medium hover:bg-[#222222] transition-colors">
+            📊 AI Productivity Comparison
+          </Link>
+          <Link href="/metrics/korus" className="inline-flex items-center gap-2 px-4 py-2 rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] text-sm font-medium hover:bg-[#222222] transition-colors">
+            🌏 KORUS APAC Board Dashboard
+          </Link>
+        </div>
       </div>
     </div>
   )

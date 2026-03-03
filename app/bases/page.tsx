@@ -1,29 +1,38 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { listBases, listTables } from '@/lib/nocodb'
+import { db } from '@/lib/db'
+import { bases, baseRows } from '@/lib/db/schema'
+import { eq, sql } from 'drizzle-orm'
 import { BasesClient } from './bases-client'
+import { type BaseColumn } from '@/types'
 
-export default async function BasesPage() {
+export default async function BasesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ workspace?: string }>
+}) {
   const session = await getSession()
   if (!session) redirect('/login')
 
-  let basesWithTables: Array<{ id: string; title: string; tables: Array<{ id: string; title: string }> }> = []
+  const { workspace } = await searchParams
+  const workspaceId = workspace ?? 'byron-film'
 
-  try {
-    const bases = await listBases()
-    basesWithTables = await Promise.all(
-      bases.map(async (base) => {
-        try {
-          const tables = await listTables(base.id)
-          return { ...base, tables }
-        } catch {
-          return { ...base, tables: [] }
-        }
-      })
-    )
-  } catch (err) {
-    console.error('Failed to fetch NocoDB bases:', err)
-  }
+  const allBases = await db
+    .select()
+    .from(bases)
+    .where(eq(bases.workspaceId, workspaceId))
 
-  return <BasesClient initialBases={basesWithTables} />
+  const rowCounts = await db
+    .select({ baseId: baseRows.baseId, count: sql<number>`count(*)::int` })
+    .from(baseRows)
+    .groupBy(baseRows.baseId)
+
+  const countMap = Object.fromEntries(rowCounts.map(r => [r.baseId, r.count]))
+  const basesWithCounts = allBases.map(b => ({
+    ...b,
+    schema: (b.schema ?? []) as BaseColumn[],
+    rowCount: countMap[b.id] ?? 0,
+  }))
+
+  return <BasesClient key={workspaceId} initialBases={basesWithCounts} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
 }

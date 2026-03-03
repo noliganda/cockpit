@@ -94,7 +94,7 @@ The following real credentials were committed to git and **still exist in git hi
 
 | Credential | Location in History | Commits |
 |---|---|---|
-| Neon DB password (`npg_jyxJkq7F4oCW`) | SPEC.md env section | `eb77add`, `ee5fffe`, `bfe0c47`, `8612cbe` + NocoDB commits |
+| Neon DB password (`[ROTATED]`) | SPEC.md env section | `eb77add`, `ee5fffe`, `bfe0c47`, `8612cbe` + NocoDB commits |
 | Notion API key (`ntn_462911842545...`) | SPEC.md env section | `eb77add` and descendants |
 | Notion DB IDs (×3) | SPEC.md env section | `eb77add` and descendants |
 
@@ -349,7 +349,7 @@ npm uninstall next-themes cmdk class-variance-authority \
 ## 9. Recommended Next Steps
 
 **Immediate (security):**
-- [ ] Rotate Neon DB password (`npg_jyxJkq7F4oCW`)
+- [x] Rotate Neon DB password (done 2026-03-03)
 - [ ] Rotate Notion API key (`ntn_462911842545...`)
 - [ ] Set `AUTH_PASSWORD_HASH`, `KORUS_GUEST_PASSWORD_HASH`, `CRON_SECRET` in production env
 - [ ] Remove stale NocoDB vars from `.env.local`

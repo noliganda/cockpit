@@ -1,29 +1,53 @@
-import { redirect, notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { db } from '@/lib/db'
-import { bases, baseRows } from '@/lib/db/schema'
-import { eq, asc } from 'drizzle-orm'
-import { BaseDetailClient } from './base-detail-client'
+import { getTable, getTableRows } from '@/lib/nocodb'
+import { TableDetailClient } from './table-detail-client'
 
-export default async function BaseDetailPage({
+export default async function TableDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ workspace?: string }>
+  searchParams: Promise<{ base?: string; name?: string }>
 }) {
   const session = await getSession()
   if (!session) redirect('/login')
 
-  const { id } = await params
-  const { workspace } = await searchParams
-  const workspaceId = workspace ?? 'byron-film'
+  const { id: tableId } = await params
+  const { base: baseId = '', name: tableName = '' } = await searchParams
 
-  const [base] = await db.select().from(bases).where(eq(bases.id, id)).limit(1)
-  if (!base) notFound()
+  let columns: Array<{ id: string; title: string; uidt: string; system?: boolean }> = []
+  let initialRows: Record<string, unknown>[] = []
+  let totalRows = 0
+  let error: string | null = null
 
-  const rawRows = await db.select().from(baseRows).where(eq(baseRows.baseId, id)).orderBy(asc(baseRows.createdAt))
-  const rows = rawRows.map(r => ({ ...r, data: (r.data ?? {}) as Record<string, unknown> }))
+  try {
+    const [table, rowsData] = await Promise.all([
+      getTable(tableId),
+      baseId
+        ? getTableRows(baseId, tableId)
+        : Promise.resolve({
+            list: [],
+            pageInfo: { totalRows: 0, page: 1, pageSize: 50, isFirstPage: true, isLastPage: true },
+          }),
+    ])
+    columns = table.columns.filter(c => !c.system)
+    initialRows = rowsData.list
+    totalRows = rowsData.pageInfo.totalRows
+  } catch (err) {
+    console.error('Failed to fetch table data:', err)
+    error = 'Failed to load table data. Check NocoDB connection.'
+  }
 
-  return <BaseDetailClient base={base} initialRows={rows} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
+  return (
+    <TableDetailClient
+      tableId={tableId}
+      baseId={baseId}
+      tableName={tableName || tableId}
+      columns={columns}
+      initialRows={initialRows}
+      totalRows={totalRows}
+      error={error}
+    />
+  )
 }

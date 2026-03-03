@@ -6,7 +6,7 @@ const NOCODB_API_TOKEN = process.env.NOCODB_API_TOKEN ?? ''
 
 function nocoHeaders() {
   return {
-    'xc-token': NOCODB_API_TOKEN,
+    'xc-auth': NOCODB_API_TOKEN,
     'Content-Type': 'application/json',
   }
 }

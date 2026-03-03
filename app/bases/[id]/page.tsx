@@ -1,36 +1,29 @@
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { getTableFields, getTableRows } from '@/lib/nocodb'
-import { TableDetailClient } from './base-detail-client'
+import { db } from '@/lib/db'
+import { bases, baseRows } from '@/lib/db/schema'
+import { eq, asc } from 'drizzle-orm'
+import { BaseDetailClient } from './base-detail-client'
 
-export default async function TableDetailPage({
+export default async function BaseDetailPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ base?: string; name?: string }>
+  searchParams: Promise<{ workspace?: string }>
 }) {
   const session = await getSession()
   if (!session) redirect('/login')
 
-  const { id: tableId } = await params
-  const { base: baseId, name: tableName } = await searchParams
+  const { id } = await params
+  const { workspace } = await searchParams
+  const workspaceId = workspace ?? 'byron-film'
 
-  if (!baseId) redirect('/bases')
+  const [base] = await db.select().from(bases).where(eq(bases.id, id)).limit(1)
+  if (!base) notFound()
 
-  const [fields, rowsData] = await Promise.all([
-    getTableFields(tableId),
-    getTableRows(baseId, tableId, { limit: 50 }),
-  ])
+  const rawRows = await db.select().from(baseRows).where(eq(baseRows.baseId, id)).orderBy(asc(baseRows.createdAt))
+  const rows = rawRows.map(r => ({ ...r, data: (r.data ?? {}) as Record<string, unknown> }))
 
-  return (
-    <TableDetailClient
-      tableId={tableId}
-      baseId={baseId}
-      tableName={tableName ?? tableId}
-      initialFields={fields}
-      initialRows={rowsData.list}
-      initialPageInfo={rowsData.pageInfo}
-    />
-  )
+  return <BaseDetailClient base={base} initialRows={rows} workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'} />
 }

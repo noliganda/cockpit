@@ -13,7 +13,7 @@ function nocoHeaders() {
 
 async function nocoFetch<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${NOCODB_URL}/${path}`
-  console.log('[NocoDB] fetch:', url, 'token-len:', NOCODB_API_TOKEN.length)
+  console.log('[NocoDB] fetch:', url, 'token:', NOCODB_API_TOKEN)
   const res = await fetch(url, {
     ...options,
     headers: {

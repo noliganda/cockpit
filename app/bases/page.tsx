@@ -17,6 +17,5 @@ export default async function BasesPage() {
     }))
   )
 
-  const nocodbUrl = process.env.NEXT_PUBLIC_NOCODB_URL ?? process.env.NOCODB_URL ?? 'http://localhost:8080'
-  return <BasesClient bases={bases} nocodbUrl={nocodbUrl} />
+  return <BasesClient bases={bases} />
 }

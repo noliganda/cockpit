@@ -22,10 +22,9 @@ const NOCO_FIELD_TYPES = [
 
 interface BasesClientProps {
   bases: (NocoBase & { tables: NocoTable[] })[]
-  nocodbUrl?: string
 }
 
-export function BasesClient({ bases: initialBases, nocodbUrl = 'http://localhost:8080' }: BasesClientProps) {
+export function BasesClient({ bases: initialBases }: BasesClientProps) {
   const [bases, setBases] = useState(initialBases)
   const [expanded, setExpanded] = useState<Record<string, boolean>>(
     // expand all by default
@@ -103,7 +102,7 @@ export function BasesClient({ bases: initialBases, nocodbUrl = 'http://localhost
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Bases</h1>
           <a
-            href={nocodbUrl}
+            href="http://localhost:8080"
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
@@ -117,7 +116,7 @@ export function BasesClient({ bases: initialBases, nocodbUrl = 'http://localhost
           <p className="text-sm text-[#A0A0A0] mb-1">No bases found in NocoDB</p>
           <p className="text-xs text-[#4B5563]">
             Make sure NocoDB is running at{' '}
-            <span className="font-mono text-[#6B7280]">NocoDB</span> and you have created at least one base.
+            <span className="font-mono text-[#6B7280]">localhost:8080</span> and you have created at least one base.
           </p>
         </div>
       </div>
@@ -136,7 +135,7 @@ export function BasesClient({ bases: initialBases, nocodbUrl = 'http://localhost
           </p>
         </div>
         <a
-          href={nocodbUrl}
+          href="http://localhost:8080"
           target="_blank"
           rel="noreferrer"
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"

@@ -27,7 +27,7 @@ async function handler(
     const res = await fetch(targetUrl, {
       method: request.method,
       headers: {
-        'xc-auth': NOCODB_API_TOKEN,
+        'xc-token': NOCODB_API_TOKEN,
         'Content-Type': 'application/json',
       },
       body,

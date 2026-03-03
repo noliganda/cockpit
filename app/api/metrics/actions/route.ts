@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
   const workspace = searchParams.get('workspace')
   const limit = parseInt(searchParams.get('limit') ?? '50')
 
-  const { eq, desc, and } = await import('drizzle-orm')
+  const { eq, desc } = await import('drizzle-orm')
   const rows = await db.select().from(actions)
     .where(workspace ? eq(actions.workspace, workspace) : undefined)
     .orderBy(desc(actions.createdAt))

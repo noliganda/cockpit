@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { X, StickyNote } from 'lucide-react'
-import { WORKSPACES, type WorkspaceId, type Note } from '@/types'
+import { WORKSPACES, type WorkspaceId } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
 

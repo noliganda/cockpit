@@ -64,8 +64,6 @@ export function ProjectDetailClient({
   const [bookmarks, setBookmarks] = useState(initialBookmarks)
   const [newBookmarkTitle, setNewBookmarkTitle] = useState('')
   const [newBookmarkUrl, setNewBookmarkUrl] = useState('')
-  const [addingBookmark, setAddingBookmark] = useState(false)
-
   // Project contacts state
   const [projectContacts, setProjectContacts] = useState(initialProjectContacts)
   const [addContactId, setAddContactId] = useState('')

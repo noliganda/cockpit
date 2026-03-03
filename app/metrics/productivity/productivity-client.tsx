@@ -2,7 +2,7 @@
 
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, ReferenceLine, Legend,
+  PieChart, Pie, Cell,
 } from 'recharts'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -37,12 +37,6 @@ const WS_COLORS: Record<string, string> = {
   'byron-film': '#D4A017',
   personal: '#F97316',
   korus: '#008080',
-}
-
-const WS_LABELS: Record<string, string> = {
-  'byron-film': 'Byron Film',
-  personal: 'Personal',
-  korus: 'KORUS',
 }
 
 const TOOLTIP_STYLE = {
@@ -107,15 +101,6 @@ function StatCard({
 function EmptyState({ text = 'No data yet — log actions to populate' }: { text?: string }) {
   return (
     <p className="text-sm text-[#4B5563] py-8 text-center">{text}</p>
-  )
-}
-
-function WorkspaceDot({ ws }: { ws: string }) {
-  return (
-    <span
-      className="inline-block w-2 h-2 rounded-full mr-1.5"
-      style={{ backgroundColor: WS_COLORS[ws] ?? '#6B7280' }}
-    />
   )
 }
 
@@ -370,9 +355,7 @@ function Section4Automation({ byWorkspace }: { byWorkspace: WorkspaceMetrics[] }
   const pieData = Object.entries(interventionTotals).map(([name, value]) => ({ name, value }))
   const totalInterventions = pieData.reduce((s, d) => s + d.value, 0)
 
-  // Weekly automation rate trend per workspace
-  const weeks = byWorkspace[0]?.weeklySeries.map(w => w.week) ?? []
-  // We don't have weekly automation rate broken out, so use static values for now
+  // Automation rate summary per workspace
   const automationRows = byWorkspace.map(ws => ({
     label: ws.label,
     color: ws.color,
@@ -495,7 +478,6 @@ function Section5Cost({ byWorkspace }: { byWorkspace: WorkspaceMetrics[] }) {
           <div className="space-y-4">
             {byWorkspace.map(ws => {
               const valueGenerated = ws.hoursSaved * 75
-              const roiPct = ws.totalApiCostUsd > 0 ? (ws.roi / ws.totalApiCostUsd) * 100 : null
               return (
                 <div key={ws.workspace}>
                   <div className="flex items-center justify-between mb-1">

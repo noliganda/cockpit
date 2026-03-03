@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { actions } from '@/lib/db/schema'
-import { eq, and, gte } from 'drizzle-orm'
+import { gte } from 'drizzle-orm'
 import { getSession, getGuestSession } from '@/lib/auth'
 
 const ACCESS_LEVELS: Record<string, { label: string; systems: string[]; color: string }> = {

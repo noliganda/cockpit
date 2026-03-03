@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Plus, Calendar, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { WORKSPACES, type Task, type Sprint } from '@/types'

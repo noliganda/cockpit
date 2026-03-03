@@ -198,7 +198,7 @@ export function BaseDetailClient({ base, initialRows, workspaceId }: BaseDetailC
         }
       }
     }
-  }, [base.id, columns])
+  }, [base.id, columns]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const createRow = useCallback(() =>
     Object.fromEntries(columns.map(c => [c.name, c.type === 'checkbox' ? false : ''])) as GridRow

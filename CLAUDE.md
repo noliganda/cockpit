@@ -6,11 +6,10 @@
 3. Read .env.local — environment variables
 4. Check Section 4 of SPEC.md for current phase status
 
-## Current Phase
-**Phase 8** — Oli UX Feedback (items 8.1–8.10)
-**Phase 9** — Bug Fixes + Core Completion (Sections A/B/C)
-
-Detailed specs for Phase 8 and 9 are also in PHASE8.md and PHASE9.md for granular reference.
+## Current State
+Phases 1–10, Blocks 1–4, Productivity Dashboard, and Bases v2 are **all complete**.
+Nothing has been pushed to GitHub yet — all work is local on `main`.
+Check Section 4 of SPEC.md for the full status tracker.
 
 ## After Each Milestone
 1. Run `npm run build` — fix ALL errors before moving on

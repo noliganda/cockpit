@@ -309,3 +309,46 @@ export const emailStats = pgTable('email_stats', {
 }, (t) => [
   unique('email_stats_date_workspace_uniq').on(t.date, t.workspace),
 ])
+
+// ── Tables / Bases (native spreadsheet feature) ──────────────────────────────
+
+export const userBases = pgTable('user_bases', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  workspace: text('workspace').notNull().default('personal'), // 'byron_film' | 'korus' | 'personal'
+  ...timestamps,
+}, (t) => [
+  index('user_bases_workspace_idx').on(t.workspace),
+])
+
+export const userTables = pgTable('user_tables', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  baseId: uuid('base_id').notNull().references(() => userBases.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  ...timestamps,
+}, (t) => [
+  index('user_tables_base_idx').on(t.baseId),
+])
+
+export const userColumns = pgTable('user_columns', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tableId: uuid('table_id').notNull().references(() => userTables.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  columnType: text('column_type').notNull().default('text'), // text | number | date | boolean | select | url | email
+  options: jsonb('options'), // for select: { choices: ["A","B","C"] }
+  order: integer('order').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('user_columns_table_idx').on(t.tableId),
+])
+
+export const userRows = pgTable('user_rows', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  tableId: uuid('table_id').notNull().references(() => userTables.id, { onDelete: 'cascade' }),
+  data: jsonb('data').notNull().default({}), // keys = column IDs, values = cell data
+  ...timestamps,
+}, (t) => [
+  index('user_rows_table_idx').on(t.tableId),
+])

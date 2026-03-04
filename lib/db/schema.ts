@@ -316,7 +316,7 @@ export const userBases = pgTable('user_bases', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
-  workspace: text('workspace').notNull().default('personal'), // 'byron_film' | 'korus' | 'personal'
+  workspace: text('workspace_id').notNull().default('personal'), // 'byron_film' | 'korus' | 'personal'
   ...timestamps,
 }, (t) => [
   index('user_bases_workspace_idx').on(t.workspace),

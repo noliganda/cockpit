@@ -31,43 +31,53 @@ const createSchema = z.object({
 })
 
 export async function GET(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const workspaceId = searchParams.get('workspace')
+    const { searchParams } = new URL(request.url)
+    const workspaceId = searchParams.get('workspace')
 
-  const rows = await db
-    .select()
-    .from(contacts)
-    .where(workspaceId ? eq(contacts.workspaceId, workspaceId) : undefined)
-    .orderBy(desc(contacts.createdAt))
+    const rows = await db
+      .select()
+      .from(contacts)
+      .where(workspaceId ? eq(contacts.workspaceId, workspaceId) : undefined)
+      .orderBy(desc(contacts.createdAt))
 
-  return NextResponse.json(rows)
+    return NextResponse.json(rows)
+  } catch (error) {
+    console.error('[GET /api/contacts]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json() as unknown
-  const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+    const body = await request.json() as unknown
+    const parsed = createSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const insertData = {
-    ...parsed.data,
-    organisationId: parsed.data.organisationId || undefined,
-    email: parsed.data.email || undefined,
+    const insertData = {
+      ...parsed.data,
+      organisationId: parsed.data.organisationId || undefined,
+      email: parsed.data.email || undefined,
+    }
+    const [contact] = await db.insert(contacts).values(insertData).returning()
+
+    await logActivity({
+      workspaceId: contact.workspaceId,
+      action: 'created',
+      entityType: 'contact',
+      entityId: contact.id,
+      entityTitle: contact.name,
+    })
+
+    return NextResponse.json(contact, { status: 201 })
+  } catch (error) {
+    console.error('[POST /api/contacts]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-  const [contact] = await db.insert(contacts).values(insertData).returning()
-
-  await logActivity({
-    workspaceId: contact.workspaceId,
-    action: 'created',
-    entityType: 'contact',
-    entityId: contact.id,
-    entityTitle: contact.name,
-  })
-
-  return NextResponse.json(contact, { status: 201 })
 }

@@ -24,38 +24,48 @@ const createSchema = z.object({
 })
 
 export async function GET(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const workspaceId = searchParams.get('workspace')
+    const { searchParams } = new URL(request.url)
+    const workspaceId = searchParams.get('workspace')
 
-  const rows = await db
-    .select()
-    .from(projects)
-    .where(workspaceId ? eq(projects.workspaceId, workspaceId) : undefined)
-    .orderBy(desc(projects.createdAt))
+    const rows = await db
+      .select()
+      .from(projects)
+      .where(workspaceId ? eq(projects.workspaceId, workspaceId) : undefined)
+      .orderBy(desc(projects.createdAt))
 
-  return NextResponse.json(rows)
+    return NextResponse.json(rows)
+  } catch (error) {
+    console.error('[GET /api/projects]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json() as unknown
-  const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+    const body = await request.json() as unknown
+    const parsed = createSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const [project] = await db.insert(projects).values(parsed.data).returning()
+    const [project] = await db.insert(projects).values(parsed.data).returning()
 
-  await logActivity({
-    workspaceId: project.workspaceId,
-    action: 'created',
-    entityType: 'project',
-    entityId: project.id,
-    entityTitle: project.name,
-  })
+    await logActivity({
+      workspaceId: project.workspaceId,
+      action: 'created',
+      entityType: 'project',
+      entityId: project.id,
+      entityTitle: project.name,
+    })
 
-  return NextResponse.json(project, { status: 201 })
+    return NextResponse.json(project, { status: 201 })
+  } catch (error) {
+    console.error('[POST /api/projects]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

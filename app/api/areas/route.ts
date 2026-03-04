@@ -18,38 +18,48 @@ const createSchema = z.object({
 })
 
 export async function GET(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const workspaceId = searchParams.get('workspace')
+    const { searchParams } = new URL(request.url)
+    const workspaceId = searchParams.get('workspace')
 
-  const rows = await db
-    .select()
-    .from(areas)
-    .where(workspaceId ? eq(areas.workspaceId, workspaceId) : undefined)
-    .orderBy(asc(areas.order))
+    const rows = await db
+      .select()
+      .from(areas)
+      .where(workspaceId ? eq(areas.workspaceId, workspaceId) : undefined)
+      .orderBy(asc(areas.order))
 
-  return NextResponse.json(rows)
+    return NextResponse.json(rows)
+  } catch (error) {
+    console.error('[GET /api/areas]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json() as unknown
-  const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+    const body = await request.json() as unknown
+    const parsed = createSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const [area] = await db.insert(areas).values(parsed.data).returning()
+    const [area] = await db.insert(areas).values(parsed.data).returning()
 
-  await logActivity({
-    workspaceId: area.workspaceId,
-    action: 'created',
-    entityType: 'area',
-    entityId: area.id,
-    entityTitle: area.name,
-  })
+    await logActivity({
+      workspaceId: area.workspaceId,
+      action: 'created',
+      entityType: 'area',
+      entityId: area.id,
+      entityTitle: area.name,
+    })
 
-  return NextResponse.json(area, { status: 201 })
+    return NextResponse.json(area, { status: 201 })
+  } catch (error) {
+    console.error('[POST /api/areas]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

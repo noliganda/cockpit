@@ -17,33 +17,43 @@ const deleteSchema = z.object({
 })
 
 export async function PATCH(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json() as unknown
-  const parsed = patchSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+    const body = await request.json() as unknown
+    const parsed = patchSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const { ids, updates } = parsed.data
-  const updated = await db
-    .update(contacts)
-    .set({ ...updates, updatedAt: new Date() })
-    .where(inArray(contacts.id, ids))
-    .returning()
+    const { ids, updates } = parsed.data
+    const updated = await db
+      .update(contacts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(inArray(contacts.id, ids))
+      .returning()
 
-  return NextResponse.json(updated)
+    return NextResponse.json(updated)
+  } catch (error) {
+    console.error('[PATCH /api/contacts/batch]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json() as unknown
-  const parsed = deleteSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+    const body = await request.json() as unknown
+    const parsed = deleteSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const { ids } = parsed.data
-  await db.delete(contacts).where(inArray(contacts.id, ids))
+    const { ids } = parsed.data
+    await db.delete(contacts).where(inArray(contacts.id, ids))
 
-  return NextResponse.json({ success: true, count: ids.length })
+    return NextResponse.json({ success: true, count: ids.length })
+  } catch (error) {
+    console.error('[DELETE /api/contacts/batch]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

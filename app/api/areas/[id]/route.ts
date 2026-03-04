@@ -8,57 +8,72 @@ import { getSession } from '@/lib/auth'
 type AreaUpdate = Partial<typeof areas.$inferInsert>
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
-  const [area] = await db.select().from(areas).where(eq(areas.id, id)).limit(1)
-  if (!area) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(area)
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const [area] = await db.select().from(areas).where(eq(areas.id, id)).limit(1)
+    if (!area) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json(area)
+  } catch (error) {
+    console.error('[GET /api/areas/[id]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
-  const body = await request.json() as AreaUpdate
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const body = await request.json() as AreaUpdate
 
-  const [area] = await db
-    .update(areas)
-    .set({ ...body, updatedAt: new Date() })
-    .where(eq(areas.id, id))
-    .returning()
+    const [area] = await db
+      .update(areas)
+      .set({ ...body, updatedAt: new Date() })
+      .where(eq(areas.id, id))
+      .returning()
 
-  if (!area) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!area) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await logActivity({
-    workspaceId: area.workspaceId,
-    action: 'updated',
-    entityType: 'area',
-    entityId: area.id,
-    entityTitle: area.name,
-    metadata: body as Record<string, unknown>,
-  })
+    await logActivity({
+      workspaceId: area.workspaceId,
+      action: 'updated',
+      entityType: 'area',
+      entityId: area.id,
+      entityTitle: area.name,
+      metadata: body as Record<string, unknown>,
+    })
 
-  return NextResponse.json(area)
+    return NextResponse.json(area)
+  } catch (error) {
+    console.error('[PATCH /api/areas/[id]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
 
-  const [area] = await db.select().from(areas).where(eq(areas.id, id)).limit(1)
-  if (!area) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    const [area] = await db.select().from(areas).where(eq(areas.id, id)).limit(1)
+    if (!area) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await db.delete(areas).where(eq(areas.id, id))
+    await db.delete(areas).where(eq(areas.id, id))
 
-  await logActivity({
-    workspaceId: area.workspaceId,
-    action: 'deleted',
-    entityType: 'area',
-    entityId: area.id,
-    entityTitle: area.name,
-  })
+    await logActivity({
+      workspaceId: area.workspaceId,
+      action: 'deleted',
+      entityType: 'area',
+      entityId: area.id,
+      entityTitle: area.name,
+    })
 
-  return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('[DELETE /api/areas/[id]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

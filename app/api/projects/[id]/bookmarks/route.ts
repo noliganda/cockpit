@@ -5,37 +5,47 @@ import { eq, desc } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = await params
+    const { id } = await params
 
-  const rows = await db
-    .select()
-    .from(bookmarks)
-    .where(eq(bookmarks.projectId, id))
-    .orderBy(desc(bookmarks.createdAt))
+    const rows = await db
+      .select()
+      .from(bookmarks)
+      .where(eq(bookmarks.projectId, id))
+      .orderBy(desc(bookmarks.createdAt))
 
-  return NextResponse.json(rows)
+    return NextResponse.json(rows)
+  } catch (error) {
+    console.error('[GET /api/projects/[id]/bookmarks]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { id } = await params
-  const body = await request.json() as { title?: string; url?: string }
+    const { id } = await params
+    const body = await request.json() as { title?: string; url?: string }
 
-  if (!body.title || !body.url) return NextResponse.json({ error: 'title and url are required' }, { status: 400 })
+    if (!body.title || !body.url) return NextResponse.json({ error: 'title and url are required' }, { status: 400 })
 
-  const [bookmark] = await db
-    .insert(bookmarks)
-    .values({
-      projectId: id,
-      title: body.title,
-      url: body.url,
-    })
-    .returning()
+    const [bookmark] = await db
+      .insert(bookmarks)
+      .values({
+        projectId: id,
+        title: body.title,
+        url: body.url,
+      })
+      .returning()
 
-  return NextResponse.json(bookmark, { status: 201 })
+    return NextResponse.json(bookmark, { status: 201 })
+  } catch (error) {
+    console.error('[POST /api/projects/[id]/bookmarks]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

@@ -84,7 +84,7 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
           </button>
         </div>
 
-        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
           <input
             value={name}
             onChange={e => setName(e.target.value)}
@@ -155,30 +155,40 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Status</label>
-              <select value={status} onChange={e => setStatus(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none">
-                <option value="active">Active</option>
-                <option value="archived">Archived</option>
-              </select>
+          {/* Status */}
+          <div>
+            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Status</label>
+            <select value={status} onChange={e => setStatus(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none">
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+
+          {/* Icon — quick-pick grid + paste input */}
+          <div>
+            <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Icon</label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {['👑','💰','⚙️','📈','🎬','🎯','💼','📣','🤖','🏗️','🌏','📁','🔒','🧠','📐','🔬','📊','🗺️','🏠','💪','📚','✈️','🎨','🌿','⚡'].map(e => (
+                <button key={e} type="button" onClick={() => setIcon(e)}
+                  className={cn('w-8 h-8 text-base flex items-center justify-center rounded-[4px] transition-colors',
+                    icon === e ? 'bg-[rgba(255,255,255,0.14)] ring-1 ring-[rgba(255,255,255,0.20)]' : 'hover:bg-[rgba(255,255,255,0.06)]')}>
+                  {e}
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Icon</label>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl w-10 h-10 flex items-center justify-center rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] shrink-0">
-                  {icon || '📁'}
-                </span>
-                <input
-                  value={icon}
-                  onChange={e => setIcon(e.target.value)}
-                  placeholder="Paste emoji…"
-                  maxLength={8}
-                  className="flex-1 px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
-                />
-              </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl w-9 h-9 flex items-center justify-center rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] shrink-0">
+                {icon || '📁'}
+              </span>
+              <input
+                value={icon}
+                onChange={e => setIcon(e.target.value)}
+                placeholder="Or paste any emoji directly…"
+                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+              />
             </div>
+            <p className="text-[10px] text-[#4B5563] mt-1">Tap a quick-pick above, or press <kbd className="px-1 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[#6B7280] font-mono text-[10px]">⌘ Ctrl Space</kbd> to open the Mac emoji keyboard</p>
           </div>
           <div>
             <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Color</label>

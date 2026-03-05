@@ -29,16 +29,16 @@ export function CustomCheckbox({
       onClick={handleClick}
       className={cn(
         'inline-flex items-center justify-center flex-shrink-0 rounded-[3px] transition-all',
-        'w-3.5 h-3.5 cursor-pointer border border-[#2A2A2A]',
+        'w-3.5 h-3.5 cursor-pointer',
         checked
-          ? 'bg-[#1F1F1F] border-[#3A3A3A]'
-          : 'bg-[#1A1A1A] border-[#2A2A2A] hover:border-[#3A3A3A]',
+          ? 'bg-[#E5E5E5] border border-[#E5E5E5]'
+          : 'bg-[#1A1A1A] border border-[rgba(255,255,255,0.22)] hover:border-[rgba(255,255,255,0.40)]',
         className
       )}
       aria-label={checked ? 'Checked' : 'Unchecked'}
     >
       {checked && (
-        <Check className="w-2.5 h-2.5 text-[#FFFFFF] stroke-[3]" />
+        <Check className="w-2.5 h-2.5 text-[#0A0A0A] stroke-[3]" />
       )}
     </button>
   )

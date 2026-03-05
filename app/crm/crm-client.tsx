@@ -3,6 +3,7 @@ import { useState, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { User, Building2, Plus, X, Search, Linkedin, Instagram, Globe, ExternalLink, Download, Trash2, ChevronDown } from 'lucide-react'
+import { CustomCheckbox } from '@/components/custom-checkbox'
 import { cn } from '@/lib/utils'
 import type { Contact, Organisation, WorkspaceId } from '@/types'
 import { PIPELINE_STAGES } from '@/types'
@@ -809,11 +810,9 @@ function ContactsTab({
               <thead>
                 <tr className="border-b border-[rgba(255,255,255,0.06)]">
                   <th className="px-3 py-3 w-8">
-                    <input
-                      type="checkbox"
+                    <CustomCheckbox
                       checked={allFilteredSelected}
                       onChange={toggleSelectAll}
-                      className="w-3.5 h-3.5 cursor-pointer accent-white"
                     />
                   </th>
                   {['Name', 'Position', 'Mobile', 'Email', 'Links', 'Pipeline Stage'].map(h => (
@@ -832,12 +831,9 @@ function ContactsTab({
                     onClick={() => setEditing(contact)}
                   >
                     <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                      <input
-                        type="checkbox"
+                      <CustomCheckbox
                         checked={selectedIds.has(contact.id)}
-                        onChange={() => {}}
-                        onClick={e => toggleSelect(e as React.MouseEvent, idx, contact.id)}
-                        className="w-3.5 h-3.5 cursor-pointer accent-white"
+                        onClick={e => toggleSelect(e, idx, contact.id)}
                       />
                     </td>
                     <td className="px-4 py-2.5">
@@ -907,12 +903,9 @@ function ContactsTab({
               >
                 <div className="flex items-start gap-2 mb-2">
                   <div className="pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
+                    <CustomCheckbox
                       checked={selectedIds.has(contact.id)}
-                      onChange={() => {}}
-                      onClick={e => toggleSelect(e as React.MouseEvent, idx, contact.id)}
-                      className="w-3.5 h-3.5 cursor-pointer accent-white"
+                      onClick={e => toggleSelect(e, idx, contact.id)}
                     />
                   </div>
                   <p

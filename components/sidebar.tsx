@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import {
   Home, CheckSquare, Kanban, Grid2X2, FolderOpen, Layout, Zap,
   Users, FileText, Database, FolderArchive, MessageSquare, Newspaper,
-  BarChart2, Settings, ChevronLeft, Menu, X, CalendarDays,
+  BarChart2, Settings, ChevronLeft, Menu, X, CalendarDays, Activity,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/hooks/use-workspace'
@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { href: '/documents', icon: FolderArchive, label: 'Documents', indent: false },
   { href: '/messages', icon: MessageSquare, label: 'Messages', indent: false },
   { href: '/brief', icon: Newspaper, label: 'Brief', indent: false },
+  { href: '/logs', icon: Activity, label: 'Logs', indent: false },
   { href: '/metrics', icon: BarChart2, label: 'Metrics', indent: false },
   { href: '/ai-metrics', icon: Zap, label: 'AI Metrics', indent: true },
   { href: '/metrics/productivity', icon: BarChart2, label: 'Productivity', indent: true },

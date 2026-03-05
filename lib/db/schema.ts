@@ -83,6 +83,7 @@ export const projects = pgTable('projects', {
   leadGenId: uuid('lead_gen_id'),
   slackChannelId: text('slack_channel_id'),
   slackChannelName: text('slack_channel_name'),
+  starred: boolean('starred').default(false),
   ...timestamps,
 }, (t) => [
   index('projects_workspace_idx').on(t.workspaceId),
@@ -308,6 +309,25 @@ export const emailStats = pgTable('email_stats', {
   escalated: integer('escalated').default(0),
 }, (t) => [
   unique('email_stats_date_workspace_uniq').on(t.date, t.workspace),
+])
+
+// ── Calendar Events (synced from Google Calendar) ────────────────────────────
+
+export const calendarEvents = pgTable('calendar_events', {
+  id: text('id').primaryKey(), // Google Calendar event ID
+  workspaceId: text('workspace_id').notNull(),
+  calendarId: text('calendar_id').notNull(), // e.g. olivier@byronfilm.com
+  title: text('title').notNull(),
+  description: text('description'),
+  location: text('location'),
+  startTime: timestamp('start_time', { withTimezone: true }).notNull(),
+  endTime: timestamp('end_time', { withTimezone: true }).notNull(),
+  allDay: boolean('all_day').default(false),
+  url: text('url'),
+  syncedAt: timestamp('synced_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('calendar_events_workspace_idx').on(t.workspaceId),
+  index('calendar_events_start_idx').on(t.startTime),
 ])
 
 // ── Tables / Bases (native spreadsheet feature) ──────────────────────────────

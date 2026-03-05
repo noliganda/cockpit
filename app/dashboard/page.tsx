@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { tasks, activityLog, projects, contacts } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { tasks, activityLog, projects, contacts, calendarEvents } from '@/lib/db/schema'
+import { eq, desc, gte, lte, and, asc } from 'drizzle-orm'
 import { WORKSPACES } from '@/types'
 import { DashboardClient } from './dashboard-client'
 
@@ -20,50 +20,55 @@ export default async function DashboardPage({
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const todayStr = today.toISOString().split('T')[0]
+  const in30Days = new Date(today)
+  in30Days.setDate(today.getDate() + 30)
   const in7Days = new Date(today)
   in7Days.setDate(today.getDate() + 7)
   const in7DaysStr = in7Days.toISOString().split('T')[0]
 
   const DONE_STATUSES = ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid']
 
-  const [allTasks, allProjects, allContacts, recentActivity] = await Promise.all([
-    workspaceId
-      ? db.select().from(tasks).where(eq(tasks.workspaceId, workspaceId))
+  const wsFilter = workspaceId
+  const [allTasks, allProjects, allContacts, recentActivity, upcomingEvents] = await Promise.all([
+    wsFilter
+      ? db.select().from(tasks).where(eq(tasks.workspaceId, wsFilter))
       : db.select().from(tasks),
-    workspaceId
-      ? db.select().from(projects).where(eq(projects.workspaceId, workspaceId))
+    wsFilter
+      ? db.select().from(projects).where(eq(projects.workspaceId, wsFilter))
       : db.select().from(projects),
-    workspaceId
-      ? db.select({ id: contacts.id }).from(contacts).where(eq(contacts.workspaceId, workspaceId))
+    wsFilter
+      ? db.select({ id: contacts.id }).from(contacts).where(eq(contacts.workspaceId, wsFilter))
       : db.select({ id: contacts.id }).from(contacts),
-    workspaceId
-      ? db.select({
-          id: activityLog.id,
-          workspaceId: activityLog.workspaceId,
-          actor: activityLog.actor,
-          action: activityLog.action,
-          entityType: activityLog.entityType,
-          entityTitle: activityLog.entityTitle,
-          description: activityLog.description,
-          createdAt: activityLog.createdAt,
-        })
-        .from(activityLog)
-        .where(eq(activityLog.workspaceId, workspaceId))
-        .orderBy(desc(activityLog.createdAt))
-        .limit(10)
-      : db.select({
-          id: activityLog.id,
-          workspaceId: activityLog.workspaceId,
-          actor: activityLog.actor,
-          action: activityLog.action,
-          entityType: activityLog.entityType,
-          entityTitle: activityLog.entityTitle,
-          description: activityLog.description,
-          createdAt: activityLog.createdAt,
-        })
-        .from(activityLog)
-        .orderBy(desc(activityLog.createdAt))
-        .limit(10),
+    db.select({
+        id: activityLog.id,
+        workspaceId: activityLog.workspaceId,
+        actor: activityLog.actor,
+        action: activityLog.action,
+        entityType: activityLog.entityType,
+        entityTitle: activityLog.entityTitle,
+        description: activityLog.description,
+        createdAt: activityLog.createdAt,
+      })
+      .from(activityLog)
+      .orderBy(desc(activityLog.createdAt))
+      .limit(20),
+    // Calendar events in next 30 days
+    wsFilter
+      ? db.select().from(calendarEvents)
+          .where(and(
+            eq(calendarEvents.workspaceId, wsFilter),
+            gte(calendarEvents.startTime, today),
+            lte(calendarEvents.startTime, in30Days),
+          ))
+          .orderBy(asc(calendarEvents.startTime))
+          .limit(20)
+      : db.select().from(calendarEvents)
+          .where(and(
+            gte(calendarEvents.startTime, today),
+            lte(calendarEvents.startTime, in30Days),
+          ))
+          .orderBy(asc(calendarEvents.startTime))
+          .limit(20),
   ])
 
   const openTasks = allTasks.filter(t => !DONE_STATUSES.includes(t.status)).length
@@ -84,13 +89,21 @@ export default async function DashboardPage({
     completed: allTasks.filter(t => t.workspaceId === ws.id && DONE_STATUSES.includes(t.status)).length,
   }))
 
+  // Featured projects: starred first, then Active, max 5
+  const featuredProjects = [
+    ...allProjects.filter(p => p.starred && !DONE_STATUSES.includes(p.status ?? '')),
+    ...allProjects.filter(p => !p.starred && p.status === 'Active'),
+  ].slice(0, 5)
+
   return (
     <DashboardClient
       key={workspaceId ?? 'all'}
       stats={{ openTasks, activeProjects, overdueItems, contactCount }}
       upcomingTasks={upcomingTasks}
+      upcomingEvents={upcomingEvents}
       recentActivity={recentActivity}
       workspaceBreakdown={workspaceBreakdown}
+      featuredProjects={featuredProjects}
       workspaceId={workspaceId}
     />
   )

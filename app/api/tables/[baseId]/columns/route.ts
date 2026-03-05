@@ -4,12 +4,12 @@ import { userColumns } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ tableId: string }> }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ baseId: string }> }) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { tableId } = await params
+    const { baseId: tableId } = await params
     const columns = await db
       .select()
       .from(userColumns)
@@ -18,17 +18,17 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ tab
 
     return NextResponse.json(columns)
   } catch (error) {
-    console.error('[GET /api/tables/[tableId]/columns]', error)
+    console.error('[GET /api/tables/[baseId]/columns]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ tableId: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ baseId: string }> }) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { tableId } = await params
+    const { baseId: tableId } = await params
     const body = await req.json()
     const { name, columnType = 'text', options, order = 0 } = body
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tab
 
     return NextResponse.json(column, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/tables/[tableId]/columns]', error)
+    console.error('[POST /api/tables/[baseId]/columns]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

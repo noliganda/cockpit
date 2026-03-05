@@ -4,12 +4,12 @@ import { userRows } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ tableId: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ baseId: string }> }) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { tableId } = await params
+    const { baseId: tableId } = await params
     const { searchParams } = new URL(req.url)
     const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
     const limit = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') ?? '100')))
@@ -25,17 +25,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ tabl
 
     return NextResponse.json({ rows, page, limit })
   } catch (error) {
-    console.error('[GET /api/tables/[tableId]/rows]', error)
+    console.error('[GET /api/tables/[baseId]/rows]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: Promise<{ tableId: string }> }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ baseId: string }> }) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { tableId } = await params
+    const { baseId: tableId } = await params
     const body = await req.json()
     const { data = {} } = body
 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tab
 
     return NextResponse.json(row, { status: 201 })
   } catch (error) {
-    console.error('[POST /api/tables/[tableId]/rows]', error)
+    console.error('[POST /api/tables/[baseId]/rows]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

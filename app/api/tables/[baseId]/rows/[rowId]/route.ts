@@ -4,7 +4,7 @@ import { userRows } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ tableId: string; rowId: string }> }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ baseId: string; rowId: string }> }) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -24,12 +24,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ ta
     if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
     return NextResponse.json(row)
   } catch (error) {
-    console.error('[PATCH /api/tables/[tableId]/rows/[rowId]]', error)
+    console.error('[PATCH /api/tables/[baseId]/rows/[rowId]]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ tableId: string; rowId: string }> }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ baseId: string; rowId: string }> }) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -38,7 +38,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     await db.delete(userRows).where(eq(userRows.id, rowId))
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error('[DELETE /api/tables/[tableId]/rows/[rowId]]', error)
+    console.error('[DELETE /api/tables/[baseId]/rows/[rowId]]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

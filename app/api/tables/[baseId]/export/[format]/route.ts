@@ -6,13 +6,13 @@ import { getSession } from '@/lib/auth'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ tableId: string; format: string }> }
+  { params }: { params: Promise<{ baseId: string; format: string }> }
 ) {
   try {
     const session = await getSession()
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { tableId, format } = await params
+    const { baseId: tableId, format } = await params
 
     if (!['csv', 'json', 'md'].includes(format)) {
       return NextResponse.json({ error: 'Invalid format. Use csv, json, or md.' }, { status: 400 })
@@ -27,12 +27,11 @@ export async function GET(
       .where(eq(userColumns.tableId, tableId))
       .orderBy(userColumns.order)
 
-    const { rows } = await db
+    const rows = await db
       .select()
       .from(userRows)
       .where(eq(userRows.tableId, tableId))
       .orderBy(userRows.createdAt)
-      .then((rows) => ({ rows }))
 
     const filename = `${table.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}`
     const rowData = rows.map((r) => r.data as Record<string, unknown>)
@@ -73,7 +72,7 @@ export async function GET(
       })
     }
 
-    // md — Obsidian-compatible markdown with YAML frontmatter
+    // md — Obsidian-compatible markdown
     const lines: string[] = [
       '---',
       `title: "${table.name}"`,
@@ -85,11 +84,8 @@ export async function GET(
       `# ${table.name}`,
       '',
     ]
-
-    // Markdown table header
     lines.push(`| # | ${columns.map((c) => c.name).join(' | ')} |`)
     lines.push(`| --- | ${columns.map(() => '---').join(' | ')} |`)
-
     rowData.forEach((row, i) => {
       const cells = columns.map((col) => {
         const val = row[col.id]
@@ -98,15 +94,14 @@ export async function GET(
       lines.push(`| ${i + 1} | ${cells.join(' | ')} |`)
     })
 
-    const md = lines.join('\n')
-    return new NextResponse(md, {
+    return new NextResponse(lines.join('\n'), {
       headers: {
         'Content-Type': 'text/markdown',
         'Content-Disposition': `attachment; filename="${filename}.md"`,
       },
     })
   } catch (error) {
-    console.error('[GET /api/tables/[tableId]/export/[format]]', error)
+    console.error('[GET /api/tables/[baseId]/export/[format]]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

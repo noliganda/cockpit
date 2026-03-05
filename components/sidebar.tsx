@@ -13,6 +13,7 @@ import { WorkspaceSwitcher } from './workspace-switcher'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Home', indent: false },
+  { href: '/brief', icon: Newspaper, label: 'Brief', indent: false },
   { href: '/tasks', icon: CheckSquare, label: 'Tasks', indent: false },
   { href: '/tasks/kanban', icon: Kanban, label: 'Kanban', indent: true },
   { href: '/tasks/matrix', icon: Grid2X2, label: 'Matrix', indent: true },
@@ -26,7 +27,6 @@ const NAV_ITEMS = [
   { href: '/bases', icon: Database, label: 'Bases', indent: false },
   { href: '/documents', icon: FolderArchive, label: 'Documents', indent: false },
   { href: '/messages', icon: MessageSquare, label: 'Messages', indent: false },
-  { href: '/brief', icon: Newspaper, label: 'Brief', indent: false },
   { href: '/logs', icon: Activity, label: 'Logs', indent: false },
   { href: '/metrics', icon: BarChart2, label: 'Metrics', indent: false },
   { href: '/ai-metrics', icon: Zap, label: 'AI Metrics', indent: true },

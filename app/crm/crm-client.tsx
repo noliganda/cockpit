@@ -527,10 +527,6 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
   const [contacts, setContacts] = useState(initialContacts)
   const [organisations, setOrganisations] = useState(initialOrgs)
   const { workspace } = useWorkspace()
-  const accentColor =
-    workspace === 'korus' ? '#008080' :
-    workspace === 'personal' ? '#F97316' :
-    '#D4A017' // byron_film default
 
   const handleDragEnd = useCallback(async (result: DropResult) => {
     if (!result.destination) return
@@ -647,6 +643,8 @@ function ContactsTab({
   onUpdate: (c: Contact) => void
   onDelete?: (ids: string[]) => void
 }) {
+  const { workspace } = useWorkspace()
+  const accentColor = workspace.color
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [editing, setEditing] = useState<Contact | null>(null)

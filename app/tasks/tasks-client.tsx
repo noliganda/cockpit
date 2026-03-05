@@ -185,6 +185,15 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter ?? 'active')
   const [urgentFilter, setUrgentFilter] = useState(false)
   const [importantFilter, setImportantFilter] = useState(false)
+  const [projectFilter, setProjectFilter] = useState<string | null>(null)
+  const [areaFilter, setAreaFilter] = useState<string | null>(null)
+  const [orphanFilter, setOrphanFilter] = useState(false)
+
+  // Filter dropdown refs
+  const projectFilterRef = useRef<HTMLButtonElement>(null)
+  const areaFilterRef = useRef<HTMLButtonElement>(null)
+  const [projectFilterOpen, setProjectFilterOpen] = useState(false)
+  const [areaFilterOpen, setAreaFilterOpen] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
 
@@ -212,10 +221,13 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
       } else if (statusFilter !== 'all' && statusFilter !== 'active' && t.status !== statusFilter) return false
       if (urgentFilter && !t.urgent) return false
       if (importantFilter && !t.important) return false
+      if (projectFilter && t.projectId !== projectFilter) return false
+      if (areaFilter && t.areaId !== areaFilter) return false
+      if (orphanFilter && (t.projectId || t.areaId)) return false
       return true
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tasks, search, statusFilter, urgentFilter, importantFilter])
+  }, [tasks, search, statusFilter, urgentFilter, importantFilter, projectFilter, areaFilter, orphanFilter])
 
   const selectedCount = selectedIds.size
   const allFilteredSelected = filtered.length > 0 && filtered.every(t => selectedIds.has(t.id))
@@ -410,6 +422,76 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
           >
             <Star className="w-3 h-3" />Important
           </button>
+
+          {/* Project filter */}
+          {projects.length > 0 && (
+            <div className="relative">
+              <button
+                ref={projectFilterRef}
+                onClick={() => { setProjectFilterOpen(v => !v); setAreaFilterOpen(false) }}
+                className={cn(
+                  'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+                  projectFilter
+                    ? 'bg-[rgba(59,130,246,0.15)] border-[rgba(59,130,246,0.4)] text-[#60A5FA]'
+                    : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                )}
+              >
+                Project{projectFilter ? `: ${projects.find(p => p.id === projectFilter)?.name ?? '?'}` : ''} <ChevronDown className="w-2.5 h-2.5" />
+              </button>
+              <PortalDropdown anchorRef={projectFilterRef} isOpen={projectFilterOpen} onClose={() => setProjectFilterOpen(false)} minWidth={180}>
+                <button onClick={() => { setProjectFilter(null); setProjectFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', !projectFilter ? 'text-[#F5F5F5]' : 'text-[#6B7280]')}>
+                  {!projectFilter ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} All projects
+                </button>
+                {projects.map(p => (
+                  <button key={p.id} onClick={() => { setProjectFilter(p.id); setProjectFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', projectFilter === p.id ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]')}>
+                    {projectFilter === p.id ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} {p.name}
+                  </button>
+                ))}
+              </PortalDropdown>
+            </div>
+          )}
+
+          {/* Area filter */}
+          {areas.length > 0 && (
+            <div className="relative">
+              <button
+                ref={areaFilterRef}
+                onClick={() => { setAreaFilterOpen(v => !v); setProjectFilterOpen(false) }}
+                className={cn(
+                  'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+                  areaFilter
+                    ? 'bg-[rgba(139,92,246,0.15)] border-[rgba(139,92,246,0.4)] text-[#A78BFA]'
+                    : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                )}
+              >
+                Area{areaFilter ? `: ${areas.find(a => a.id === areaFilter)?.name ?? '?'}` : ''} <ChevronDown className="w-2.5 h-2.5" />
+              </button>
+              <PortalDropdown anchorRef={areaFilterRef} isOpen={areaFilterOpen} onClose={() => setAreaFilterOpen(false)} minWidth={180}>
+                <button onClick={() => { setAreaFilter(null); setAreaFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', !areaFilter ? 'text-[#F5F5F5]' : 'text-[#6B7280]')}>
+                  {!areaFilter ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} All areas
+                </button>
+                {areas.map(a => (
+                  <button key={a.id} onClick={() => { setAreaFilter(a.id); setAreaFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', areaFilter === a.id ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]')}>
+                    {areaFilter === a.id ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} {a.name}
+                  </button>
+                ))}
+              </PortalDropdown>
+            </div>
+          )}
+
+          {/* Orphan filter */}
+          <button
+            onClick={() => setOrphanFilter(f => !f)}
+            title="Show tasks with no project or area"
+            className={cn(
+              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+              orphanFilter
+                ? 'bg-[rgba(239,68,68,0.15)] border-[rgba(239,68,68,0.4)] text-[#EF4444]'
+                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+            )}
+          >
+            Unassigned
+          </button>
         </div>
       </div>
 
@@ -510,16 +592,18 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
                 />
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Project</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Area</th>
               <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
               <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Assignee</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
+              <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
             ) : filtered.map((task, idx) => (
               <tr
                 key={task.id}
@@ -537,6 +621,32 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
                 </td>
                 <td className="px-4 py-2.5">
                   <span className="text-sm text-[#F5F5F5]">{task.title}</span>
+                </td>
+                <td className="px-4 py-2.5">
+                  {task.projectId ? (
+                    <button
+                      onClick={e => { e.stopPropagation(); setProjectFilter(task.projectId ?? null) }}
+                      className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(59,130,246,0.10)] text-[#60A5FA] hover:bg-[rgba(59,130,246,0.20)] transition-colors truncate max-w-[120px] block"
+                      title={projects.find(p => p.id === task.projectId)?.name}
+                    >
+                      {projects.find(p => p.id === task.projectId)?.name ?? '…'}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-[#374151]">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2.5">
+                  {task.areaId ? (
+                    <button
+                      onClick={e => { e.stopPropagation(); setAreaFilter(task.areaId ?? null) }}
+                      className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(139,92,246,0.10)] text-[#A78BFA] hover:bg-[rgba(139,92,246,0.20)] transition-colors truncate max-w-[120px] block"
+                      title={areas.find(a => a.id === task.areaId)?.name}
+                    >
+                      {areas.find(a => a.id === task.areaId)?.name ?? '…'}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-[#374151]">—</span>
+                  )}
                 </td>
                 <td className="px-2 py-2.5 text-center">
                   <button

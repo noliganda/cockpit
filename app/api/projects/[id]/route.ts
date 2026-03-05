@@ -8,57 +8,72 @@ import { getSession } from '@/lib/auth'
 type ProjectUpdate = Partial<typeof projects.$inferInsert>
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
-  const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
-  if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(project)
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
+    if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json(project)
+  } catch (error) {
+    console.error('[GET /api/projects/[id]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
-  const body = await request.json() as ProjectUpdate
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const body = await request.json() as ProjectUpdate
 
-  const [project] = await db
-    .update(projects)
-    .set({ ...body, updatedAt: new Date() })
-    .where(eq(projects.id, id))
-    .returning()
+    const [project] = await db
+      .update(projects)
+      .set({ ...body, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning()
 
-  if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await logActivity({
-    workspaceId: project.workspaceId,
-    action: 'updated',
-    entityType: 'project',
-    entityId: project.id,
-    entityTitle: project.name,
-    metadata: body as Record<string, unknown>,
-  })
+    await logActivity({
+      workspaceId: project.workspaceId,
+      action: 'updated',
+      entityType: 'project',
+      entityId: project.id,
+      entityTitle: project.name,
+      metadata: body as Record<string, unknown>,
+    })
 
-  return NextResponse.json(project)
+    return NextResponse.json(project)
+  } catch (error) {
+    console.error('[PATCH /api/projects/[id]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { id } = await params
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
 
-  const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
-  if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
+    if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await db.delete(projects).where(eq(projects.id, id))
+    await db.delete(projects).where(eq(projects.id, id))
 
-  await logActivity({
-    workspaceId: project.workspaceId,
-    action: 'deleted',
-    entityType: 'project',
-    entityId: project.id,
-    entityTitle: project.name,
-  })
+    await logActivity({
+      workspaceId: project.workspaceId,
+      action: 'deleted',
+      entityType: 'project',
+      entityId: project.id,
+      entityTitle: project.name,
+    })
 
-  return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('[DELETE /api/projects/[id]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

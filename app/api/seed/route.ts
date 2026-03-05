@@ -33,30 +33,35 @@ const DEFAULT_AREAS: Array<{ workspaceId: string; name: string; icon: string; or
 ]
 
 export async function POST() {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  for (const ws of DEFAULT_WORKSPACES) {
-    await db.insert(workspaces).values(ws).onConflictDoNothing()
+    for (const ws of DEFAULT_WORKSPACES) {
+      await db.insert(workspaces).values(ws).onConflictDoNothing()
+    }
+
+    let areasCreated = 0
+    for (const area of DEFAULT_AREAS) {
+      await db.insert(areas).values(area).onConflictDoNothing()
+      areasCreated++
+    }
+
+    // Seed default admin users
+    const DEFAULT_USERS = [
+      { email: 'charlie@byronfilm.com', name: 'Charlie', role: 'admin' as const, password: 'changeme123' },
+      { email: 'olivier@byronfilm.com', name: 'Olivier Marcolin', role: 'admin' as const, password: 'changeme123' },
+    ]
+    for (const u of DEFAULT_USERS) {
+      const passwordHash = await hashPassword(u.password)
+      await db.insert(users)
+        .values({ email: u.email, name: u.name, role: u.role, passwordHash })
+        .onConflictDoNothing()
+    }
+
+    return NextResponse.json({ success: true, workspacesSeeded: DEFAULT_WORKSPACES.length, areasSeeded: areasCreated })
+  } catch (error) {
+    console.error('[POST /api/seed]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-
-  let areasCreated = 0
-  for (const area of DEFAULT_AREAS) {
-    await db.insert(areas).values(area).onConflictDoNothing()
-    areasCreated++
-  }
-
-  // Seed default admin users
-  const DEFAULT_USERS = [
-    { email: 'charlie@byronfilm.com', name: 'Charlie', role: 'admin' as const, password: 'changeme123' },
-    { email: 'olivier@byronfilm.com', name: 'Olivier Marcolin', role: 'admin' as const, password: 'changeme123' },
-  ]
-  for (const u of DEFAULT_USERS) {
-    const passwordHash = await hashPassword(u.password)
-    await db.insert(users)
-      .values({ email: u.email, name: u.name, role: u.role, passwordHash })
-      .onConflictDoNothing()
-  }
-
-  return NextResponse.json({ success: true, workspacesSeeded: DEFAULT_WORKSPACES.length, areasSeeded: areasCreated })
 }

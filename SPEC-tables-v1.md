@@ -1,339 +1,140 @@
-# Tables Feature — V1 Spec
+# SPEC: Built-in Tables (Bases v2)
 
-> **Goal:** Replace NocoDB with a native, built-in table/database editor. Data lives in Neon, is .md-exportable, semantic-searchable, and fully accessible via API + MCP.
+## Overview
+Replace the NocoDB-dependent Bases page with a native, built-in table/spreadsheet feature.
+Data lives in Neon (same DB as everything else). No Docker, no tunnels, no external tools.
 
----
+## Architecture
 
-## 1. Architecture Overview
-
-```
-┌─────────────────────────────────────────────┐
-│              Dashboard UI                    │
-│  (Table editor with TanStack Table + inline  │
-│   editing, column config, sorting, filters)  │
-└──────────────┬──────────────────────────────┘
-               │ Next.js API Routes
-┌──────────────▼──────────────────────────────┐
-│           /api/tables/*                      │
-│  CRUD for bases, tables, columns, rows       │
-│  + .md export endpoint                       │
-│  + semantic search endpoint                  │
-└──────────────┬──────────────────────────────┘
-               │ Drizzle ORM
-┌──────────────▼──────────────────────────────┐
-│           Neon PostgreSQL                    │
-│  user_bases, user_tables, user_columns,      │
-│  user_rows (JSONB data)                      │
-└──────────────┬──────────────────────────────┘
-               │
-┌──────────────▼──────────────────────────────┐
-│           MCP Server (Phase 2)               │
-│  Thin JSON-RPC wrapper over /api/tables/*    │
-│  → Claude Desktop, Cursor, any MCP client    │
-└─────────────────────────────────────────────┘
-```
-
----
-
-## 2. Database Schema
-
-We use a **dynamic schema** approach — user-defined tables are stored as metadata + JSONB rows. This lets users create any table structure without DB migrations.
+### New DB Tables (Drizzle schema in `lib/db/schema.ts`)
 
 ```sql
--- A "base" is a collection of tables (like a NocoDB base or Airtable workspace)
-CREATE TABLE user_bases (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id TEXT NOT NULL,          -- 'byron-film' | 'korus' | 'personal'
+-- A "base" is a collection of tables (like a spreadsheet workbook)
+user_bases (
+  id UUID PK DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
-  icon TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
-);
+  workspace TEXT NOT NULL DEFAULT 'personal', -- 'byron_film' | 'korus' | 'personal'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+)
 
--- Each table within a base
-CREATE TABLE user_tables (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  base_id UUID NOT NULL REFERENCES user_bases(id) ON DELETE CASCADE,
+-- A table within a base
+user_tables (
+  id UUID PK DEFAULT gen_random_uuid(),
+  base_id UUID FK -> user_bases.id ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
-  icon TEXT,
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
-);
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+)
 
--- Column definitions (schema metadata)
-CREATE TABLE user_columns (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  table_id UUID NOT NULL REFERENCES user_tables(id) ON DELETE CASCADE,
+-- Column definitions for a table
+user_columns (
+  id UUID PK DEFAULT gen_random_uuid(),
+  table_id UUID FK -> user_tables.id ON DELETE CASCADE,
   name TEXT NOT NULL,
-  field_type TEXT NOT NULL,  -- 'text' | 'number' | 'date' | 'checkbox' | 'select' | 'url' | 'email' | 'longtext' | 'relation'
-  options JSONB,             -- e.g. { "choices": ["Red","Blue"], "precision": 2, "relatedTableId": "..." }
-  sort_order INTEGER DEFAULT 0,
-  required BOOLEAN DEFAULT FALSE,
-  default_value TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
-);
+  column_type TEXT NOT NULL DEFAULT 'text', -- text | number | date | boolean | select | url | email
+  options JSONB, -- for select: { choices: ["A","B","C"] }
+  order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+)
 
--- Actual data rows (JSONB for flexibility)
-CREATE TABLE user_rows (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  table_id UUID NOT NULL REFERENCES user_tables(id) ON DELETE CASCADE,
-  data JSONB NOT NULL DEFAULT '{}',     -- { "col_id_1": "value", "col_id_2": 42, ... }
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
-);
-
--- Indexes
-CREATE INDEX user_rows_table_idx ON user_rows(table_id);
-CREATE INDEX user_rows_data_gin ON user_rows USING GIN(data);  -- enables JSONB queries
-CREATE INDEX user_tables_base_idx ON user_tables(base_id);
-CREATE INDEX user_bases_workspace_idx ON user_bases(workspace_id);
+-- Row data stored as JSONB (flexible schema, no migrations needed per-table)
+user_rows (
+  id UUID PK DEFAULT gen_random_uuid(),
+  table_id UUID FK -> user_tables.id ON DELETE CASCADE,
+  data JSONB NOT NULL DEFAULT '{}', -- keys = column IDs, values = cell data
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+)
 ```
 
-### Drizzle Schema (lib/db/schema.ts additions)
+### API Routes (`/api/tables/*`)
 
-```ts
-export const userBases = pgTable('user_bases', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  workspaceId: text('workspace_id').notNull(),
-  name: text('name').notNull(),
-  description: text('description'),
-  icon: text('icon'),
-  ...timestamps,
-}, (t) => [
-  index('user_bases_workspace_idx').on(t.workspaceId),
-])
+```
+GET    /api/tables/bases              — list all bases
+POST   /api/tables/bases              — create base
+GET    /api/tables/bases/:id          — get base with its tables
+PATCH  /api/tables/bases/:id          — update base
+DELETE /api/tables/bases/:id          — delete base
 
-export const userTables = pgTable('user_tables', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  baseId: uuid('base_id').notNull(),
-  name: text('name').notNull(),
-  description: text('description'),
-  icon: text('icon'),
-  sortOrder: integer('sort_order').default(0),
-  ...timestamps,
-}, (t) => [
-  index('user_tables_base_idx').on(t.baseId),
-])
+GET    /api/tables/:baseId/tables          — list tables in base
+POST   /api/tables/:baseId/tables          — create table
+GET    /api/tables/:baseId/tables/:id      — get table with columns
+PATCH  /api/tables/:baseId/tables/:id      — update table
+DELETE /api/tables/:baseId/tables/:id      — delete table
 
-export const userColumns = pgTable('user_columns', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  tableId: uuid('table_id').notNull(),
-  name: text('name').notNull(),
-  fieldType: text('field_type').notNull(),
-  options: jsonb('options'),
-  sortOrder: integer('sort_order').default(0),
-  required: boolean('required').default(false),
-  defaultValue: text('default_value'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-}, (t) => [
-  index('user_columns_table_idx').on(t.tableId),
-])
+GET    /api/tables/:tableId/columns        — list columns
+POST   /api/tables/:tableId/columns        — create column
+PATCH  /api/tables/:tableId/columns/:id    — update column
+DELETE /api/tables/:tableId/columns/:id    — delete column
 
-export const userRows = pgTable('user_rows', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  tableId: uuid('table_id').notNull(),
-  data: jsonb('data').notNull().default({}),
-  sortOrder: integer('sort_order').default(0),
-  ...timestamps,
-}, (t) => [
-  index('user_rows_table_idx').on(t.tableId),
-])
+GET    /api/tables/:tableId/rows           — list rows (paginated, sortable, filterable)
+POST   /api/tables/:tableId/rows           — create row
+PATCH  /api/tables/:tableId/rows/:id       — update row
+DELETE /api/tables/:tableId/rows/:id       — delete row
+
+GET    /api/tables/:tableId/export/:format — export as csv | json | md
 ```
 
----
+### UI Pages
 
-## 3. API Routes
+**`/bases`** — Base browser
+- Grid of bases with workspace color coding
+- Create new base button
+- Click base → see its tables
 
-All under `/api/tables/`:
+**`/bases/:baseId`** — Table list within a base
+- List of tables
+- Create new table button
+- Click table → open editor
 
-### Bases
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/tables/bases` | List all bases (optionally filter by workspace) |
-| POST | `/api/tables/bases` | Create a base |
-| PATCH | `/api/tables/bases/[id]` | Update base name/description |
-| DELETE | `/api/tables/bases/[id]` | Delete base + cascade |
-
-### Tables
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/tables/[baseId]/tables` | List tables in a base |
-| POST | `/api/tables/[baseId]/tables` | Create table (with initial columns) |
-| PATCH | `/api/tables/t/[tableId]` | Rename/update table |
-| DELETE | `/api/tables/t/[tableId]` | Delete table + cascade |
-
-### Columns
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/tables/t/[tableId]/columns` | List columns |
-| POST | `/api/tables/t/[tableId]/columns` | Add column |
-| PATCH | `/api/tables/t/[tableId]/columns/[colId]` | Update column |
-| DELETE | `/api/tables/t/[tableId]/columns/[colId]` | Delete column |
-
-### Rows
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/tables/t/[tableId]/rows` | List rows (pagination, sort, filter) |
-| POST | `/api/tables/t/[tableId]/rows` | Create row(s) |
-| PATCH | `/api/tables/t/[tableId]/rows/[rowId]` | Update row |
-| DELETE | `/api/tables/t/[tableId]/rows/[rowId]` | Delete row |
-| POST | `/api/tables/t/[tableId]/rows/bulk` | Bulk create/update/delete |
-
-### Export & Search
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/tables/t/[tableId]/export.md` | Export table as markdown |
-| GET | `/api/tables/t/[tableId]/export.csv` | Export as CSV |
-| GET | `/api/tables/t/[tableId]/export.json` | Export as JSON |
-| GET | `/api/tables/search?q=...` | Full-text search across all table data |
-
----
-
-## 4. UI Components
-
-### Page: `/bases` (replace existing NocoDB page)
-
-**Sidebar:** List of bases → expand to see tables
-
-**Main view (per table):**
-- Column headers with type icons + sort/filter controls
-- Editable cells (click to edit, tab to move)
+**`/bases/:baseId/:tableId`** — Table editor (the main UI)
+- TanStack Table powered grid
+- Inline cell editing (click to edit)
+- Column header: sort, filter, hide
 - Add row button (bottom)
 - Add column button (right)
-- Toolbar: filter, sort, export (.md / .csv), search
+- Column type selector when creating/editing columns
+- Row selection with checkboxes
+- Batch delete selected rows
+- CSV/MD/JSON export buttons
+- Search/filter bar
+- Pagination
 
-**Libraries:**
-- `@tanstack/react-table` — headless table with sorting, filtering, pagination
-- Existing Radix UI + Tailwind for controls
-- No new dependencies needed beyond TanStack Table
+## Design System
 
-**Key UX patterns:**
-- Inline cell editing (double-click or Enter to edit)
-- Column type picker when adding/editing columns
-- Drag-to-reorder columns and rows
-- Right-click context menu on rows (delete, duplicate)
-- Cmd+Z undo for cell edits (optimistic + server sync)
+Follow `.interface-design/system.md` exactly:
+- Dark neutral surfaces (#0F0F0F → #141414 → #1A1A1A)
+- Workspace accent colors: Byron Film #D4A017, KORUS #008080, Personal #F97316
+- Data table patterns: tertiary uppercase headers, subtle row borders, hover states
+- Geist Mono for data cells, Geist Sans for labels
+- Inline editing matching existing input patterns (bg-inset, border-stronger on focus)
+- Mobile: card layout, not horizontal scroll
 
----
+## Key Design Choices
 
-## 5. .md Export Format
+1. **JSONB rows** — users create any schema without DB migrations
+2. **.md export with YAML frontmatter** — parseable, Obsidian-compatible, searchable
+3. **Every row change feeds into the embedding pipeline** → semantic search across all table data (Phase 2)
+4. **MCP server** gives AI tools full programmatic access (Phase 2)
 
-Each table exports as a markdown file with YAML frontmatter:
+## Implementation Steps
 
-```markdown
----
-table: Equipment Inventory
-base: Byron Film Operations
-exported: 2026-03-03T21:30:00+11:00
-columns:
-  - name: Item
-    type: text
-  - name: Category
-    type: select
-  - name: Daily Rate
-    type: number
-  - name: Available
-    type: checkbox
----
+1. Schema + Drizzle migration (`lib/db/schema.ts` + `drizzle/migrations/`)
+2. API routes (CRUD for all entities)
+3. Export endpoints (csv, json, md)
+4. Base browser UI (`/bases` page)
+5. Table editor UI (TanStack Table grid with inline editing)
+6. Search integration (Phase 2)
+7. MCP server (Phase 2)
 
-# Equipment Inventory
+## Constraints
 
-| Item | Category | Daily Rate | Available |
-|------|----------|-----------|-----------|
-| BMPCC 4K | Camera | 350 | ✅ |
-| Aputure 600d | Lighting | 150 | ✅ |
-| Sigma 18-35mm | Lens | 75 | ❌ |
-```
-
-This format is:
-- Human-readable
-- Parseable back into structured data
-- Indexable by semantic search
-- Compatible with Obsidian / any markdown tool
-
----
-
-## 6. Semantic Search Integration
-
-Table data feeds into the existing `activity_log` with embeddings:
-- On row create/update → generate embedding of row content
-- Store in `activity_log` with `entity_type: 'table_row'`
-- Searchable alongside notes, tasks, everything else
-
----
-
-## 7. MCP Server (Phase 2)
-
-Thin wrapper exposing these tools:
-- `list_bases` / `list_tables` / `list_columns`
-- `query_rows(tableId, filters?, sort?, limit?)`
-- `create_row(tableId, data)`
-- `update_row(tableId, rowId, data)`
-- `delete_row(tableId, rowId)`
-- `export_table(tableId, format: 'md' | 'csv' | 'json')`
-- `search_tables(query)`
-
-This gives any MCP-compatible AI full CRUD access.
-
----
-
-## 8. Column Types (V1)
-
-| Type | Storage | Editor | Display |
-|------|---------|--------|---------|
-| `text` | string | Text input | Plain text |
-| `longtext` | string | Textarea / rich text | Expandable |
-| `number` | number | Number input | Formatted |
-| `date` | ISO string | Date picker | Formatted |
-| `checkbox` | boolean | Toggle | ✅/❌ |
-| `select` | string | Dropdown (from options) | Badge |
-| `multiselect` | string[] | Multi-dropdown | Badge list |
-| `url` | string | URL input | Clickable link |
-| `email` | string | Email input | Mailto link |
-
-**V2 additions:** `relation` (link to other table rows), `formula`, `attachment`
-
----
-
-## 9. Migration from NocoDB
-
-1. Export existing NocoDB tables via API before shutdown
-2. Import into new system via bulk row API
-3. Remove NocoDB Docker container + Cloudflare tunnel
-4. Update `/bases` page to use new system
-
----
-
-## 10. Implementation Order
-
-1. **Schema + DB migration** — Add Drizzle schema, run `db:push`
-2. **API routes** — Full CRUD for bases, tables, columns, rows
-3. **Export endpoints** — .md, .csv, .json
-4. **UI — Table list** — Replace NocoDB bases page with native base/table browser
-5. **UI — Table editor** — TanStack Table grid with inline editing
-6. **Search integration** — Hook into activity_log embeddings
-7. **MCP server** — Thin wrapper (can be standalone Node process or API route)
-
-**Estimated effort:** 3-5 days coding agent work
-
----
-
-## 11. What This Replaces
-
-| Before (NocoDB) | After (Native Tables) |
-|------------------|-----------------------|
-| Separate Docker container | Same Next.js app |
-| Cloudflare tunnel | Same Vercel deployment |
-| Separate auth | Same dashboard auth |
-| No .md export | Built-in .md export |
-| No semantic search | Embedded in search index |
-| No MCP | Full MCP access |
-| Separate backup concerns | Same Neon DB backup |
-
----
-
-*Built for us. Owned by us. Searchable, exportable, AI-native.* 🐙
+- Do NOT break existing pages (tasks, CRM, notes, productivity, etc.)
+- Do NOT modify existing DB tables
+- Use existing auth system (getSession check on all API routes)
+- Use existing design patterns from the codebase
+- Keep it simple — this replaces a failed NocoDB integration, robustness > features
+- Test that `npm run build` passes before committing

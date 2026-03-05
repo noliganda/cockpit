@@ -5,12 +5,17 @@ import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string; pcid: string }> }) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { pcid } = await params
+    const { pcid } = await params
 
-  await db.delete(projectContacts).where(eq(projectContacts.id, pcid))
+    await db.delete(projectContacts).where(eq(projectContacts.id, pcid))
 
-  return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('[DELETE /api/projects/[id]/contacts/[pcid]]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

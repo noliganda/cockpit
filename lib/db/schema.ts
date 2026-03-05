@@ -310,17 +310,16 @@ export const emailStats = pgTable('email_stats', {
   unique('email_stats_date_workspace_uniq').on(t.date, t.workspace),
 ])
 
-// ─── Native Tables Feature ───────────────────────────────────────────────────
+// ── Tables / Bases (native spreadsheet feature) ──────────────────────────────
 
 export const userBases = pgTable('user_bases', {
   id: uuid('id').defaultRandom().primaryKey(),
-  workspaceId: text('workspace_id').notNull(),
   name: text('name').notNull(),
   description: text('description'),
-  icon: text('icon'),
+  workspace: text('workspace_id').notNull().default('personal'), // 'byron_film' | 'korus' | 'personal'
   ...timestamps,
 }, (t) => [
-  index('user_bases_workspace_idx').on(t.workspaceId),
+  index('user_bases_workspace_idx').on(t.workspace),
 ])
 
 export const userTables = pgTable('user_tables', {
@@ -328,8 +327,6 @@ export const userTables = pgTable('user_tables', {
   baseId: uuid('base_id').notNull().references(() => userBases.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   description: text('description'),
-  icon: text('icon'),
-  sortOrder: integer('sort_order').default(0),
   ...timestamps,
 }, (t) => [
   index('user_tables_base_idx').on(t.baseId),
@@ -339,11 +336,9 @@ export const userColumns = pgTable('user_columns', {
   id: uuid('id').defaultRandom().primaryKey(),
   tableId: uuid('table_id').notNull().references(() => userTables.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  fieldType: text('field_type').notNull(),
-  options: jsonb('options'),
-  sortOrder: integer('sort_order').default(0),
-  required: boolean('required').default(false),
-  defaultValue: text('default_value'),
+  columnType: text('column_type').notNull().default('text'), // text | number | date | boolean | select | url | email
+  options: jsonb('options'), // for select: { choices: ["A","B","C"] }
+  order: integer('order').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => [
   index('user_columns_table_idx').on(t.tableId),
@@ -352,8 +347,7 @@ export const userColumns = pgTable('user_columns', {
 export const userRows = pgTable('user_rows', {
   id: uuid('id').defaultRandom().primaryKey(),
   tableId: uuid('table_id').notNull().references(() => userTables.id, { onDelete: 'cascade' }),
-  data: jsonb('data').notNull().$defaultFn(() => ({})),
-  sortOrder: integer('sort_order').default(0),
+  data: jsonb('data').notNull().default({}), // keys = column IDs, values = cell data
   ...timestamps,
 }, (t) => [
   index('user_rows_table_idx').on(t.tableId),

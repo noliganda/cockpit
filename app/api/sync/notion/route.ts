@@ -3,7 +3,12 @@ import { syncAllNotionDatabases } from '@/lib/notion-sync'
 import { getSession } from '@/lib/auth'
 
 export async function GET() {
-  return NextResponse.json({ status: 'ready', message: 'POST to trigger sync' })
+  try {
+    return NextResponse.json({ status: 'ready', message: 'POST to trigger sync' })
+  } catch (error) {
+    console.error('[GET /api/sync/notion]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST() {

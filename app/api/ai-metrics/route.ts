@@ -27,49 +27,59 @@ const createSchema = z.object({
 })
 
 export async function GET(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const from = searchParams.get('from')
-  const to = searchParams.get('to')
+    const { searchParams } = new URL(request.url)
+    const from = searchParams.get('from')
+    const to = searchParams.get('to')
 
-  const conditions = []
-  if (from) conditions.push(gte(aiMetrics.periodStart, from))
-  if (to) conditions.push(lte(aiMetrics.periodEnd, to))
+    const conditions = []
+    if (from) conditions.push(gte(aiMetrics.periodStart, from))
+    if (to) conditions.push(lte(aiMetrics.periodEnd, to))
 
-  const rows = await db
-    .select()
-    .from(aiMetrics)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(aiMetrics.periodStart))
-    .limit(200)
+    const rows = await db
+      .select()
+      .from(aiMetrics)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(aiMetrics.periodStart))
+      .limit(200)
 
-  return NextResponse.json(rows)
+    return NextResponse.json(rows)
+  } catch (error) {
+    console.error('[GET /api/ai-metrics]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const session = await getSession()
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await request.json() as unknown
-  const parsed = createSchema.safeParse(body)
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
+    const body = await request.json() as unknown
+    const parsed = createSchema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-  const { avgTaskDurationMins, automationRate, apiCostUsd, costPerTask, avgResponseTimeMins, humanInterventionRate, ...rest } = parsed.data
+    const { avgTaskDurationMins, automationRate, apiCostUsd, costPerTask, avgResponseTimeMins, humanInterventionRate, ...rest } = parsed.data
 
-  const [row] = await db
-    .insert(aiMetrics)
-    .values({
-      ...rest,
-      avgTaskDurationMins: avgTaskDurationMins !== undefined ? String(avgTaskDurationMins) : undefined,
-      automationRate: automationRate !== undefined ? String(automationRate) : undefined,
-      apiCostUsd: apiCostUsd !== undefined ? String(apiCostUsd) : undefined,
-      costPerTask: costPerTask !== undefined ? String(costPerTask) : undefined,
-      avgResponseTimeMins: avgResponseTimeMins !== undefined ? String(avgResponseTimeMins) : undefined,
-      humanInterventionRate: humanInterventionRate !== undefined ? String(humanInterventionRate) : undefined,
-    })
-    .returning()
+    const [row] = await db
+      .insert(aiMetrics)
+      .values({
+        ...rest,
+        avgTaskDurationMins: avgTaskDurationMins !== undefined ? String(avgTaskDurationMins) : undefined,
+        automationRate: automationRate !== undefined ? String(automationRate) : undefined,
+        apiCostUsd: apiCostUsd !== undefined ? String(apiCostUsd) : undefined,
+        costPerTask: costPerTask !== undefined ? String(costPerTask) : undefined,
+        avgResponseTimeMins: avgResponseTimeMins !== undefined ? String(avgResponseTimeMins) : undefined,
+        humanInterventionRate: humanInterventionRate !== undefined ? String(humanInterventionRate) : undefined,
+      })
+      .returning()
 
-  return NextResponse.json(row, { status: 201 })
+    return NextResponse.json(row, { status: 201 })
+  } catch (error) {
+    console.error('[POST /api/ai-metrics]', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

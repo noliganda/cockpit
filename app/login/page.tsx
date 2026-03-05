@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [useEmail, setUseEmail] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -17,21 +16,17 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const body = useEmail
-        ? { email, password }
-        : { password }
-
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email, password }),
       })
 
       if (res.ok) {
         router.push('/dashboard')
         router.refresh()
       } else {
-        setError('Invalid credentials')
+        setError('Invalid email or password')
       }
     } catch {
       setError('Something went wrong')
@@ -54,22 +49,21 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          {useEmail && (
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="Email"
-              autoFocus
-              className="w-full px-4 py-3 rounded-[8px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] focus:outline-none focus:border-[rgba(255,255,255,0.16)] text-sm transition-colors"
-            />
-          )}
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="Email"
+            autoFocus
+            required
+            className="w-full px-4 py-3 rounded-[8px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] focus:outline-none focus:border-[rgba(255,255,255,0.16)] text-sm transition-colors"
+          />
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="Password"
-            autoFocus={!useEmail}
+            required
             className="w-full px-4 py-3 rounded-[8px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] focus:outline-none focus:border-[rgba(255,255,255,0.16)] text-sm transition-colors"
           />
 
@@ -79,18 +73,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading || !password || (useEmail && !email)}
+            disabled={loading || !password || !email}
             className="w-full py-3 rounded-[8px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm font-medium hover:bg-[#222222] hover:border-[rgba(255,255,255,0.10)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
             {loading ? 'Signing in...' : 'Sign in'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setUseEmail(u => !u); setError('') }}
-            className="w-full text-xs text-[#4B5563] hover:text-[#6B7280] transition-colors py-1"
-          >
-            {useEmail ? 'Use password only' : 'Sign in with email + password'}
           </button>
         </form>
       </div>

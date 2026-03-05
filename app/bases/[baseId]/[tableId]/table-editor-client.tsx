@@ -28,6 +28,8 @@ import {
   Link as LinkIcon,
   Mail,
   Check,
+  FolderOpen,
+  Layers,
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
@@ -61,6 +63,16 @@ interface UserTable {
   description: string | null
 }
 
+interface BaseInfo {
+  id: string
+  name: string
+  workspace: string
+  areaId: string | null
+  projectId: string | null
+  areaName: string | null
+  projectName: string | null
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const COLUMN_TYPES: { value: ColumnType; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
@@ -72,6 +84,12 @@ const COLUMN_TYPES: { value: ColumnType; label: string; Icon: React.ComponentTyp
   { value: 'url', label: 'URL', Icon: LinkIcon },
   { value: 'email', label: 'Email', Icon: Mail },
 ]
+
+const WORKSPACE_COLORS: Record<string, string> = {
+  byron_film: '#D4A017',
+  korus: '#008080',
+  personal: '#F97316',
+}
 
 const inputCls =
   'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]'
@@ -189,11 +207,13 @@ function AddColumnDialog({
 function CellEditor({
   value,
   column,
+  accentColor,
   onSave,
   onCancel,
 }: {
   value: unknown
   column: UserColumn
+  accentColor: string
   onSave: (v: unknown) => void
   onCancel: () => void
 }) {
@@ -219,16 +239,20 @@ function CellEditor({
   }
 
   if (column.columnType === 'boolean') {
+    const checked = val as boolean
     return (
       <button
         className="w-full h-full flex items-center justify-center"
         onClick={() => {
-          setVal(!val)
-          onSave(!val)
+          setVal(!checked)
+          onSave(!checked)
         }}
       >
-        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${val ? 'bg-[#22C55E] border-[#22C55E]' : 'border-[rgba(255,255,255,0.16)] bg-[#0A0A0A]'}`}>
-          {val && <Check size={10} className="text-black" />}
+        <div
+          className="w-4 h-4 rounded border flex items-center justify-center transition-colors"
+          style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(255,255,255,0.16)', background: '#0A0A0A' }}
+        >
+          {checked && <Check size={10} className="text-black" />}
         </div>
       </button>
     )
@@ -270,14 +294,17 @@ function CellEditor({
 
 // ─── Cell display ─────────────────────────────────────────────────────────────
 
-function CellDisplay({ value, column }: { value: unknown; column: UserColumn }) {
+function CellDisplay({ value, column, accentColor }: { value: unknown; column: UserColumn; accentColor: string }) {
   if (value == null || value === '') {
     return <span className="text-[#4B5563]">—</span>
   }
   if (column.columnType === 'boolean') {
     const checked = value === true || value === 'true'
     return (
-      <div className={`w-4 h-4 rounded border flex items-center justify-center ${checked ? 'bg-[#22C55E] border-[#22C55E]' : 'border-[rgba(255,255,255,0.16)]'}`}>
+      <div
+        className="w-4 h-4 rounded border flex items-center justify-center"
+        style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(255,255,255,0.16)', background: 'transparent' }}
+      >
         {checked && <Check size={10} className="text-black" />}
       </div>
     )
@@ -308,6 +335,7 @@ function CellDisplay({ value, column }: { value: unknown; column: UserColumn }) 
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function TableEditorClient({ baseId, tableId }: { baseId: string; tableId: string }) {
+  const [base, setBase] = useState<BaseInfo | null>(null)
   const [table, setTable] = useState<UserTable | null>(null)
   const [columns, setColumns] = useState<UserColumn[]>([])
   const [rows, setRows] = useState<UserRow[]>([])
@@ -319,13 +347,17 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
   const [globalFilter, setGlobalFilter] = useState('')
   const [deleting, setDeleting] = useState(false)
 
+  const accentColor = WORKSPACE_COLORS[base?.workspace ?? ''] ?? '#D4A017'
+
   // ── Load data ──────────────────────────────────────────────────────────────
   useEffect(() => {
     setLoading(true)
     Promise.all([
+      fetch(`/api/tables/bases/${baseId}`).then((r) => r.json()),
       fetch(`/api/tables/${baseId}/tables/${tableId}`).then((r) => r.json()),
       fetch(`/api/tables/${tableId}/rows?limit=500`).then((r) => r.json()),
-    ]).then(([tableData, rowData]) => {
+    ]).then(([baseData, tableData, rowData]) => {
+      setBase(baseData)
       setTable(tableData)
       setColumns(tableData.columns ?? [])
       setRows(rowData.rows ?? [])
@@ -405,7 +437,6 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
   const columnHelper = createColumnHelper<UserRow>()
 
   const tanColumns: ColumnDef<UserRow, unknown>[] = [
-    // Checkbox column
     columnHelper.display({
       id: 'select',
       header: () => (
@@ -436,7 +467,6 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
       ),
       size: 40,
     }),
-    // Data columns
     ...columns.map((col) =>
       columnHelper.accessor((row) => (row.data as Record<string, unknown>)[col.id], {
         id: col.id,
@@ -451,6 +481,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
               <CellEditor
                 value={value}
                 column={col}
+                accentColor={accentColor}
                 onSave={async (v) => {
                   await updateCell(rowId, col.id, v)
                   setEditCell(null)
@@ -465,7 +496,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
               className="w-full h-full cursor-pointer"
               onClick={() => setEditCell({ rowId, colId: col.id })}
             >
-              <CellDisplay value={value} column={col} />
+              <CellDisplay value={value} column={col} accentColor={accentColor} />
             </div>
           )
         },
@@ -497,26 +528,49 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
     )
   }
 
+  // Breadcrumb back path
+  const backToParent = base?.projectId
+    ? { href: `/projects/${base.projectId}`, label: base.projectName ?? 'Project', Icon: FolderOpen }
+    : base?.areaId
+    ? { href: `/areas/${base.areaId}`, label: base.areaName ?? 'Area', Icon: Layers }
+    : null
+
   return (
-    <div className="flex flex-col h-full min-h-screen bg-[#0F0F0F]">
+    // h-full (not min-h-screen) so the layout's scroll container controls height
+    <div className="flex flex-col h-full bg-[#0F0F0F]">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[rgba(255,255,255,0.06)]">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[rgba(255,255,255,0.06)] flex-shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Back to parent (project/area) */}
+          {backToParent && (
+            <>
+              <Link
+                href={backToParent.href}
+                className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0"
+              >
+                <backToParent.Icon size={12} />
+                {backToParent.label}
+              </Link>
+              <span className="text-[#4B5563] text-xs">/</span>
+            </>
+          )}
+          {/* Back to base list */}
           <Link
             href={`/bases/${baseId}`}
-            className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0"
+            title="Back to base"
           >
             <ArrowLeft size={15} />
           </Link>
-          <div>
-            <h1 className="text-sm font-semibold text-[#F5F5F5]">{table?.name ?? 'Table'}</h1>
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold text-[#F5F5F5] truncate">{table?.name ?? 'Table'}</h1>
             {table?.description && (
-              <p className="text-xs text-[#6B7280]">{table.description}</p>
+              <p className="text-xs text-[#6B7280] truncate">{table.description}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Export */}
           <div className="flex items-center gap-1">
             {(['csv', 'json', 'md'] as const).map((fmt) => (
@@ -546,7 +600,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
       </div>
 
       {/* ── Toolbar ────────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(255,255,255,0.04)]">
+      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(255,255,255,0.04)] flex-shrink-0">
         <div className="relative flex-1 max-w-xs">
           <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#4B5563]" />
           <input
@@ -562,23 +616,23 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
         </span>
       </div>
 
-      {/* ── Table ──────────────────────────────────────────────────────────── */}
-      {columns.length === 0 ? (
-        <div className="flex flex-col items-center justify-center flex-1 text-center py-20">
-          <div className="text-[#4B5563] mb-3">
-            <Plus size={32} />
+      {/* ── Table (scrollable) ─────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-auto">
+        {columns.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full py-20 text-center">
+            <div className="text-[#4B5563] mb-3">
+              <Plus size={32} />
+            </div>
+            <p className="text-sm text-[#6B7280] mb-1">No columns yet</p>
+            <p className="text-xs text-[#4B5563] mb-4">Add columns to start building your table</p>
+            <button
+              onClick={() => setShowAddCol(true)}
+              className="px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+            >
+              Add first column
+            </button>
           </div>
-          <p className="text-sm text-[#6B7280] mb-1">No columns yet</p>
-          <p className="text-xs text-[#4B5563] mb-4">Add columns to start building your table</p>
-          <button
-            onClick={() => setShowAddCol(true)}
-            className="px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
-          >
-            Add first column
-          </button>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-auto">
+        ) : (
           <table className="w-full border-collapse text-xs" style={{ tableLayout: 'fixed' }}>
             <colgroup>
               <col style={{ width: '40px' }} />
@@ -640,10 +694,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             <tbody>
               {tanTable.getRowModel().rows.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={columns.length + 2}
-                    className="py-12 text-center"
-                  >
+                  <td colSpan={columns.length + 2} className="py-12 text-center">
                     {globalFilter ? (
                       <span className="text-[#4B5563]">No rows match your search</span>
                     ) : (
@@ -683,12 +734,12 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
               )}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* ── Add Row footer ──────────────────────────────────────────────────── */}
+      {/* ── Add Row footer — always visible at bottom ───────────────────────── */}
       {columns.length > 0 && (
-        <div className="sticky bottom-0 border-t border-[rgba(255,255,255,0.06)] bg-[#0F0F0F] px-4 py-2">
+        <div className="flex-shrink-0 border-t border-[rgba(255,255,255,0.06)] bg-[#0F0F0F] px-4 py-2">
           <button
             onClick={addRow}
             className="flex items-center gap-2 px-3 py-1.5 rounded-[6px] text-xs text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-[#1A1A1A] transition-colors"

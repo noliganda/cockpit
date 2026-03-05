@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { userBases, userTables } from '@/lib/db/schema'
+import { userBases, userTables, areas, projects } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 import { randomBytes } from 'crypto'
@@ -15,7 +15,20 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!base) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     const tables = await db.select().from(userTables).where(eq(userTables.baseId, id)).orderBy(userTables.createdAt)
-    return NextResponse.json({ ...base, tables })
+
+    // Resolve area + project names for breadcrumbs
+    let areaName: string | null = null
+    let projectName: string | null = null
+    if (base.areaId) {
+      const [area] = await db.select({ name: areas.name }).from(areas).where(eq(areas.id, base.areaId))
+      areaName = area?.name ?? null
+    }
+    if (base.projectId) {
+      const [project] = await db.select({ name: projects.name }).from(projects).where(eq(projects.id, base.projectId))
+      projectName = project?.name ?? null
+    }
+
+    return NextResponse.json({ ...base, tables, areaName, projectName })
   } catch (error) {
     console.error('[GET /api/tables/bases/[id]]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

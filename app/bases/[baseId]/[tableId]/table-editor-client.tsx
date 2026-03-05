@@ -436,35 +436,49 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
   // ── TanStack Table setup ──────────────────────────────────────────────────
   const columnHelper = createColumnHelper<UserRow>()
 
+  // Inline row-select checkbox — workspace-colored, no native browser styling
+  const allSelected = rows.length > 0 && selected.size === rows.length
+
   const tanColumns: ColumnDef<UserRow, unknown>[] = [
     columnHelper.display({
       id: 'select',
       header: () => (
-        <input
-          type="checkbox"
-          className="w-3.5 h-3.5 rounded border-[rgba(255,255,255,0.16)] bg-[#0A0A0A] accent-[#22C55E]"
-          checked={rows.length > 0 && selected.size === rows.length}
-          onChange={(e) => {
-            if (e.target.checked) setSelected(new Set(rows.map((r) => r.id)))
-            else setSelected(new Set())
-          }}
-        />
+        <button
+          type="button"
+          onClick={() => allSelected ? setSelected(new Set()) : setSelected(new Set(rows.map((r) => r.id)))}
+          className="w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors flex-shrink-0"
+          style={allSelected
+            ? { background: accentColor, borderColor: accentColor }
+            : { background: 'transparent', borderColor: accentColor, opacity: 0.6 }
+          }
+        >
+          {allSelected && <Check size={10} className="text-black stroke-[3]" />}
+        </button>
       ),
-      cell: ({ row }) => (
-        <input
-          type="checkbox"
-          className="w-3.5 h-3.5 rounded border-[rgba(255,255,255,0.16)] bg-[#0A0A0A] accent-[#22C55E]"
-          checked={selected.has(row.original.id)}
-          onChange={(e) => {
-            setSelected((prev) => {
-              const next = new Set(prev)
-              if (e.target.checked) next.add(row.original.id)
-              else next.delete(row.original.id)
-              return next
-            })
-          }}
-        />
-      ),
+      cell: ({ row }) => {
+        const isSelected = selected.has(row.original.id)
+        return (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelected((prev) => {
+                const next = new Set(prev)
+                if (isSelected) next.delete(row.original.id)
+                else next.add(row.original.id)
+                return next
+              })
+            }}
+            className="w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors flex-shrink-0"
+            style={isSelected
+              ? { background: accentColor, borderColor: accentColor }
+              : { background: 'transparent', borderColor: accentColor, opacity: 0.6 }
+            }
+          >
+            {isSelected && <Check size={10} className="text-black stroke-[3]" />}
+          </button>
+        )
+      },
       size: 40,
     }),
     ...columns.map((col) =>
@@ -473,8 +487,30 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
         header: col.name,
         cell: ({ row, getValue }) => {
           const rowId = row.original.id
-          const isEditing = editCell?.rowId === rowId && editCell?.colId === col.id
           const value = getValue()
+
+          // Boolean — toggle directly, no intermediate edit mode (prevents visual jump)
+          if (col.columnType === 'boolean') {
+            const checked = value === true || value === 'true'
+            return (
+              <div
+                className="w-full h-full flex items-center cursor-pointer px-1"
+                onClick={() => updateCell(rowId, col.id, !checked)}
+              >
+                <div
+                  className="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0"
+                  style={checked
+                    ? { background: accentColor, borderColor: accentColor }
+                    : { borderColor: 'rgba(255,255,255,0.22)', background: 'transparent' }
+                  }
+                >
+                  {checked && <Check size={10} className="text-black" />}
+                </div>
+              </div>
+            )
+          }
+
+          const isEditing = editCell?.rowId === rowId && editCell?.colId === col.id
 
           if (isEditing) {
             return (

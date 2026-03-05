@@ -6,6 +6,12 @@ import { eq } from 'drizzle-orm'
 import { calculatePriorities, type ProjectData, type TaskData } from '@/lib/priority-engine'
 import { PriorityClient } from './priority-client'
 
+function mapWorkspaceToBusiness(workspaceId: string): 'OM' | 'BF' | 'Korus' {
+  if (workspaceId.includes('korus')) return 'Korus'
+  if (workspaceId.includes('oliver') || workspaceId.includes('personal')) return 'OM'
+  return 'BF' // default: Byron Film
+}
+
 export default async function PriorityPage({
   searchParams,
 }: {
@@ -26,29 +32,29 @@ export default async function PriorityPage({
 
     // Map database schema to priority engine types
     const projectsData: ProjectData[] = allProjects
-      .filter(p => p.status !== 'complete')
+      .filter(p => p.status !== 'complete' && p.status !== 'Complete')
       .map(p => ({
         id: p.id,
-        name: p.title,
-        business: (p.workspace?.includes('korus') ? 'Korus' : p.workspace?.includes('oliver') ? 'OM' : 'BF') as 'OM' | 'BF' | 'Korus',
-        projectType: (p.metadata?.projectType ?? 'income') as 'income' | 'family' | 'hybrid',
-        profitabilityEstimate: p.metadata?.profitabilityEstimate ?? null,
-        deadline: p.metadata?.deadline ? new Date(p.metadata.deadline) : null,
-        percentComplete: 0, // TODO: Calculate from task completions
-        status: p.status as 'active' | 'paused' | 'complete',
+        name: p.name,
+        business: mapWorkspaceToBusiness(workspaceId),
+        projectType: 'income' as const, // default; could be extended later
+        profitabilityEstimate: p.budget ? parseFloat(String(p.budget)) : null,
+        deadline: p.endDate ? new Date(p.endDate) : null,
+        percentComplete: 0, // calculated from task counts if needed
+        status: (p.status?.toLowerCase() === 'active' ? 'active' : p.status?.toLowerCase() === 'paused' ? 'paused' : 'active') as 'active' | 'paused' | 'complete',
       }))
 
     const tasksData: TaskData[] = allTasks
-      .filter(t => t.status !== 'complete')
+      .filter(t => t.status !== 'Done' && t.status !== 'Complete')
       .map(t => ({
         id: t.id,
         title: t.title,
-        projectId: t.projectId,
-        status: t.status as 'pending' | 'in_progress' | 'complete' | 'blocked',
+        projectId: t.projectId ?? '',
+        status: (t.status === 'In Progress' ? 'in_progress' : t.status === 'Blocked' ? 'blocked' : 'pending') as 'pending' | 'in_progress' | 'complete' | 'blocked',
         dueDate: t.dueDate ? new Date(t.dueDate) : null,
-        estimateHours: t.estimateHours ?? 4,
-        isBlocking: t.metadata?.isBlocking ?? false,
-        isCriticalPath: t.metadata?.isCriticalPath ?? false,
+        estimateHours: 4, // no estimate field in schema — use default
+        isBlocking: false, // no isBlocking field — use urgent as proxy
+        isCriticalPath: t.urgent === true && t.important === true, // both urgent+important = critical path
         description: t.description ?? undefined,
       }))
 

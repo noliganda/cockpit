@@ -13,13 +13,7 @@ interface AreasClientProps {
   workspaceId: WorkspaceId
 }
 
-const AREA_ICONS = ['📁', '🎬', '💰', '⚙️', '📈', '🎯', '👥', '📣', '🤖', '🔒', '🌏', '🏗️']
 const AREA_COLORS = ['#D4A017', '#008080', '#F97316', '#3B82F6', '#22C55E', '#EF4444', '#8B5CF6', '#EC4899', '#6B7280']
-
-const PRESET_SPHERES = [
-  'Insurance', 'Contracts', 'HR', 'Design', 'Content', 'Brand',
-  'Operations', 'Finance', 'Marketing', 'Legal',
-]
 
 interface AreaDialogProps {
   area?: Area | null
@@ -143,12 +137,12 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
               </div>
             )}
             {/* Text input + add */}
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2">
               <input
                 value={sphereInput}
                 onChange={e => setSphereInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSphere(sphereInput) } }}
-                placeholder="Add sphere..."
+                placeholder="Type a sphere and press Enter..."
                 className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-xs outline-none focus:border-[rgba(255,255,255,0.16)]"
               />
               <button
@@ -158,19 +152,6 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
               >
                 Add
               </button>
-            </div>
-            {/* Preset chips */}
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_SPHERES.filter(s => !spheres.includes(s)).map(sphere => (
-                <button
-                  key={sphere}
-                  type="button"
-                  onClick={() => addSphere(sphere)}
-                  className="px-2 py-1 rounded-[4px] text-xs text-[#6B7280] border border-[rgba(255,255,255,0.06)] hover:text-[#A0A0A0] hover:border-[rgba(255,255,255,0.12)] transition-colors"
-                >
-                  + {sphere}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -185,13 +166,17 @@ function AreaDialog({ area, workspaceId, onClose, onSave, onDelete, linkedProjec
             </div>
             <div>
               <label className="block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5">Icon</label>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {AREA_ICONS.map(i => (
-                  <button key={i} type="button" onClick={() => setIcon(i)}
-                    className={cn('w-8 h-8 text-base flex items-center justify-center rounded-[4px] transition-colors', icon === i ? 'bg-[rgba(255,255,255,0.12)]' : 'hover:bg-[rgba(255,255,255,0.06)]')}>
-                    {i}
-                  </button>
-                ))}
+              <div className="flex items-center gap-2">
+                <span className="text-2xl w-10 h-10 flex items-center justify-center rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] shrink-0">
+                  {icon || '📁'}
+                </span>
+                <input
+                  value={icon}
+                  onChange={e => setIcon(e.target.value)}
+                  placeholder="Paste emoji…"
+                  maxLength={8}
+                  className="flex-1 px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+                />
               </div>
             </div>
           </div>

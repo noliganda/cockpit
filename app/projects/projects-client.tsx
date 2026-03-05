@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
-import { Plus, ExternalLink, Edit2, Trash2, X, Download } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Plus, ExternalLink, Edit2, Trash2, X, Download, Link2, TrendingUp, TrendingDown, Folders, CheckCircle2 } from 'lucide-react'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import Link from 'next/link'
 import { type WorkspaceId, type Project, type Task, type Area, type Contact, PROJECT_STATUSES } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
@@ -248,6 +249,20 @@ const STATUS_COLORS: Record<string, string> = {
   Archived: 'text-[#4B5563] bg-[rgba(75,85,99,0.12)]',
 }
 
+// ── Chart + accent colors ─────────────────────────────────────────────────
+const TEAL   = '#2A9D8F'
+const ORANGE = '#F4A261'
+const GOLD   = '#D4A017'
+const MUTED  = '#6B7280'
+
+const STATUS_CHART_COLORS: Record<string, string> = {
+  Planning: '#457B9D',
+  Active: TEAL,
+  'On Hold': ORANGE,
+  Completed: MUTED,
+  Archived: '#374151',
+}
+
 export function ProjectsClient({ initialProjects, allTasks, allAreas, allContacts, workspaceId }: ProjectsClientProps) {
   const [projects, setProjects] = useState(initialProjects)
   const [showDialog, setShowDialog] = useState(false)
@@ -255,15 +270,71 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
   const { workspace } = useWorkspace()
   const router = useRouter()
 
+  // ── Helpers ──────────────────────────────────────────────────────────────
   const getProgress = (projectId: string) => {
-    const projectTasks = allTasks.filter(t => t.projectId === projectId)
-    if (projectTasks.length === 0) return 0
-    const done = projectTasks.filter(t => ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)).length
-    return Math.round((done / projectTasks.length) * 100)
+    const pt = allTasks.filter(t => t.projectId === projectId)
+    if (pt.length === 0) return 0
+    const done = pt.filter(t => ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid'].includes(t.status)).length
+    return Math.round((done / pt.length) * 100)
   }
-
   const getTaskCount = (projectId: string) => allTasks.filter(t => t.projectId === projectId).length
+  const getArea = (areaId?: string | null) => allAreas.find(a => a.id === areaId)
 
+  // ── Analytics ────────────────────────────────────────────────────────────
+  const stats = useMemo(() => {
+    let totalRevenue = 0, totalCost = 0, completedCount = 0, activeCount = 0
+    for (const p of projects) {
+      const b = p.budget ? Number(p.budget) : 0
+      if (b > 0) totalRevenue += b
+      if (b < 0) totalCost += Math.abs(b)
+      if (p.status === 'Active') activeCount++
+      if (p.status === 'Completed') completedCount++
+    }
+    const avgProgress = projects.length
+      ? Math.round(projects.reduce((sum, p) => sum + getProgress(p.id), 0) / projects.length)
+      : 0
+    return { totalRevenue, totalCost, activeCount, completedCount, avgProgress }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects, allTasks])
+
+  const statusChartData = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const p of projects) {
+      const s = p.status ?? 'Planning'
+      counts[s] = (counts[s] ?? 0) + 1
+    }
+    return Object.entries(counts).map(([name, value]) => ({ name, value }))
+  }, [projects])
+
+  const contextChartData = useMemo(() => {
+    let internal = 0, external = 0, unset = 0
+    for (const p of projects) {
+      const area = getArea(p.areaId)
+      if (!area?.context) unset++
+      else if (area.context === 'Internal') internal++
+      else external++
+    }
+    const data = []
+    if (internal) data.push({ name: 'Internal', value: internal })
+    if (external) data.push({ name: 'External', value: external })
+    if (unset)    data.push({ name: 'Unassigned', value: unset })
+    return data
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects, allAreas])
+
+  const pipelineData = useMemo(() =>
+    [...projects]
+      .filter(p => p.budget && Number(p.budget) !== 0)
+      .sort((a, b) => Math.abs(Number(b.budget)) - Math.abs(Number(a.budget)))
+      .slice(0, 8)
+      .map(p => ({
+        name: p.name.length > 20 ? p.name.slice(0, 20) + '…' : p.name,
+        value: Math.abs(Number(p.budget)),
+        isRevenue: Number(p.budget) > 0,
+      })),
+  [projects])
+
+  // ── CRUD ─────────────────────────────────────────────────────────────────
   function exportMarkdown() {
     const date = new Date().toISOString().slice(0, 10)
     const lines: string[] = [`# Projects — ${workspaceId}\n`]
@@ -272,12 +343,11 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
       lines.push(`## ${p.name}`)
       lines.push(`- **Status:** ${p.status ?? 'Planning'}`)
       if (p.endDate) lines.push(`- **End Date:** ${p.endDate}`)
-      if (p.budget) lines.push(`- **Budget:** ${p.budget}`)
+      if (p.budget)  lines.push(`- **Budget:** ${p.budget}`)
       if (tasks.length) {
         lines.push('\n### Tasks')
-        for (const t of tasks) {
+        for (const t of tasks)
           lines.push(`- [${t.status}] ${t.title}${t.assignee ? ` _(${t.assignee})_` : ''}`)
-        }
       }
       lines.push('')
     }
@@ -290,8 +360,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
 
   async function handleCreate(data: Partial<Project>) {
     const res = await fetch('/api/projects', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...data, workspaceId }),
     })
     if (res.ok) {
@@ -299,122 +368,244 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
       setProjects(prev => [project, ...prev])
       router.refresh()
       toast.success('Project created')
-    } else {
-      toast.error('Failed to create project')
-    }
+    } else toast.error('Failed to create project')
   }
 
   async function handleUpdate(id: string, data: Partial<Project>) {
     const res = await fetch(`/api/projects/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-    if (res.ok) {
-      const updated = await res.json() as Project
-      setProjects(prev => prev.map(p => p.id === id ? updated : p))
-      toast.success('Project updated')
-    } else {
-      toast.error('Failed to update project')
-    }
+    if (!res.ok) { toast.error('Failed to update project'); return }
+    toast.success('Project updated')
+    // re-fetch to get fresh data
+    const fresh = await fetch(`/api/projects/${id}`).then(r => r.json()) as Project
+    setProjects(prev => prev.map(p => p.id === id ? fresh : p))
   }
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' })
-    if (res.ok) {
-      setProjects(prev => prev.filter(p => p.id !== id))
-      toast.success('Project deleted')
-    } else {
-      toast.error('Failed to delete project')
-    }
+    if (res.ok) { setProjects(prev => prev.filter(p => p.id !== id)); toast.success('Project deleted') }
+    else toast.error('Failed to delete project')
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Projects</h1>
         <div className="flex items-center gap-2">
-          <button
-            onClick={exportMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export
+          <button onClick={exportMarkdown}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors">
+            <Download className="w-3.5 h-3.5" /> Export
           </button>
-          <button
-            onClick={() => { setEditingProject(null); setShowDialog(true) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
-          >
+          <button onClick={() => { setEditingProject(null); setShowDialog(true) }}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors">
             <Plus className="w-4 h-4" /> New project
           </button>
         </div>
       </div>
 
+      {/* ── Stats Bar ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: 'Pipeline Revenue', value: `$${stats.totalRevenue.toLocaleString()}`, sub: 'total budgeted income', icon: TrendingUp, color: TEAL },
+          { label: 'Total Costs', value: `$${stats.totalCost.toLocaleString()}`, sub: 'total budgeted expenses', icon: TrendingDown, color: ORANGE },
+          { label: 'Active Projects', value: String(stats.activeCount), sub: `${projects.length} total`, icon: Folders, color: GOLD },
+          { label: 'Avg Completion', value: `${stats.avgProgress}%`, sub: `${stats.completedCount} completed`, icon: CheckCircle2, color: '#A0A0A0' },
+        ].map(({ label, value, sub, icon: Icon, color }) => (
+          <div key={label} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] flex flex-col gap-1">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-[#6B7280] uppercase tracking-wide">{label}</span>
+              <Icon className="w-4 h-4" style={{ color }} />
+            </div>
+            <span className="text-2xl font-bold tracking-tight" style={{ color }}>{value}</span>
+            <span className="text-xs text-[#4B5563]">{sub}</span>
+          </div>
+        ))}
+      </div>
+
       {projects.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-sm text-[#4B5563]">No projects yet. Create one to get started.</p>
+        <div className="text-center py-16 border border-dashed border-[rgba(255,255,255,0.06)] rounded-[8px]">
+          <p className="text-sm text-[#4B5563]">No projects yet.</p>
+          <button onClick={() => { setEditingProject(null); setShowDialog(true) }}
+            className="mt-3 text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors">
+            Create your first project →
+          </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map(project => {
-            const progress = getProgress(project.id)
-            const taskCount = getTaskCount(project.id)
-            const budgetNum = project.budget ? Number(project.budget) : null
-            return (
-              <div key={project.id} className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group">
-                <div className="flex items-start justify-between mb-3">
-                  <Link href={`/projects/${project.id}?workspace=${workspaceId}`} className="text-sm font-semibold text-[#F5F5F5] flex-1 mr-2 hover:opacity-80 transition-opacity">
-                    {project.name}
-                  </Link>
-                  <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => { setEditingProject(project); setShowDialog(true) }}
-                      className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <Link href={`/projects/${project.id}?workspace=${workspaceId}`}>
-                      <ExternalLink className="w-3.5 h-3.5 text-[#4B5563] hover:text-[#6B7280] transition-colors" />
-                    </Link>
-                  </div>
-                </div>
-                {project.description && (
-                  <p className="text-xs text-[#6B7280] mb-4 line-clamp-2">
-                    {project.description.trimStart().startsWith('[')
-                      ? (() => {
-                          try {
-                            const blocks = JSON.parse(project.description!) as Array<{ content?: Array<{ text?: string }> }>
-                            return blocks.map(b => b.content?.map(c => c.text ?? '').join('') ?? '').filter(Boolean).join(' ')
-                          } catch { return project.description }
-                        })()
-                      : project.description}
-                  </p>
-                )}
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-[#6B7280]">{taskCount} tasks</span>
-                    <span className="text-xs font-mono text-[#A0A0A0]">{progress}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: workspace.color }} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {project.status && (
-                    <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', STATUS_COLORS[project.status] ?? 'text-[#A0A0A0] bg-[rgba(255,255,255,0.06)]')}>
-                      {project.status}
-                    </span>
-                  )}
-                  {budgetNum !== null && (
-                    <span className={cn('text-xs', budgetNum < 0 ? 'text-[#EF4444]' : 'text-[#22C55E]')}>
-                      {budgetNum < 0 ? `-$${Math.abs(budgetNum).toLocaleString()}` : `$${budgetNum.toLocaleString()}`}
-                    </span>
-                  )}
+        <>
+          {/* ── Charts Row ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            {/* Status donut */}
+            <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+              <h3 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide mb-4">By Status</h3>
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width={100} height={100}>
+                  <PieChart>
+                    <Pie data={statusChartData} cx="50%" cy="50%" innerRadius={30} outerRadius={46} paddingAngle={2} dataKey="value">
+                      {statusChartData.map((entry, i) => (
+                        <Cell key={i} fill={STATUS_CHART_COLORS[entry.name] ?? MUTED} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  {statusChartData.map(d => (
+                    <div key={d.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: STATUS_CHART_COLORS[d.name] ?? MUTED }} />
+                        <span className="text-[#A0A0A0]">{d.name}</span>
+                      </div>
+                      <span className="text-[#F5F5F5] font-medium tabular-nums">{d.value}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            )
-          })}
-        </div>
+            </div>
+
+            {/* Internal vs External donut */}
+            <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+              <h3 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide mb-4">Internal vs External</h3>
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width={100} height={100}>
+                  <PieChart>
+                    <Pie data={contextChartData} cx="50%" cy="50%" innerRadius={30} outerRadius={46} paddingAngle={2} dataKey="value">
+                      {contextChartData.map((entry, i) => (
+                        <Cell key={i} fill={entry.name === 'Internal' ? GOLD : entry.name === 'External' ? TEAL : MUTED} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  {contextChartData.map(d => (
+                    <div key={d.name} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.name === 'Internal' ? GOLD : d.name === 'External' ? TEAL : MUTED }} />
+                        <span className="text-[#A0A0A0]">{d.name}</span>
+                      </div>
+                      <span className="text-[#F5F5F5] font-medium tabular-nums">{d.value}</span>
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-[#4B5563] mt-1">Based on area context</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Xero placeholder */}
+            <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] border-dashed flex flex-col items-center justify-center text-center gap-2">
+              <Link2 className="w-6 h-6 text-[#4B5563]" />
+              <p className="text-xs font-semibold text-[#6B7280]">Xero not connected</p>
+              <p className="text-[10px] text-[#4B5563] max-w-[180px]">Connect Xero to pull actual invoice & expense data per project</p>
+              <span className="mt-1 text-[10px] px-2 py-1 rounded-full border border-[rgba(255,255,255,0.06)] text-[#4B5563]">Coming in Step 3</span>
+            </div>
+          </div>
+
+          {/* ── Pipeline bar chart ── */}
+          {pipelineData.length > 0 && (
+            <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+              <h3 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide mb-4">Project Pipeline (Top {pipelineData.length} by value)</h3>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={pipelineData} layout="vertical" margin={{ left: 0, right: 20, top: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" horizontal={false} />
+                  <XAxis type="number" tick={{ fill: '#6B7280', fontSize: 10 }} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 11 }} width={120} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, fontSize: 11 }}
+                    formatter={(v: number, _n: string, props: { payload?: { isRevenue?: boolean } }) => [`$${v.toLocaleString()}`, props.payload?.isRevenue ? 'Revenue' : 'Cost']}
+                  />
+                  <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={16}>
+                    {pipelineData.map((entry, i) => (
+                      <Cell key={i} fill={entry.isRevenue ? TEAL : ORANGE} fillOpacity={0.85} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="flex items-center gap-4 mt-2 justify-end">
+                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: TEAL }} />Revenue</div>
+                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: ORANGE }} />Cost</div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Project cards ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projects.map(project => {
+              const progress = getProgress(project.id)
+              const taskCount = getTaskCount(project.id)
+              const area = getArea(project.areaId)
+              const budgetNum = project.budget ? Number(project.budget) : null
+              const isRevenue = budgetNum !== null && budgetNum > 0
+              const accentColor = area?.context === 'Internal' ? GOLD : area?.context === 'External' ? TEAL : MUTED
+              return (
+                <div key={project.id}
+                  className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group"
+                  style={{ borderLeftColor: accentColor, borderLeftWidth: 2 }}>
+                  <div className="flex items-start justify-between mb-2">
+                    <Link href={`/projects/${project.id}?workspace=${workspaceId}`}
+                      className="text-sm font-semibold text-[#F5F5F5] flex-1 mr-2 hover:opacity-80 transition-opacity leading-snug">
+                      {project.name}
+                    </Link>
+                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => { setEditingProject(project); setShowDialog(true) }}
+                        className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors">
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <Link href={`/projects/${project.id}?workspace=${workspaceId}`}>
+                        <ExternalLink className="w-3.5 h-3.5 text-[#4B5563] hover:text-[#6B7280] transition-colors" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Area tag */}
+                  {area && (
+                    <div className="flex items-center gap-1 mb-2">
+                      <span className="text-xs px-1.5 py-0.5 rounded" style={{ color: accentColor, background: `${accentColor}18` }}>
+                        {area.icon} {area.name}
+                      </span>
+                      {area.context && (
+                        <span className="text-[10px] text-[#4B5563]">{area.context}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Progress bar */}
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-[#6B7280]">{taskCount} tasks</span>
+                      <span className="text-xs font-mono text-[#A0A0A0]">{progress}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: accentColor }} />
+                    </div>
+                  </div>
+
+                  {/* Footer: status + budget */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {project.status && (
+                      <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', STATUS_COLORS[project.status] ?? 'text-[#A0A0A0] bg-[rgba(255,255,255,0.06)]')}>
+                        {project.status}
+                      </span>
+                    )}
+                    {budgetNum !== null && (
+                      <span className="text-xs font-medium" style={{ color: isRevenue ? TEAL : ORANGE }}>
+                        {isRevenue ? `+$${budgetNum.toLocaleString()}` : `-$${Math.abs(budgetNum).toLocaleString()}`}
+                      </span>
+                    )}
+                    {project.endDate && (
+                      <span className="text-xs text-[#4B5563] ml-auto">{project.endDate}</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </>
       )}
 
       {showDialog && (

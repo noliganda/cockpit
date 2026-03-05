@@ -527,6 +527,10 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
   const [contacts, setContacts] = useState(initialContacts)
   const [organisations, setOrganisations] = useState(initialOrgs)
   const { workspace } = useWorkspace()
+  const accentColor =
+    workspace === 'korus' ? '#008080' :
+    workspace === 'personal' ? '#F97316' :
+    '#D4A017' // byron_film default
 
   const handleDragEnd = useCallback(async (result: DropResult) => {
     if (!result.destination) return
@@ -813,6 +817,7 @@ function ContactsTab({
                     <CustomCheckbox
                       checked={allFilteredSelected}
                       onChange={toggleSelectAll}
+                      accentColor={accentColor}
                     />
                   </th>
                   {['Name', 'Position', 'Mobile', 'Email', 'Links', 'Pipeline Stage'].map(h => (
@@ -834,6 +839,7 @@ function ContactsTab({
                       <CustomCheckbox
                         checked={selectedIds.has(contact.id)}
                         onClick={e => toggleSelect(e, idx, contact.id)}
+                        accentColor={accentColor}
                       />
                     </td>
                     <td className="px-4 py-2.5">
@@ -906,6 +912,7 @@ function ContactsTab({
                     <CustomCheckbox
                       checked={selectedIds.has(contact.id)}
                       onClick={e => toggleSelect(e, idx, contact.id)}
+                      accentColor={accentColor}
                     />
                   </div>
                   <p

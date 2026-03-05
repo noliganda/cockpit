@@ -332,10 +332,21 @@ export function AreasClient({ initialAreas, allProjects, allTasks, workspaceId }
                 className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group"
                 style={area.color ? { borderLeftColor: area.color, borderLeftWidth: 2 } : undefined}
               >
-                <div className="flex items-start justify-between mb-2">
+                {/* Header row: icon + name + context badge + edit */}
+                <div className="flex items-start justify-between mb-1">
                   <Link href={`/areas/${area.id}?workspace=${workspaceId}`} className="flex items-center gap-2 flex-1 min-w-0">
-                    {area.icon && <span className="text-lg shrink-0">{area.icon}</span>}
+                    {area.icon && <span className="text-base shrink-0">{area.icon}</span>}
                     <h3 className="text-sm font-semibold text-[#F5F5F5] truncate">{area.name}</h3>
+                    {area.context && (
+                      <span className={cn(
+                        'text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0',
+                        area.context === 'Internal'
+                          ? 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]'
+                          : 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]'
+                      )}>
+                        {area.context}
+                      </span>
+                    )}
                   </Link>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0">
                     <button
@@ -346,35 +357,28 @@ export function AreasClient({ initialAreas, allProjects, allTasks, workspaceId }
                     </button>
                   </div>
                 </div>
+
+                {/* Description — "Minimise risk in the business" */}
                 {area.description && (
-                  <p className="text-xs text-[#6B7280] mb-3 line-clamp-2">{area.description}</p>
+                  <p className="text-xs text-[#6B7280] italic mb-2.5 pl-6">{area.description}</p>
                 )}
-                {/* Context badge + sphere tags */}
-                {(area.context || spheres.length > 0) && (
-                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                    {area.context && (
-                      <span className={cn(
-                        'text-xs px-1.5 py-0.5 rounded font-medium',
-                        area.context === 'Internal'
-                          ? 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]'
-                          : 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]'
-                      )}>
-                        {area.context}
-                      </span>
-                    )}
-                    {spheres.slice(0, 3).map(sphere => (
-                      <span key={sphere} className="text-xs px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">
+
+                {/* Spheres of Responsibility — bullet list */}
+                {spheres.length > 0 && (
+                  <ul className="pl-6 mb-3 space-y-0.5">
+                    {spheres.map(sphere => (
+                      <li key={sphere} className="flex items-center gap-1.5 text-xs text-[#A0A0A0]">
+                        <span className="w-1 h-1 rounded-full bg-[#4B5563] shrink-0" />
                         {sphere}
-                      </span>
+                      </li>
                     ))}
-                    {spheres.length > 3 && (
-                      <span className="text-xs text-[#6B7280]">+{spheres.length - 3}</span>
-                    )}
-                  </div>
+                  </ul>
                 )}
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-[#6B7280]">{projCount} projects</span>
-                  <span className="text-xs text-[#6B7280]">{taskCount} tasks</span>
+
+                {/* Footer: project/task counts */}
+                <div className="flex items-center gap-3 pt-2 border-t border-[rgba(255,255,255,0.04)]">
+                  <span className="text-xs text-[#4B5563]">{projCount} projects</span>
+                  <span className="text-xs text-[#4B5563]">{taskCount} tasks</span>
                   {area.status === 'archived' && (
                     <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(107,114,128,0.15)] text-[#6B7280]">Archived</span>
                   )}

@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { areas, projects, tasks } from '@/lib/db/schema'
+import { areas, projects, tasks, notes } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { AreaDetailClient } from './area-detail-client'
 
@@ -22,9 +22,10 @@ export default async function AreaDetailPage({
   const [area] = await db.select().from(areas).where(eq(areas.id, id)).limit(1)
   if (!area) notFound()
 
-  const [areaProjects, areaTasks] = await Promise.all([
+  const [areaProjects, areaTasks, areaNotes] = await Promise.all([
     db.select().from(projects).where(eq(projects.areaId, id)),
     db.select().from(tasks).where(eq(tasks.areaId, id)),
+    db.select().from(notes).where(eq(notes.areaId, id)),
   ])
 
   return (
@@ -32,6 +33,7 @@ export default async function AreaDetailPage({
       area={area as import('@/types').Area}
       projects={areaProjects as import('@/types').Project[]}
       tasks={areaTasks as import('@/types').Task[]}
+      notes={areaNotes as import('@/types').Note[]}
       workspaceId={workspaceId}
     />
   )

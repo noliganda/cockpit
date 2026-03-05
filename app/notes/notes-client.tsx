@@ -231,10 +231,15 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
   }
 
   async function handleMeta(id: string, field: 'projectId' | 'areaId' | 'sprintId', value: string | null) {
+    // Project and Area are mutually exclusive — clear the other when one is set
+    const payload: Record<string, string | null> = { [field]: value }
+    if (field === 'projectId' && value) payload.areaId = null
+    if (field === 'areaId' && value) payload.projectId = null
+
     const res = await fetch(`/api/notes/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [field]: value }),
+      body: JSON.stringify(payload),
     })
     if (res.ok) {
       const updated = await res.json() as Note

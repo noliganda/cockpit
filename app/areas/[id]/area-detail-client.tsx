@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
-import { type Area, type Project, type Task } from '@/types'
+import { ArrowLeft, FileText } from 'lucide-react'
+import { type Area, type Project, type Task, type Note } from '@/types'
 import { cn } from '@/lib/utils'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -15,16 +15,17 @@ const STATUS_COLORS: Record<string, string> = {
 
 const TASK_STATUS_ORDER = ['In Progress', 'To Do', 'Backlog', 'Needs Review', 'Done', 'Cancelled']
 
-type Tab = 'overview' | 'projects' | 'tasks'
+type Tab = 'overview' | 'projects' | 'tasks' | 'notes'
 
 interface AreaDetailClientProps {
   area: Area
   projects: Project[]
   tasks: Task[]
+  notes: Note[]
   workspaceId: string
 }
 
-export function AreaDetailClient({ area, projects, tasks, workspaceId }: AreaDetailClientProps) {
+export function AreaDetailClient({ area, projects, tasks, notes, workspaceId }: AreaDetailClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
 
   const spheres = area.spheresOfResponsibility ?? []
@@ -50,6 +51,7 @@ export function AreaDetailClient({ area, projects, tasks, workspaceId }: AreaDet
     { id: 'overview', label: 'Overview' },
     { id: 'projects', label: `Projects (${projects.length})` },
     { id: 'tasks', label: `Tasks (${tasks.length})` },
+    { id: 'notes', label: `Notes (${notes.length})` },
   ]
 
   return (
@@ -233,6 +235,54 @@ export function AreaDetailClient({ area, projects, tasks, workspaceId }: AreaDet
             <div className="py-16 text-center">
               <p className="text-sm text-[#4B5563]">No projects in this area yet.</p>
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Notes Tab */}
+      {activeTab === 'notes' && (
+        <div className="space-y-3">
+          {notes.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-sm text-[#4B5563]">No notes in this area yet.</p>
+              <Link href={`/notes?workspace=${workspaceId}`}
+                className="mt-2 inline-block text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+                Create a note and assign it to this area →
+              </Link>
+            </div>
+          ) : (
+            notes.map(note => {
+              // Extract plaintext preview from BlockNote JSON or plain string
+              let preview = ''
+              try {
+                const blocks = typeof note.content === 'string'
+                  ? JSON.parse(note.content) as Array<{ content?: Array<{ text?: string }> }>
+                  : note.content as Array<{ content?: Array<{ text?: string }> }>
+                if (Array.isArray(blocks)) {
+                  preview = blocks
+                    .map(b => Array.isArray(b.content) ? b.content.map(i => i.text ?? '').join('') : '')
+                    .filter(Boolean).join(' ')
+                }
+              } catch { preview = '' }
+
+              return (
+                <Link key={note.id} href={`/notes?workspace=${workspaceId}&note=${note.id}`}
+                  className="flex items-start gap-3 p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group">
+                  <FileText className="w-4 h-4 text-[#4B5563] shrink-0 mt-0.5 group-hover:text-[#6B7280] transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[#F5F5F5] truncate mb-0.5">{note.title || 'Untitled'}</p>
+                    {preview && (
+                      <p className="text-xs text-[#6B7280] line-clamp-2">{preview}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#4B5563] shrink-0 mt-0.5">
+                    {note.updatedAt
+                      ? new Date(note.updatedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
+                      : ''}
+                  </span>
+                </Link>
+              )
+            })
           )}
         </div>
       )}

@@ -134,7 +134,7 @@ export function scoreProject(project: ProjectData, allProjects: ProjectData[]): 
 export function scoreTask(
   task: TaskData,
   project: ScoredProject,
-  allProjects: ScoredProject[]
+  _allProjects: ScoredProject[]
 ): Omit<ScoredTask, 'rank'> {
   const daysRemaining = daysUntilDeadline(task.dueDate)
   const parentDaysRemaining = daysUntilDeadline(project.deadline)

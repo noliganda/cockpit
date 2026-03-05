@@ -464,7 +464,22 @@ function AllocationView({ stats }: { stats: { timeAllocation: { tier1Percent: nu
   )
 }
 
-function StatsBar({ stats }: { stats: any }) {
+interface StatsBarProps {
+  stats: {
+    p1Tasks: number
+    revenueAtRisk: number
+    familyProjects: number
+    blockedTasks: number
+    timeAllocation: {
+      tier1Percent: number
+      tier2Percent: number
+      tier3Percent: number
+      tier4Percent: number
+    }
+  }
+}
+
+function StatsBar({ stats }: StatsBarProps) {
   const items = [
     { label: 'P1 Tasks', value: stats.p1Tasks, color: '#E63946', icon: '🔥' },
     { label: 'Revenue at Risk', value: `$${(stats.revenueAtRisk / 1000).toFixed(0)}k`, color: '#2A9D8F', icon: '💰' },

@@ -8,12 +8,12 @@ import { TasksClient } from './tasks-client'
 export default async function TasksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ workspace?: string }>
+  searchParams: Promise<{ workspace?: string; filter?: string }>
 }) {
   const session = await getSession()
   if (!session) redirect('/login')
 
-  const { workspace } = await searchParams
+  const { workspace, filter } = await searchParams
   const workspaceId = workspace ?? 'byron-film'
 
   const [allTasks, allAreas, allProjects, allSprints, allUsers] = await Promise.all([
@@ -26,9 +26,10 @@ export default async function TasksPage({
 
   return (
     <TasksClient
-      key={workspaceId}
+      key={`${workspaceId}-${filter ?? 'active'}`}
       initialTasks={allTasks}
       workspaceId={workspaceId as 'byron-film' | 'korus' | 'personal'}
+      initialStatusFilter={filter}
       areas={allAreas}
       projects={allProjects}
       sprints={allSprints}

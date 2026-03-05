@@ -1,17 +1,18 @@
 'use client'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Search, X, FileText, CheckSquare, FolderOpen, Users, Activity } from 'lucide-react'
+import { Search, X, FileText, CheckSquare, FolderOpen, Users, Activity, ScrollText, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/hooks/use-workspace'
 
 interface SearchResult {
   id: string
-  type: 'task' | 'project' | 'note' | 'contact' | 'activity'
+  type: 'task' | 'project' | 'note' | 'contact' | 'activity' | 'log'
   title: string
   description?: string | null
   workspaceId: string
   score?: number
+  meta?: string
 }
 
 const TYPE_ICONS = {
@@ -20,6 +21,7 @@ const TYPE_ICONS = {
   note: FileText,
   contact: Users,
   activity: Activity,
+  log: ScrollText,
 }
 
 const TYPE_ROUTES: Record<string, (id: string) => string> = {
@@ -27,10 +29,11 @@ const TYPE_ROUTES: Record<string, (id: string) => string> = {
   project: (id) => `/projects/${id}`,
   note: (id) => `/notes?note=${id}`,
   contact: (id) => `/crm/${id}`,
-  activity: () => `/`,
+  activity: () => '/logs',
+  log: () => '/logs',
 }
 
-type FilterType = 'all' | 'task' | 'project' | 'note' | 'contact' | 'activity'
+type FilterType = 'all' | 'task' | 'project' | 'note' | 'contact' | 'activity' | 'log'
 
 const FILTERS: { id: FilterType; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -39,6 +42,7 @@ const FILTERS: { id: FilterType; label: string }[] = [
   { id: 'contact', label: 'Contacts' },
   { id: 'note', label: 'Notes' },
   { id: 'activity', label: 'Activity' },
+  { id: 'log', label: 'Logs' },
 ]
 
 export function SearchOverlay({ onClose }: { onClose: () => void }) {
@@ -172,12 +176,16 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-[#F5F5F5] truncate">{r.title}</p>
-                  {r.description && <p className="text-xs text-[#6B7280] truncate mt-0.5">{r.description}</p>}
+                  {(r.meta ?? r.description) && (
+                    <p className="text-xs text-[#6B7280] truncate mt-0.5">{r.meta ?? r.description}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-xs text-[#4B5563] capitalize">{r.type}</span>
                   {r.score !== undefined && (
-                    <span className="text-xs font-mono text-[#4B5563]">{Math.round(r.score * 100)}%</span>
+                    <span className="text-xs font-mono text-[#4B5563] flex items-center gap-0.5">
+                      <Sparkles className="w-2.5 h-2.5 text-[#A855F7]" />{Math.round(r.score * 100)}%
+                    </span>
                   )}
                 </div>
               </button>

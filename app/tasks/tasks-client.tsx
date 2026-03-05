@@ -16,6 +16,7 @@ interface UserOption {
 interface TasksClientProps {
   initialTasks: Task[]
   workspaceId: WorkspaceId
+  initialStatusFilter?: string
   areas?: Area[]
   projects?: Project[]
   sprints?: Sprint[]
@@ -177,10 +178,10 @@ function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOpti
   )
 }
 
-export function TasksClient({ initialTasks, workspaceId, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
+export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('active')
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter ?? 'active')
   const [urgentFilter, setUrgentFilter] = useState(false)
   const [importantFilter, setImportantFilter] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
@@ -197,15 +198,22 @@ export function TasksClient({ initialTasks, workspaceId, areas = [], projects = 
 
   const router = useRouter()
 
+  const todayStr = new Date().toISOString().split('T')[0]
+  const DONE_STATUSES = ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid']
+
   const filtered = useMemo(() => {
     return tasks.filter(t => {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false
-      if (statusFilter === 'active' && (t.status === 'Done' || t.status === 'Cancelled')) return false
-      else if (statusFilter !== 'all' && statusFilter !== 'active' && t.status !== statusFilter) return false
+      if (statusFilter === 'active' && DONE_STATUSES.includes(t.status)) return false
+      else if (statusFilter === 'overdue') {
+        if (DONE_STATUSES.includes(t.status)) return false
+        if (!t.dueDate || t.dueDate >= todayStr) return false
+      } else if (statusFilter !== 'all' && statusFilter !== 'active' && t.status !== statusFilter) return false
       if (urgentFilter && !t.urgent) return false
       if (importantFilter && !t.important) return false
       return true
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, search, statusFilter, urgentFilter, importantFilter])
 
   const selectedCount = selectedIds.size

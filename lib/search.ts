@@ -1,15 +1,16 @@
 import { db } from './db'
-import { tasks, projects, notes, contacts } from './db/schema'
-import { sql, ilike, or } from 'drizzle-orm'
+import { tasks, projects, notes, contacts, activityLog } from './db/schema'
+import { sql, ilike, or, and, eq, desc } from 'drizzle-orm'
 import { generateEmbedding } from './embeddings'
 
 export interface SearchResult {
   id: string
-  type: 'task' | 'project' | 'note' | 'contact' | 'activity'
+  type: 'task' | 'project' | 'note' | 'contact' | 'activity' | 'log'
   title: string
   description?: string | null
   workspaceId: string
   score?: number
+  meta?: string // e.g. "created task" for log entries
 }
 
 export async function search(
@@ -67,6 +68,48 @@ export async function search(
     .limit(5)
 
   contactResults.forEach(c => results.push({ id: c.id, title: c.title, description: c.notes, workspaceId: c.workspaceId, type: 'contact' as const }))
+
+  // Layer 1b: Text search on activity log
+  const logWhere = workspaceId
+    ? and(
+        eq(activityLog.workspaceId, workspaceId),
+        or(
+          ilike(activityLog.entityTitle, `%${query}%`),
+          ilike(activityLog.description, `%${query}%`),
+          ilike(activityLog.action, `%${query}%`),
+          ilike(activityLog.actor, `%${query}%`),
+        )
+      )
+    : or(
+        ilike(activityLog.entityTitle, `%${query}%`),
+        ilike(activityLog.description, `%${query}%`),
+        ilike(activityLog.action, `%${query}%`),
+        ilike(activityLog.actor, `%${query}%`),
+      )
+
+  const logResults = await db
+    .select({
+      id: activityLog.id,
+      workspaceId: activityLog.workspaceId,
+      actor: activityLog.actor,
+      action: activityLog.action,
+      entityType: activityLog.entityType,
+      entityTitle: activityLog.entityTitle,
+      description: activityLog.description,
+    })
+    .from(activityLog)
+    .where(logWhere)
+    .orderBy(desc(activityLog.createdAt))
+    .limit(8)
+
+  logResults.forEach(l => results.push({
+    id: l.id,
+    type: 'log' as const,
+    title: l.entityTitle ?? `${l.action} ${l.entityType}`,
+    description: l.description,
+    workspaceId: l.workspaceId,
+    meta: `${l.actor} ${l.action} ${l.entityType}`,
+  }))
 
   // Layer 2: Semantic search on activity_log if OpenAI is available
   if (process.env.OPENAI_API_KEY) {

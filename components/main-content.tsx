@@ -1,6 +1,6 @@
 'use client'
 import { useSidebar } from '@/hooks/use-sidebar'
-import { Menu, Search } from 'lucide-react'
+import { Menu, Search, Keyboard } from 'lucide-react'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { motion, AnimatePresence } from 'framer-motion'
 import { usePathname } from 'next/navigation'
@@ -43,6 +43,14 @@ export function MainContent({ children, onSearchOpen }: MainContentProps) {
             <kbd className="hidden sm:inline text-[#4B5563] border border-[rgba(255,255,255,0.06)] rounded px-1 py-0.5 text-xs">⌘K</kbd>
           </button>
         )}
+        {/* Keyboard shortcut hint */}
+        <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: '/', metaKey: true, bubbles: true }))}
+          title="Keyboard shortcuts (⌘/)"
+          className="ml-2 w-7 h-7 flex items-center justify-center rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#4B5563] hover:text-[#A0A0A0] hover:border-[rgba(255,255,255,0.10)] transition-colors"
+        >
+          <Keyboard className="w-3.5 h-3.5" />
+        </button>
       </div>
       {/* Content area */}
       <main className="flex-1 overflow-y-auto">

@@ -14,14 +14,15 @@ import type { Task } from '@/types'
 
 interface CalendarEvent {
   id: string
-  workspaceId: string
+  workspace: string
   calendarId: string
+  calendarLabel: string
   title: string
   description?: string | null
   location?: string | null
-  startTime: Date
-  endTime: Date
-  allDay?: boolean | null
+  startTime: string
+  endTime: string
+  allDay?: boolean
   url?: string | null
 }
 
@@ -62,7 +63,6 @@ interface DashboardClientProps {
     contactCount: number
   }
   upcomingTasks: Task[]
-  upcomingEvents: CalendarEvent[]
   recentActivity: ActivityEntry[]
   workspaceBreakdown: WorkspaceStats[]
   featuredProjects: FeaturedProject[]
@@ -282,7 +282,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 // ── Main dashboard ────────────────────────────────────────────────────────────
 export function DashboardClient({
-  stats, upcomingTasks, upcomingEvents, recentActivity,
+  stats, upcomingTasks, recentActivity,
   workspaceBreakdown, featuredProjects, workspaceId,
 }: DashboardClientProps) {
   const { workspace, workspaceId: wsId } = useWorkspace()
@@ -290,28 +290,38 @@ export function DashboardClient({
   const ws = (workspaceId ?? wsId) as WorkspaceId
 
   const [modal, setModal] = useState<'task' | 'project' | 'contact' | null>(null)
-  const [syncing, setSyncing] = useState(false)
   const [upcomingTab, setUpcomingTab] = useState<'tasks' | 'events'>('tasks')
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [eventsLoading, setEventsLoading] = useState(false)
+  const [eventsFetched, setEventsFetched] = useState(false)
   const [starredProjects, setStarredProjects] = useState<Set<string>>(
     new Set(featuredProjects.filter(p => p.starred).map(p => p.id))
   )
 
   function refresh() { router.refresh() }
 
-  async function handleCalendarSync() {
-    setSyncing(true)
+  async function fetchEvents() {
+    setEventsLoading(true)
     try {
-      const res = await fetch('/api/calendar/sync', { method: 'POST' })
-      const data = await res.json() as { success?: boolean; synced?: number; message?: string }
-      if (data.success) {
-        toast.success(`Calendar synced — ${data.synced ?? 0} events`)
-        router.refresh()
+      const res = await fetch('/api/calendar/live?days=30')
+      const data = await res.json() as { events?: CalendarEvent[]; error?: string }
+      if (data.events) {
+        setEvents(data.events)
+        setEventsFetched(true)
       } else {
-        toast.error(data.message ?? 'Sync failed')
+        toast.error(data.error ?? 'Calendar fetch failed')
       }
-    } catch { toast.error('Calendar sync error') }
-    finally { setSyncing(false) }
+    } catch { toast.error('Calendar error') }
+    finally { setEventsLoading(false) }
   }
+
+  // Auto-fetch events when user switches to Events tab
+  useEffect(() => {
+    if (upcomingTab === 'events' && !eventsFetched && !eventsLoading) {
+      void fetchEvents()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [upcomingTab])
 
   async function toggleStar(projectId: string, currentlyStarred: boolean) {
     try {
@@ -332,10 +342,10 @@ export function DashboardClient({
   }
 
   const STAT_CARDS = [
-    { label: 'Open Tasks', value: stats.openTasks, icon: CheckSquare, color: workspace.color, href: '/tasks' },
-    { label: 'Active Projects', value: stats.activeProjects, icon: FolderOpen, color: '#22C55E', href: '/projects' },
-    { label: 'Contacts', value: stats.contactCount, icon: Users, color: '#3B82F6', href: '/crm' },
-    { label: 'Overdue', value: stats.overdueItems, icon: AlertCircle, color: stats.overdueItems > 0 ? '#EF4444' : '#6B7280', href: '/tasks' },
+    { label: 'Open Tasks', value: stats.openTasks, icon: CheckSquare, color: workspace.color, href: `/tasks?workspace=${ws}&filter=active` },
+    { label: 'Active Projects', value: stats.activeProjects, icon: FolderOpen, color: '#22C55E', href: `/projects?workspace=${ws}&status=Active` },
+    { label: 'Contacts', value: stats.contactCount, icon: Users, color: '#3B82F6', href: `/crm?workspace=${ws}` },
+    { label: 'Overdue', value: stats.overdueItems, icon: AlertCircle, color: stats.overdueItems > 0 ? '#EF4444' : '#6B7280', href: `/tasks?workspace=${ws}&filter=overdue` },
   ]
 
   const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-xs text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[rgba(255,255,255,0.10)] transition-colors cursor-pointer'
@@ -377,7 +387,7 @@ export function DashboardClient({
           {STAT_CARDS.map(stat => {
             const Icon = stat.icon
             return (
-              <Link key={stat.label} href={`${stat.href}?workspace=${ws}`}
+              <Link key={stat.label} href={stat.href}
                 className="group p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <p className="text-xs text-[#6B7280] font-medium uppercase tracking-wide">{stat.label}</p>
@@ -429,12 +439,14 @@ export function DashboardClient({
                           : 'text-[#6B7280] hover:text-[#A0A0A0]'
                       )}
                     >
-                      Events {upcomingEvents.length > 0 && <span className="ml-1 text-[10px] opacity-60">({upcomingEvents.length})</span>}
+                      Events {events.length > 0 && <span className="ml-1 text-[10px] opacity-60">({events.length})</span>}
                     </button>
                   </div>
                   {upcomingTab === 'tasks'
                     ? <Link href={`/tasks?workspace=${ws}`} className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">View all</Link>
-                    : <Link href="/calendar" className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">Calendar</Link>
+                    : <button onClick={() => void fetchEvents()} disabled={eventsLoading} className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors disabled:opacity-40">
+                        <RefreshCw className={cn('w-3 h-3', eventsLoading && 'animate-spin')} />Refresh
+                      </button>
                   }
                 </div>
               </div>
@@ -464,44 +476,42 @@ export function DashboardClient({
                     </div>
                   )
                 ) : (
-                  upcomingEvents.length === 0 ? (
+                  eventsLoading ? (
+                    <div className="py-6 text-center">
+                      <RefreshCw className="w-5 h-5 text-[#4B5563] mx-auto mb-2 animate-spin" />
+                      <p className="text-sm text-[#4B5563]">Fetching calendars…</p>
+                    </div>
+                  ) : events.length === 0 ? (
                     <div className="py-6 text-center">
                       <Calendar className="w-7 h-7 text-[#1F1F1F] mx-auto mb-2" />
-                      <p className="text-sm text-[#4B5563]">No calendar events synced</p>
+                      <p className="text-sm text-[#4B5563]">No upcoming events found</p>
                       <button
-                        onClick={handleCalendarSync}
-                        disabled={syncing}
-                        className="mt-3 flex items-center gap-1.5 mx-auto text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors disabled:opacity-40"
+                        onClick={() => void fetchEvents()}
+                        className="mt-3 flex items-center gap-1.5 mx-auto text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors"
                       >
-                        <RefreshCw className={cn('w-3 h-3', syncing && 'animate-spin')} />
-                        {syncing ? 'Syncing…' : 'Sync Google Calendar'}
+                        <RefreshCw className="w-3 h-3" />
+                        Fetch from Google Calendar
                       </button>
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      {upcomingEvents.map(event => (
-                        <div key={event.id} className="flex items-start gap-3 py-2 border-b border-[rgba(255,255,255,0.04)] last:border-0">
-                          <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: getWorkspaceColor(event.workspaceId) }} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-[#F5F5F5] truncate">{event.title}</p>
-                            {event.location && <p className="text-xs text-[#6B7280] truncate mt-0.5">{event.location}</p>}
+                      {events.map(event => {
+                        const COLOR_MAP: Record<string, string> = { 'byron-film': '#D4A017', korus: '#008080', personal: '#F97316' }
+                        const dotColor = COLOR_MAP[event.workspace] ?? '#6B7280'
+                        return (
+                          <div key={event.id} className="flex items-start gap-3 py-2 border-b border-[rgba(255,255,255,0.04)] last:border-0">
+                            <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: dotColor }} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-[#F5F5F5] truncate">{event.title}</p>
+                              <p className="text-[10px] text-[#4B5563] mt-0.5">{event.calendarLabel}{event.location ? ` · ${event.location}` : ''}</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-xs text-[#F59E0B] font-mono">{formatEventDate(new Date(event.startTime))}</p>
+                              <p className="text-[10px] text-[#6B7280]">{formatEventTime(new Date(event.startTime), new Date(event.endTime), event.allDay)}</p>
+                            </div>
                           </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-xs text-[#F59E0B] font-mono">{formatEventDate(event.startTime)}</p>
-                            <p className="text-[10px] text-[#6B7280]">{formatEventTime(event.startTime, event.endTime, event.allDay)}</p>
-                          </div>
-                        </div>
-                      ))}
-                      <div className="pt-2 flex justify-end">
-                        <button
-                          onClick={handleCalendarSync}
-                          disabled={syncing}
-                          className="flex items-center gap-1 text-xs text-[#4B5563] hover:text-[#6B7280] transition-colors disabled:opacity-40"
-                        >
-                          <RefreshCw className={cn('w-3 h-3', syncing && 'animate-spin')} />
-                          {syncing ? 'Syncing…' : 'Refresh'}
-                        </button>
-                      </div>
+                        )
+                      })}
                     </div>
                   )
                 )}

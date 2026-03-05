@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { tasks, activityLog, projects, contacts, calendarEvents } from '@/lib/db/schema'
-import { eq, desc, gte, lte, and, asc } from 'drizzle-orm'
+import { tasks, activityLog, projects, contacts } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
 import { WORKSPACES } from '@/types'
 import { DashboardClient } from './dashboard-client'
 
@@ -20,8 +20,6 @@ export default async function DashboardPage({
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const todayStr = today.toISOString().split('T')[0]
-  const in30Days = new Date(today)
-  in30Days.setDate(today.getDate() + 30)
   const in7Days = new Date(today)
   in7Days.setDate(today.getDate() + 7)
   const in7DaysStr = in7Days.toISOString().split('T')[0]
@@ -29,7 +27,7 @@ export default async function DashboardPage({
   const DONE_STATUSES = ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid']
 
   const wsFilter = workspaceId
-  const [allTasks, allProjects, allContacts, recentActivity, upcomingEvents] = await Promise.all([
+  const [allTasks, allProjects, allContacts, recentActivity] = await Promise.all([
     wsFilter
       ? db.select().from(tasks).where(eq(tasks.workspaceId, wsFilter))
       : db.select().from(tasks),
@@ -52,23 +50,6 @@ export default async function DashboardPage({
       .from(activityLog)
       .orderBy(desc(activityLog.createdAt))
       .limit(20),
-    // Calendar events in next 30 days
-    wsFilter
-      ? db.select().from(calendarEvents)
-          .where(and(
-            eq(calendarEvents.workspaceId, wsFilter),
-            gte(calendarEvents.startTime, today),
-            lte(calendarEvents.startTime, in30Days),
-          ))
-          .orderBy(asc(calendarEvents.startTime))
-          .limit(20)
-      : db.select().from(calendarEvents)
-          .where(and(
-            gte(calendarEvents.startTime, today),
-            lte(calendarEvents.startTime, in30Days),
-          ))
-          .orderBy(asc(calendarEvents.startTime))
-          .limit(20),
   ])
 
   const openTasks = allTasks.filter(t => !DONE_STATUSES.includes(t.status)).length
@@ -100,7 +81,6 @@ export default async function DashboardPage({
       key={workspaceId ?? 'all'}
       stats={{ openTasks, activeProjects, overdueItems, contactCount }}
       upcomingTasks={upcomingTasks}
-      upcomingEvents={upcomingEvents}
       recentActivity={recentActivity}
       workspaceBreakdown={workspaceBreakdown}
       featuredProjects={featuredProjects}

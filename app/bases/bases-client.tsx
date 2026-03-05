@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Database, Table2, Trash2, X, Share2, Check } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
 import { type UserBase } from '@/types'
@@ -22,6 +23,11 @@ const WORKSPACE_LABELS: Record<string, string> = {
 const inputCls =
   'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]'
 const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+const selectCls =
+  'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none'
+
+interface AreaOption { id: string; name: string }
+interface ProjectOption { id: string; name: string }
 
 function CreateBaseDialog({
   workspaceId,
@@ -30,11 +36,26 @@ function CreateBaseDialog({
 }: {
   workspaceId: string
   onClose: () => void
-  onCreated: (base: UserBase) => void
+  onCreated: (base: UserBase & { defaultTableId?: string }) => void
 }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [areaId, setAreaId] = useState('')
+  const [projectId, setProjectId] = useState('')
+  const [areas, setAreas] = useState<AreaOption[]>([])
+  const [projectOptions, setProjectOptions] = useState<ProjectOption[]>([])
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/areas?workspace=${workspaceId}`)
+      .then((r) => r.json())
+      .then((d) => setAreas(Array.isArray(d) ? d : []))
+      .catch(() => {})
+    fetch(`/api/projects?workspace=${workspaceId}`)
+      .then((r) => r.json())
+      .then((d) => setProjectOptions(Array.isArray(d) ? d : []))
+      .catch(() => {})
+  }, [workspaceId])
 
   async function handleSave() {
     if (!name.trim()) return
@@ -43,10 +64,16 @@ function CreateBaseDialog({
       const res = await fetch('/api/tables/bases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description, workspace: workspaceId }),
+        body: JSON.stringify({
+          name,
+          description,
+          workspace: workspaceId,
+          areaId: areaId || null,
+          projectId: projectId || null,
+        }),
       })
       if (!res.ok) throw new Error('Failed to create base')
-      const base = await res.json()
+      const base = await res.json() as UserBase & { defaultTableId?: string }
       onCreated(base)
       toast.success('Base created')
       onClose()
@@ -74,7 +101,7 @@ function CreateBaseDialog({
               className={inputCls}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Cast Tracker"
+              placeholder="e.g. Shoot Breakdown"
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleSave()}
             />
@@ -88,6 +115,45 @@ function CreateBaseDialog({
               placeholder="Optional description"
             />
           </div>
+
+          {/* Link to Area or Project (mutually exclusive) */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Link to Area</label>
+              <select
+                className={selectCls}
+                value={areaId}
+                onChange={(e) => { setAreaId(e.target.value); if (e.target.value) setProjectId('') }}
+              >
+                <option value="">— none —</option>
+                {areas.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Link to Project</label>
+              <select
+                className={selectCls}
+                value={projectId}
+                onChange={(e) => { setProjectId(e.target.value); if (e.target.value) setAreaId('') }}
+              >
+                <option value="">— none —</option>
+                {projectOptions.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {(areaId || projectId) && (
+            <p className="text-xs text-[#6B7280] -mt-1">
+              This base will appear in the{' '}
+              {areaId
+                ? `"${areas.find((a) => a.id === areaId)?.name ?? ''}" area`
+                : `"${projectOptions.find((p) => p.id === projectId)?.name ?? ''}" project`}{' '}
+              Bases tab.
+            </p>
+          )}
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
@@ -112,6 +178,7 @@ function CreateBaseDialog({
 
 export default function BasesClient() {
   const { workspaceId } = useWorkspace()
+  const router = useRouter()
   const [bases, setBases] = useState<UserBase[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
@@ -139,7 +206,6 @@ export default function BasesClient() {
   }
 
   async function handleShare(base: UserBase) {
-    // If already has a share token + isPublic, copy the URL
     if (base.shareToken && base.isPublic) {
       const url = `${window.location.origin}/bases/share/${base.shareToken}`
       await navigator.clipboard.writeText(url)
@@ -148,7 +214,6 @@ export default function BasesClient() {
       setTimeout(() => setCopiedId(null), 2000)
       return
     }
-    // Otherwise generate token + enable sharing
     const res = await fetch(`/api/tables/bases/${base.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -162,6 +227,14 @@ export default function BasesClient() {
       setCopiedId(base.id)
       toast.success('Sharing enabled — link copied!')
       setTimeout(() => setCopiedId(null), 2000)
+    }
+  }
+
+  function handleCreated(base: UserBase & { defaultTableId?: string }) {
+    setBases((prev) => [...prev, base])
+    // Go straight to the table editor if a default table was auto-created
+    if (base.defaultTableId) {
+      router.push(`/bases/${base.id}/${base.defaultTableId}`)
     }
   }
 
@@ -265,7 +338,7 @@ export default function BasesClient() {
         <CreateBaseDialog
           workspaceId={wsKey}
           onClose={() => setShowCreate(false)}
-          onCreated={(base) => setBases((prev) => [...prev, base])}
+          onCreated={handleCreated}
         />
       )}
     </div>

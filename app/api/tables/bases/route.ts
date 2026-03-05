@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { userBases } from '@/lib/db/schema'
+import { userBases, userTables } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
 
@@ -52,7 +52,14 @@ export async function POST(req: NextRequest) {
         projectId: projectId ?? null,
       })
       .returning()
-    return NextResponse.json(base, { status: 201 })
+
+    // Auto-create a default table so users land directly in the editor
+    const [defaultTable] = await db
+      .insert(userTables)
+      .values({ baseId: base.id, name: base.name, description: null })
+      .returning()
+
+    return NextResponse.json({ ...base, defaultTableId: defaultTable.id }, { status: 201 })
   } catch (error) {
     console.error('[POST /api/tables/bases]', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

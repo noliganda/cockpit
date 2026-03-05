@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Table2, Trash2, X, ArrowLeft, FileText } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
 
@@ -122,6 +123,7 @@ function CreateTableDialog({
 
 export default function BaseDetailClient({ baseId }: { baseId: string }) {
   const { workspaceId } = useWorkspace()
+  const router = useRouter()
   const [base, setBase] = useState<UserBase | null>(null)
   const [tables, setTables] = useState<UserTable[]>([])
   const [loading, setLoading] = useState(true)
@@ -136,11 +138,16 @@ export default function BaseDetailClient({ baseId }: { baseId: string }) {
       .then((r) => r.json())
       .then((data) => {
         setBase(data)
-        setTables(data.tables ?? [])
+        const tableList: UserTable[] = data.tables ?? []
+        setTables(tableList)
         setLoading(false)
+        // Auto-redirect to the editor when there's exactly one table
+        if (tableList.length === 1) {
+          router.replace(`/bases/${baseId}/${tableList[0].id}`)
+        }
       })
       .catch(() => setLoading(false))
-  }, [baseId])
+  }, [baseId, router])
 
   async function handleDeleteTable(id: string, name: string) {
     if (!confirm(`Delete table "${name}" and all its data?`)) return

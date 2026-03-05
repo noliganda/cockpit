@@ -642,9 +642,22 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                 <tr>
                   <td
                     colSpan={columns.length + 2}
-                    className="py-12 text-center text-[#4B5563]"
+                    className="py-12 text-center"
                   >
-                    {globalFilter ? 'No rows match your search' : 'No rows yet — click + Add Row below'}
+                    {globalFilter ? (
+                      <span className="text-[#4B5563]">No rows match your search</span>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3">
+                        <span className="text-sm text-[#6B7280]">No rows yet</span>
+                        <button
+                          onClick={addRow}
+                          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+                        >
+                          <Plus size={14} />
+                          Add first row
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -675,10 +688,10 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
 
       {/* ── Add Row footer ──────────────────────────────────────────────────── */}
       {columns.length > 0 && (
-        <div className="border-t border-[rgba(255,255,255,0.06)] px-5 py-2.5">
+        <div className="sticky bottom-0 border-t border-[rgba(255,255,255,0.06)] bg-[#0F0F0F] px-4 py-2">
           <button
             onClick={addRow}
-            className="flex items-center gap-2 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-[6px] text-xs text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-[#1A1A1A] transition-colors"
           >
             <Plus size={13} />
             Add Row

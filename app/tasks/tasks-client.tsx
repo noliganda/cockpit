@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import { Plus, Search, Zap, Star, Download, Trash2, X, Check, ChevronDown } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TaskDialog } from '@/components/task-dialog'
+import { CustomCheckbox } from '@/components/custom-checkbox'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { useRouter } from 'next/navigation'
 
@@ -503,11 +504,9 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
           <thead>
             <tr className="border-b border-[rgba(255,255,255,0.06)]">
               <th className="px-3 py-3 w-8">
-                <input
-                  type="checkbox"
+                <CustomCheckbox
                   checked={allFilteredSelected}
                   onChange={toggleSelectAll}
-                  className="w-3.5 h-3.5 cursor-pointer accent-white"
                 />
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
@@ -531,12 +530,9 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
                 )}
               >
                 <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                  <input
-                    type="checkbox"
+                  <CustomCheckbox
                     checked={selectedIds.has(task.id)}
-                    onChange={() => {}}
                     onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
-                    className="w-3.5 h-3.5 cursor-pointer accent-white"
                   />
                 </td>
                 <td className="px-4 py-2.5">
@@ -595,12 +591,9 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
           >
             <div className="flex items-start gap-2 mb-2">
               <div className="pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
-                <input
-                  type="checkbox"
+                <CustomCheckbox
                   checked={selectedIds.has(task.id)}
-                  onChange={() => {}}
                   onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
-                  className="w-3.5 h-3.5 cursor-pointer accent-white"
                 />
               </div>
               <p

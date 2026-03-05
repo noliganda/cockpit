@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, CheckSquare, FileText, Database, Users, FolderOpen, Zap, Star, Plus, Trash2, Check, ExternalLink, Hash } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
-import { type Project, type Task, type Area, type Note, type Milestone, type Bookmark, type ProjectContact, type Contact } from '@/types'
+import { type Project, type Task, type Area, type Note, type Milestone, type Bookmark, type ProjectContact, type Contact, type UserBase } from '@/types'
 import dynamic from 'next/dynamic'
 
 const BlockEditor = dynamic(() => import('@/components/block-editor').then(m => m.BlockEditor), { ssr: false })
@@ -18,6 +18,7 @@ interface ProjectDetailClientProps {
   initialBookmarks: Bookmark[]
   initialProjectContacts: ProjectContact[]
   workspaceContacts: Contact[]
+  projectBases: UserBase[]
 }
 
 const TABS = [
@@ -50,7 +51,7 @@ const BOOKMARK_PRESETS = [
 
 export function ProjectDetailClient({
   project, projectTasks, projectNotes, area, progress,
-  initialMilestones, initialBookmarks, initialProjectContacts, workspaceContacts
+  initialMilestones, initialBookmarks, initialProjectContacts, workspaceContacts, projectBases
 }: ProjectDetailClientProps) {
   const [activeTab, setActiveTab] = useState<TabId>('overview')
 
@@ -599,9 +600,28 @@ export function ProjectDetailClient({
       )}
 
       {activeTab === 'bases' && (
-        <div className="text-center py-16">
-          <Database className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
-          <p className="text-sm text-[#4B5563]">Linked bases coming soon.</p>
+        <div className="space-y-3">
+          {projectBases.length === 0 ? (
+            <div className="text-center py-16">
+              <Database className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
+              <p className="text-sm text-[#4B5563]">No bases linked to this project yet.</p>
+              <Link href="/bases" className="mt-2 inline-block text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+                Go to Bases to create one and link it here →
+              </Link>
+            </div>
+          ) : projectBases.map(base => (
+            <Link key={base.id} href={`/bases/${base.id}`}
+              className="flex items-center gap-3 p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group">
+              <Database className="w-4 h-4 text-[#4B5563] shrink-0 group-hover:text-[#6B7280] transition-colors" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[#F5F5F5] truncate">{base.name}</p>
+                {base.description && <p className="text-xs text-[#6B7280] truncate">{base.description}</p>}
+              </div>
+              {base.isPublic && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(34,197,94,0.12)] text-[#22C55E] shrink-0">Shared</span>
+              )}
+            </Link>
+          ))}
         </div>
       )}
     </div>

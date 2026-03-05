@@ -1,10 +1,10 @@
 import { redirect, notFound } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { projects, tasks, notes, areas, milestones, bookmarks, projectContacts, contacts } from '@/lib/db/schema'
+import { projects, tasks, notes, areas, milestones, bookmarks, projectContacts, contacts, userBases } from '@/lib/db/schema'
 import { eq, asc } from 'drizzle-orm'
 import { ProjectDetailClient } from './project-detail-client'
-import type { Project, Task, Note, Area, Milestone, Bookmark, ProjectContact, Contact } from '@/types'
+import type { Project, Task, Note, Area, Milestone, Bookmark, ProjectContact, Contact, UserBase } from '@/types'
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
@@ -14,7 +14,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
   if (!project) notFound()
 
-  const [projectTasks, projectNotes, projectMilestones, projectBookmarks, projectContactRows, workspaceContactRows] = await Promise.all([
+  const [projectTasks, projectNotes, projectMilestones, projectBookmarks, projectContactRows, workspaceContactRows, projectBasesRows] = await Promise.all([
     db.select().from(tasks).where(eq(tasks.projectId, id)),
     db.select().from(notes).where(eq(notes.projectId, id)),
     db.select().from(milestones).where(eq(milestones.projectId, id)).orderBy(asc(milestones.date)),
@@ -30,6 +30,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       .innerJoin(contacts, eq(projectContacts.contactId, contacts.id))
       .where(eq(projectContacts.projectId, id)),
     db.select().from(contacts).where(eq(contacts.workspaceId, project.workspaceId)),
+    db.select().from(userBases).where(eq(userBases.projectId, id)),
   ])
 
   let area: Area | null = null
@@ -53,6 +54,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       initialBookmarks={projectBookmarks as Bookmark[]}
       initialProjectContacts={projectContactRows as ProjectContact[]}
       workspaceContacts={workspaceContactRows as Contact[]}
+      projectBases={projectBasesRows as UserBase[]}
     />
   )
 }

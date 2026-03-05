@@ -200,5 +200,18 @@ export interface ProjectContact {
 }
 
 
+export interface UserBase {
+  id: string
+  name: string
+  description: string | null
+  workspace: string
+  areaId: string | null
+  projectId: string | null
+  shareToken: string | null
+  isPublic: boolean
+  createdAt: Date | string
+  updatedAt: Date | string
+}
+
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 export type PipelineStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'

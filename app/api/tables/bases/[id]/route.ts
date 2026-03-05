@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { userBases, userTables } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { getSession } from '@/lib/auth'
+import { randomBytes } from 'crypto'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,11 +29,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { id } = await params
     const body = await req.json()
-    const { name, description, workspace } = body
+    const { name, description, workspace, areaId, projectId, isPublic, generateShareToken } = body
+
+    // If enabling sharing and no token yet, generate one
+    let shareToken: string | undefined
+    if (generateShareToken) {
+      shareToken = randomBytes(16).toString('hex')
+    }
+
+    const updateData: Record<string, unknown> = { updatedAt: new Date() }
+    if (name !== undefined) updateData.name = name
+    if (description !== undefined) updateData.description = description
+    if (workspace !== undefined) updateData.workspace = workspace
+    if (areaId !== undefined) updateData.areaId = areaId
+    if (projectId !== undefined) updateData.projectId = projectId
+    if (isPublic !== undefined) updateData.isPublic = isPublic
+    if (shareToken) updateData.shareToken = shareToken
 
     const [base] = await db
       .update(userBases)
-      .set({ name, description, workspace, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(userBases.id, id))
       .returning()
 

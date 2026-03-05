@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, FileText } from 'lucide-react'
-import { type Area, type Project, type Task, type Note } from '@/types'
+import { ArrowLeft, FileText, Table2 } from 'lucide-react'
+import { type Area, type Project, type Task, type Note, type UserBase } from '@/types'
 import { cn } from '@/lib/utils'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -15,17 +15,18 @@ const STATUS_COLORS: Record<string, string> = {
 
 const TASK_STATUS_ORDER = ['In Progress', 'To Do', 'Backlog', 'Needs Review', 'Done', 'Cancelled']
 
-type Tab = 'overview' | 'projects' | 'tasks' | 'notes'
+type Tab = 'overview' | 'projects' | 'tasks' | 'notes' | 'bases'
 
 interface AreaDetailClientProps {
   area: Area
   projects: Project[]
   tasks: Task[]
   notes: Note[]
+  bases: UserBase[]
   workspaceId: string
 }
 
-export function AreaDetailClient({ area, projects, tasks, notes, workspaceId }: AreaDetailClientProps) {
+export function AreaDetailClient({ area, projects, tasks, notes, bases, workspaceId }: AreaDetailClientProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
 
   const spheres = area.spheresOfResponsibility ?? []
@@ -52,6 +53,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, workspaceId }: 
     { id: 'projects', label: `Projects (${projects.length})` },
     { id: 'tasks', label: `Tasks (${tasks.length})` },
     { id: 'notes', label: `Notes (${notes.length})` },
+    { id: 'bases', label: `Bases (${bases.length})` },
   ]
 
   return (
@@ -322,6 +324,37 @@ export function AreaDetailClient({ area, projects, tasks, notes, workspaceId }: 
                   ))}
                 </div>
               </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Bases Tab */}
+      {activeTab === 'bases' && (
+        <div className="space-y-3">
+          {bases.length === 0 ? (
+            <div className="py-16 text-center">
+              <p className="text-sm text-[#4B5563]">No bases in this area yet.</p>
+              <Link href={`/bases?workspace=${workspaceId}`}
+                className="mt-2 inline-block text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+                Go to Bases to create one and link it to this area →
+              </Link>
+            </div>
+          ) : (
+            bases.map(base => (
+              <Link key={base.id} href={`/bases/${base.id}`}
+                className="flex items-start gap-3 p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group">
+                <Table2 className="w-4 h-4 text-[#4B5563] shrink-0 mt-0.5 group-hover:text-[#6B7280] transition-colors" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[#F5F5F5] truncate mb-0.5">{base.name}</p>
+                  {base.description && (
+                    <p className="text-xs text-[#6B7280] line-clamp-1">{base.description}</p>
+                  )}
+                </div>
+                {base.isPublic && (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(34,197,94,0.12)] text-[#22C55E] shrink-0">Shared</span>
+                )}
+              </Link>
             ))
           )}
         </div>

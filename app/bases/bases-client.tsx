@@ -1,19 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Database, Table2, Trash2, X, ChevronRight } from 'lucide-react'
+import { Plus, Database, Table2, Trash2, X, Share2, Check } from 'lucide-react'
 import Link from 'next/link'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
-
-interface UserBase {
-  id: string
-  name: string
-  description: string | null
-  workspace: string
-  createdAt: string
-  updatedAt: string
-}
+import { type UserBase } from '@/types'
 
 const WORKSPACE_COLORS: Record<string, string> = {
   byron_film: '#D4A017',
@@ -123,6 +115,7 @@ export default function BasesClient() {
   const [bases, setBases] = useState<UserBase[]>([])
   const [loading, setLoading] = useState(true)
   const [showCreate, setShowCreate] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const wsKey = workspaceId ?? 'personal'
   const accentColor = WORKSPACE_COLORS[wsKey] ?? '#F97316'
@@ -143,6 +136,33 @@ export default function BasesClient() {
     await fetch(`/api/tables/bases/${id}`, { method: 'DELETE' })
     setBases((prev) => prev.filter((b) => b.id !== id))
     toast.success('Base deleted')
+  }
+
+  async function handleShare(base: UserBase) {
+    // If already has a share token + isPublic, copy the URL
+    if (base.shareToken && base.isPublic) {
+      const url = `${window.location.origin}/bases/share/${base.shareToken}`
+      await navigator.clipboard.writeText(url)
+      setCopiedId(base.id)
+      toast.success('Share link copied!')
+      setTimeout(() => setCopiedId(null), 2000)
+      return
+    }
+    // Otherwise generate token + enable sharing
+    const res = await fetch(`/api/tables/bases/${base.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isPublic: true, generateShareToken: true }),
+    })
+    if (res.ok) {
+      const updated = await res.json() as UserBase
+      setBases((prev) => prev.map((b) => b.id === base.id ? updated : b))
+      const url = `${window.location.origin}/bases/share/${updated.shareToken}`
+      await navigator.clipboard.writeText(url)
+      setCopiedId(base.id)
+      toast.success('Sharing enabled — link copied!')
+      setTimeout(() => setCopiedId(null), 2000)
+    }
   }
 
   return (
@@ -201,26 +221,41 @@ export default function BasesClient() {
                   >
                     <Table2 size={16} style={{ color: accentColor }} />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-[#F5F5F5] truncate">{base.name}</h3>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-sm font-semibold text-[#F5F5F5] truncate">{base.name}</h3>
+                      {base.isPublic && (
+                        <span className="text-xs px-1.5 py-0 rounded-full bg-[rgba(34,197,94,0.12)] text-[#22C55E] shrink-0">Shared</span>
+                      )}
+                    </div>
                     {base.description && (
                       <p className="text-xs text-[#6B7280] mt-0.5 truncate">{base.description}</p>
                     )}
-                    <div className="flex items-center gap-1 mt-2">
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                       <span className="text-xs text-[#4B5563]">
                         {WORKSPACE_LABELS[base.workspace] ?? base.workspace}
                       </span>
-                      <ChevronRight size={10} className="text-[#4B5563]" />
                     </div>
                   </div>
                 </div>
               </Link>
-              <button
-                onClick={() => handleDelete(base.id, base.name)}
-                className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-[#4B5563] hover:text-[#EF4444]"
-              >
-                <Trash2 size={13} />
-              </button>
+              {/* Action buttons */}
+              <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => { e.preventDefault(); void handleShare(base) }}
+                  className="w-6 h-6 flex items-center justify-center rounded text-[#4B5563] hover:text-[#2A9D8F] transition-colors"
+                  title={base.isPublic ? 'Copy share link' : 'Enable sharing'}
+                >
+                  {copiedId === base.id ? <Check size={12} className="text-[#22C55E]" /> : <Share2 size={12} />}
+                </button>
+                <button
+                  onClick={() => handleDelete(base.id, base.name)}
+                  className="w-6 h-6 flex items-center justify-center rounded text-[#4B5563] hover:text-[#EF4444] transition-colors"
+                  title="Delete base"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

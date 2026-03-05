@@ -337,9 +337,15 @@ export const userBases = pgTable('user_bases', {
   name: text('name').notNull(),
   description: text('description'),
   workspace: text('workspace_id').notNull().default('personal'), // 'byron_film' | 'korus' | 'personal'
+  areaId: uuid('area_id').references(() => areas.id, { onDelete: 'set null' }),
+  projectId: uuid('project_id').references(() => projects.id, { onDelete: 'set null' }),
+  shareToken: text('share_token').unique(),
+  isPublic: boolean('is_public').default(false).notNull(),
   ...timestamps,
 }, (t) => [
   index('user_bases_workspace_idx').on(t.workspace),
+  index('user_bases_area_idx').on(t.areaId),
+  index('user_bases_project_idx').on(t.projectId),
 ])
 
 export const userTables = pgTable('user_tables', {

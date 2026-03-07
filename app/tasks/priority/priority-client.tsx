@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { type ScoredProject, type ScoredTask } from '@/lib/priority-engine'
+import { GroupToggle, CollapsibleGroup, getSavedGrouping } from '@/components/group-toggle'
+import { groupTasksBy, type GroupingProperty } from '@/lib/task-grouping'
 
 // ─── Tier color palette (orange/gold/red accents per tier) ───────────────────
 const TIER_COLORS: Record<number, string> = {
@@ -159,9 +161,59 @@ function StatsBar({ stats }: StatsBarProps) {
   )
 }
 
+// ─── Task Card (shared for kanban + grouped views) ───────────────────────────
+function TaskCard({ task }: { task: ScoredTask }) {
+  return (
+    <div style={{
+      background: '#141414',
+      borderRadius: 10, padding: '12px 14px',
+      border: task.priority === 'P1'
+        ? '1px solid rgba(230,57,70,0.30)'
+        : '1px solid rgba(255,255,255,0.07)',
+      boxShadow: task.priority === 'P1' ? '0 0 12px rgba(230,57,70,0.08)' : 'none',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <TierBadge tier={task.projectTier} />
+        <span style={{ marginLeft: 'auto' }}>
+          <EffortImpactDot effort={task.effort} impact={task.impact} />
+        </span>
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F5', lineHeight: 1.35, marginBottom: 4 }}>
+        {QUADRANT_ICONS[task.quadrant]} {task.title}
+      </div>
+      <div style={{ fontSize: 11, color: '#4B5563', marginBottom: 8 }}>
+        {task.parentProject.name}
+      </div>
+      {task.flags.length > 0 && (
+        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+          {task.flags.map(f => <FlagChip key={f} flag={f} />)}
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <PriorityBadge priority={task.priority} />
+        {task.daysRemaining !== null && (
+          <span style={{
+            fontSize: 10, fontWeight: 600, fontFamily: 'monospace',
+            color: task.daysRemaining <= 0 ? '#E63946' : task.daysRemaining <= 3 ? '#F4A261' : '#4B5563',
+          }}>
+            {task.daysRemaining <= 0 ? 'OVERDUE' : `${task.daysRemaining}d`}
+          </span>
+        )}
+        <span style={{
+          fontSize: 9, padding: '2px 6px', borderRadius: 4,
+          background: task.status === 'in_progress' ? 'rgba(59,130,246,0.15)' : task.status === 'blocked' ? 'rgba(230,57,70,0.15)' : 'rgba(255,255,255,0.05)',
+          color: task.status === 'in_progress' ? '#60A5FA' : task.status === 'blocked' ? '#E63946' : '#6B7280',
+          fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3,
+        }}>
+          {task.status.replace('_', ' ')}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 // ─── Kanban View ─────────────────────────────────────────────────────────────
 function KanbanView({ tasks }: { tasks: ScoredTask[] }) {
-  // Group by priority label (Critical, Urgent, High, Medium, Queue)
   const cols = [
     { key: 'P1', label: 'Critical' },
     { key: 'P2', label: 'Urgent'   },
@@ -183,7 +235,6 @@ function KanbanView({ tasks }: { tasks: ScoredTask[] }) {
     <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8, minHeight: 420 }}>
       {cols.map(col => (
         <div key={col.key} style={{ minWidth: 250, maxWidth: 290, flex: '1 0 250px' }}>
-          {/* Column header */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             marginBottom: 10, padding: '7px 12px', borderRadius: 8,
@@ -203,55 +254,9 @@ function KanbanView({ tasks }: { tasks: ScoredTask[] }) {
               {grouped[col.key].length}
             </span>
           </div>
-
-          {/* Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {grouped[col.key].map(task => (
-              <div key={task.id} style={{
-                background: '#141414',
-                borderRadius: 10, padding: '12px 14px',
-                border: task.priority === 'P1'
-                  ? '1px solid rgba(230,57,70,0.30)'
-                  : '1px solid rgba(255,255,255,0.07)',
-                boxShadow: task.priority === 'P1' ? '0 0 12px rgba(230,57,70,0.08)' : 'none',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <TierBadge tier={task.projectTier} />
-                  <span style={{ marginLeft: 'auto' }}>
-                    <EffortImpactDot effort={task.effort} impact={task.impact} />
-                  </span>
-                </div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#F5F5F5', lineHeight: 1.35, marginBottom: 4 }}>
-                  {QUADRANT_ICONS[task.quadrant]} {task.title}
-                </div>
-                <div style={{ fontSize: 11, color: '#4B5563', marginBottom: 8 }}>
-                  {task.parentProject.name}
-                </div>
-                {task.flags.length > 0 && (
-                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
-                    {task.flags.map(f => <FlagChip key={f} flag={f} />)}
-                  </div>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <PriorityBadge priority={task.priority} />
-                  {task.daysRemaining !== null && (
-                    <span style={{
-                      fontSize: 10, fontWeight: 600, fontFamily: 'monospace',
-                      color: task.daysRemaining <= 0 ? '#E63946' : task.daysRemaining <= 3 ? '#F4A261' : '#4B5563',
-                    }}>
-                      {task.daysRemaining <= 0 ? 'OVERDUE' : `${task.daysRemaining}d`}
-                    </span>
-                  )}
-                  <span style={{
-                    fontSize: 9, padding: '2px 6px', borderRadius: 4,
-                    background: task.status === 'in_progress' ? 'rgba(59,130,246,0.15)' : task.status === 'blocked' ? 'rgba(230,57,70,0.15)' : 'rgba(255,255,255,0.05)',
-                    color: task.status === 'in_progress' ? '#60A5FA' : task.status === 'blocked' ? '#E63946' : '#6B7280',
-                    fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.3,
-                  }}>
-                    {task.status.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
+              <TaskCard key={task.id} task={task} />
             ))}
             {grouped[col.key].length === 0 && (
               <div style={{ padding: 20, textAlign: 'center', color: '#374151', fontSize: 12, fontStyle: 'italic' }}>
@@ -260,6 +265,35 @@ function KanbanView({ tasks }: { tasks: ScoredTask[] }) {
             )}
           </div>
         </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Grouped Task View (for kanban tab when grouping is active) ──────────────
+function GroupedTaskView({ tasks, grouping }: { tasks: ScoredTask[]; grouping: GroupingProperty }) {
+  const groups = useMemo(() => {
+    const keyFn = (t: ScoredTask) => {
+      switch (grouping) {
+        case 'project':  return t.parentProject.name
+        case 'status':   return t.status.replace('_', ' ')
+        case 'assignee': return 'All' // ScoredTask has no assignee field
+        default:         return 'All'
+      }
+    }
+    return groupTasksBy(tasks, keyFn)
+  }, [tasks, grouping])
+
+  return (
+    <div>
+      {groups.map(group => (
+        <CollapsibleGroup key={group.key} group={group}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingLeft: 8 }}>
+            {group.tasks.map(task => (
+              <TaskCard key={task.id} task={task} />
+            ))}
+          </div>
+        </CollapsibleGroup>
       ))}
     </div>
   )
@@ -387,8 +421,11 @@ function AllocationView({ stats }: { stats: { timeAllocation: { tier1Percent: nu
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+
 export function PriorityClient({ projects, tasks, stats }: PriorityClientProps) {
   const [activeView, setActiveView] = useState<'kanban' | 'projects' | 'allocation'>('kanban')
+  const [grouping, setGrouping] = useState<GroupingProperty>('none')
+  useEffect(() => { setGrouping(getSavedGrouping()) }, [])
 
   const views = [
     { key: 'kanban'     as const, label: 'Task Board'     },
@@ -409,19 +446,30 @@ export function PriorityClient({ projects, tasks, stats }: PriorityClientProps) 
           </p>
         </div>
 
-        {/* View tabs */}
-        <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3 }}>
-          {views.map(v => (
-            <button key={v.key} onClick={() => setActiveView(v.key)} style={{
-              padding: '6px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-              fontSize: 12, fontWeight: 600,
-              background: activeView === v.key ? '#1F1F1F' : 'transparent',
-              color: activeView === v.key ? '#F5F5F5' : '#4B5563',
-              boxShadow: activeView === v.key ? '0 1px 3px rgba(0,0,0,0.4)' : 'none',
-            }}>
-              {v.label}
-            </button>
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Group toggle */}
+          {activeView === 'kanban' && (
+            <GroupToggle
+              value={grouping}
+              onChange={setGrouping}
+              options={['project', 'status']}
+            />
+          )}
+
+          {/* View tabs */}
+          <div style={{ display: 'flex', gap: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 3 }}>
+            {views.map(v => (
+              <button key={v.key} onClick={() => setActiveView(v.key)} style={{
+                padding: '6px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                fontSize: 12, fontWeight: 600,
+                background: activeView === v.key ? '#1F1F1F' : 'transparent',
+                color: activeView === v.key ? '#F5F5F5' : '#4B5563',
+                boxShadow: activeView === v.key ? '0 1px 3px rgba(0,0,0,0.4)' : 'none',
+              }}>
+                {v.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -429,7 +477,11 @@ export function PriorityClient({ projects, tasks, stats }: PriorityClientProps) 
       <StatsBar stats={stats} />
 
       {/* Views */}
-      {activeView === 'kanban' && <KanbanView tasks={tasks} />}
+      {activeView === 'kanban' && (
+        grouping !== 'none'
+          ? <GroupedTaskView tasks={tasks} grouping={grouping} />
+          : <KanbanView tasks={tasks} />
+      )}
       {activeView === 'projects' && <ProjectHealthView projects={projects} />}
       {activeView === 'allocation' && (
         <div style={{ background: '#141414', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>

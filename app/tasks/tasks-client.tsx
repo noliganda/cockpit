@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Plus, Search, Zap, Star, Download, Trash2, X, Check, ChevronDown } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
@@ -7,6 +7,8 @@ import { TaskDialog } from '@/components/task-dialog'
 import { CustomCheckbox } from '@/components/custom-checkbox'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { useRouter } from 'next/navigation'
+import { GroupToggle, CollapsibleGroup, getSavedGrouping } from '@/components/group-toggle'
+import { groupTasksBy, type GroupingProperty } from '@/lib/task-grouping'
 
 interface UserOption {
   id: string
@@ -189,6 +191,13 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
   const [areaFilter, setAreaFilter] = useState<string | null>(null)
   const [orphanFilter, setOrphanFilter] = useState(false)
 
+  // Grouping
+  const [grouping, setGrouping] = useState<GroupingProperty>('none')
+  useEffect(() => { setGrouping(getSavedGrouping()) }, [])
+
+  const projectMap = useMemo(() => new Map(projects.map(p => [p.id, p.name])), [projects])
+  const areaMap = useMemo(() => new Map(areas.map(a => [a.id, a.name])), [areas])
+
   // Filter dropdown refs
   const projectFilterRef = useRef<HTMLButtonElement>(null)
   const areaFilterRef = useRef<HTMLButtonElement>(null)
@@ -228,6 +237,20 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
     })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks, search, statusFilter, urgentFilter, importantFilter, projectFilter, areaFilter, orphanFilter])
+
+  const groups = useMemo(() => {
+    if (grouping === 'none') return null
+    const keyFn = (t: Task) => {
+      switch (grouping) {
+        case 'project': return t.projectId ? (projectMap.get(t.projectId) ?? 'Unknown') : 'No Project'
+        case 'status':  return t.status
+        case 'assignee': return t.assignee ?? 'Unassigned'
+        case 'space':   return t.workspaceId
+        default:        return 'All'
+      }
+    }
+    return groupTasksBy(filtered, keyFn)
+  }, [filtered, grouping, projectMap])
 
   const selectedCount = selectedIds.size
   const allFilteredSelected = filtered.length > 0 && filtered.every(t => selectedIds.has(t.id))
@@ -351,6 +374,128 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
     const selectedTasks = tasks.filter(t => selectedIds.has(t.id))
     const allActive = selectedTasks.every(t => t[field])
     await batchUpdate({ [field]: !allActive })
+  }
+
+  // ─── Extracted row/card renderers (used by both grouped + ungrouped views) ──
+
+  function TaskRow({ task, idx }: { task: Task; idx: number }) {
+    return (
+      <tr
+        onClick={() => { setEditingTask(task); setShowDialog(true) }}
+        className={cn(
+          'border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)] cursor-pointer transition-colors',
+          selectedIds.has(task.id) && 'bg-[rgba(255,255,255,0.03)]'
+        )}
+      >
+        <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
+          <CustomCheckbox
+            checked={selectedIds.has(task.id)}
+            onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
+          />
+        </td>
+        <td className="px-4 py-2.5">
+          <span className="text-sm text-[#F5F5F5]">{task.title}</span>
+        </td>
+        <td className="px-4 py-2.5">
+          {task.projectId ? (
+            <button
+              onClick={e => { e.stopPropagation(); setProjectFilter(task.projectId ?? null) }}
+              className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(59,130,246,0.10)] text-[#60A5FA] hover:bg-[rgba(59,130,246,0.20)] transition-colors truncate max-w-[120px] block"
+              title={projects.find(p => p.id === task.projectId)?.name}
+            >
+              {projects.find(p => p.id === task.projectId)?.name ?? '…'}
+            </button>
+          ) : (
+            <span className="text-xs text-[#374151]">—</span>
+          )}
+        </td>
+        <td className="px-4 py-2.5">
+          {task.areaId ? (
+            <button
+              onClick={e => { e.stopPropagation(); setAreaFilter(task.areaId ?? null) }}
+              className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(139,92,246,0.10)] text-[#A78BFA] hover:bg-[rgba(139,92,246,0.20)] transition-colors truncate max-w-[120px] block"
+              title={areas.find(a => a.id === task.areaId)?.name}
+            >
+              {areas.find(a => a.id === task.areaId)?.name ?? '…'}
+            </button>
+          ) : (
+            <span className="text-xs text-[#374151]">—</span>
+          )}
+        </td>
+        <td className="px-2 py-2.5 text-center">
+          <button
+            onClick={e => toggleFlag(e, task, 'urgent')}
+            title="Toggle Urgent"
+            className={cn(
+              'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
+              task.urgent ? 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]' : 'text-[#4B5563] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)]'
+            )}
+          >
+            <Zap className="w-3.5 h-3.5" />
+          </button>
+        </td>
+        <td className="px-2 py-2.5 text-center">
+          <button
+            onClick={e => toggleFlag(e, task, 'important')}
+            title="Toggle Important"
+            className={cn(
+              'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
+              task.important ? 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]' : 'text-[#4B5563] hover:text-[#F59E0B] hover:bg-[rgba(245,158,11,0.08)]'
+            )}
+          >
+            <Star className="w-3.5 h-3.5" />
+          </button>
+        </td>
+        <td className="px-4 py-2.5">
+          <InlineStatus task={task} onUpdate={handleUpdate} />
+        </td>
+        <td className="px-4 py-2.5">
+          <InlineDueDate task={task} onUpdate={handleUpdate} />
+        </td>
+        <td className="px-4 py-2.5">
+          <InlineAssignee task={task} users={users} onUpdate={handleUpdate} />
+        </td>
+      </tr>
+    )
+  }
+
+  function TaskCard({ task, idx }: { task: Task; idx: number }) {
+    return (
+      <div
+        className={cn(
+          'p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]',
+          selectedIds.has(task.id) && 'border-[rgba(255,255,255,0.10)] bg-[#1A1A1A]'
+        )}
+      >
+        <div className="flex items-start gap-2 mb-2">
+          <div className="pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+            <CustomCheckbox
+              checked={selectedIds.has(task.id)}
+              onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
+            />
+          </div>
+          <p
+            className="text-sm font-medium text-[#F5F5F5] flex-1 cursor-pointer"
+            onClick={() => { setEditingTask(task); setShowDialog(true) }}
+          >
+            {task.title}
+          </p>
+          <div className="flex items-center gap-1 shrink-0">
+            <button onClick={e => toggleFlag(e, task, 'urgent')} className={cn('p-1 rounded transition-colors', task.urgent ? 'text-[#EF4444]' : 'text-[#4B5563]')}>
+              <Zap className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={e => toggleFlag(e, task, 'important')} className={cn('p-1 rounded transition-colors', task.important ? 'text-[#F59E0B]' : 'text-[#4B5563]')}>
+              <Star className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <InlineStatus task={task} onUpdate={handleUpdate} />
+          <InlineDueDate task={task} onUpdate={handleUpdate} />
+          {task.assignee && <span className="text-xs text-[#6B7280]">{task.assignee}</span>}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -492,6 +637,13 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
           >
             Unassigned
           </button>
+
+          {/* Grouping toggle */}
+          <GroupToggle
+            value={grouping}
+            onChange={setGrouping}
+            options={['project', 'status', 'assignee', 'space']}
+          />
         </div>
       </div>
 
@@ -580,155 +732,80 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
         </div>
       )}
 
-      {/* Desktop table */}
-      <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-[rgba(255,255,255,0.06)]">
-              <th className="px-3 py-3 w-8">
-                <CustomCheckbox
-                  checked={allFilteredSelected}
-                  onChange={toggleSelectAll}
-                />
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Project</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Area</th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
-              <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Assignee</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
-            ) : filtered.map((task, idx) => (
-              <tr
-                key={task.id}
-                onClick={() => { setEditingTask(task); setShowDialog(true) }}
-                className={cn(
-                  'border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)] cursor-pointer transition-colors',
-                  selectedIds.has(task.id) && 'bg-[rgba(255,255,255,0.03)]'
-                )}
-              >
-                <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
-                  <CustomCheckbox
-                    checked={selectedIds.has(task.id)}
-                    onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
-                  />
-                </td>
-                <td className="px-4 py-2.5">
-                  <span className="text-sm text-[#F5F5F5]">{task.title}</span>
-                </td>
-                <td className="px-4 py-2.5">
-                  {task.projectId ? (
-                    <button
-                      onClick={e => { e.stopPropagation(); setProjectFilter(task.projectId ?? null) }}
-                      className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(59,130,246,0.10)] text-[#60A5FA] hover:bg-[rgba(59,130,246,0.20)] transition-colors truncate max-w-[120px] block"
-                      title={projects.find(p => p.id === task.projectId)?.name}
-                    >
-                      {projects.find(p => p.id === task.projectId)?.name ?? '…'}
-                    </button>
-                  ) : (
-                    <span className="text-xs text-[#374151]">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-2.5">
-                  {task.areaId ? (
-                    <button
-                      onClick={e => { e.stopPropagation(); setAreaFilter(task.areaId ?? null) }}
-                      className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(139,92,246,0.10)] text-[#A78BFA] hover:bg-[rgba(139,92,246,0.20)] transition-colors truncate max-w-[120px] block"
-                      title={areas.find(a => a.id === task.areaId)?.name}
-                    >
-                      {areas.find(a => a.id === task.areaId)?.name ?? '…'}
-                    </button>
-                  ) : (
-                    <span className="text-xs text-[#374151]">—</span>
-                  )}
-                </td>
-                <td className="px-2 py-2.5 text-center">
-                  <button
-                    onClick={e => toggleFlag(e, task, 'urgent')}
-                    title="Toggle Urgent"
-                    className={cn(
-                      'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
-                      task.urgent ? 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]' : 'text-[#4B5563] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)]'
-                    )}
-                  >
-                    <Zap className="w-3.5 h-3.5" />
-                  </button>
-                </td>
-                <td className="px-2 py-2.5 text-center">
-                  <button
-                    onClick={e => toggleFlag(e, task, 'important')}
-                    title="Toggle Important"
-                    className={cn(
-                      'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
-                      task.important ? 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]' : 'text-[#4B5563] hover:text-[#F59E0B] hover:bg-[rgba(245,158,11,0.08)]'
-                    )}
-                  >
-                    <Star className="w-3.5 h-3.5" />
-                  </button>
-                </td>
-                <td className="px-4 py-2.5">
-                  <InlineStatus task={task} onUpdate={handleUpdate} />
-                </td>
-                <td className="px-4 py-2.5">
-                  <InlineDueDate task={task} onUpdate={handleUpdate} />
-                </td>
-                <td className="px-4 py-2.5">
-                  <InlineAssignee task={task} users={users} onUpdate={handleUpdate} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile card layout */}
-      <div className="md:hidden space-y-2">
-        {filtered.length === 0 ? (
-          <p className="text-center text-sm text-[#4B5563] py-12">No tasks found</p>
-        ) : filtered.map((task, idx) => (
-          <div
-            key={task.id}
-            className={cn(
-              'p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]',
-              selectedIds.has(task.id) && 'border-[rgba(255,255,255,0.10)] bg-[#1A1A1A]'
-            )}
-          >
-            <div className="flex items-start gap-2 mb-2">
-              <div className="pt-0.5 shrink-0" onClick={e => e.stopPropagation()}>
-                <CustomCheckbox
-                  checked={selectedIds.has(task.id)}
-                  onClick={e => toggleSelect(e as React.MouseEvent, idx, task.id)}
-                />
+      {/* Desktop table + Mobile cards — with optional grouping */}
+      {groups ? (
+        <>
+          {/* Grouped view */}
+          {groups.map(group => (
+            <CollapsibleGroup key={group.key} group={group}>
+              {/* Desktop */}
+              <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden mb-2">
+                <table className="w-full">
+                  <tbody>
+                    {group.tasks.map((task, idx) => {
+                      const globalIdx = filtered.indexOf(task)
+                      return (
+                        <TaskRow key={task.id} task={task} idx={globalIdx} />
+                      )
+                    })}
+                  </tbody>
+                </table>
               </div>
-              <p
-                className="text-sm font-medium text-[#F5F5F5] flex-1 cursor-pointer"
-                onClick={() => { setEditingTask(task); setShowDialog(true) }}
-              >
-                {task.title}
-              </p>
-              <div className="flex items-center gap-1 shrink-0">
-                <button onClick={e => toggleFlag(e, task, 'urgent')} className={cn('p-1 rounded transition-colors', task.urgent ? 'text-[#EF4444]' : 'text-[#4B5563]')}>
-                  <Zap className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={e => toggleFlag(e, task, 'important')} className={cn('p-1 rounded transition-colors', task.important ? 'text-[#F59E0B]' : 'text-[#4B5563]')}>
-                  <Star className="w-3.5 h-3.5" />
-                </button>
+              {/* Mobile */}
+              <div className="md:hidden space-y-2">
+                {group.tasks.map((task, idx) => {
+                  const globalIdx = filtered.indexOf(task)
+                  return (
+                    <TaskCard key={task.id} task={task} idx={globalIdx} />
+                  )
+                })}
               </div>
-            </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <InlineStatus task={task} onUpdate={handleUpdate} />
-              <InlineDueDate task={task} onUpdate={handleUpdate} />
-              {task.assignee && <span className="text-xs text-[#6B7280]">{task.assignee}</span>}
-            </div>
+            </CollapsibleGroup>
+          ))}
+        </>
+      ) : (
+        <>
+          {/* Ungrouped desktop table */}
+          <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[rgba(255,255,255,0.06)]">
+                  <th className="px-3 py-3 w-8">
+                    <CustomCheckbox
+                      checked={allFilteredSelected}
+                      onChange={toggleSelectAll}
+                    />
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Project</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Area</th>
+                  <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
+                  <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Assignee</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
+                ) : filtered.map((task, idx) => (
+                  <TaskRow key={task.id} task={task} idx={idx} />
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
+
+          {/* Ungrouped mobile cards */}
+          <div className="md:hidden space-y-2">
+            {filtered.length === 0 ? (
+              <p className="text-center text-sm text-[#4B5563] py-12">No tasks found</p>
+            ) : filtered.map((task, idx) => (
+              <TaskCard key={task.id} task={task} idx={idx} />
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (

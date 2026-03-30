@@ -3,7 +3,7 @@ import { db } from '@/lib/db'
 import { tasks, taskEvents } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { logActivity } from '@/lib/activity'
-import { createTaskSession, createWakeupRequest } from '@/lib/agent-execution'
+import { createWakeupRequest } from '@/lib/agent-execution'
 import { getSession, getSessionData } from '@/lib/auth'
 import { z } from 'zod'
 import {
@@ -82,15 +82,6 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     const { id } = await params
     const [task] = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1)
     if (!task) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    // Trigger agent execution session when task assigned to an agent or started
-    if ((statusChanging && taskFields.status === 'In Progress') || assignmentChanging) {
-      if (task.assigneeType === 'agent' && task.assigneeId) {
-        // fire-and-forget session creation
-        createTaskSession(task.id, task.assigneeId, 'openclaw').catch(err => {
-          console.error('Failed to create agent task session', err)
-        })
-      }
-    }
     return NextResponse.json(task)
   } catch (error) {
     console.error('[GET /api/tasks/[id]]', error)

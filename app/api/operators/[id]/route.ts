@@ -29,7 +29,7 @@ export async function PATCH(
     }
 
     const data = parsed.data
-    const updates: Partial<typeof operators._inferModel> = {}
+    const updates: Partial<typeof operators.$inferSelect> = {}
     if (data.status) {
       updates.status = data.status
       if (data.status === 'active') updates.pausedAt = null
@@ -60,7 +60,7 @@ export async function PATCH(
       eventType: 'operator_updated',
       actorType: 'human',
       actorId: session.userId,
-      actorName: session.userName,
+      actorName: session.email,
     })
 
     return NextResponse.json(updated)

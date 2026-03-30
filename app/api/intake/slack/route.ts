@@ -26,7 +26,7 @@ const SLACK_SIGNING_SECRET = process.env.SLACK_SIGNING_SECRET ?? ''
  * Pre-classifies to determine object type, then checks thread context.
  */
 async function enrichWithThreadInference(payload: IntakePayload): Promise<IntakePayload> {
-  const classification = classifyIntake(payload)
+  const classification = await classifyIntake(payload)
   const { payload: enriched, inference } = await inferThreadParent(payload, classification.objectType)
   if (inference.attempted) {
     console.log(`[slack-thread-inference] ${inference.reason}`)

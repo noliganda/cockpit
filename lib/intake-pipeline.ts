@@ -12,7 +12,7 @@ import { tasks, projects, taskEvents } from './db/schema'
 import { logActivity } from './activity'
 import { classifyIntake } from './intake'
 import { validateParent, inheritFromParent } from './task-hierarchy'
-import type { IntakePayload, IntakeResult, IntakeEventType } from '@/types'
+import type { IntakePayload, IntakeResult, IntakeEventType, IntakeClassification } from '@/types'
 
 interface Actor {
   actorType: 'human' | 'agent' | 'system'
@@ -119,7 +119,7 @@ export async function processIntake(
 
 async function createTaskFromIntake(
   payload: IntakePayload,
-  classification: ReturnType<typeof classifyIntake>,
+  classification: IntakeClassification,
   actor: Actor,
 ): Promise<IntakeResult> {
   const isSubtask = !!payload.parentTaskId
@@ -219,7 +219,7 @@ async function createTaskFromIntake(
 
 async function createProjectFromIntake(
   payload: IntakePayload,
-  classification: ReturnType<typeof classifyIntake>,
+  classification: IntakeClassification,
   actor: Actor,
 ): Promise<IntakeResult> {
   const [project] = await db.insert(projects).values({

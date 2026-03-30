@@ -1,13 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { type Operator } from '@/types'
+import { type Operator, type OperatorStatus } from '@/types'
 
 interface OperatorRow extends Operator {
   budgetMonthlyCents: number
   spentMonthlyCents: number
   lastHeartbeatAt: string | null
-  status: string
+  status: OperatorStatus
 }
 
 export function AgentsClient() {
@@ -75,7 +75,7 @@ export function AgentsClient() {
                   <button
                     onClick={async () => {
                       const next = o.status === 'active' ? 'paused' : 'active'
-                      const body: any = { status: next }
+                      const body: { status: string; pauseReason?: string } = { status: next }
                       if (next === 'paused') body.pauseReason = 'Manual pause'
                       const res = await fetch(`/api/operators/${o.id}`, {
                         method: 'PATCH',

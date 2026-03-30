@@ -1,6 +1,6 @@
 import { db } from './db'
 import { agentTaskSessions, agentWakeupRequests, tasks } from './db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { logActivity } from './activity'
 
 /**
@@ -82,7 +82,7 @@ export async function createWakeupRequest(
     .where(
       and(
         eq(agentWakeupRequests.operatorId, operatorId),
-        eq(agentWakeupRequests.taskId, taskId),
+        taskId !== null ? eq(agentWakeupRequests.taskId, taskId) : isNull(agentWakeupRequests.taskId),
         eq(agentWakeupRequests.status, 'queued'),
       ),
     )
@@ -96,7 +96,7 @@ export async function createWakeupRequest(
     return
   }
   // Insert new wakeup request
-  const values: any = {
+  const values: typeof agentWakeupRequests.$inferInsert = {
     operatorId,
     taskId,
     source,
@@ -117,8 +117,8 @@ export async function createWakeupRequest(
       action: 'agent_wakeup_requested',
       entityType: 'agent_wakeup_request',
       entityId: request.id,
-      actorType: options?.requestedByActorType || 'system',
-      actorId: options?.requestedByActorId || null,
+      actorType: (options?.requestedByActorType as 'human' | 'agent' | 'system' | 'webhook') || 'system',
+      actorId: options?.requestedByActorId || undefined,
       eventFamily: 'agent',
       eventType: 'agent_wakeup_requested',
     })

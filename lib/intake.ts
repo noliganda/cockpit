@@ -168,23 +168,118 @@ export function extractTitle(rawText: string, explicitTitle?: string): string {
   return firstLine.slice(0, 117) + '...'
 }
 
+// ── AI-assisted classification prompt ─────────────────────────────────────────
+const AI_CLASSIFIER_SYSTEM_PROMPT = `
+You are an intake classifier for a business operations system.
+Classify the incoming message into the correct operational object type and workspace.
+
+Available object types:
+- task: a concrete piece of work to be done
+- project: a larger initiative with multiple tasks and a timeline
+- event: a meeting, call, appointment, or time-based item
+- document_request: a request to create a document, report, or written artifact
+- communication_action: an email, message, or outreach action
+- research_request: a request to research, analyse, or investigate something
+
+Available workspaces:
+- byron-film: video production, shoots, clients, content, Byron Film
+- korus: commercial fit-out, KORUS Group, construction, Singapore, Australia, France
+- personal: personal tasks, Olivier Marcolin, family, personal admin
+
+Return a JSON object only, no explanation:
+{
+  "objectType": "task|project|event|document_request|communication_action|research_request",
+  "workspaceId": "byron-film|korus|personal|null",
+  "title": "short clear title for the task",
+  "confidence": "high|medium|low",
+  "isDraft": false
+}
+
+Set isDraft to true only if the request is very ambiguous or unclear.
+Set workspaceId to null if you cannot determine the workspace.
+`;
+
+/**
+ * Call OpenAI to classify intake, returns parsed classification
+ */
+async function classifyWithAI(
+  rawText: string,
+  objectTypeHint?: IntakeObjectType,
+  workspaceIdHint?: string,
+): Promise<{ objectType: IntakeObjectType; workspaceId: string | null; title: string; confidence: IntakeConfidence; isDraft: boolean }> {
+  if (!process.env.OPENAI_API_KEY) throw new Error('Missing OpenAI API key');
+  const messages = [
+    { role: 'system', content: AI_CLASSIFIER_SYSTEM_PROMPT },
+    { role: 'user', content: JSON.stringify({ text: rawText, objectTypeHint, workspaceIdHint }) },
+  ];
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+    body: JSON.stringify({ model: 'gpt-4o-mini', messages, temperature: 0, max_tokens: 500 }),
+  });
+  if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Empty response from OpenAI');
+  return JSON.parse(content);
+}
 // ── Full classification pipeline ─────────────────────────────────────────────
 
-export function classifyIntake(payload: IntakePayload): IntakeClassification {
-  const workspaceId = resolveWorkspace(payload.workspaceId)
+export async function classifyIntake(payload: IntakePayload): Promise<IntakeClassification> {
+  // Resolve initial workspace hint
+  const resolvedWorkspace = resolveWorkspace(payload.workspaceId)
+  // Combine text inputs for keyword fallback
   const fullText = [payload.title, payload.rawText, payload.description].filter(Boolean).join(' ')
+
+  // 1. If explicit objectTypeHint, trust keyword classifier
+  if (payload.objectTypeHint) {
+    const { objectType, confidence } = classifyObjectType(fullText, payload.objectTypeHint)
+    const title = extractTitle(payload.rawText, payload.title)
+    const isDraft = confidence === 'low' && objectType !== 'task'
+    return {
+      objectType,
+      confidence,
+      title,
+      description: payload.description ?? (payload.rawText !== title ? payload.rawText : undefined),
+      workspaceId: resolvedWorkspace,
+      isDraft,
+      classifierUsed: 'keyword',
+    }
+  }
+
+  // 2. Try AI-assisted classification when API key is set
+  if (process.env.OPENAI_API_KEY) {
+    try {
+      const ai = await classifyWithAI(payload.rawText, payload.objectTypeHint, payload.workspaceId)
+      if (ai.confidence === 'high' || ai.confidence === 'medium') {
+        const title = ai.title
+        const workspaceId = ai.workspaceId ?? resolvedWorkspace
+        return {
+          objectType: ai.objectType,
+          confidence: ai.confidence,
+          title,
+          description: payload.description ?? (payload.rawText !== title ? payload.rawText : undefined),
+          workspaceId,
+          isDraft: ai.isDraft,
+          classifierUsed: 'ai',
+        }
+      }
+    } catch {
+      // Silent fallback to keyword classifier on any error
+    }
+  }
+
+  // 3. Keyword fallback
   const { objectType, confidence } = classifyObjectType(fullText, payload.objectTypeHint)
   const title = extractTitle(payload.rawText, payload.title)
-
-  // Low confidence on non-task types → draft to avoid silent misclassification
   const isDraft = confidence === 'low' && objectType !== 'task'
-
   return {
     objectType,
     confidence,
     title,
     description: payload.description ?? (payload.rawText !== title ? payload.rawText : undefined),
-    workspaceId,
+    workspaceId: resolvedWorkspace,
     isDraft,
+    classifierUsed: 'keyword',
   }
 }

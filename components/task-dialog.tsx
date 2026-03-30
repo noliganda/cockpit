@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Trash2, ExternalLink, Zap, Star, Plus, ListTree, ArrowUpRight } from 'lucide-react'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { cn } from '@/lib/utils'
@@ -53,6 +53,15 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   const [important, setImportant] = useState(task?.important ?? false)
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
   const [assignee, setAssignee] = useState(task?.assignee ?? '')
+  const [assigneeId, setAssigneeId] = useState<string>(task?.assigneeId ?? '')
+  const [assigneeName, setAssigneeName] = useState<string>(task?.assigneeName ?? '')
+  const [operatorsList, setOperatorsList] = useState<{ id: string; name: string; operatorType: string }[]>([])
+  useEffect(() => {
+    fetch('/api/operators')
+      .then(res => res.json())
+      .then((data: { id: string; name: string; operatorType: string }[]) => setOperatorsList(data))
+      .catch(() => {})
+  }, [])
   const [region, setRegion] = useState(task?.region ?? '')
   const [areaId, setAreaId] = useState(task?.areaId ?? '')
   const [projectId, setProjectId] = useState(task?.projectId ?? '')
@@ -113,6 +122,8 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
         important,
         dueDate: dueDate || undefined,
         assignee: assignee || undefined,
+        assigneeId: assigneeId || undefined,
+        assigneeName: assigneeName || undefined,
         tags,
         areaId: effectiveAreaId || undefined,
         projectId: projectId || undefined,
@@ -196,20 +207,33 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
           {/* Row 3: Assignee | Tags */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Assignee</label>
-              {users.length > 0 ? (
-                <select value={assignee} onChange={e => setAssignee(e.target.value)} className={selectCls}>
-                  <option value="">— Unassigned —</option>
-                  {users.map(u => (
-                    <option key={u.id} value={u.name ?? u.email}>{u.name ?? u.email}</option>
-                  ))}
-                </select>
-              ) : (
-                <input type="text" value={assignee} onChange={e => setAssignee(e.target.value)} placeholder="Name"
-                  className={inputCls} />
-              )}
-            </div>
+          <div>
+            <label className={labelCls}>Assignee</label>
+            <select
+              value={assigneeId}
+              onChange={e => {
+                const id = e.target.value
+                const op = operatorsList.find(o => o.id === id)
+                if (op) {
+                  setAssigneeName(op.name)
+                  setAssigneeId(op.id)
+                  setAssignee(op.name)
+                } else {
+                  setAssigneeName('')
+                  setAssigneeId('')
+                  setAssignee('')
+                }
+              }}
+              className={selectCls}
+            >
+              <option value="">— Unassigned —</option>
+              {operatorsList.map(op => (
+                <option key={op.id} value={op.id}>
+                  {op.operatorType === 'agent' ? '🤖 ' : '🧑 '}{op.name}
+                </option>
+              ))}
+            </select>
+          </div>
             <div>
               <label className={labelCls}>Tags</label>
               <div className="flex items-center gap-1.5">

@@ -458,6 +458,8 @@ export interface IntakeClassification {
   workspaceId: string
   /** Whether this should be created as a draft */
   isDraft: boolean
+  /** Which classifier was used */
+  classifierUsed: 'ai' | 'keyword'
 }
 
 export interface IntakeResult {

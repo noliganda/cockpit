@@ -28,7 +28,7 @@ export async function processIntake(
   actor: Actor,
 ): Promise<IntakeResult> {
   // ── Step 1: Classify ──────────────────────────────────────────────────
-  const classification = classifyIntake(payload)
+  const classification = await classifyIntake(payload)
 
   // ── Log intake_received ───────────────────────────────────────────────
   await logActivity({

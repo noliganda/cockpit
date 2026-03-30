@@ -150,7 +150,9 @@ function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOpti
         onClick={() => setOpen(v => !v)}
         className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors flex items-center gap-1"
       >
-        {task.assignee ?? '—'}
+        {task.assigneeName
+          ? `${task.assigneeType === 'agent' ? '🤖' : '🧑'} ${task.assigneeName}`
+          : '—'}
         <ChevronDown className="w-2.5 h-2.5 opacity-60" />
       </button>
       <PortalDropdown anchorRef={btnRef} isOpen={open} onClose={() => setOpen(false)} minWidth={160}>
@@ -523,7 +525,11 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
         <div className="flex items-center gap-3 flex-wrap">
           <InlineStatus task={task} onUpdate={handleUpdate} />
           <InlineDueDate task={task} onUpdate={handleUpdate} />
-          {task.assignee && <span className="text-xs text-[#6B7280]">{task.assignee}</span>}
+          {task.assigneeName ? (
+            <span className="text-xs text-[#6B7280]">
+              {task.assigneeType === 'agent' ? '🤖 ' : '🧑 '}{task.assigneeName}
+            </span>
+          ) : null}
         </div>
       </div>
     )

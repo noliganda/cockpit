@@ -33,6 +33,7 @@ const NAV_ITEMS = [
   { href: '/ai-metrics', icon: Zap, label: 'AI Metrics', indent: true },
   { href: '/metrics/productivity', icon: BarChart2, label: 'Productivity', indent: true },
   { href: '/settings', icon: Settings, label: 'Settings', indent: false },
+  { href: '/settings/agents', icon: Users, label: 'Agents', indent: true },
 ] as const
 
 interface SidebarInnerProps {

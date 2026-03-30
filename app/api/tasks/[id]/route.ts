@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { tasks, taskEvents } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { logActivity } from '@/lib/activity'
+import { createTaskSession, createWakeupRequest } from '@/lib/agent-execution'
 import { getSession, getSessionData } from '@/lib/auth'
 import { z } from 'zod'
 import {
@@ -81,6 +82,15 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
     const { id } = await params
     const [task] = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1)
     if (!task) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    // Trigger agent execution session when task assigned to an agent or started
+    if ((statusChanging && taskFields.status === 'In Progress') || assignmentChanging) {
+      if (task.assigneeType === 'agent' && task.assigneeId) {
+        // fire-and-forget session creation
+        createTaskSession(task.id, task.assigneeId, 'openclaw').catch(err => {
+          console.error('Failed to create agent task session', err)
+        })
+      }
+    }
     return NextResponse.json(task)
   } catch (error) {
     console.error('[GET /api/tasks/[id]]', error)
@@ -255,6 +265,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       await applyParentRollup(current.parentTaskId, id)
     }
 
+    // Trigger agent wakeup on assignment to agent
+    if (assignmentChanging && task.assigneeType === 'agent' && task.assigneeId) {
+      createWakeupRequest(
+        task.assigneeId,
+        task.id,
+        'task_assigned',
+        { task },
+        {
+          triggerDetail: `Assigned task ${task.title}`,
+          requestedByActorType: actorType,
+          requestedByActorId: actorId,
+          idempotencyKey: task.id,
+        }
+      ).catch(err => console.error('Failed to enqueue wakeup request', err))
+    }
     return NextResponse.json(task)
   } catch (error) {
     console.error('[PATCH /api/tasks/[id]]', error)
@@ -303,6 +328,7 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
     if (task.parentTaskId) {
       await applyParentRollup(task.parentTaskId, id)
     }
+
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -364,6 +364,8 @@ export const agentTaskSessions = pgTable('agent_task_sessions', {
   lastCheckpointAt: timestamp('last_checkpoint_at', { withTimezone: true }).defaultNow().notNull(),
   lastError: text('last_error'),
   metadata: jsonb('metadata').notNull().default({}),
+  /** Snapshot of full task context at session creation */
+  contextSnapshot: jsonb('context_snapshot'),
   ...timestamps,
 }, (t) => [
   unique('agent_task_sessions_operator_task_uniq').on(t.operatorId, t.taskId),
@@ -574,4 +576,28 @@ export const userRows = pgTable('user_rows', {
   ...timestamps,
 }, (t) => [
   index('user_rows_table_idx').on(t.tableId),
+])
+// ── Agent Wakeup Requests (task assignment triggers for agent execution) ─────
+export const agentWakeupRequests = pgTable('agent_wakeup_requests', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  operatorId: text('operator_id').notNull().references(() => operators.id),
+  taskId: uuid('task_id').references(() => tasks.id),
+  source: text('source').notNull(), // 'task_assigned' | 'heartbeat' | 'manual' | 'slack'
+  triggerDetail: text('trigger_detail'),
+  reason: text('reason'),
+  payload: jsonb('payload').notNull(),
+  status: text('status').notNull().default('queued'), // queued | claimed | running | completed | failed | cancelled
+  coalescedCount: integer('coalesced_count').notNull().default(0),
+  idempotencyKey: text('idempotency_key'),
+  requestedByActorType: text('requested_by_actor_type'), // 'human' | 'agent' | 'system'
+  requestedByActorId: text('requested_by_actor_id'),
+  runId: uuid('run_id').references(() => agentTaskSessions.id),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).defaultNow().notNull(),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }),
+  finishedAt: timestamp('finished_at', { withTimezone: true }),
+  error: text('error'),
+  ...timestamps,
+}, (t) => [
+  index('agent_wakeup_requests_operator_status_idx').on(t.operatorId, t.status),
+  index('agent_wakeup_requests_task_status_idx').on(t.taskId, t.status),
 ])

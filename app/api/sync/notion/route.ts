@@ -3,17 +3,23 @@ import { syncAllNotionDatabases } from '@/lib/notion-sync'
 import { getSession } from '@/lib/auth'
 
 export async function GET() {
-  try {
-    return NextResponse.json({ status: 'ready', message: 'POST to trigger sync' })
-  } catch (error) {
-    console.error('[GET /api/sync/notion]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+  return NextResponse.json({ 
+    status: 'ready', 
+    enabled: process.env.NOTION_SYNC_ENABLED !== 'false',
+    message: 'POST to trigger sync' 
+  })
 }
 
 export async function POST() {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  if (process.env.NOTION_SYNC_ENABLED === 'false') {
+    return NextResponse.json({ 
+      disabled: true, 
+      message: 'Notion sync is disabled. Set NOTION_SYNC_ENABLED=true in Vercel environment variables to re-enable.' 
+    })
+  }
 
   try {
     const results = await syncAllNotionDatabases()

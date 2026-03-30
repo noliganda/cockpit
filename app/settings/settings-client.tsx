@@ -117,8 +117,10 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
     setSyncing(true)
     try {
       const res = await fetch('/api/sync/notion', { method: 'POST' })
-      const data = await res.json() as { success?: boolean; results?: Array<{ workspaceId: string; created: number; updated: number }> }
-      if (data.success && data.results) {
+      const data = await res.json() as { success?: boolean; disabled?: boolean; message?: string; results?: Array<{ workspaceId: string; created: number; updated: number }> }
+      if (data.disabled) {
+        toast.info(data.message ?? 'Notion sync is currently disabled. Set NOTION_SYNC_ENABLED=true in Vercel env to re-enable.')
+      } else if (data.success && data.results) {
         const summary = data.results.map(r => `${r.workspaceId}: +${r.created} created, ${r.updated} updated`).join(' | ')
         toast.success(`Sync complete: ${summary}`)
       } else {
@@ -353,13 +355,10 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
 
         <Section icon={RefreshCw} title="Notion Sync">
           <p className="text-xs text-[#6B7280] mb-2">Pull tasks from Notion databases into Cockpit.</p>
-          <p className="text-xs text-[#F59E0B] mb-3">⚠️ Disabled — Cockpit is now the source of truth. The daily Notion cron has been removed. Use this button only for a one-time manual import if needed.</p>
-          <div className="flex items-center gap-3">
-            <Btn onClick={handleNotionSync} disabled={syncing}>
-              {syncing ? 'Syncing…' : 'Manual sync (one-time)'}
-            </Btn>
-            <span className="text-xs text-[#4B5563]">Auto-sync: disabled</span>
-          </div>
+          <p className="text-xs text-[#F59E0B] mb-3">⚠️ Currently disabled — <code className="text-xs bg-[#111] px-1 rounded">NOTION_SYNC_ENABLED=false</code> is set in Vercel. Clicking &quot;Sync now&quot; will show a message instead of syncing. To re-enable, update <code className="text-xs bg-[#111] px-1 rounded">NOTION_SYNC_ENABLED</code> to <code className="text-xs bg-[#111] px-1 rounded">true</code> in Vercel environment variables.</p>
+          <Btn onClick={handleNotionSync} disabled={syncing}>
+            {syncing ? 'Syncing…' : 'Sync now'}
+          </Btn>
         </Section>
 
         <Section icon={Database} title="Seed Defaults">

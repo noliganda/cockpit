@@ -52,6 +52,12 @@ export const operators = pgTable('operators', {
   workspaceScope: text('workspace_scope').array().default([]), // which workspaces this operator covers
   capabilities: text('capabilities').array().default([]),
   notes: text('notes'),
+  // Agent execution model fields
+  budgetMonthlyCents: integer('budget_monthly_cents').notNull().default(0),
+  spentMonthlyCents: integer('spent_monthly_cents').notNull().default(0),
+  lastHeartbeatAt: timestamp('last_heartbeat_at', { withTimezone: true }),
+  pausedAt: timestamp('paused_at', { withTimezone: true }),
+  pauseReason: text('pause_reason'),
   ...timestamps,
 })
 
@@ -346,6 +352,37 @@ export const agentActions = pgTable('agent_actions', {
   index('agent_actions_created_idx').on(t.createdAt),
   index('agent_actions_type_idx').on(t.actionType),
 ])
+
+// ── Agent Task Sessions (prevent double assignment of tasks) ───────────────
+export const agentTaskSessions = pgTable('agent_task_sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  operatorId: text('operator_id').notNull(),
+  taskId: uuid('task_id').notNull(),
+  sessionDisplayId: text('session_display_id'),
+  adapterType: text('adapter_type').notNull(),
+  status: text('status').notNull().default('active'),
+  lastCheckpointAt: timestamp('last_checkpoint_at', { withTimezone: true }).defaultNow().notNull(),
+  lastError: text('last_error'),
+  metadata: jsonb('metadata').notNull().default({}),
+  ...timestamps,
+}, (t) => [
+  unique('agent_task_sessions_operator_task_uniq').on(t.operatorId, t.taskId),
+])
+
+
+// ── Budget Policies (limits and warnings per scope) ──────────────────────
+export const budgetPolicies = pgTable('budget_policies', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  workspaceId: text('workspace_id').notNull(),
+  scopeType: text('scope_type').notNull(),
+  scopeId: text('scope_id').notNull(),
+  windowKind: text('window_kind').notNull().default('monthly'),
+  amountCents: integer('amount_cents').notNull().default(0),
+  warnPercent: integer('warn_percent').notNull().default(80),
+  hardStopEnabled: boolean('hard_stop_enabled').notNull().default(true),
+  isActive: boolean('is_active').notNull().default(true),
+  ...timestamps,
+})
 
 // ── Log Share Tokens (workspace-scoped guest access to /logs) ─────────────────
 

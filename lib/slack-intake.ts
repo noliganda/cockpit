@@ -11,6 +11,7 @@
  */
 
 import type { IntakePayload } from '@/types'
+import { extractWorkspaceFromText } from '@/lib/intake'
 
 // ── Slack workspace → Cockpit workspace mapping ─────────────────────────────
 
@@ -100,7 +101,10 @@ export function normalizeSlackEvent(payload: SlackEventPayload): IntakePayload |
   if (!event || !event.text) return null
 
   const channelId = event.channel
-  const workspaceHint = resolveWorkspaceFromChannel(channelId)
+  // Text-based workspace hint takes priority over channel name mapping
+  const workspaceHint =
+    extractWorkspaceFromText(event.text) ??
+    resolveWorkspaceFromChannel(channelId)
 
   return {
     sourceType: 'slack',
@@ -125,7 +129,9 @@ export function normalizeSlackEvent(payload: SlackEventPayload): IntakePayload |
  * Normalize a Slack slash command into IntakePayload.
  */
 export function normalizeSlackSlashCommand(payload: SlackSlashCommandPayload): IntakePayload {
-  const workspaceHint = resolveWorkspaceFromChannel(payload.channel_name)
+  const workspaceHint =
+    extractWorkspaceFromText(payload.text) ??
+    resolveWorkspaceFromChannel(payload.channel_name)
 
   return {
     sourceType: 'slack',
@@ -150,7 +156,10 @@ export function normalizeSlackSlashCommand(payload: SlackSlashCommandPayload): I
  * This is the simplest and most common path for agent-driven Slack intake.
  */
 export function normalizeSlackDirect(payload: SlackDirectPayload): IntakePayload {
-  const workspaceHint = payload.workspaceHint ?? resolveWorkspaceFromChannel(payload.channelName)
+  const workspaceHint =
+    payload.workspaceHint ??
+    extractWorkspaceFromText(payload.text) ??
+    resolveWorkspaceFromChannel(payload.channelName)
 
   return {
     sourceType: 'slack',

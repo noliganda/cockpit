@@ -42,6 +42,50 @@ export function resolveWorkspace(hint?: string): string {
   return WORKSPACE_ALIASES[normalized] ?? hint
 }
 
+/**
+ * Extract workspace hint from raw message text.
+ * Checks for explicit workspace prefixes/tags before channel-based fallback.
+ *
+ * Supported patterns:
+ *   - "korus: do this", "korus | do this", "korus - do this", "[korus] do this"
+ *   - "for korus: ...", "for byron film: ...", "for bf: ..."
+ *   - "#korus", "#bf", "#om"
+ *   - KORUS, BF, OM (uppercase shorthand)
+ */
+export function extractWorkspaceFromText(text: string): string | undefined {
+  const t = text.toLowerCase().trim()
+
+  // Bracket prefix: [korus], [bf], [om]
+  const bracketMatch = t.match(/^\[([a-z\s-]+)\]/)
+  if (bracketMatch) {
+    const resolved = WORKSPACE_ALIASES[bracketMatch[1].trim()]
+    if (resolved) return resolved
+  }
+
+  // Explicit "for X:" or "for X -" patterns
+  const forMatch = t.match(/^for\s+([a-z\s-]+?)[\s:|-]/)
+  if (forMatch) {
+    const resolved = WORKSPACE_ALIASES[forMatch[1].trim()]
+    if (resolved) return resolved
+  }
+
+  // Prefix patterns: "korus:", "bf -", "om |"
+  const prefixMatch = t.match(/^([a-z]+(?:\s[a-z]+)?)\s*[:|-]/)
+  if (prefixMatch) {
+    const resolved = WORKSPACE_ALIASES[prefixMatch[1].trim()]
+    if (resolved) return resolved
+  }
+
+  // Hashtag hint: #korus, #bf, #om
+  const tagMatch = t.match(/#([a-z]+(?:-[a-z]+)*)/)
+  if (tagMatch) {
+    const resolved = WORKSPACE_ALIASES[tagMatch[1].trim()]
+    if (resolved) return resolved
+  }
+
+  return undefined
+}
+
 // ── Keyword-based object type classification ─────────────────────────────────
 
 interface ClassificationRule {

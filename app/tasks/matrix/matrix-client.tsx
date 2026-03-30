@@ -2,17 +2,22 @@
 import { useState, useMemo } from 'react'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
-import { WORKSPACES, type WorkspaceId, type Task } from '@/types'
+import { WORKSPACES, TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project } from '@/types'
+import { Search } from 'lucide-react'
 
 interface MatrixClientProps {
   initialTasks: Task[]
   workspaceId: WorkspaceId
+  areas?: Area[]
+  projects?: Project[]
 }
+
+const DONE_STATUSES = ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid']
 
 const QUADRANTS = [
   {
     id: 'do-first',
-    label: '🚨 Do First',
+    label: 'Do First',
     subtitle: 'Urgent + Important',
     urgent: true,
     important: true,
@@ -22,7 +27,7 @@ const QUADRANTS = [
   },
   {
     id: 'schedule',
-    label: '⭐ Schedule',
+    label: 'Schedule',
     subtitle: 'Important, not urgent',
     urgent: false,
     important: true,
@@ -32,7 +37,7 @@ const QUADRANTS = [
   },
   {
     id: 'delegate',
-    label: '⚡ Delegate',
+    label: 'Delegate',
     subtitle: 'Urgent, not important',
     urgent: true,
     important: false,
@@ -42,7 +47,7 @@ const QUADRANTS = [
   },
   {
     id: 'eliminate',
-    label: '🗑 Eliminate',
+    label: 'Eliminate',
     subtitle: 'Neither urgent nor important',
     urgent: false,
     important: false,
@@ -61,9 +66,26 @@ function getQuadrantId(task: Task): string {
   return 'eliminate'
 }
 
-export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
+export function MatrixClient({ initialTasks, workspaceId, areas = [], projects = [] }: MatrixClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const workspace = WORKSPACES.find(w => w.id === workspaceId)!
+
+  // Filters
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'active' | 'all' | string>('active')
+  const [projectFilter, setProjectFilter] = useState<string | null>(null)
+  const [areaFilter, setAreaFilter] = useState<string | null>(null)
+
+  const filtered = useMemo(() => {
+    return tasks.filter(t => {
+      if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false
+      if (statusFilter === 'active' && DONE_STATUSES.includes(t.status)) return false
+      else if (statusFilter !== 'active' && statusFilter !== 'all' && t.status !== statusFilter) return false
+      if (projectFilter && t.projectId !== projectFilter) return false
+      if (areaFilter && t.areaId !== areaFilter) return false
+      return true
+    })
+  }, [tasks, search, statusFilter, projectFilter, areaFilter])
 
   const tasksByQuadrant = useMemo(() => {
     const map: Record<string, Task[]> = {
@@ -72,12 +94,12 @@ export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
       'delegate': [],
       'eliminate': [],
     }
-    tasks.forEach(t => {
+    filtered.forEach(t => {
       const qId = getQuadrantId(t)
       map[qId].push(t)
     })
     return map
-  }, [tasks])
+  }, [filtered])
 
   async function handleDragEnd(result: DropResult) {
     const { source, destination, draggableId } = result
@@ -88,7 +110,6 @@ export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
 
     const { urgent, important } = destQuadrant
 
-    // Optimistic update
     setTasks(prev => prev.map(t =>
       t.id === draggableId ? { ...t, urgent, important } : t
     ))
@@ -100,9 +121,17 @@ export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
     })
   }
 
+  const filterBtnCls = (active: boolean, color?: string) => cn(
+    'px-2.5 py-1 text-xs rounded-[6px] border transition-colors whitespace-nowrap',
+    active
+      ? color ?? 'bg-[#222222] border-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
+      : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]',
+  )
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
         <div>
           <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Eisenhower Matrix</h1>
           <p className="text-xs text-[#6B7280] mt-0.5">Drag tasks between quadrants to set urgency and importance</p>
@@ -113,6 +142,49 @@ export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-5">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] max-w-[200px]">
+          <Search className="w-3 h-3 text-[#6B7280]" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Filter..."
+            className="bg-transparent text-xs text-[#F5F5F5] placeholder-[#4B5563] outline-none flex-1 w-0"
+          />
+        </div>
+        {['active', 'all', ...TASK_STATUSES].map(s => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={filterBtnCls(statusFilter === s)}
+          >
+            {s === 'active' ? 'Active' : s === 'all' ? 'All' : s}
+          </button>
+        ))}
+        {projects.length > 0 && (
+          <select
+            value={projectFilter ?? ''}
+            onChange={e => setProjectFilter(e.target.value || null)}
+            className="px-2.5 py-1 text-xs rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] outline-none appearance-none"
+          >
+            <option value="">All projects</option>
+            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        )}
+        {areas.length > 0 && (
+          <select
+            value={areaFilter ?? ''}
+            onChange={e => setAreaFilter(e.target.value || null)}
+            className="px-2.5 py-1 text-xs rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] outline-none appearance-none"
+          >
+            <option value="">All areas</option>
+            {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+        )}
+      </div>
+
+      {/* Matrix grid */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {QUADRANTS.map(quadrant => {
@@ -123,7 +195,6 @@ export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
                 className="rounded-[8px] border overflow-hidden flex flex-col min-h-[280px]"
                 style={{ borderColor: quadrant.border, backgroundColor: quadrant.bg }}
               >
-                {/* Quadrant header */}
                 <div className="px-4 py-3 border-b" style={{ borderColor: quadrant.border }}>
                   <div className="flex items-center justify-between">
                     <div>
@@ -136,7 +207,6 @@ export function MatrixClient({ initialTasks, workspaceId }: MatrixClientProps) {
                   </div>
                 </div>
 
-                {/* Droppable area */}
                 <Droppable droppableId={quadrant.id}>
                   {(provided, snapshot) => (
                     <div

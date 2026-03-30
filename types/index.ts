@@ -28,6 +28,28 @@ export const PROJECT_STATUSES = ['Planning', 'Active', 'On Hold', 'Completed', '
 
 export const PIPELINE_STAGES = ['Lead', 'Qualified', 'Proposal', 'Signature', 'Won', 'Lost', 'On Hold'] as const
 
+// ── Operator types ───────────────────────────────────────────────────────────
+
+export type OperatorType = 'human' | 'agent'
+export type OperatorStatus = 'active' | 'paused' | 'retired'
+export type ExecutionMode = 'manual' | 'agent' | 'hybrid'
+export type SourceType = 'slack' | 'email' | 'form' | 'manual' | 'api' | 'imported'
+export type ObjectType = 'task' | 'project' | 'event' | 'document_request' | 'communication_action' | 'research_request'
+
+export interface Operator {
+  id: string
+  name: string
+  operatorType: OperatorType
+  role?: string | null
+  status: OperatorStatus
+  defaultSupervisorId?: string | null
+  workspaceScope?: string[] | null
+  capabilities?: string[] | null
+  notes?: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 export interface Task {
   id: string
   workspaceId: string
@@ -48,8 +70,83 @@ export interface Task {
   notionId?: string | null
   notionLastSynced?: Date | null
   region?: string | null
+
+  // OPS v5 ownership
+  assigneeType?: string | null
+  assigneeId?: string | null
+  assigneeName?: string | null
+  supervisorId?: string | null
+  supervisorName?: string | null
+  executionMode?: string | null
+
+  // OPS v5 provenance
+  sourceType?: string | null
+  sourceChannel?: string | null
+  sourceMessageId?: string | null
+  sourceUrl?: string | null
+  sourceCreatedAt?: Date | null
+
+  // OPS v5 lifecycle
+  objectType?: string | null
+  blockedReason?: string | null
+  startedAt?: Date | null
+  completedAt?: Date | null
+  lastActivityAt?: Date | null
+  nextReviewAt?: Date | null
+
+  // OPS v5 review
+  reviewRequired?: boolean | null
+  reviewedBy?: string | null
+  reviewedAt?: Date | null
+  completionSummary?: string | null
+
+  // OPS v5 artifacts
+  artifactUrl?: string | null
+  artifactType?: string | null
+  artifactStatus?: string | null
+
+  // OPS v5 hierarchy
+  parentTaskId?: string | null
+  subtaskOrder?: number | null
+
   createdAt: Date
   updatedAt: Date
+}
+
+// ── Task Event types ─────────────────────────────────────────────────────────
+
+export type TaskEventType =
+  | 'task_created'
+  | 'task_assigned'
+  | 'task_started'
+  | 'task_blocked'
+  | 'task_unblocked'
+  | 'task_submitted_for_review'
+  | 'task_approved'
+  | 'task_reopened'
+  | 'task_completed'
+  | 'task_cancelled'
+  | 'task_updated'
+  // Hierarchy events
+  | 'subtask_created'
+  | 'task_rollup_updated'
+  | 'parent_at_risk'
+  | 'parent_ready_for_review'
+
+export interface TaskEvent {
+  id: string
+  taskId: string
+  eventType: TaskEventType
+  fromStatus?: string | null
+  toStatus?: string | null
+  actorType?: string | null
+  actorId?: string | null
+  actorName?: string | null
+  summaryNote?: string | null
+  blockedReason?: string | null
+  artifactUrl?: string | null
+  metadata?: unknown
+  createdAt: Date
 }
 
 export interface Project {
@@ -302,3 +399,75 @@ export interface AgentAction {
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
 export type PipelineStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
+
+// ── Intake types ─────────────────────────────────────────────────────────────
+
+export type IntakeObjectType = 'task' | 'project' | 'event' | 'document_request' | 'communication_action' | 'research_request'
+
+export type IntakeEventType =
+  | 'intake_received'
+  | 'intake_classified'
+  | 'intake_task_created'
+  | 'intake_subtask_created'
+  | 'intake_project_created'
+  | 'intake_needs_review'
+
+export interface IntakePayload {
+  /** Source channel: slack, manual, email, form, api */
+  sourceType: SourceType
+  /** Raw text or summary of the request */
+  rawText: string
+  /** Workspace hint — slug like 'byron-film', 'korus', 'personal' */
+  workspaceId?: string
+  /** Explicit object type if caller already knows */
+  objectTypeHint?: IntakeObjectType
+  /** Explicit title if available (otherwise extracted from rawText) */
+  title?: string
+  /** Description beyond the title */
+  description?: string
+  /** Source channel name or ID */
+  sourceChannel?: string
+  /** Source message ID for traceability */
+  sourceMessageId?: string
+  /** Source URL for traceability */
+  sourceUrl?: string
+  /** Timestamp from the source system */
+  sourceCreatedAt?: string
+  /** Parent task ID — if set, create as subtask */
+  parentTaskId?: string
+  /** Priority hint */
+  priority?: string
+  /** Assignee hint */
+  assigneeId?: string
+  assigneeName?: string
+  /** Actor performing the intake */
+  actorType?: 'human' | 'agent' | 'system'
+  actorId?: string
+  actorName?: string
+  /** Additional context */
+  metadata?: Record<string, unknown>
+}
+
+export type IntakeConfidence = 'high' | 'medium' | 'low'
+
+export interface IntakeClassification {
+  objectType: IntakeObjectType
+  confidence: IntakeConfidence
+  title: string
+  description?: string
+  workspaceId: string
+  /** Whether this should be created as a draft */
+  isDraft: boolean
+}
+
+export interface IntakeResult {
+  success: boolean
+  objectType: IntakeObjectType
+  objectId: string
+  title: string
+  confidence: IntakeConfidence
+  isDraft: boolean
+  parentTaskId?: string | null
+  workspaceId: string
+  intakeEventType: IntakeEventType
+}

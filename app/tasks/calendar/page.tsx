@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { tasks, milestones, sprints, projects } from '@/lib/db/schema'
-import { eq, inArray } from 'drizzle-orm'
+import { eq, inArray, and, isNull } from 'drizzle-orm'
 import { CalendarClient } from '@/app/calendar/calendar-client'
 
 export default async function TasksCalendarPage({
@@ -17,7 +17,7 @@ export default async function TasksCalendarPage({
   const workspaceId = wsParam ?? 'byron-film'
 
   const [allTasks, allSprints, workspaceProjects] = await Promise.all([
-    db.select().from(tasks).where(eq(tasks.workspaceId, workspaceId)),
+    db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), isNull(tasks.parentTaskId))),
     db.select().from(sprints).where(eq(sprints.workspaceId, workspaceId)),
     db.select({ id: projects.id }).from(projects).where(eq(projects.workspaceId, workspaceId)),
   ])

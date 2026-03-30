@@ -1,14 +1,14 @@
 // Task Grouping Logic
 // Groups tasks by property, returns ordered groups with labels + counts.
 
-export type GroupingProperty = 'none' | 'project' | 'status' | 'assignee' | 'space'
+export type GroupingProperty = 'none' | 'project' | 'status' | 'assignee' | 'area'
 
 export const GROUPING_OPTIONS: { value: GroupingProperty; label: string }[] = [
   { value: 'none',     label: 'No grouping' },
   { value: 'project',  label: 'Project' },
   { value: 'status',   label: 'Status' },
   { value: 'assignee', label: 'Assignee' },
-  { value: 'space',    label: 'Space' },
+  { value: 'area',     label: 'Area' },
 ]
 
 export interface TaskGroup<T> {

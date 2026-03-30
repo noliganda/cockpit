@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Plus, Search, Zap, Star, Download, Trash2, X, Check, ChevronDown } from 'lucide-react'
+import { Plus, Search, Zap, Star, Download, Trash2, X, Check, ChevronDown, ListTree, Inbox } from 'lucide-react'
 import { cn, formatDate, isOverdue } from '@/lib/utils'
 import { TaskDialog } from '@/components/task-dialog'
 import { CustomCheckbox } from '@/components/custom-checkbox'
@@ -9,6 +9,8 @@ import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, ty
 import { useRouter } from 'next/navigation'
 import { GroupToggle, CollapsibleGroup, getSavedGrouping } from '@/components/group-toggle'
 import { groupTasksBy, type GroupingProperty } from '@/lib/task-grouping'
+import { ExpandChevron, RollupBadge, SubtaskExpansion, SubtaskCards, useSubtaskExpansion } from '@/components/subtask-row'
+import { IntakeDialog } from '@/components/intake-dialog'
 
 interface UserOption {
   id: string
@@ -204,6 +206,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
   const [areaFilterOpen, setAreaFilterOpen] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [parentForSubtask, setParentForSubtask] = useState<Task | null>(null)
+  const [showIntake, setShowIntake] = useState(false)
 
   // Batch selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -215,6 +219,13 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
   const batchAssigneeRef = useRef<HTMLButtonElement>(null)
 
   const router = useRouter()
+
+  // Hierarchy expand/collapse
+  const { expandedIds, toggle: toggleExpand, rollups, setRollup } = useSubtaskExpansion()
+  // Track which parent tasks have children (loaded lazily via rollup fetch)
+  const [parentFlags, setParentFlags] = useState<Map<string, boolean>>(new Map())
+  // Increment to force SubtaskExpansion to re-fetch children
+  const [subtaskRefreshKey, setSubtaskRefreshKey] = useState(0)
 
   const todayStr = new Date().toISOString().split('T')[0]
   const DONE_STATUSES = ['Done', 'Cancelled', 'Delivered', 'Won', 'Completed', 'Paid']
@@ -244,12 +255,12 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
         case 'project': return t.projectId ? (projectMap.get(t.projectId) ?? 'Unknown') : 'No Project'
         case 'status':  return t.status
         case 'assignee': return t.assignee ?? 'Unassigned'
-        case 'space':   return t.workspaceId
+        case 'area':    return t.areaId ? (areas.find(a => a.id === t.areaId)?.name ?? 'Unknown') : 'No Area'
         default:        return 'All'
       }
     }
     return groupTasksBy(filtered, keyFn)
-  }, [filtered, grouping, projectMap])
+  }, [filtered, grouping, projectMap, areas])
 
   const selectedCount = selectedIds.size
   const allFilteredSelected = filtered.length > 0 && filtered.every(t => selectedIds.has(t.id))
@@ -313,7 +324,18 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
     })
     if (res.ok) {
       const task = await res.json() as Task
-      setTasks(prev => [task, ...prev])
+      if (task.parentTaskId) {
+        // Subtask created — don't add to top-level list.
+        // Instead, refresh the parent's subtask expansion and ensure it's expanded.
+        setSubtaskRefreshKey(k => k + 1)
+        setParentFlags(prev => { const next = new Map(prev); next.set(task.parentTaskId!, true); return next })
+        if (!expandedIds.has(task.parentTaskId)) {
+          toggleExpand(task.parentTaskId)
+        }
+      } else {
+        // Top-level task — add to list
+        setTasks(prev => [task, ...prev])
+      }
       router.refresh()
     }
   }
@@ -393,7 +415,17 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
           />
         </td>
         <td className="px-4 py-2.5">
-          <span className="text-sm text-[#F5F5F5]">{task.title}</span>
+          <div className="flex items-center gap-1.5">
+            <ExpandChevron
+              expanded={expandedIds.has(task.id)}
+              hasChildren={parentFlags.get(task.id) ?? false}
+              onClick={() => toggleExpand(task.id)}
+            />
+            <span className="text-sm text-[#F5F5F5]">{task.title}</span>
+            {rollups.has(task.id) && (
+              <RollupBadge rollup={rollups.get(task.id)!} />
+            )}
+          </div>
         </td>
         <td className="px-4 py-2.5">
           {task.projectId ? (
@@ -497,6 +529,86 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
     )
   }
 
+  // ── Hierarchy: load rollups for visible tasks on mount ─────────────────
+  useEffect(() => {
+    // Fetch rollup for each visible parent task to know if they have children
+    const fetchRollups = async () => {
+      for (const task of filtered) {
+        if (parentFlags.has(task.id)) continue
+        try {
+          const res = await fetch(`/api/tasks/${task.id}/subtasks`)
+          if (res.ok) {
+            const data = await res.json() as { subtasks: Task[]; rollup: { totalChildren: number; completedChildren: number; blockedChildren: number; inProgressChildren: number; allChildrenResolved: boolean; hasBlockedChild: boolean; hasOverdueChild: boolean; parentSignal: string } }
+            if (data.rollup.totalChildren > 0) {
+              setParentFlags(prev => { const next = new Map(prev); next.set(task.id, true); return next })
+              setRollup(task.id, data.rollup)
+            } else {
+              setParentFlags(prev => { const next = new Map(prev); next.set(task.id, false); return next })
+            }
+          }
+        } catch { /* ignore */ }
+      }
+    }
+    if (filtered.length > 0 && filtered.length <= 200) {
+      void fetchRollups()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtered.length])
+
+  // ── Composite row: TaskRow + optional subtask expansion ─────────────
+  function TaskRowWithSubtasks({ task, idx }: { task: Task; idx: number }) {
+    return (
+      <>
+        <TaskRow task={task} idx={idx} />
+        <SubtaskExpansion
+          parentId={task.id}
+          expanded={expandedIds.has(task.id)}
+          refreshKey={subtaskRefreshKey}
+          onEdit={(t) => { setEditingTask(t); setParentForSubtask(task); setShowDialog(true) }}
+          onAddSubtask={() => { setEditingTask(null); setParentForSubtask(task); setShowDialog(true) }}
+        />
+      </>
+    )
+  }
+
+  function TaskCardWithSubtasks({ task, idx }: { task: Task; idx: number }) {
+    const isExpanded = expandedIds.has(task.id)
+    const hasChildren = parentFlags.get(task.id) ?? false
+    const childCount = rollups.get(task.id)?.totalChildren
+    return (
+      <div>
+        <TaskCard task={task} idx={idx} />
+        <button
+          onClick={() => toggleExpand(task.id)}
+          className={cn(
+            'flex items-center gap-1 text-[10px] mt-1 ml-2 transition-colors',
+            hasChildren ? 'text-[#6B7280] hover:text-[#A0A0A0]' : 'text-[#2A2A2A] hover:text-[#4B5563]',
+          )}
+        >
+          <ListTree className="w-3 h-3" />
+          {isExpanded ? 'Hide' : hasChildren ? `${childCount ?? '?'} subtasks` : 'Subtasks'}
+        </button>
+        {isExpanded && (
+          <>
+            <SubtaskCards
+              parentId={task.id}
+              expanded={isExpanded}
+              onEdit={(t) => { setEditingTask(t); setShowDialog(true) }}
+            />
+            {/* Mobile add-subtask for empty parents */}
+            <button
+              onClick={() => { setEditingTask(null); setParentForSubtask(task); setShowDialog(true) }}
+              className="flex items-center gap-1.5 text-xs text-[#4B5563] hover:text-[#60A5FA] transition-colors ml-7 mt-1 mb-1"
+            >
+              <Plus className="w-3 h-3" />
+              Add subtask
+            </button>
+          </>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -511,7 +623,14 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
             Export
           </button>
           <button
-            onClick={() => { setEditingTask(null); setShowDialog(true) }}
+            onClick={() => setShowIntake(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#60A5FA] rounded-[6px] hover:bg-[#222222] transition-colors"
+          >
+            <Inbox className="w-3.5 h-3.5" />
+            Intake
+          </button>
+          <button
+            onClick={() => { setEditingTask(null); setParentForSubtask(null); setShowDialog(true) }}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -641,7 +760,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
           <GroupToggle
             value={grouping}
             onChange={setGrouping}
-            options={['project', 'status', 'assignee', 'space']}
+            options={['project', 'status', 'assignee', 'area']}
           />
         </div>
       </div>
@@ -744,7 +863,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
                     {group.tasks.map((task) => {
                       const globalIdx = filtered.indexOf(task)
                       return (
-                        <TaskRow key={task.id} task={task} idx={globalIdx} />
+                        <TaskRowWithSubtasks key={task.id} task={task} idx={globalIdx} />
                       )
                     })}
                   </tbody>
@@ -755,7 +874,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
                 {group.tasks.map((task) => {
                   const globalIdx = filtered.indexOf(task)
                   return (
-                    <TaskCard key={task.id} task={task} idx={globalIdx} />
+                    <TaskCardWithSubtasks key={task.id} task={task} idx={globalIdx} />
                   )
                 })}
               </div>
@@ -789,7 +908,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
                 {filtered.length === 0 ? (
                   <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
                 ) : filtered.map((task, idx) => (
-                  <TaskRow key={task.id} task={task} idx={idx} />
+                  <TaskRowWithSubtasks key={task.id} task={task} idx={idx} />
                 ))}
               </tbody>
             </table>
@@ -800,7 +919,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
             {filtered.length === 0 ? (
               <p className="text-center text-sm text-[#4B5563] py-12">No tasks found</p>
             ) : filtered.map((task, idx) => (
-              <TaskCard key={task.id} task={task} idx={idx} />
+              <TaskCardWithSubtasks key={task.id} task={task} idx={idx} />
             ))}
           </div>
         </>
@@ -826,13 +945,28 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
         <TaskDialog
           task={editingTask}
           workspaceId={workspaceId}
-          onClose={() => { setShowDialog(false); setEditingTask(null) }}
+          parentTask={parentForSubtask}
+          onClose={() => { setShowDialog(false); setEditingTask(null); setParentForSubtask(null) }}
           onSave={editingTask ? (d) => handleUpdate(editingTask.id, d) : handleCreate}
           onDelete={editingTask ? () => handleDelete(editingTask.id) : undefined}
+          onCreateSubtask={(parent) => {
+            // Close current dialog, open fresh dialog in subtask creation mode
+            setEditingTask(null)
+            setParentForSubtask(parent)
+          }}
           areas={areas}
           projects={projects}
           sprints={sprints}
           users={users}
+        />
+      )}
+
+      {/* Intake dialog */}
+      {showIntake && (
+        <IntakeDialog
+          workspaceId={workspaceId}
+          onClose={() => setShowIntake(false)}
+          onComplete={() => router.refresh()}
         />
       )}
     </div>

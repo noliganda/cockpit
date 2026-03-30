@@ -9,8 +9,10 @@
 ## Read This First
 
 ### Current / active architecture docs
+- `docs/current/architecture/OPS-V5-TASK-HIERARCHY-DECISION-NOTE.md`
 - `docs/current/architecture/OPS-V5-INTAKE-ROUTING-AND-EXECUTION-MODEL.md`
 - `docs/current/architecture/OPS-V5-ROLLOUT-PLAN-CHARLIE-DEVON-CLAUDE.md`
+- `docs/current/architecture/OPS-V5-TASK-OWNERSHIP-AND-EXECUTION-PLAN.md`
 - `docs/INDEX.md`
 
 These are the current source-of-truth docs for Cockpit direction.
@@ -44,8 +46,21 @@ These are the current source-of-truth docs for Cockpit direction.
 
 ---
 
+## Current Build Direction
+
+The current task-system rebuild direction assumes:
+- Cockpit is the operational source of truth
+- `activity_log` is the canonical event spine
+- parent tasks are the main prioritisation and review objects
+- subtasks are execution objects beneath parents
+- schema may support generic nesting, but v1 product behavior should strongly bias to a practical parent/subtask model
+- task UI should support parent-first views with expand/collapse toggles for child tasks
+- the existing prioritisation workflow based on importance, urgency, effort, impact, and project context should be preserved
+
+---
+
 ## Guidance
-- Treat `docs/architecture/v5/` as the current build direction
+- Treat `docs/current/architecture/` as the current build direction
 - Treat `docs/versions/v4-ops-dashboard/` as historical reference, not current architecture
 - Treat `docs/archive/` as historical context only
 - Keep repo root focused on code/runtime files plus this index and `CLAUDE.md`

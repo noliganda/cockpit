@@ -212,6 +212,13 @@ export function CalendarClient({ initialTasks, initialMilestones, initialSprints
         <span className="text-sm font-medium text-[#F5F5F5] min-w-[180px] text-right hidden sm:block">{headerLabel}</span>
       </div>
 
+      {/* Hint bar */}
+      <div className="px-4 md:px-6 py-2 border-b border-[rgba(255,255,255,0.04)] text-[10px] text-[#4B5563] flex items-center gap-3">
+        <span>Only tasks with a due date appear on the calendar.</span>
+        <span className="hidden sm:inline">Click a day to create a dated task.</span>
+        <span className="ml-auto tabular-nums">{tasks.filter(t => t.dueDate).length} dated / {tasks.length} total</span>
+      </div>
+
       {/* Calendar body */}
       <div className="flex-1 overflow-y-auto">
         {view === 'month' ? (

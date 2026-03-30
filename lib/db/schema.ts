@@ -40,6 +40,21 @@ export const workspaces = pgTable('workspaces', {
   ...timestamps,
 })
 
+// ── Operators (first-class human + agent registry) ──────────────────────────
+
+export const operators = pgTable('operators', {
+  id: text('id').primaryKey(), // stable slug: 'oli', 'charlie', 'devon', etc.
+  name: text('name').notNull(),
+  operatorType: text('operator_type').notNull().default('human'), // human | agent
+  role: text('role'),
+  status: text('status').notNull().default('active'), // active | paused | retired
+  defaultSupervisorId: text('default_supervisor_id'),
+  workspaceScope: text('workspace_scope').array().default([]), // which workspaces this operator covers
+  capabilities: text('capabilities').array().default([]),
+  notes: text('notes'),
+  ...timestamps,
+})
+
 export const tasks = pgTable('tasks', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: text('workspace_id').notNull(),
@@ -52,7 +67,7 @@ export const tasks = pgTable('tasks', {
   urgent: boolean('urgent').default(false),
   important: boolean('important').default(false),
   dueDate: date('due_date'),
-  assignee: text('assignee'),
+  assignee: text('assignee'), // kept for backward compat — prefer assigneeId
   tags: text('tags').array().default([]),
   areaId: uuid('area_id'),
   projectId: uuid('project_id'),
@@ -60,11 +75,75 @@ export const tasks = pgTable('tasks', {
   notionId: text('notion_id'),
   notionLastSynced: timestamp('notion_last_synced', { withTimezone: true }),
   region: text('region'),
+
+  // ── OPS v5 ownership fields ───────────────────────────────────────────────
+  assigneeType: text('assignee_type'), // human | agent
+  assigneeId: text('assignee_id'), // FK to operators.id
+  assigneeName: text('assignee_name'), // denormalized display name
+  supervisorId: text('supervisor_id'), // FK to operators.id
+  supervisorName: text('supervisor_name'),
+  executionMode: text('execution_mode'), // manual | agent | hybrid
+
+  // ── OPS v5 provenance fields ──────────────────────────────────────────────
+  sourceType: text('source_type'), // slack | email | form | manual | api | imported
+  sourceChannel: text('source_channel'),
+  sourceMessageId: text('source_message_id'),
+  sourceUrl: text('source_url'),
+  sourceCreatedAt: timestamp('source_created_at', { withTimezone: true }),
+
+  // ── OPS v5 lifecycle fields ───────────────────────────────────────────────
+  objectType: text('object_type'), // task | project | event | document_request | communication_action | research_request
+  blockedReason: text('blocked_reason'),
+  startedAt: timestamp('started_at', { withTimezone: true }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  lastActivityAt: timestamp('last_activity_at', { withTimezone: true }),
+  nextReviewAt: timestamp('next_review_at', { withTimezone: true }),
+
+  // ── OPS v5 review fields ──────────────────────────────────────────────────
+  reviewRequired: boolean('review_required').default(false),
+  reviewedBy: text('reviewed_by'),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  completionSummary: text('completion_summary'),
+
+  // ── OPS v5 artifact fields ────────────────────────────────────────────────
+  artifactUrl: text('artifact_url'),
+  artifactType: text('artifact_type'),
+  artifactStatus: text('artifact_status'),
+
+  // ── OPS v5 hierarchy fields ─────────────────────────────────────────────
+  parentTaskId: uuid('parent_task_id'), // FK to tasks.id — null = top-level parent
+  subtaskOrder: integer('subtask_order').default(0), // ordering among siblings
+
   ...timestamps,
 }, (t) => [
   index('tasks_workspace_idx').on(t.workspaceId),
   index('tasks_status_idx').on(t.status),
   index('tasks_notion_idx').on(t.notionId),
+  index('tasks_assignee_id_idx').on(t.assigneeId),
+  index('tasks_object_type_idx').on(t.objectType),
+  index('tasks_parent_task_id_idx').on(t.parentTaskId),
+])
+
+// ── Task Events (structured lifecycle audit trail) ──────────────────────────
+
+export const taskEvents = pgTable('task_events', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  taskId: uuid('task_id').notNull(),
+  eventType: text('event_type').notNull(), // task_created | task_assigned | task_started | task_blocked | etc.
+  fromStatus: text('from_status'),
+  toStatus: text('to_status'),
+  actorType: text('actor_type'), // human | agent | system
+  actorId: text('actor_id'),
+  actorName: text('actor_name'),
+  summaryNote: text('summary_note'),
+  blockedReason: text('blocked_reason'),
+  artifactUrl: text('artifact_url'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [
+  index('task_events_task_idx').on(t.taskId),
+  index('task_events_type_idx').on(t.eventType),
+  index('task_events_created_idx').on(t.createdAt),
 ])
 
 export const projects = pgTable('projects', {

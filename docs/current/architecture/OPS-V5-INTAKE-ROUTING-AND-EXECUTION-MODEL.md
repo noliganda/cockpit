@@ -1,6 +1,6 @@
 # OPS v5 — Intake, Routing, and Execution Model
 
-**Date:** 2026-03-27  
+**Date:** 2026-03-30  
 **Status:** Active architecture direction  
 **Purpose:** Define the generic intake, routing, storage, execution, and measurement model for OPS v5 — Cockpit.
 
@@ -15,6 +15,7 @@ The real goal is to create a system where:
 - meaningful work is routed into the right operational structure,
 - artifacts are delivered to the right system,
 - work becomes measurable,
+- execution becomes more legible,
 - and the human can steer based on what actually got produced.
 
 The key principle is:
@@ -47,6 +48,7 @@ It should know:
 - where it lives,
 - who asked for it,
 - what project/area/contact/event it belongs to,
+- whether it is a parent task or a child execution item where relevant,
 - who is responsible,
 - and what happened.
 
@@ -100,6 +102,7 @@ For each request, the system should determine:
   - document/artifact
   - communication action
   - research/report
+- whether the work should become a **parent task** or a **subtask** of existing work
 - who is responsible
 - which backend/storage system it should live in
 - whether it should become measurable operational output
@@ -113,6 +116,9 @@ Other agents may be used internally, but not as the primary public-facing operat
 
 ### Why this matters
 This routing layer is what stops the system from becoming a pile of disconnected chats and files.
+It is also what stops complex work from becoming either:
+- one vague flat task with no execution structure,
+- or dozens of disconnected flat tasks with no strategic parent.
 
 ---
 
@@ -125,6 +131,8 @@ When a request becomes a meaningful operational object, Cockpit should record:
 - workspace/entity
 - object type
 - project/area/task/event/contact linkage
+- whether the task is a parent or a child
+- parent-child linkage where relevant
 - responsible operator
 - current status
 - output/artifact linkage
@@ -153,6 +161,12 @@ Cockpit should route work to the system that is best suited to execute or store 
 - captured/registered in Cockpit
 - may sync into Google Workspace / Microsoft To Do style systems where useful
 - but Cockpit should remain the operational record
+
+### Parent task / subtask implication
+When work is complex enough to need hierarchy:
+- the **parent task** should hold the main strategic context
+- the **subtasks** should hold the execution breakdown
+- subtasks should improve execution clarity without overwhelming the strategic boards
 
 ### Calendar events
 - requested in channels
@@ -191,35 +205,48 @@ Cockpit should be the **registry and orchestration layer**, not necessarily the 
 
 ---
 
-## Layer 5 — Review, Scheduling, and Reassignment
+## Layer 5 — Review, Prioritisation, Scheduling, and Reassignment
 This is where execution becomes real.
 
 ### Key behavioral truth
 For Oli, a task sitting on a list is much less likely to be completed than a task placed into time on a calendar.
 
+### Another key truth
+Cockpit already has a prioritisation workflow that takes into account:
+- importance
+- urgency
+- effort
+- impact
+- project context
+- blocking / critical-path logic
+
+That strategic signal should remain centered on **parent tasks**, not every child execution item.
+
 ### Operational implication
 The system should evolve toward:
 - task capture in Cockpit
+- parent-first review
+- child execution detail when needed
 - scheduling into calendar/time blocks
 - end-of-day review
 - incomplete tasks being reslotted to the next realistic slot
 
-### This matters more than generic task lists
-A list-only operating model is not aligned with how work actually gets done here.
-A calendar-native execution model is much closer to reality.
-
 ### Desired loop
 - request enters the system
 - task/project/event is registered in Cockpit
+- if needed, task is broken into subtasks
+- strategic priority stays with the parent task
 - execution is scheduled
 - day ends
 - incomplete work is reviewed and reassigned
 
-This is a stronger execution model than simply dumping tasks into a backlog forever.
+This is stronger than either:
+- dumping flat tasks into a backlog forever,
+- or flooding the board with execution crumbs pretending to be strategic priorities.
 
 ---
 
-# 4. Communications as a First-Class Phase A Capability
+# 4. Communications as a First-Class Capability
 
 The intake model must explicitly include **communications**.
 
@@ -270,7 +297,7 @@ And at a more operational level, areas/departments can become responsibility con
 - recruitment
 - project delivery
 
-Specialized agents can later support these areas, but that should happen on top of a stable intake-routing-measurement spine rather than before it.
+Specialized agents can later support these areas, but that should happen on top of a stable intake-routing-execution spine rather than before it.
 
 ---
 
@@ -325,6 +352,7 @@ Instead, it should log:
 - completed actions
 - delivered artifacts
 - measurable events
+- meaningful parent/child lifecycle changes where they affect execution visibility
 
 ## Better rule
 > **Log the outcome, not the chat.**
@@ -373,23 +401,31 @@ Build intake/routing for:
 - communications
 
 ## Phase B
+Add hierarchy-aware task handling:
+- parent/subtask registration
+- parent-first review logic
+- child execution structure
+- rollup visibility
+
+## Phase C
 Route outputs into the right execution/storage systems:
 - Drive / OneDrive / iCloud
 - calendars
 - CRM / contacts
 - knowledge systems
 
-## Phase C
+## Phase D
 Strengthen measurement and review loops:
 - logging
 - output linkage
 - workspace metrics
 - time-blocking / rescheduling
-
-## Phase D
-Add richer orchestration and specialist agents
+- hierarchy-aware review routines
 
 ## Phase E
+Add richer orchestration and specialist agents
+
+## Phase F
 Harden fallback and resilience
 
 This keeps the model achievable by stages rather than trying to build the final empire in one move.
@@ -400,7 +436,7 @@ This keeps the model achievable by stages rather than trying to build the final 
 
 OPS v5 — Cockpit should become:
 
-> **the place where requests from channels and forms become structured operational objects, get routed to the right execution/storage systems, and are made legible, linked, and measurable for human steering.**
+> **the place where requests from channels and forms become structured operational objects, get routed to the right execution/storage systems, and are made legible, linked, measurable, and execution-ready for human steering.**
 
 That is the most accurate generic definition of the model.
 
@@ -408,4 +444,4 @@ That is the most accurate generic definition of the model.
 
 # 12. One-Line Summary
 
-> **Channels are the intake. Cockpit is the operational truth. Specialist systems execute and store. The value of the system comes from routing real work into measurable outcomes.**
+> **Channels are the intake. Cockpit is the operational truth. Specialist systems execute and store. The value of the system comes from routing real work into measurable outcomes — with parent tasks holding strategy and subtasks holding execution where needed.**

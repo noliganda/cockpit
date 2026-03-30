@@ -7,8 +7,10 @@ This repo contains a mix of **current architecture**, **historical version docs*
 ## Read first
 
 ### Current architecture
+- `current/architecture/OPS-V5-TASK-HIERARCHY-DECISION-NOTE.md`
 - `current/architecture/OPS-V5-INTAKE-ROUTING-AND-EXECUTION-MODEL.md`
 - `current/architecture/OPS-V5-ROLLOUT-PLAN-CHARLIE-DEVON-CLAUDE.md`
+- `current/architecture/OPS-V5-TASK-OWNERSHIP-AND-EXECUTION-PLAN.md`
 
 These are the current source-of-truth docs for **Cockpit / OPS v5**.
 
@@ -38,3 +40,4 @@ Legacy phase-grouped materials retained for historical context.
 - Use `current/` for present-tense decisions
 - Use `versions/` for historical product understanding
 - Use `archive/` only when tracing older thinking
+- For the task-system rebuild, treat the task hierarchy decision note plus the task ownership/execution docs as the canonical source of truth

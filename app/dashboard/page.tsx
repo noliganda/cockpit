@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { tasks, activityLog, projects, contacts } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNull } from 'drizzle-orm'
 import { WORKSPACES } from '@/types'
 import { DashboardClient } from './dashboard-client'
 
@@ -29,8 +29,8 @@ export default async function DashboardPage({
   const wsFilter = workspaceId
   const [allTasks, allProjects, allContacts, recentActivity] = await Promise.all([
     wsFilter
-      ? db.select().from(tasks).where(eq(tasks.workspaceId, wsFilter))
-      : db.select().from(tasks),
+      ? db.select().from(tasks).where(and(eq(tasks.workspaceId, wsFilter), isNull(tasks.parentTaskId)))
+      : db.select().from(tasks).where(isNull(tasks.parentTaskId)),
     wsFilter
       ? db.select().from(projects).where(eq(projects.workspaceId, wsFilter))
       : db.select().from(projects),

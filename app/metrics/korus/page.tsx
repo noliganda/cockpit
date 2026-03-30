@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { activityLog, tasks, projects, contacts } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNull } from 'drizzle-orm'
 import { cookies } from 'next/headers'
 import { KorusMetricsClient } from './korus-metrics-client'
 import type { ActivityLogEntry } from '@/types'
@@ -45,7 +45,7 @@ export default async function KorusMetricsPage() {
     allKorusActivity30d,
     allKorusTasks30d,
   ] = await Promise.all([
-    db.select().from(tasks).where(eq(tasks.workspaceId, 'korus')),
+    db.select().from(tasks).where(and(eq(tasks.workspaceId, 'korus'), isNull(tasks.parentTaskId))),
     db.select().from(projects).where(eq(projects.workspaceId, 'korus')),
     db.select().from(contacts).where(eq(contacts.workspaceId, 'korus')),
     db.select({
@@ -72,7 +72,7 @@ export default async function KorusMetricsPage() {
     // All KORUS tasks created in last 30 days
     db.select({ createdAt: tasks.createdAt })
       .from(tasks)
-      .where(eq(tasks.workspaceId, 'korus')),
+      .where(and(eq(tasks.workspaceId, 'korus'), isNull(tasks.parentTaskId))),
   ])
 
   const recentActivity: ActivityLogEntry[] = recentActivityRows

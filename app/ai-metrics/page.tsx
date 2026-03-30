@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { activityLog, aiMetrics, tasks } from '@/lib/db/schema'
-import { desc, eq, gte, and, isNotNull } from 'drizzle-orm'
+import { desc, eq, gte, and, isNotNull, isNull } from 'drizzle-orm'
 import { AIMetricsClient } from './ai-metrics-client'
 
 export default async function AIMetricsPage() {
@@ -50,6 +50,7 @@ export default async function AIMetricsPage() {
       .where(and(
         eq(tasks.workspaceId, 'byron-film'),
         gte(tasks.createdAt, ninetyDaysAgo),
+        isNull(tasks.parentTaskId),
       ))
       .orderBy(desc(tasks.createdAt))
       .limit(200),

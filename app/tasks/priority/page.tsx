@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { tasks, projects } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { calculatePriorities, type ProjectData, type TaskData } from '@/lib/priority-engine'
 import { PriorityClient } from './priority-client'
 
@@ -27,7 +27,7 @@ export default async function PriorityPage({
     // Fetch all projects and tasks for this workspace
     const [allProjects, allTasks] = await Promise.all([
       db.select().from(projects).where(eq(projects.workspaceId, workspaceId)),
-      db.select().from(tasks).where(eq(tasks.workspaceId, workspaceId)),
+      db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), isNull(tasks.parentTaskId))),
     ])
 
     // Map database schema to priority engine types

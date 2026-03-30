@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { sprints, tasks } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNull } from 'drizzle-orm'
 import { SprintsClient } from './sprints-client'
 import type { Sprint, Task } from '@/types'
 
@@ -19,7 +19,7 @@ export default async function SprintsPage({
 
   const [allSprints, allTasks] = await Promise.all([
     db.select().from(sprints).where(eq(sprints.workspaceId, workspaceId)).orderBy(desc(sprints.createdAt)),
-    db.select().from(tasks).where(eq(tasks.workspaceId, workspaceId)),
+    db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), isNull(tasks.parentTaskId))),
   ])
 
   return (

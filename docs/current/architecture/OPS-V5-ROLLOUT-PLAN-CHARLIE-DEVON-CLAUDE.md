@@ -1,6 +1,6 @@
 # OPS v5 — Rollout Plan (Charlie, Devon, Claude Code)
 
-**Date:** 2026-03-27  
+**Date:** 2026-03-30  
 **Status:** Active rollout roadmap  
 **Purpose:** Define the practical step-by-step rollout for getting OPS v5 — Cockpit from current architecture into a real working operating system while Byron Film, KORUS, and OM continue running day to day.
 
@@ -54,13 +54,24 @@ Each new feature should answer:
 - who is responsible?
 - how is it measured?
 
-## 3. Use native best-fit systems
+## 3. Preserve strategic readability
+Cockpit already has a task prioritisation workflow built around:
+- importance
+- urgency
+- effort
+- impact
+- project context
+- blocking / critical-path logic
+
+The task-system rebuild must preserve that signal rather than dilute it.
+
+## 4. Use native best-fit systems
 Cockpit should orchestrate, not try to replace every specialist backend.
 
-## 4. Keep humans in the loop where judgment matters
+## 5. Keep humans in the loop where judgment matters
 No autonomous empire-building. Human steering stays central.
 
-## 5. Ship by checkpoints
+## 6. Ship by checkpoints
 Every checkpoint should be:
 - testable,
 - reviewable,
@@ -79,7 +90,6 @@ Every checkpoint should be:
 - Productivity repointed
 - AI Metrics repointed
 - rollout merged and deployed
-- OPS v5 architecture docs now organized in `docs/architecture/v5/`
 
 ## Newly locked architectural direction
 - channels/forms = intake
@@ -87,13 +97,17 @@ Every checkpoint should be:
 - specialist systems = execution/storage
 - log the outcome, not the chat
 - calendar-native execution is preferred over passive task lists
-- comms belong in Phase A
+- parent task = prioritisation and review object
+- subtask = execution object
+- generic nesting in schema is acceptable, but v1 behavior should strongly bias to a practical two-level parent/subtask model
+- top-level review should remain parent-first
+- task UI should support expand/collapse toggles for child subtasks
 
 ---
 
 # 5. Rollout Overview
 
-The rollout should happen in **five major build waves**.
+The rollout should happen in **six major build waves**.
 
 ## Wave 1 — Stabilize the Cockpit Spine
 **Status:** mostly underway / largely complete
@@ -113,14 +127,38 @@ Most of this is now completed or in final cleanup territory.
 
 ---
 
-## Wave 2 — Intake & Artifact Routing v1
+## Wave 2 — Hierarchy-Aware Task System Rebuild
 **Next major build**
 
+### Goal
+Turn the task system into a hierarchy-aware operational layer where:
+- parent tasks carry strategic priority and review semantics
+- subtasks carry execution semantics
+- child state rolls up into parent visibility
+- top-level boards remain readable
+
+### Must cover
+- hierarchy-aware task schema
+- parent/subtask lifecycle API
+- rollup logic
+- priority-safe task behavior
+- toggle-based UI direction
+
+### Why this is next
+Because the current priority engine and task workflow already have signal.
+The main risk is not a missing board — it is flattening complex work into unreadable task mush.
+
+This wave fixes that before deeper intake automation.
+
+---
+
+## Wave 3 — Intake & Artifact Routing v1
 ### Goal
 Turn Slack/Teams/messages/forms into a structured intake layer that creates the right operational objects in Cockpit.
 
 ### Must cover
 - task intake
+- parent/subtask decisioning where relevant
 - project intake
 - docs/artifact requests
 - event creation requests
@@ -135,12 +173,13 @@ For each intake item:
 - log outcome in canonical operational log
 - link back to source channel/message where useful
 
-### Why this is next
-This is the bridge between conversation and measurable operational output.
+### Why this follows the hierarchy rebuild
+Because intake needs a clean target model.
+Without parent/subtask logic, intake will either create vague mega-tasks or spam the system with disconnected childless items.
 
 ---
 
-## Wave 3 — Execution & Scheduling Loop
+## Wave 4 — Execution & Scheduling Loop
 ### Goal
 Move beyond task lists into actual execution behavior.
 
@@ -159,7 +198,7 @@ This wave turns Cockpit from registry into execution-support system.
 
 ---
 
-## Wave 4 — Comms + CRM + Contact Spine
+## Wave 5 — Comms + CRM + Contact Spine
 ### Goal
 Make communication and contact workflows measurable and routable.
 
@@ -176,7 +215,7 @@ Comms are a first-class business function, not an afterthought.
 
 ---
 
-## Wave 5 — Orchestration + Specialist Agents
+## Wave 6 — Orchestration + Specialist Agents
 ### Goal
 Layer richer internal agent roles on top of a stable operational system.
 
@@ -187,43 +226,38 @@ Layer richer internal agent roles on top of a stable operational system.
 - Oli reviewing/steering/escalating
 
 ### Important rule
-Do not build theatrical agent bureaucracy before Waves 1–4 are stable.
+Do not build theatrical agent bureaucracy before Waves 1–5 are stable.
 
 ---
 
 # 6. Immediate Next Build: Wave 2
 
 ## Name
-**OPS v5 — Intake & Artifact Routing v1**
+**OPS v5 — Hierarchy-Aware Task System Rebuild**
 
 ## Objective
-Build the first real version of the intake-routing loop so work requested in channels becomes measurable delivery in Cockpit.
+Rebuild the Cockpit task layer so complex work can be structured as parent tasks with child subtasks without breaking the existing priority model.
 
-## Inputs to support first
-- Slack
-- email
-- forms
-- optionally Teams once native flow is ready
+## Inputs this work must respect
+- current task ownership / lifecycle direction
+- current `activity_log`-centric event spine
+- current prioritisation logic using importance, urgency, effort, impact, and project context
+- current expectation that strategic review remains legible
 
-## Request types to classify first
-- task
-- project
-- document/artifact
-- event
-- communication action
-
-## Delivery destinations to support first
-- Cockpit task/project/event records
-- Google Calendar / Outlook event creation
-- Google Drive / OneDrive / iCloud storage targets
-- Obsidian for research/report outputs
+## Must deliver
+- parent/subtask schema support
+- hierarchy-aware lifecycle rules
+- child-to-parent rollup logic
+- parent-first strategic behavior
+- execution-friendly child structure
+- toggle-based task UI direction for later UI work
 
 ## MVP rule
-If a message in Slack produces a real deliverable, the deliverable should:
-- be registered in Cockpit
-- be linked to the right workspace/object
-- be stored in the right execution/storage system
-- count toward productivity and operational metrics
+If a complex piece of work is represented in Cockpit, the system should be able to:
+- show the parent task as the strategic unit
+- show subtasks as execution units
+- show child progress/blockers through parent rollups
+- avoid flooding the top-level board with execution crumbs
 
 ---
 
@@ -297,8 +331,8 @@ With the bridge:
 - faster review loops
 - better overnight compounding
 
-## Important note
-This should be built **after** the current rollout/sprint is fully stabilized, not in the middle of it.
+### Important note
+This should be built **after** the hierarchy-aware task rebuild is stable, not in the middle of it.
 
 ---
 
@@ -325,6 +359,7 @@ The more programmatic access we have to:
 
 ### Includes
 - stable operational spine
+- hierarchy-aware task system
 - intake/routing v1
 - basic artifact registration
 - first real channel-to-Cockpit loop
@@ -338,6 +373,7 @@ The more programmatic access we have to:
 - stronger comms/CRM linkage
 - better execution loops
 - more reliable cross-workspace reporting
+- stronger hierarchy-aware review behavior
 
 ## Mature Cockpit
 **3–6 months**
@@ -359,6 +395,7 @@ This is not full-time greenfield development.
 ## In the near term
 - requests in channels produce measurable structured outcomes
 - Cockpit reflects real delivered work
+- complex work can be broken into subtasks without losing strategic clarity
 - productivity metrics become more trustworthy
 - fewer things get lost in chat
 
@@ -378,22 +415,21 @@ This is not full-time greenfield development.
 # 12. Immediate Next Steps
 
 ## Step 1
-Finish confirming the unified logging sprint is live and behaving correctly.
+Finish the task-system spec rewrite so the hierarchy model is the clear source of truth.
 
 ## Step 2
-Start the **Intake & Artifact Routing v1** build.
+Start the **Hierarchy-Aware Task System Rebuild**.
 
 ## Step 3
-Define the first intake classification matrix:
-- message type
-- object type
-- destination system
-- required log event
-- required storage destination
+Implement:
+- task hierarchy schema
+- lifecycle rules
+- parent rollup logic
+- parent-first priority-safe behavior
 
 ## Step 4
-Build the first end-to-end flows:
-- Slack → task/project in Cockpit
+Then build the first end-to-end flows:
+- Slack → parent task or child task in Cockpit
 - Slack → event in calendar + Cockpit
 - Slack → document request → stored artifact + Cockpit log
 - Slack/email/forms → comms/contact handling path
@@ -409,6 +445,7 @@ OPS v5 is not just software.
 It is a gradually built operational system where:
 - intake happens in natural channels,
 - work is routed into the correct business structures,
+- tasks can hold both strategic and execution structure,
 - outputs become measurable,
 - execution is scheduled realistically,
 - and the human stays at the helm.
@@ -417,4 +454,4 @@ It is a gradually built operational system where:
 
 # 14. One-Line Summary
 
-> **Build the operational spine first, then the intake-routing loop, then the execution loop, then comms/CRM, then richer orchestration — all while the business keeps moving.**
+> **Build the operational spine first, then the hierarchy-aware task system, then the intake-routing loop, then the execution loop, then comms/CRM, then richer orchestration — all while the business keeps moving.**

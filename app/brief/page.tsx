@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { tasks, projects } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { neon } from '@neondatabase/serverless'
 import { BriefClient } from './brief-client'
 
@@ -29,8 +29,8 @@ export default async function BriefPage({
 
   const [allTasks, allProjects, calendarRows, briefRows] = await Promise.all([
     workspaceId
-      ? db.select().from(tasks).where(eq(tasks.workspaceId, workspaceId))
-      : db.select().from(tasks),
+      ? db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), isNull(tasks.parentTaskId)))
+      : db.select().from(tasks).where(isNull(tasks.parentTaskId)),
     workspaceId
       ? db.select().from(projects).where(eq(projects.workspaceId, workspaceId))
       : db.select().from(projects),

@@ -17,11 +17,11 @@ export function AgentsClient() {
   useEffect(() => {
     fetch('/api/operators')
       .then(res => res.json())
-      .then(data => setOperators(data))
-      .catch(() => {})
+      .then(data => setOperators(Array.isArray(data) ? data : []))
+      .catch(() => setOperators([]))
     fetch('/api/tasks?status=Backlog')
       .then(res => res.json())
-      .then(data => setTasksCount(data.length))
+      .then(data => setTasksCount(Array.isArray(data) ? data.length : 0))
       .catch(() => {})
   }, [])
 

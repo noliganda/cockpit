@@ -352,10 +352,14 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
         )}
 
         <Section icon={RefreshCw} title="Notion Sync">
-          <p className="text-xs text-[#6B7280] mb-3">Pull tasks from all three Notion databases into this dashboard.</p>
-          <Btn onClick={handleNotionSync} disabled={syncing}>
-            {syncing ? 'Syncing…' : 'Sync now'}
-          </Btn>
+          <p className="text-xs text-[#6B7280] mb-2">Pull tasks from Notion databases into Cockpit.</p>
+          <p className="text-xs text-[#F59E0B] mb-3">⚠️ Disabled — Cockpit is now the source of truth. The daily Notion cron has been removed. Use this button only for a one-time manual import if needed.</p>
+          <div className="flex items-center gap-3">
+            <Btn onClick={handleNotionSync} disabled={syncing}>
+              {syncing ? 'Syncing…' : 'Manual sync (one-time)'}
+            </Btn>
+            <span className="text-xs text-[#4B5563]">Auto-sync: disabled</span>
+          </div>
         </Section>
 
         <Section icon={Database} title="Seed Defaults">

@@ -59,8 +59,8 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   useEffect(() => {
     fetch('/api/operators')
       .then(res => res.json())
-      .then((data: { id: string; name: string; operatorType: string }[]) => setOperatorsList(data))
-      .catch(() => {})
+      .then((data: unknown) => setOperatorsList(Array.isArray(data) ? data as { id: string; name: string; operatorType: string }[] : []))
+      .catch(() => setOperatorsList([]))
   }, [])
   const [region, setRegion] = useState(task?.region ?? '')
   const [areaId, setAreaId] = useState(task?.areaId ?? '')

@@ -101,7 +101,7 @@ search_memory(query: string) → results
       "command": "node",
       "args": ["/Users/charlie/.openclaw/workspace/bin/mcp-copilot.js"],
       "env": {
-        "PROJECT_ROOT": "/Users/charlie/.openclaw/workspace/olivier-marcolin/projects/charlie-dashboard",
+        "PROJECT_ROOT": "/Users/charlie/.openclaw/workspace/om/projects/charlie-dashboard",
         "MEMORY_DIR": "/Users/charlie/.openclaw/workspace/memory"
       }
     }
@@ -314,4 +314,4 @@ Phase 7 (Memory Migration)
 **Created by:** Charlie  
 **For:** Oli  
 **Context:** Harness Architecture Sprint (2026-03-08)  
-**Location:** `olivier-marcolin/projects/charlie-dashboard/PHASE-2A-HARNESS.md`
+**Location:** `om/projects/charlie-dashboard/PHASE-2A-HARNESS.md`

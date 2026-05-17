@@ -37,7 +37,7 @@ This checkpoint must preserve the current prioritisation workflow by keeping:
 # 2. Repo context for the implementation agent
 
 ## Project path
-`/Users/charlie/.openclaw/workspace/olivier-marcolin/projects/cockpit/`
+`~/workspaces/dev/cockpit/`
 
 ## Read these first
 - `README.md`
@@ -419,7 +419,7 @@ Use the following prompt verbatim or near-verbatim:
 You are implementing the next hierarchy-aware task checkpoint for OPS v5 — Cockpit.
 
 Work in this repo:
-`/Users/charlie/.openclaw/workspace/olivier-marcolin/projects/cockpit/`
+`~/workspaces/dev/cockpit/`
 
 Read first:
 - `README.md`

@@ -2,7 +2,9 @@
 
 **Current product direction:** **OPS v5 — Cockpit**  
 **Historical repo/package lineage:** Charlie Dashboard → Ops Dashboard → Cockpit  
-**Current codebase path:** `olivier-marcolin/projects/cockpit/`
+**Current codebase path:** `~/workspaces/dev/cockpit/`
+
+**Workspace brief path:** `~/workspaces/om/projects/cockpit/`
 
 ---
 

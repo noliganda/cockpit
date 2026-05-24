@@ -106,7 +106,7 @@ export function CharlieChat() {
         setMessages(prev => [...prev, {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: `Charlie is offline (OpenClaw Gateway not connected at ${WS_URL}).`,
+          content: `Assistant is offline (gateway not connected at ${WS_URL}).`,
           timestamp: new Date(),
         }])
         setSending(false)
@@ -263,7 +263,7 @@ export function CharlieChat() {
           >
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: wsConnected ? '#22C55E' : '#6B7280' }} />
-              <span className="text-sm font-semibold text-[#F5F5F5]">Charlie</span>
+              <span className="text-sm font-semibold text-[#F5F5F5]">Assistant</span>
               <span className="text-xs text-[#4B5563]">{wsConnected ? 'connected' : 'offline'}</span>
             </div>
             <button
@@ -279,7 +279,7 @@ export function CharlieChat() {
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
             {messages.length === 0 && (
               <div className="text-center pt-8">
-                <p className="text-sm text-[#4B5563]">Send a message to Charlie</p>
+                <p className="text-sm text-[#4B5563]">Send a message</p>
                 <p className="text-xs text-[#4B5563] mt-1">Context: {workspace.name}</p>
               </div>
             )}
@@ -346,7 +346,7 @@ export function CharlieChat() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void sendMessage() } }}
               onPaste={handlePaste}
-              placeholder="Message Charlie…"
+              placeholder="Message…"
               className="flex-1 bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] rounded-[6px] px-3 py-2 text-sm text-[#F5F5F5] placeholder-[#4B5563] outline-none focus:border-[rgba(255,255,255,0.16)]"
             />
             <input

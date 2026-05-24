@@ -190,7 +190,7 @@ export function BriefClient({
           <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: workspace.color }} />
-              <span className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-widest">Charlie&apos;s Brief</span>
+              <span className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-widest">Brief</span>
             </div>
             {brief?.generated_at && (
               <span className="text-xs text-[#4B5563]">

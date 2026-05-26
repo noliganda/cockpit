@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { X, Trash2, ExternalLink, Zap, Star, Plus, ListTree, ArrowUpRight } from 'lucide-react'
+import { X, Trash2, ExternalLink, Zap, Star, Plus, ListTree, ArrowUpRight, Copy, Check } from 'lucide-react'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
@@ -39,6 +39,13 @@ const KORUS_REGIONS = [
   { value: 'Global', label: '🌏 Global' },
 ]
 
+const VIRTUAL_HARNESSES = [
+  { id: 'hermes', name: 'Hermes', operatorType: 'function' },
+  { id: 'claude-code', name: 'Claude Code', operatorType: 'function' },
+  { id: 'codex', name: 'Codex', operatorType: 'function' },
+  { id: 'pie', name: 'Pie', operatorType: 'function' },
+]
+
 const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors'
 const selectCls = `${inputCls} appearance-none`
 const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
@@ -55,6 +62,14 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   const [assignee, setAssignee] = useState(task?.assignee ?? '')
   const [assigneeId, setAssigneeId] = useState<string>(task?.assigneeId ?? '')
   const [assigneeName, setAssigneeName] = useState<string>(task?.assigneeName ?? '')
+  const [assigneeType, setAssigneeType] = useState<string>(task?.assigneeType ?? '')
+  const [copied, setCopied] = useState(false)
+
+  const handleCopySessionId = (sessionId: string) => {
+    navigator.clipboard.writeText(`hermes --resume ${sessionId}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
   const [operatorsList, setOperatorsList] = useState<{ id: string; name: string; operatorType: string }[]>([])
   useEffect(() => {
     fetch('/api/operators')
@@ -124,6 +139,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
         assignee: assignee || undefined,
         assigneeId: assigneeId || undefined,
         assigneeName: assigneeName || undefined,
+        assigneeType: assigneeType || undefined,
         tags,
         areaId: effectiveAreaId || undefined,
         projectId: projectId || undefined,
@@ -209,30 +225,65 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           <div className="grid grid-cols-2 gap-3">
           <div>
             <label className={labelCls}>Assignee</label>
-            <select
-              value={assigneeId}
-              onChange={e => {
-                const id = e.target.value
-                const op = operatorsList.find(o => o.id === id)
-                if (op) {
-                  setAssigneeName(op.name)
-                  setAssigneeId(op.id)
-                  setAssignee(op.name)
-                } else {
-                  setAssigneeName('')
-                  setAssigneeId('')
-                  setAssignee('')
-                }
-              }}
-              className={selectCls}
-            >
-              <option value="">— Unassigned —</option>
-              {operatorsList.map(op => (
-                <option key={op.id} value={op.id}>
-                  {op.operatorType === 'agent' ? '🤖 ' : '🧑 '}{op.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={assigneeId}
+                onChange={e => {
+                  const id = e.target.value
+                  const op = operatorsList.find(o => o.id === id) ?? VIRTUAL_HARNESSES.find(h => h.id === id)
+                  if (op) {
+                    setAssigneeName(op.name)
+                    setAssigneeId(op.id)
+                    setAssignee(op.name)
+                    setAssigneeType(op.operatorType)
+                  } else {
+                    setAssigneeName('')
+                    setAssigneeId('')
+                    setAssignee('')
+                    setAssigneeType('')
+                  }
+                }}
+                className={selectCls}
+              >
+                <option value="">— Unassigned —</option>
+                <optgroup label="Humans" className="text-gray-400 bg-[#1A1A1A]">
+                  {operatorsList.filter(op => op.operatorType === 'human').map(op => (
+                    <option key={op.id} value={op.id} className="text-[#F5F5F5]">
+                      🧑 {op.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Autonomous Agents" className="text-gray-400 bg-[#1A1A1A]">
+                  {operatorsList.filter(op => op.operatorType === 'agent').map(op => (
+                    <option key={op.id} value={op.id} className="text-[#F5F5F5]">
+                      🤖 {op.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Harnesses / Functions" className="text-gray-400 bg-[#1A1A1A]">
+                  {VIRTUAL_HARNESSES.map(op => (
+                    <option key={op.id} value={op.id} className="text-[#F5F5F5]">
+                      ⚡️ {op.name}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+              {assigneeType === 'function' && (
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#60A5FA]">
+                  <span>⚡️ Ephemeral Function Harness</span>
+                </div>
+              )}
+              {assigneeType === 'agent' && (
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#A78BFA]">
+                  <span>🤖 Autonomous Agent Operator</span>
+                </div>
+              )}
+              {assigneeType === 'human' && (
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#34D399]">
+                  <span>🧑 Human Operator</span>
+                </div>
+              )}
+            </div>
           </div>
             <div>
               <label className={labelCls}>Tags</label>
@@ -382,6 +433,46 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               />
             </div>
           </div>
+
+          {/* Execution Footprint Panel */}
+          {(task?.executingModel || task?.executingSessionId) && (
+            <div className="p-3.5 rounded-[8px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
+                <Zap className="w-3.5 h-3.5 text-[#60A5FA]" />
+                <span>Execution Footprint</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                {task?.executingModel && (
+                  <div>
+                    <span className="text-[#6B7280] block mb-1">Executing Model</span>
+                    <div className="font-mono text-[#F5F5F5] bg-[#0A0A0A] px-2.5 py-1.5 rounded-[4px] border border-[rgba(255,255,255,0.04)] truncate flex items-center gap-1.5">
+                      <span>🤖</span>
+                      <span className="truncate">{task.executingModel}</span>
+                    </div>
+                  </div>
+                )}
+                {task?.executingSessionId && (
+                  <div>
+                    <span className="text-[#6B7280] block mb-1">Session ID</span>
+                    <div className="font-mono text-[#F5F5F5] bg-[#0A0A0A] px-2.5 py-1.5 rounded-[4px] border border-[rgba(255,255,255,0.04)] flex items-center justify-between gap-1.5 min-w-0">
+                      <span className="truncate">{task.executingSessionId}</span>
+                      <button
+                        onClick={() => handleCopySessionId(task.executingSessionId!)}
+                        className="p-1 rounded-[4px] hover:bg-[rgba(255,255,255,0.08)] text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0"
+                        title="Copy resume command"
+                      >
+                        {copied ? (
+                          <Check className="w-3 h-3 text-[#34D399]" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {task?.notionId && (
             <div className="flex items-center gap-2 text-xs text-[#6B7280]">

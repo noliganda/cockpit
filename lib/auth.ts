@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash)
@@ -18,6 +18,9 @@ export interface SessionData {
   userId: string
   email: string
   role: 'admin' | 'collaborator' | 'guest'
+  harnessName?: string
+  harnessModel?: string
+  harnessSessionId?: string
 }
 
 export async function setSessionCookie(data: SessionData | string = 'authenticated') {
@@ -33,11 +36,48 @@ export async function setSessionCookie(data: SessionData | string = 'authenticat
 }
 
 export async function getSession(): Promise<string | null> {
+  try {
+    const headersList = await headers()
+    const authHeader = headersList.get('authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      if (process.env.CRON_SECRET && token === process.env.CRON_SECRET) return 'api-authenticated'
+    }
+  } catch {
+    // headers() might throw in some static environments, ignore
+  }
+
   const cookieStore = await cookies()
   return cookieStore.get(SESSION_COOKIE)?.value ?? null
 }
 
 export async function getSessionData(): Promise<SessionData | null> {
+  // 1. Check for Bearer token in Authorization header (API / Harness requests)
+  try {
+    const headersList = await headers()
+    const authHeader = headersList.get('authorization')
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7)
+      if (process.env.CRON_SECRET && token === process.env.CRON_SECRET) {
+        const harnessName = headersList.get('x-harness-name') ?? undefined
+        const harnessModel = headersList.get('x-harness-model') ?? undefined
+        const harnessSessionId = headersList.get('x-harness-session-id') ?? undefined
+
+        return {
+          userId: harnessName ? harnessName.toLowerCase().replace(/\s+/g, '-') : 'api-client',
+          email: harnessName ? `${harnessName.toLowerCase()}@local` : 'api@local',
+          role: 'admin',
+          harnessName,
+          harnessModel,
+          harnessSessionId,
+        }
+      }
+    }
+  } catch {
+    // headers() might throw in some static environments, ignore
+  }
+
+  // 2. Fallback to cookie-based session (browser dashboard requests)
   const cookieStore = await cookies()
   const raw = cookieStore.get(SESSION_COOKIE)?.value
   if (!raw) return null

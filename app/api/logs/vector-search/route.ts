@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
         entity_title as "entityTitle",
         description,
         metadata,
+        workflow_run_id as "workflowRunId",
+        api_model as "apiModel",
         embedding_model as "hasEmbedding",
         created_at as "createdAt",
         1 - (embedding <=> ${sql.raw(`'${vectorStr}'::vector`)}) as score

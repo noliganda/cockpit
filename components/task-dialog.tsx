@@ -43,6 +43,9 @@ const VIRTUAL_HARNESSES = [
   { id: 'hermes', name: 'Hermes', operatorType: 'function' },
   { id: 'claude-code', name: 'Claude Code', operatorType: 'function' },
   { id: 'codex', name: 'Codex', operatorType: 'function' },
+  { id: 'opencode', name: 'OpenCode', operatorType: 'function' },
+  { id: 'openclaw', name: 'OpenClaw', operatorType: 'function' },
+  { id: 'nanoclaw', name: 'NanoClaw', operatorType: 'function' },
   { id: 'pie', name: 'Pie', operatorType: 'function' },
 ]
 
@@ -63,6 +66,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   const [assigneeId, setAssigneeId] = useState<string>(task?.assigneeId ?? '')
   const [assigneeName, setAssigneeName] = useState<string>(task?.assigneeName ?? '')
   const [assigneeType, setAssigneeType] = useState<string>(task?.assigneeType ?? '')
+  const [executingModel, setExecutingModel] = useState(task?.executingModel ?? '')
+  const [executingSessionId, setExecutingSessionId] = useState(task?.executingSessionId ?? '')
+  const [customHarness, setCustomHarness] = useState(task?.assigneeType === 'function' && task?.assigneeName && !VIRTUAL_HARNESSES.some(h => h.id === task.assigneeId) ? task.assigneeName : '')
   const [copied, setCopied] = useState(false)
 
   const handleCopySessionId = (sessionId: string) => {
@@ -74,7 +80,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
   useEffect(() => {
     fetch('/api/operators')
       .then(res => res.json())
-      .then((data: unknown) => setOperatorsList(Array.isArray(data) ? data as { id: string; name: string; operatorType: string }[] : []))
+      .then((data: unknown) => setOperatorsList(Array.isArray(data) ? (data as { id: string; name: string; operatorType: string; status?: string }[]).filter(o => o.id !== 'charlie') : []))
       .catch(() => setOperatorsList([]))
   }, [])
   const [region, setRegion] = useState(task?.region ?? '')
@@ -140,6 +146,8 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
         assigneeId: assigneeId || undefined,
         assigneeName: assigneeName || undefined,
         assigneeType: assigneeType || undefined,
+        executingModel: executingModel || undefined,
+        executingSessionId: executingSessionId || undefined,
         tags,
         areaId: effectiveAreaId || undefined,
         projectId: projectId || undefined,
@@ -232,11 +240,13 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   const id = e.target.value
                   const op = operatorsList.find(o => o.id === id) ?? VIRTUAL_HARNESSES.find(h => h.id === id)
                   if (op) {
+                    setCustomHarness('')
                     setAssigneeName(op.name)
                     setAssigneeId(op.id)
                     setAssignee(op.name)
                     setAssigneeType(op.operatorType)
                   } else {
+                    setCustomHarness('')
                     setAssigneeName('')
                     setAssigneeId('')
                     setAssignee('')
@@ -268,6 +278,22 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   ))}
                 </optgroup>
               </select>
+              <input
+                value={customHarness}
+                onChange={e => {
+                  const value = e.target.value
+                  setCustomHarness(value)
+                  if (value.trim()) {
+                    const id = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+                    setAssigneeName(value.trim())
+                    setAssigneeId(id)
+                    setAssignee(value.trim())
+                    setAssigneeType('function')
+                  }
+                }}
+                placeholder="Or type custom harness: OpenClaw, NanoClaw, Pie…"
+                className={cn(inputCls, 'mt-2')}
+              />
               {assigneeType === 'function' && (
                 <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#60A5FA]">
                   <span>⚡️ Ephemeral Function Harness</span>
@@ -311,6 +337,39 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               )}
             </div>
           </div>
+
+          {/* Execution identity — required for harness/API work tracking */}
+          {(assigneeType === 'function' || assigneeType === 'agent' || executingModel || executingSessionId) && (
+            <div className="p-3.5 rounded-[8px] bg-[rgba(59,130,246,0.05)] border border-[rgba(59,130,246,0.12)] space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
+                <Zap className="w-3.5 h-3.5 text-[#60A5FA]" />
+                <span>Execution identity</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Executing Model</label>
+                  <input
+                    value={executingModel}
+                    onChange={e => setExecutingModel(e.target.value)}
+                    placeholder="opus-4.7, gpt-5.5, kimi-k2.6…"
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Session ID</label>
+                  <input
+                    value={executingSessionId}
+                    onChange={e => setExecutingSessionId(e.target.value)}
+                    placeholder="Resume/session/run ID"
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+              <p className="text-[11px] text-[#6B7280]">
+                These fields are written to task metadata and operational logs so work can be traced back to the exact harness, model, and resumable session.
+              </p>
+            </div>
+          )}
 
           {/* Row 4: Project | Area — hidden for subtasks (inherited from parent) */}
           {!isSubtask && (

@@ -143,9 +143,16 @@ export async function POST(request: NextRequest) {
     const [task] = await db.insert(tasks).values(insertData).returning()
 
     // ── Write task_events row ─────────────────────────────────────────────
-    const actorType = reqActorType ?? 'human'
+    const actorType = reqActorType ?? (sessionData.harnessName ? 'agent' : 'human')
     const actorId = reqActorId ?? sessionData.userId
-    const actorName = reqActorName ?? sessionData.email
+
+    let actorName = reqActorName
+    if (!actorName) {
+      actorName = sessionData.harnessName ?? sessionData.email
+    }
+    const harnessModel = fields.executingModel ?? sessionData.harnessModel
+    const harnessSessionId = fields.executingSessionId ?? sessionData.harnessSessionId
+
     const eventType = isSubtask ? 'subtask_created' : 'task_created'
 
     await db.insert(taskEvents).values({
@@ -160,6 +167,9 @@ export async function POST(request: NextRequest) {
         assigneeId: fields.assigneeId,
         objectType: fields.objectType,
         parentTaskId: fields.parentTaskId,
+        harnessName: sessionData.harnessName,
+        executingModel: harnessModel,
+        executingSessionId: harnessSessionId,
       },
     })
 
@@ -186,6 +196,9 @@ export async function POST(request: NextRequest) {
         objectType: fields.objectType,
         parentTaskId: fields.parentTaskId,
         isSubtask,
+        harnessName: sessionData.harnessName,
+        executingModel: harnessModel,
+        executingSessionId: harnessSessionId,
       },
       actorType: actorType as 'human' | 'agent' | 'system',
       actorId,
@@ -193,6 +206,8 @@ export async function POST(request: NextRequest) {
       eventFamily: 'task',
       eventType,
       sourceSystem: actorType === 'agent' ? 'api' : 'dashboard',
+      workflowRunId: harnessSessionId,
+      apiModel: harnessModel,
       status: 'success',
     })
 

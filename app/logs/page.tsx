@@ -47,9 +47,9 @@ export default async function LogsPage({
   // Build filters on canonical activity_log
   const filters = []
   if (guestEntity) {
-    filters.push(eq(activityLog.entity, guestEntity))
+    filters.push(eq(activityLog.workspaceId, guestEntity))
   } else if (entity) {
-    filters.push(eq(activityLog.entity, entity))
+    filters.push(eq(activityLog.workspaceId, entity))
   }
   if (agent) filters.push(eq(activityLog.agentId, agent))
   if (type) filters.push(eq(activityLog.eventType, type))
@@ -70,6 +70,7 @@ export default async function LogsPage({
     // Main query — select canonical fields
     db.select({
       id: activityLog.id,
+      workspaceId: activityLog.workspaceId,
       actor: activityLog.actor,
       actorType: activityLog.actorType,
       actorId: activityLog.actorId,
@@ -87,6 +88,8 @@ export default async function LogsPage({
       status: activityLog.status,
       sourceSystem: activityLog.sourceSystem,
       sourceUrl: activityLog.sourceUrl,
+      workflowRunId: activityLog.workflowRunId,
+      apiModel: activityLog.apiModel,
       apiCostUsd: activityLog.apiCostUsd,
       createdAt: activityLog.createdAt,
     })

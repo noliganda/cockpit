@@ -378,7 +378,6 @@ export interface AgentDef {
 }
 
 export const AGENTS: AgentDef[] = [
-  { id: 'charlie', name: 'Charlie', emoji: '🐙', color: '#D4A017', slackChannel: '#om-charlie', mission: 'Chief of Staff — orchestration & comms' },
   { id: 'hunter', name: 'Hunter', emoji: '🎯', color: '#14B8A6', slackChannel: '#om-hunter', mission: 'Business Development — outreach & pipeline' },
   { id: 'finn', name: 'Finn', emoji: '💰', color: '#22C55E', slackChannel: '#om-finn', mission: 'Finance — invoicing, cost tracking, reporting' },
   { id: 'marcus', name: 'Marcus', emoji: '📝', color: '#F97316', slackChannel: '#om-marcus', mission: 'Content — social media, copy, briefs' },

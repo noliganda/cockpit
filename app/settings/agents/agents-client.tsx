@@ -17,7 +17,7 @@ export function AgentsClient() {
   useEffect(() => {
     fetch('/api/operators')
       .then(res => res.json())
-      .then(data => setOperators(Array.isArray(data) ? data : []))
+      .then(data => setOperators(Array.isArray(data) ? data.filter(o => o.id !== 'charlie') : []))
       .catch(() => setOperators([]))
     fetch('/api/tasks?status=Backlog')
       .then(res => res.json())

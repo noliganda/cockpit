@@ -3,10 +3,11 @@ import { useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Search, ChevronLeft, ChevronRight, Filter, X, ExternalLink, DollarSign, Sparkles } from 'lucide-react'
 import { cn, formatRelativeDate } from '@/lib/utils'
-import { AGENTS, ENTITIES } from '@/types'
+import { AGENTS } from '@/types'
 
 interface LogEntry {
   id: string
+  workspaceId?: string | null
   actor: string
   actorType: string
   actorId?: string | null
@@ -24,6 +25,8 @@ interface LogEntry {
   status: string
   sourceSystem: string
   sourceUrl?: string | null
+  workflowRunId?: string | null
+  apiModel?: string | null
   apiCostUsd?: number | null
   createdAt: Date
 }
@@ -157,6 +160,8 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
         metadata: r.metadata,
         status: 'success',
         sourceSystem: 'dashboard',
+        workflowRunId: r.workflowRunId as string | null,
+        apiModel: r.apiModel as string | null,
         apiCostUsd: null,
         createdAt: new Date(r.createdAt as string),
       })))
@@ -235,9 +240,10 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
               onChange={e => setEntity(e.target.value)}
               className="px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none"
             >
-              <option value="">All entities</option>
-              {ENTITIES.map(e => <option key={e.id} value={e.id}>{e.label}</option>)}
-              <option value="shared">Shared</option>
+              <option value="">All workspaces</option>
+              <option value="byron-film">Byron Film</option>
+              <option value="korus">KORUS Group</option>
+              <option value="personal">Personal</option>
             </select>
           )}
           <select
@@ -325,7 +331,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
                     <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide w-36">Event</th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Description</th>
                     {!isGuest && (
-                      <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide w-20">Entity</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide w-28">Workspace</th>
                     )}
                     <th className="px-4 py-3 text-right text-xs font-medium text-[#6B7280] uppercase tracking-wide w-20">Cost</th>
                   </tr>
@@ -334,7 +340,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
                   {displayEntries.map(entry => {
                     const displayEventType = entry.eventType ?? entry.action
                     const typeColor = EVENT_TYPE_COLORS[displayEventType] ?? '#6B7280'
-                    const entityDef = ENTITIES.find(e => e.id === entry.entity)
+                    const workspaceLabel = entry.workspaceId === 'byron-film' ? 'Byron Film' : entry.workspaceId === 'korus' ? 'KORUS Group' : entry.workspaceId === 'personal' ? 'Personal' : 'Shared'
                     const isExpanded = expandedId === entry.id
                     const cost = entry.apiCostUsd ?? 0
 
@@ -404,6 +410,16 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
                                   src: {entry.sourceSystem}
                                 </span>
                               )}
+                              {entry.apiModel && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(59,130,246,0.10)] text-[#60A5FA]">
+                                  model: {entry.apiModel}
+                                </span>
+                              )}
+                              {entry.workflowRunId && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(212,160,23,0.10)] text-[#D4A017]">
+                                  session: {entry.workflowRunId}
+                                </span>
+                              )}
                               {entry.category && (
                                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.04)] text-[#6B7280]">
                                   cat: {entry.category}
@@ -430,7 +446,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
                         {!isGuest && (
                           <td className="px-4 py-3">
                             <span className="text-xs text-[#6B7280]">
-                              {entityDef?.label ?? entry.entity ?? '—'}
+                              {workspaceLabel}
                             </span>
                           </td>
                         )}

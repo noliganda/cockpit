@@ -180,9 +180,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (!task) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     // ── Determine event type ──────────────────────────────────────────────
-    const actorType = reqActorType ?? 'human'
+    const actorType = reqActorType ?? (sessionData.harnessName ? 'agent' : 'human')
     const actorId = reqActorId ?? sessionData.userId
-    const actorName = reqActorName ?? sessionData.email
+
+    let actorName = reqActorName
+    if (!actorName) {
+      actorName = sessionData.harnessName ?? sessionData.email
+    }
+    const harnessModel = taskFields.executingModel ?? sessionData.harnessModel
+    const harnessSessionId = taskFields.executingSessionId ?? sessionData.harnessSessionId
 
     let eventType: string
     if (assignmentChanging && !statusChanging) {
@@ -216,6 +222,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       metadata: {
         changedFields: Object.keys(taskFields),
         ...(summaryNote && { summaryNote }),
+        harnessName: sessionData.harnessName,
+        executingModel: harnessModel,
+        executingSessionId: harnessSessionId,
       },
     })
 
@@ -236,6 +245,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         blockedReason: taskFields.blockedReason,
         artifactUrl: taskFields.artifactUrl,
         summaryNote,
+        harnessName: sessionData.harnessName,
+        executingModel: harnessModel,
+        executingSessionId: harnessSessionId,
       },
       actorType: actorType as 'human' | 'agent' | 'system',
       actorId,
@@ -243,6 +255,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       eventFamily: 'task',
       eventType,
       sourceSystem: actorType === 'agent' ? 'api' : 'dashboard',
+      workflowRunId: harnessSessionId,
+      apiModel: harnessModel,
       status: 'success',
     })
 

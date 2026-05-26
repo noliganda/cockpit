@@ -4,20 +4,13 @@
 **Historical repo/package lineage:** Charlie Dashboard → Ops Dashboard → Cockpit  
 **Current codebase path:** `~/workspaces/dev/cockpit/`
 
-**Workspace brief path:** `~/workspaces/om/projects/cockpit/`
+**Project journal:** `docs/journal/` — briefs, ideation, and session handoff logs (migrated in-repo)
 
 ---
 
 ## Read This First
 
-### Current / active architecture docs
-- `docs/current/architecture/OPS-V5-TASK-HIERARCHY-DECISION-NOTE.md`
-- `docs/current/architecture/OPS-V5-INTAKE-ROUTING-AND-EXECUTION-MODEL.md`
-- `docs/current/architecture/OPS-V5-ROLLOUT-PLAN-CHARLIE-DEVON-CLAUDE.md`
-- `docs/current/architecture/OPS-V5-TASK-OWNERSHIP-AND-EXECUTION-PLAN.md`
-- `docs/INDEX.md`
-
-These are the current source-of-truth docs for Cockpit direction.
+See **`docs/INDEX.md`** for the maintained, canonical list of source-of-truth docs. It is the single index — this README does not duplicate it.
 
 ---
 
@@ -34,9 +27,10 @@ These are the current source-of-truth docs for Cockpit direction.
 
 ### Documentation folders
 - `docs/current/` — current Cockpit architecture and live build direction
+- `docs/journal/` — briefs, ideation, and dated session handoff logs (migrated from the old OM project folder)
 - `docs/versions/v4-ops-dashboard/` — v4 phase + spec docs retained for reference
-- `docs/reference/` — audits, status notes, other supporting docs
-- `docs/archive/` — historical/obsolete materials that should not drive current decisions
+- `docs/reference/` — live supporting material: env audit, phase notes, agent task queue
+- `docs/archive/` — historical/obsolete materials (dated status/audit snapshots, raw drafts) that should not drive current decisions
 - `docs/INDEX.md` — quick map of the documentation set
 
 ---

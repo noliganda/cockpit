@@ -5,6 +5,7 @@ import { eq, desc, isNull } from 'drizzle-orm'
 import { logActivity } from '@/lib/activity'
 import { buildEventDescription } from '@/lib/task-lifecycle'
 import { validateParent, inheritFromParent } from '@/lib/task-hierarchy'
+import { getWorkspaceIds } from '@/lib/workspaces'
 import { z } from 'zod'
 import { getSession, getSessionData } from '@/lib/auth'
 
@@ -59,6 +60,10 @@ const createSchema = z.object({
   actorType: z.enum(['human', 'agent', 'system']).optional(),
   actorId: z.string().optional(),
   actorName: z.string().optional(),
+
+  // Idempotency: a retried create with the same key returns the existing task
+  // instead of duplicating. May also be passed via the `Idempotency-Key` header.
+  idempotencyKey: z.string().min(1).max(255).optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -107,7 +112,39 @@ export async function POST(request: NextRequest) {
     const parsed = createSchema.safeParse(body)
     if (!parsed.success) return NextResponse.json({ error: parsed.error.format() }, { status: 400 })
 
-    const { actorType: reqActorType, actorId: reqActorId, actorName: reqActorName, ...fields } = parsed.data
+    const { actorType: reqActorType, actorId: reqActorId, actorName: reqActorName, idempotencyKey: bodyIdemKey, ...fields } = parsed.data
+
+    // ── Workspace validation ──────────────────────────────────────────────
+    // tasks.workspaceId is free text; reject unknown IDs so harness writes
+    // don't silently create invisible orphan tasks (e.g. "bf" vs "byron-film").
+    const validWorkspaceIds = await getWorkspaceIds()
+    if (validWorkspaceIds.length > 0 && !validWorkspaceIds.includes(fields.workspaceId)) {
+      return NextResponse.json({
+        error: `Unknown workspaceId "${fields.workspaceId}". Use GET /api/workspaces to list valid IDs.`,
+        code: 'invalid_workspace',
+        validWorkspaceIds,
+      }, { status: 422 })
+    }
+
+    // ── Idempotency replay ────────────────────────────────────────────────
+    // A retried create with the same key returns the existing task (200) instead
+    // of duplicating. Best-effort against sequential retries, not concurrent races.
+    const idempotencyKey = (request.headers.get('idempotency-key') ?? bodyIdemKey ?? '').trim() || null
+    if (idempotencyKey) {
+      try {
+        const [existing] = await db
+          .select()
+          .from(tasks)
+          .where(eq(tasks.idempotencyKey, idempotencyKey))
+          .limit(1)
+        if (existing) {
+          return NextResponse.json(existing, { status: 200, headers: { 'Idempotent-Replay': 'true' } })
+        }
+      } catch (err) {
+        // Column may not exist yet (migration 0008 unapplied) — degrade to a normal create.
+        console.warn('[POST /api/tasks] idempotency lookup skipped (apply migration 0008?):', err)
+      }
+    }
 
     const now = new Date()
     const isSubtask = !!fields.parentTaskId
@@ -141,6 +178,16 @@ export async function POST(request: NextRequest) {
     } as typeof tasks.$inferInsert
 
     const [task] = await db.insert(tasks).values(insertData).returning()
+
+    // Persist the idempotency key out-of-band so a missing column (pre-migration)
+    // can never block task creation — dedup just stays off until 0008 is applied.
+    if (idempotencyKey) {
+      try {
+        await db.update(tasks).set({ idempotencyKey }).where(eq(tasks.id, task.id))
+      } catch (err) {
+        console.warn('[POST /api/tasks] could not store idempotency key (apply migration 0008?):', err)
+      }
+    }
 
     // ── Write task_events row ─────────────────────────────────────────────
     const actorType = reqActorType ?? (sessionData.harnessName ? 'agent' : 'human')

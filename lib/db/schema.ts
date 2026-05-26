@@ -123,6 +123,9 @@ export const tasks = pgTable('tasks', {
   executingModel: text('executing_model'),
   executingSessionId: text('executing_session_id'),
 
+  // Optional client-supplied key so retried POSTs don't create duplicates.
+  idempotencyKey: text('idempotency_key'),
+
   ...timestamps,
 }, (t) => [
   index('tasks_workspace_idx').on(t.workspaceId),
@@ -131,6 +134,7 @@ export const tasks = pgTable('tasks', {
   index('tasks_assignee_id_idx').on(t.assigneeId),
   index('tasks_object_type_idx').on(t.objectType),
   index('tasks_parent_task_id_idx').on(t.parentTaskId),
+  index('tasks_idempotency_key_idx').on(t.idempotencyKey),
 ])
 
 // ── Task Events (structured lifecycle audit trail) ──────────────────────────

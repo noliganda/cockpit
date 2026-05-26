@@ -70,7 +70,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-  const [operatorsList, setOperatorsList] = useState<{ id: string; name: string; operatorType: string }[]>([])
+  const [operatorsList, setOperatorsList] = useState<{ id: string; name: string; operatorType: string; status?: string }[]>([])
   useEffect(() => {
     fetch('/api/operators')
       .then(res => res.json())
@@ -247,14 +247,14 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               >
                 <option value="">— Unassigned —</option>
                 <optgroup label="Humans" className="text-gray-400 bg-[#1A1A1A]">
-                  {operatorsList.filter(op => op.operatorType === 'human').map(op => (
+                  {operatorsList.filter(op => op.operatorType === 'human' && op.status !== 'retired').map(op => (
                     <option key={op.id} value={op.id} className="text-[#F5F5F5]">
                       🧑 {op.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="Autonomous Agents" className="text-gray-400 bg-[#1A1A1A]">
-                  {operatorsList.filter(op => op.operatorType === 'agent').map(op => (
+                  {operatorsList.filter(op => op.operatorType === 'agent' && op.status !== 'retired').map(op => (
                     <option key={op.id} value={op.id} className="text-[#F5F5F5]">
                       🤖 {op.name}
                     </option>

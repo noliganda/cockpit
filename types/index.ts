@@ -109,6 +109,9 @@ export interface Task {
   parentTaskId?: string | null
   subtaskOrder?: number | null
 
+  executingModel?: string | null
+  executingSessionId?: string | null
+
   createdAt: Date
   updatedAt: Date
 }

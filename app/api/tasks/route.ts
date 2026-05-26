@@ -27,7 +27,7 @@ const createSchema = z.object({
   region: z.string().optional(),
 
   // OPS v5 ownership
-  assigneeType: z.enum(['human', 'agent']).optional(),
+  assigneeType: z.enum(['human', 'agent', 'function']).optional(),
   assigneeId: z.string().optional(),
   assigneeName: z.string().optional(),
   supervisorId: z.string().optional(),
@@ -50,6 +50,10 @@ const createSchema = z.object({
   // OPS v5 hierarchy
   parentTaskId: z.string().uuid().optional(),
   subtaskOrder: z.number().int().min(0).optional(),
+
+  // Ephemeral execution footprint
+  executingModel: z.string().optional(),
+  executingSessionId: z.string().optional(),
 
   // Logging context
   actorType: z.enum(['human', 'agent', 'system']).optional(),

@@ -38,7 +38,7 @@ const patchSchema = z.object({
   status: z.string().optional(),
 
   // OPS v5 ownership
-  assigneeType: z.enum(['human', 'agent']).nullable().optional(),
+  assigneeType: z.enum(['human', 'agent', 'function']).nullable().optional(),
   assigneeId: z.string().nullable().optional(),
   assigneeName: z.string().nullable().optional(),
   supervisorId: z.string().nullable().optional(),
@@ -67,6 +67,10 @@ const patchSchema = z.object({
   // OPS v5 hierarchy
   parentTaskId: z.string().uuid().nullable().optional(),
   subtaskOrder: z.number().int().min(0).optional(),
+
+  // Ephemeral execution footprint
+  executingModel: z.string().nullable().optional(),
+  executingSessionId: z.string().nullable().optional(),
 
   // Logging context — not persisted on task, used for event/activity log
   summaryNote: z.string().optional(),

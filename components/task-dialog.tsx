@@ -43,7 +43,7 @@ const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[r
 const selectCls = `${inputCls} appearance-none`
 const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
 
-export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, onCreateSubtask, parentTask, areas = [], projects = [], sprints = [], users = [] }: TaskDialogProps) {
+export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, onCreateSubtask, parentTask, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
   const [description, setDescription] = useState<unknown>(task?.description ?? undefined)
   const [status, setStatus] = useState(task?.status ?? defaultStatus ?? 'Backlog')

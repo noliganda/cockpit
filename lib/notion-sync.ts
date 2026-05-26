@@ -25,6 +25,16 @@ interface DbSchema {
   statusProperty: string | null
 }
 
+interface NotionQueryResponse {
+  results: Array<{
+    object: string
+    id: string
+    properties: Record<string, unknown>
+  }>
+  has_more: boolean
+  next_cursor: string | null
+}
+
 // Cache schema per database to avoid repeated API calls
 const schemaCache = new Map<string, DbSchema>()
 
@@ -123,18 +133,20 @@ export async function syncNotionDatabase(databaseId: string): Promise<SyncResult
   let cursor: string | undefined
 
   while (hasMore) {
-    // v5 API: dataSources.query() with data_source_id
-    const response = await notion.dataSources.query({
-      data_source_id: databaseId,
-      start_cursor: cursor,
-      page_size: 100,
-    })
+    const response = (await notion.request({
+      path: `databases/${databaseId}/query`,
+      method: 'post',
+      body: {
+        start_cursor: cursor,
+        page_size: 100,
+      }
+    })) as unknown as NotionQueryResponse
 
     for (const page of response.results) {
       if (page.object !== 'page') continue
 
       try {
-        const props = (page as { properties: Record<string, unknown> }).properties
+        const props = page.properties
         const title = extractTitle(props, schema.titleProperty)
         const status = extractStatus(props, schema.statusProperty)
         const dueDate = extractDate(props, ['Due Date', 'Due', 'Date', 'Deadline', 'due_date'])

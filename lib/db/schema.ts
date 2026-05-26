@@ -120,6 +120,9 @@ export const tasks = pgTable('tasks', {
   parentTaskId: uuid('parent_task_id'), // FK to tasks.id — null = top-level parent
   subtaskOrder: integer('subtask_order').default(0), // ordering among siblings
 
+  executingModel: text('executing_model'),
+  executingSessionId: text('executing_session_id'),
+
   ...timestamps,
 }, (t) => [
   index('tasks_workspace_idx').on(t.workspaceId),

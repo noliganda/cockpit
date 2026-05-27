@@ -72,7 +72,9 @@ export async function GET(request: NextRequest) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
-    const workspaceId = searchParams.get('workspace')
+    // Accept both `workspace` (dashboard) and `workspaceId` (matches the create
+    // body field) so a filter param is never silently ignored.
+    const workspaceId = searchParams.get('workspace') ?? searchParams.get('workspaceId')
     const topLevel = searchParams.get('topLevel')
     const parentId = searchParams.get('parentTaskId')
 

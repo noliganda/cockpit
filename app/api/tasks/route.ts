@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { tasks, taskEvents } from '@/lib/db/schema'
-import { eq, desc, isNull } from 'drizzle-orm'
+import { and, eq, desc, isNull } from 'drizzle-orm'
 import { logActivity } from '@/lib/activity'
 import { buildEventDescription } from '@/lib/task-lifecycle'
 import { validateParent, inheritFromParent } from '@/lib/task-hierarchy'
@@ -80,19 +80,23 @@ export async function GET(request: NextRequest) {
 
     let query = db.select().from(tasks)
 
-    // Filter by workspace
+    // Build all filters, then apply in a single .where() — Drizzle's .where() is
+    // NOT additive: a second call silently replaces the first, so chaining
+    // workspace + topLevel + parentTaskId drops the earlier filters.
+    const filters = []
     if (workspaceId) {
-      query = query.where(eq(tasks.workspaceId, workspaceId)) as typeof query
+      filters.push(eq(tasks.workspaceId, workspaceId))
     }
-
     // Filter: top-level only (no parent) — keeps subtasks off the main board
     if (topLevel === 'true') {
-      query = query.where(isNull(tasks.parentTaskId)) as typeof query
+      filters.push(isNull(tasks.parentTaskId))
     }
-
     // Filter: children of a specific parent
     if (parentId) {
-      query = query.where(eq(tasks.parentTaskId, parentId)) as typeof query
+      filters.push(eq(tasks.parentTaskId, parentId))
+    }
+    if (filters.length > 0) {
+      query = query.where(and(...filters)) as typeof query
     }
 
     const rows = await query.orderBy(desc(tasks.createdAt))

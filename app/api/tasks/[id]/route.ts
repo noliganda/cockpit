@@ -14,6 +14,7 @@ import {
   toNormalized,
 } from '@/lib/task-lifecycle'
 import { applyParentRollup, validateReparent, getChildCount } from '@/lib/task-hierarchy'
+import { cascadeOnCompletion } from '@/lib/dispatch/cascade'
 
 // ── Patch schema — all fields optional, validated where needed ───────────────
 
@@ -272,6 +273,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     // If we moved away from a parent (reparented to null or different parent), rollup old parent too
     if (current.parentTaskId && taskFields.parentTaskId !== undefined && taskFields.parentTaskId !== current.parentTaskId) {
       await applyParentRollup(current.parentTaskId, id)
+    }
+
+    // ── Dependency cascade: on transition to Done, promote ready dependents ─
+    // Enqueues wakeup requests for dependents whose prerequisites are now met.
+    // Never throws (swallows its own errors); nothing claims the requests yet
+    // (the dispatcher arrives in Phase 2).
+    if (statusChanging && toNormalized(task.status) === 'done') {
+      await cascadeOnCompletion(id)
     }
 
     // Trigger agent wakeup on assignment to agent

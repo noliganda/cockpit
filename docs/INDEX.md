@@ -11,6 +11,7 @@ This repo contains a mix of **current architecture**, **historical version docs*
 - `current/architecture/OPS-V5-INTAKE-ROUTING-AND-EXECUTION-MODEL.md`
 - `current/architecture/OPS-V5-ROLLOUT-PLAN-CHARLIE-DEVON-CLAUDE.md`
 - `current/architecture/OPS-V5-TASK-OWNERSHIP-AND-EXECUTION-PLAN.md`
+- `current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md` — dispatch engine + dependency cascade (draft, 2026-06-30)
 
 These are the current source-of-truth docs for **Cockpit / OPS v5**.
 

@@ -1,11 +1,145 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { X, Trash2, ExternalLink, Zap, Star, Plus, ListTree, ArrowUpRight, Copy, Check } from 'lucide-react'
+import { X, Trash2, ExternalLink, Zap, Star, Plus, ListTree, ArrowUpRight, Copy, Check, History, AlertTriangle, CheckCircle2, Circle } from 'lucide-react'
 import { TASK_STATUSES, type WorkspaceId, type Task, type Area, type Project, type Sprint } from '@/types'
 import { cn } from '@/lib/utils'
 import dynamic from 'next/dynamic'
 
 const BlockEditor = dynamic(() => import('./block-editor').then(m => m.BlockEditor), { ssr: false })
+
+// ── Task timeline ────────────────────────────────────────────────────────────
+// Read-only render of the structured task_events feed (GET /api/tasks/[id]/events).
+// Surfaces the harness progress/artifact/verification events appended via the
+// events endpoint, plus the lifecycle events written on every task mutation.
+
+interface TaskEvent {
+  id: string
+  eventType: string
+  fromStatus: string | null
+  toStatus: string | null
+  actorType: string | null
+  actorName: string | null
+  summaryNote: string | null
+  blockedReason: string | null
+  artifactUrl: string | null
+  metadata: Record<string, unknown> | null
+  createdAt: string
+}
+
+function formatRelativeTime(iso: string): string {
+  const then = new Date(iso).getTime()
+  if (Number.isNaN(then)) return ''
+  const diff = Date.now() - then
+  const sec = Math.round(diff / 1000)
+  if (sec < 60) return 'just now'
+  const min = Math.round(sec / 60)
+  if (min < 60) return `${min}m ago`
+  const hr = Math.round(min / 60)
+  if (hr < 24) return `${hr}h ago`
+  const day = Math.round(hr / 24)
+  if (day < 7) return `${day}d ago`
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function humanizeEventType(type: string): string {
+  return type
+    .replace(/^task_/, '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
+}
+
+// Per-event-family accent (icon + color). Falls back to a neutral dot.
+function eventVisual(ev: TaskEvent): { Icon: typeof Circle; color: string } {
+  const t = ev.eventType
+  if (ev.blockedReason || t.includes('blocked') || t.includes('at_risk') || t.includes('failed'))
+    return { Icon: AlertTriangle, color: '#EF4444' }
+  if (t.includes('completed') || t.includes('done') || t.includes('verification') || t.includes('unblocked') || t.includes('ready_for_review'))
+    return { Icon: CheckCircle2, color: '#34D399' }
+  if (ev.artifactUrl || t.includes('artifact'))
+    return { Icon: ExternalLink, color: '#60A5FA' }
+  if (t.includes('created') || t.includes('assigned') || t.includes('started') || t.includes('submitted'))
+    return { Icon: Circle, color: '#60A5FA' }
+  return { Icon: Circle, color: '#6B7280' }
+}
+
+function TaskTimeline({ taskId }: { taskId: string }) {
+  const [events, setEvents] = useState<TaskEvent[] | null>(null)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    fetch(`/api/tasks/${taskId}/events`)
+      .then(res => (res.ok ? res.json() : Promise.reject()))
+      .then((data: unknown) => { if (active) setEvents(Array.isArray(data) ? (data as TaskEvent[]) : []) })
+      .catch(() => { if (active) setError(true) })
+    return () => { active = false }
+  }, [taskId])
+
+  if (error) return null
+  if (events && events.length === 0) return null
+
+  return (
+    <div className="p-3.5 rounded-[8px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] space-y-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
+        <History className="w-3.5 h-3.5 text-[#60A5FA]" />
+        <span>Timeline</span>
+        {events && <span className="text-[#6B7280] normal-case font-normal tracking-normal">· {events.length}</span>}
+      </div>
+
+      {!events ? (
+        <p className="text-xs text-[#6B7280]">Loading…</p>
+      ) : (
+        <ol className="relative space-y-3">
+          {events.map((ev, i) => {
+            const { Icon, color } = eventVisual(ev)
+            const model = ev.metadata?.executingModel as string | undefined
+            const session = ev.metadata?.executingSessionId as string | undefined
+            const isLast = i === events.length - 1
+            return (
+              <li key={ev.id} className="relative flex gap-2.5">
+                {/* Rail */}
+                <div className="flex flex-col items-center shrink-0">
+                  <Icon className="w-3.5 h-3.5 mt-0.5" style={{ color }} />
+                  {!isLast && <span className="w-px flex-1 mt-1 bg-[rgba(255,255,255,0.08)]" />}
+                </div>
+                {/* Content */}
+                <div className="min-w-0 flex-1 pb-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-xs font-medium text-[#F5F5F5]">{humanizeEventType(ev.eventType)}</span>
+                    <span className="text-[10px] text-[#6B7280] shrink-0" title={new Date(ev.createdAt).toLocaleString()}>
+                      {formatRelativeTime(ev.createdAt)}
+                    </span>
+                  </div>
+                  {ev.fromStatus && ev.toStatus && (
+                    <p className="text-[11px] text-[#6B7280] font-mono mt-0.5">{ev.fromStatus} → {ev.toStatus}</p>
+                  )}
+                  {ev.summaryNote && <p className="text-xs text-[#A0A0A0] mt-0.5 break-words">{ev.summaryNote}</p>}
+                  {ev.blockedReason && (
+                    <p className="text-xs text-[#EF4444] mt-0.5 break-words">Blocked: {ev.blockedReason}</p>
+                  )}
+                  {ev.artifactUrl && (
+                    <a href={ev.artifactUrl} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] text-[#60A5FA] hover:underline mt-0.5 break-all">
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{ev.artifactUrl}</span>
+                    </a>
+                  )}
+                  {(ev.actorName || model || session) && (
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-[#6B7280] font-mono">
+                      {ev.actorName && <span>{ev.actorName}</span>}
+                      {model && <span className="px-1.5 py-0.5 rounded-[3px] bg-[rgba(255,255,255,0.04)]">🤖 {model}</span>}
+                      {session && <span className="px-1.5 py-0.5 rounded-[3px] bg-[rgba(255,255,255,0.04)] truncate max-w-[140px]">{session}</span>}
+                    </div>
+                  )}
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+      )}
+    </div>
+  )
+}
 
 interface UserOption {
   id: string
@@ -532,6 +666,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               </div>
             </div>
           )}
+
+          {/* Timeline — structured event history for existing tasks */}
+          {task?.id && <TaskTimeline taskId={task.id} />}
 
           {task?.notionId && (
             <div className="flex items-center gap-2 text-xs text-[#6B7280]">

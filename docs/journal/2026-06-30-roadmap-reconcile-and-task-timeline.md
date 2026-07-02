@@ -61,3 +61,8 @@ Verification: `npm run build` passes clean.
 
 - Agents page rebuild (MVP = card grid + `[id]` detail page) is the clearest next self-contained build.
 - Add harness/session/outcome filters to the logs client (small, high-value observability win).
+- **Dispatch engine** — see `docs/current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md` (drafted
+  2026-06-30). Pulls Wave 6 forward. Phase 1 = `task_dependencies` table + dependency cascade
+  (no dispatch yet); Phase 2 = dispatcher + Hermes oneshot adapter + cron poller; Phase 3 =
+  Claude Code + tmux adapters. Completes the agent-execution infrastructure that's ~60% built
+  (session tracking + wakeup queue exist; the claiming/spawning/cascade layer is missing).

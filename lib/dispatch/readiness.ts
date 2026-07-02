@@ -17,7 +17,7 @@
 import { db } from '@/lib/db'
 import { tasks, operators, taskDependencies, agentTaskSessions } from '@/lib/db/schema'
 import { eq, inArray, and } from 'drizzle-orm'
-import { toNormalized } from '@/lib/task-lifecycle'
+import { toNormalized, isKnownStatus } from '@/lib/task-lifecycle'
 import { getAdapter } from './adapters'
 
 export interface ReadinessResult {
@@ -66,8 +66,13 @@ export async function evaluateReadiness(taskId: string): Promise<ReadinessResult
   }
 
   // 2. Task must be in a dispatchable state (To Do / Backlog), not already
-  //    in progress, blocked, done, or cancelled.
-  if (!DISPATCHABLE_STATUSES.has(toNormalized(task.status))) {
+  //    in progress, blocked, done, or cancelled. Unknown status strings are
+  //    NEVER dispatchable — toNormalized() falls back to 'queued' for unknowns
+  //    (stray legacy values like 'Completed' exist in prod data), so the status
+  //    must be recognized before normalization is trusted.
+  if (!isKnownStatus(task.status)) {
+    blockers.push(`status "${task.status}" is not recognized as dispatchable`)
+  } else if (!DISPATCHABLE_STATUSES.has(toNormalized(task.status))) {
     blockers.push(`status "${task.status}" is not dispatchable`)
   }
 

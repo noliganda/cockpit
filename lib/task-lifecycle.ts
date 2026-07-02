@@ -43,6 +43,16 @@ export function toNormalized(status: string): NormalizedStatus {
   return legacyToNormalized[status] ?? 'queued'
 }
 
+/**
+ * Whether the string is a recognized legacy or normalized status. Callers that
+ * gate side effects on a status (e.g. dispatch readiness) must check this
+ * first: toNormalized() maps UNKNOWN strings to 'queued' as a lenient fallback,
+ * which would otherwise make stray legacy values (e.g. 'Completed') eligible.
+ */
+export function isKnownStatus(status: string): boolean {
+  return status in legacyToNormalized
+}
+
 // ── Allowed transitions (normalized) ─────────────────────────────────────────
 
 const allowedTransitions: Record<NormalizedStatus, NormalizedStatus[]> = {

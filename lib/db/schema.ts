@@ -159,6 +159,23 @@ export const taskEvents = pgTable('task_events', {
   index('task_events_created_idx').on(t.createdAt),
 ])
 
+// ── Task dependencies (the dispatch dependency graph) ────────────────────────
+// Distinct from the parent/child hierarchy: hierarchy is grouping, dependencies
+// are ordering. A dependent task can't be dispatched until its prerequisites are
+// satisfied. See docs/current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md §4.1.
+export const taskDependencies = pgTable('task_dependencies', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  prerequisiteTaskId: uuid('prerequisite_task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  dependentTaskId: uuid('dependent_task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
+  // blocks | needs_artifact | needs_review
+  dependencyType: text('dependency_type').notNull().default('blocks'),
+  ...timestamps,
+}, (t) => [
+  unique('task_dependencies_uniq').on(t.prerequisiteTaskId, t.dependentTaskId),
+  index('task_dependencies_dependent_idx').on(t.dependentTaskId),
+  index('task_dependencies_prereq_idx').on(t.prerequisiteTaskId),
+])
+
 export const projects = pgTable('projects', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: text('workspace_id').notNull(),

@@ -17,10 +17,11 @@
  * tasks table doesn't carry — slot it in when that data exists.)
  */
 import { db } from '@/lib/db'
-import { tasks, operators, agentWakeupRequests, agentTaskSessions, taskEvents } from '@/lib/db/schema'
+import { tasks, operators, agentWakeupRequests, agentTaskSessions, taskEvents, taskDependencies } from '@/lib/db/schema'
 import { eq, and, inArray } from 'drizzle-orm'
 import { evaluateReadiness } from './readiness'
-import { getAdapter } from './adapters'
+import { getAdapter, type DispatchContext } from './adapters'
+import { toNormalized, isKnownStatus } from '@/lib/task-lifecycle'
 import { createTaskSession, createWakeupRequest, markSessionActive, markSessionFailed } from '@/lib/agent-execution'
 import { logActivity } from '@/lib/activity'
 
@@ -248,96 +249,21 @@ export async function runDispatchCycle(): Promise<DispatchSummary> {
   summary.ready = ready.length
   if (ready.length === 0) return summary
 
-  // 3. Priority order + per-operator concurrency budget for THIS cycle
-  //    (readiness saw active_run_count as of its own query; track increments here).
+  // 3. Priority order, then dispatch one by one. dispatchTaskById re-reads the
+  //    operator each time, so active_run_count increments from earlier tasks in
+  //    this same cycle are visible to later concurrency checks.
   ready.sort(byDispatchPriority)
-  const operatorIds = [...new Set(ready.map(t => t.assigneeId!))]
-  const operatorRows = await db.select().from(operators).where(inArray(operators.id, operatorIds))
-  const operatorById = new Map(operatorRows.map(o => [o.id, o]))
-  const runCounts = new Map(operatorRows.map(o => [o.id, o.activeRunCount]))
-
   for (const task of ready) {
-    const operator = operatorById.get(task.assigneeId!)
-    if (!operator) continue
-    const adapter = getAdapter(operator.adapterType)
-    if (!adapter) {
-      summary.skipped.push({ taskId: task.id, reason: `adapter "${operator.adapterType}" not registered` })
-      continue
-    }
-    if ((runCounts.get(operator.id) ?? 0) >= operator.maxConcurrent) {
-      summary.skipped.push({ taskId: task.id, reason: `operator "${operator.id}" at max concurrency this cycle` })
-      continue
-    }
-
     try {
-      // 4. Atomic claim (UPDATE ... WHERE status='queued' RETURNING).
-      const wakeup = await claimWakeup(task)
-      if (!wakeup) {
-        summary.skipped.push({ taskId: task.id, reason: 'wakeup claim lost (raced another dispatcher)' })
-        continue
+      const outcome = await dispatchTaskById(task.id, { skipReadinessCheck: true })
+      if (outcome.claimed) summary.claimed++
+      if (outcome.outcome === 'dispatched') {
+        summary.dispatched++
+      } else if (outcome.outcome === 'failed') {
+        summary.errors.push({ taskId: task.id, error: outcome.reason })
+      } else {
+        summary.skipped.push({ taskId: task.id, reason: outcome.reason })
       }
-      summary.claimed++
-
-      // 5. Session + run count. createTaskSession returns any existing row for
-      //    (operator, task) — a completed/failed one from a previous run is
-      //    reactivated, since readiness already proved no live session exists.
-      const session = await createTaskSession(task.id, operator.id, adapter.type)
-      if (session.status !== 'active') await markSessionActive(session.id)
-      await db.update(agentWakeupRequests).set({ runId: session.id }).where(eq(agentWakeupRequests.id, wakeup.id))
-      await db.update(operators)
-        .set({ activeRunCount: (runCounts.get(operator.id) ?? 0) + 1 })
-        .where(eq(operators.id, operator.id))
-      runCounts.set(operator.id, (runCounts.get(operator.id) ?? 0) + 1)
-
-      // 6. Spawn the harness.
-      const result = await adapter.dispatch(task, operator, wakeup)
-
-      if (result.status === 'failed') {
-        await markSessionFailed(session.id, result.detail)
-        await db.update(agentWakeupRequests)
-          .set({ status: 'failed', error: result.detail, finishedAt: new Date() })
-          .where(eq(agentWakeupRequests.id, wakeup.id))
-        await db.update(operators)
-          .set({ activeRunCount: Math.max(0, (runCounts.get(operator.id) ?? 1) - 1) })
-          .where(eq(operators.id, operator.id))
-        runCounts.set(operator.id, Math.max(0, (runCounts.get(operator.id) ?? 1) - 1))
-        summary.errors.push({ taskId: task.id, error: result.detail })
-        continue
-      }
-
-      await db.update(agentWakeupRequests)
-        .set({ status: 'running' })
-        .where(eq(agentWakeupRequests.id, wakeup.id))
-      await db.update(agentTaskSessions)
-        .set({ sessionDisplayId: result.sessionId })
-        .where(eq(agentTaskSessions.id, session.id))
-      summary.dispatched++
-
-      // 7. Observability: structured task_event + canonical activity_log.
-      await db.insert(taskEvents).values({
-        taskId: task.id,
-        eventType: 'task_dispatched',
-        actorType: 'system',
-        actorName: 'dispatch-engine',
-        summaryNote: `Dispatched to ${operator.id} via ${adapter.type}: ${result.detail}`,
-        metadata: { operatorId: operator.id, adapterType: adapter.type, harnessSessionId: result.sessionId, wakeupId: wakeup.id },
-      })
-      await logActivity({
-        workspaceId: task.workspaceId,
-        actor: 'dispatch-engine',
-        action: 'task_dispatched',
-        entityType: 'task',
-        entityId: task.id,
-        entityTitle: task.title,
-        description: `"${task.title}" dispatched to ${operator.id} via ${adapter.type}`,
-        metadata: { operatorId: operator.id, adapterType: adapter.type, harnessSessionId: result.sessionId },
-        actorType: 'system',
-        actorName: 'dispatch-engine',
-        eventFamily: 'agent',
-        eventType: 'task_dispatched',
-        sourceSystem: 'api',
-        status: 'success',
-      })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       summary.errors.push({ taskId: task.id, error: message })
@@ -346,4 +272,174 @@ export async function runDispatchCycle(): Promise<DispatchSummary> {
   }
 
   return summary
+}
+
+export interface DispatchOutcome {
+  outcome: 'dispatched' | 'skipped' | 'failed'
+  reason: string
+  /** Not-ready blockers when the readiness check rejected the task. */
+  blockers?: string[]
+  /** Whether a wakeup claim was consumed (even if the spawn then failed). */
+  claimed?: boolean
+  harnessSessionId?: string
+  adapterType?: string
+  operatorId?: string
+}
+
+/**
+ * Dispatch a single task — shared by the cycle loop and the manual trigger
+ * (spec §6.2). Hard guards hold even under force=true: the task must exist,
+ * carry a recognized non-terminal, non-in-progress status, have no live
+ * session, and its operator must exist with a registered adapter and a free
+ * concurrency slot. force ONLY bypasses the evaluateReadiness() gate
+ * (dependencies, operator active/budget state) — "force" must never mean
+ * "double-dispatch".
+ *
+ * Before spawning, satisfied needs_artifact prerequisites are resolved into
+ * the adapter prompt context (spec §8 Phase 4) so the harness starts from its
+ * inputs.
+ */
+export async function dispatchTaskById(
+  taskId: string,
+  opts: { force?: boolean; skipReadinessCheck?: boolean; actorName?: string } = {},
+): Promise<DispatchOutcome> {
+  const [task] = await db.select().from(tasks).where(eq(tasks.id, taskId)).limit(1)
+  if (!task) return { outcome: 'skipped', reason: 'task not found' }
+
+  // Hard guards — force does not bypass these.
+  if (!isKnownStatus(task.status)) {
+    return { outcome: 'skipped', reason: `status "${task.status}" is not recognized as dispatchable` }
+  }
+  const normalized = toNormalized(task.status)
+  if (normalized === 'in_progress' || normalized === 'done' || normalized === 'cancelled') {
+    return { outcome: 'skipped', reason: `status "${task.status}" is ${normalized === 'in_progress' ? 'already in progress' : 'terminal'}` }
+  }
+  if (!task.assigneeId || !['agent', 'function'].includes(task.assigneeType ?? '')) {
+    return { outcome: 'skipped', reason: 'not assigned to an agent or function operator' }
+  }
+  const liveSessions = await db
+    .select({ id: agentTaskSessions.id })
+    .from(agentTaskSessions)
+    .where(and(eq(agentTaskSessions.taskId, taskId), inArray(agentTaskSessions.status, ['active', 'queued'])))
+    .limit(1)
+  if (liveSessions.length > 0) {
+    return { outcome: 'skipped', reason: 'task already has an active session' }
+  }
+
+  if (!opts.force && !opts.skipReadinessCheck) {
+    const readiness = await evaluateReadiness(taskId)
+    if (!readiness.ready) {
+      return { outcome: 'skipped', reason: 'not ready', blockers: readiness.blockers }
+    }
+  }
+
+  const [operator] = await db.select().from(operators).where(eq(operators.id, task.assigneeId)).limit(1)
+  if (!operator) return { outcome: 'skipped', reason: `operator "${task.assigneeId}" is not registered` }
+  const adapter = getAdapter(operator.adapterType)
+  if (!adapter) return { outcome: 'skipped', reason: `adapter "${operator.adapterType}" not registered` }
+  if (operator.activeRunCount >= operator.maxConcurrent) {
+    return { outcome: 'skipped', reason: `operator "${operator.id}" at max concurrency (${operator.activeRunCount}/${operator.maxConcurrent})` }
+  }
+
+  // Atomic claim (UPDATE ... WHERE status='queued' RETURNING).
+  const wakeup = await claimWakeup(task)
+  if (!wakeup) {
+    return { outcome: 'skipped', reason: 'wakeup claim lost (raced another dispatcher)' }
+  }
+
+  // Session + run count. createTaskSession returns any existing row for
+  // (operator, task) — a completed/failed one from a previous run is
+  // reactivated, since the live-session guard above proved none is active.
+  const session = await createTaskSession(task.id, operator.id, adapter.type)
+  if (session.status !== 'active') await markSessionActive(session.id)
+  await db.update(agentWakeupRequests).set({ runId: session.id }).where(eq(agentWakeupRequests.id, wakeup.id))
+  await db.update(operators)
+    .set({ activeRunCount: operator.activeRunCount + 1 })
+    .where(eq(operators.id, operator.id))
+
+  // Spawn the harness, with prerequisite artifacts in context.
+  const context = await resolveArtifactContext(task.id)
+  const result = await adapter.dispatch(task, operator, wakeup, context)
+
+  if (result.status === 'failed') {
+    await markSessionFailed(session.id, result.detail)
+    await db.update(agentWakeupRequests)
+      .set({ status: 'failed', error: result.detail, finishedAt: new Date() })
+      .where(eq(agentWakeupRequests.id, wakeup.id))
+    const [fresh] = await db.select().from(operators).where(eq(operators.id, operator.id)).limit(1)
+    if (fresh) {
+      await db.update(operators)
+        .set({ activeRunCount: Math.max(0, fresh.activeRunCount - 1) })
+        .where(eq(operators.id, fresh.id))
+    }
+    return { outcome: 'failed', reason: result.detail, claimed: true, adapterType: adapter.type, operatorId: operator.id }
+  }
+
+  await db.update(agentWakeupRequests)
+    .set({ status: 'running' })
+    .where(eq(agentWakeupRequests.id, wakeup.id))
+  await db.update(agentTaskSessions)
+    .set({ sessionDisplayId: result.sessionId })
+    .where(eq(agentTaskSessions.id, session.id))
+
+  // Observability: structured task_event + canonical activity_log.
+  const actorName = opts.actorName ?? 'dispatch-engine'
+  const forcedNote = opts.force ? ' (forced — readiness bypassed)' : ''
+  await db.insert(taskEvents).values({
+    taskId: task.id,
+    eventType: 'task_dispatched',
+    actorType: 'system',
+    actorName,
+    summaryNote: `Dispatched to ${operator.id} via ${adapter.type}${forcedNote}: ${result.detail}`,
+    metadata: { operatorId: operator.id, adapterType: adapter.type, harnessSessionId: result.sessionId, wakeupId: wakeup.id, forced: !!opts.force },
+  })
+  await logActivity({
+    workspaceId: task.workspaceId,
+    actor: actorName,
+    action: 'task_dispatched',
+    entityType: 'task',
+    entityId: task.id,
+    entityTitle: task.title,
+    description: `"${task.title}" dispatched to ${operator.id} via ${adapter.type}${forcedNote}`,
+    metadata: { operatorId: operator.id, adapterType: adapter.type, harnessSessionId: result.sessionId, forced: !!opts.force },
+    actorType: 'system',
+    actorName,
+    eventFamily: 'agent',
+    eventType: 'task_dispatched',
+    sourceSystem: 'api',
+    status: 'success',
+  })
+
+  return {
+    outcome: 'dispatched',
+    reason: result.detail,
+    claimed: true,
+    harnessSessionId: result.sessionId,
+    adapterType: adapter.type,
+    operatorId: operator.id,
+  }
+}
+
+/**
+ * Satisfied needs_artifact prerequisites → prompt context (spec §8 Phase 4).
+ * Readiness already required these to be Done WITH an artifactUrl; unfinished
+ * ones (possible under force) are simply omitted.
+ */
+async function resolveArtifactContext(taskId: string): Promise<DispatchContext | undefined> {
+  const edges = await db
+    .select()
+    .from(taskDependencies)
+    .where(and(
+      eq(taskDependencies.dependentTaskId, taskId),
+      eq(taskDependencies.dependencyType, 'needs_artifact'),
+    ))
+  if (edges.length === 0) return undefined
+  const prereqs = await db
+    .select({ id: tasks.id, title: tasks.title, artifactUrl: tasks.artifactUrl })
+    .from(tasks)
+    .where(inArray(tasks.id, edges.map(e => e.prerequisiteTaskId)))
+  const artifacts = prereqs
+    .filter((p): p is typeof p & { artifactUrl: string } => !!p.artifactUrl)
+    .map(p => ({ title: p.title, artifactUrl: p.artifactUrl }))
+  return artifacts.length > 0 ? { artifacts } : undefined
 }

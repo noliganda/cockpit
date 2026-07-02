@@ -5,10 +5,12 @@
  * operator available), atomically claims their wakeup request, creates an
  * agent_task_session, and invokes the operator's adapter to spawn the harness.
  *
- * Phase 2 scope: no stale-claim reclamation and no /api/dispatch/status yet
- * (both Phase 3). Candidates are filtered on the two canonical dispatchable
- * statuses ONLY — toNormalized() maps unknown legacy strings to 'queued' as a
- * fallback, so trusting normalization here could dispatch stray statuses.
+ * Each cycle starts with stale-claim reclamation (Phase 3): dead claims are
+ * re-queued and their slots freed before candidates are evaluated. Candidates
+ * are filtered on the two canonical dispatchable statuses ONLY — toNormalized()
+ * maps unknown legacy strings to 'queued' as a fallback, so trusting
+ * normalization here could dispatch stray statuses (readiness re-checks this
+ * via isKnownStatus as well).
  *
  * Priority order: tasks.priority text, then urgent+important flags, then age.
  * (lib/priority-engine.ts scoring needs project tiers / estimate fields the
@@ -23,12 +25,108 @@ import { createTaskSession, createWakeupRequest, markSessionActive, markSessionF
 import { logActivity } from '@/lib/activity'
 
 export interface DispatchSummary {
+  reclaimed: number
   candidates: number
   ready: number
   claimed: number
   dispatched: number
   skipped: { taskId: string; reason: string }[]
   errors: { taskId: string; error: string }[]
+}
+
+/** Spec §5.2 default for operators whose adapter is unknown/unregistered. */
+const DEFAULT_STALE_THRESHOLD_MS = 15 * 60 * 1000
+
+/**
+ * Stale-claim reclamation (spec §5.2 step 1, Phase 3). A claimed/running
+ * wakeup whose last sign of life — claim time or the linked session's
+ * lastCheckpointAt, whichever is newer — is older than the operator adapter's
+ * threshold (oneshot/delegate 5 min, tmux 30 min, unknown 15 min) is
+ * considered dead: the harness crashed or never picked the task up. The
+ * wakeup returns to 'queued' (so the next cycle can re-dispatch), the linked
+ * session is failed, and the operator slot is freed. Everything is logged on
+ * both spines as task_claim_stale_reclaimed.
+ */
+export async function reclaimStaleClaims(now: Date = new Date()): Promise<number> {
+  const inFlight = await db
+    .select()
+    .from(agentWakeupRequests)
+    .where(inArray(agentWakeupRequests.status, ['claimed', 'running']))
+  if (inFlight.length === 0) return 0
+
+  const operatorIds = [...new Set(inFlight.map(w => w.operatorId))]
+  const operatorRows = await db.select().from(operators).where(inArray(operators.id, operatorIds))
+  const operatorById = new Map(operatorRows.map(o => [o.id, o]))
+
+  let reclaimed = 0
+  for (const wakeup of inFlight) {
+    const operator = operatorById.get(wakeup.operatorId)
+    const adapter = operator ? getAdapter(operator.adapterType) : null
+    const thresholdMs = adapter?.staleClaimThresholdMs ?? DEFAULT_STALE_THRESHOLD_MS
+
+    let session: typeof agentTaskSessions.$inferSelect | undefined
+    if (wakeup.runId) {
+      ;[session] = await db.select().from(agentTaskSessions).where(eq(agentTaskSessions.id, wakeup.runId)).limit(1)
+    }
+    const lastAlive = Math.max(
+      wakeup.claimedAt?.getTime() ?? wakeup.requestedAt.getTime(),
+      session?.lastCheckpointAt?.getTime() ?? 0,
+    )
+    if (now.getTime() - lastAlive < thresholdMs) continue
+
+    // Guarded reset: only reclaim if still in a claimed/running state (a
+    // harness completing between our read and this write wins the race).
+    const [reset] = await db
+      .update(agentWakeupRequests)
+      .set({ status: 'queued', claimedAt: null, runId: null })
+      .where(and(eq(agentWakeupRequests.id, wakeup.id), inArray(agentWakeupRequests.status, ['claimed', 'running'])))
+      .returning()
+    if (!reset) continue
+    reclaimed++
+
+    if (session && (session.status === 'active' || session.status === 'queued')) {
+      await markSessionFailed(session.id, `stale claim reclaimed after ${Math.round(thresholdMs / 60000)} min without activity`)
+      if (operator) {
+        const [fresh] = await db.select().from(operators).where(eq(operators.id, operator.id)).limit(1)
+        if (fresh) {
+          await db.update(operators)
+            .set({ activeRunCount: Math.max(0, fresh.activeRunCount - 1) })
+            .where(eq(operators.id, fresh.id))
+        }
+      }
+    }
+
+    if (wakeup.taskId) {
+      await db.insert(taskEvents).values({
+        taskId: wakeup.taskId,
+        eventType: 'task_claim_stale_reclaimed',
+        actorType: 'system',
+        actorName: 'dispatch-engine',
+        summaryNote: `Stale claim reclaimed (no activity for ${Math.round((now.getTime() - lastAlive) / 60000)} min, threshold ${Math.round(thresholdMs / 60000)} min) — wakeup re-queued`,
+        metadata: { wakeupId: wakeup.id, operatorId: wakeup.operatorId, sessionId: session?.id ?? null, thresholdMs },
+      })
+    }
+    const [task] = wakeup.taskId
+      ? await db.select({ workspaceId: tasks.workspaceId, title: tasks.title }).from(tasks).where(eq(tasks.id, wakeup.taskId)).limit(1)
+      : []
+    await logActivity({
+      workspaceId: task?.workspaceId ?? 'personal',
+      actor: 'dispatch-engine',
+      action: 'task_claim_stale_reclaimed',
+      entityType: 'task',
+      entityId: wakeup.taskId ?? wakeup.id,
+      entityTitle: task?.title ?? 'unknown task',
+      description: `Stale ${wakeup.status} claim reclaimed for operator ${wakeup.operatorId}; wakeup re-queued`,
+      metadata: { wakeupId: wakeup.id, operatorId: wakeup.operatorId, thresholdMs },
+      actorType: 'system',
+      actorName: 'dispatch-engine',
+      eventFamily: 'agent',
+      eventType: 'task_claim_stale_reclaimed',
+      sourceSystem: 'api',
+      status: 'success',
+    })
+  }
+  return reclaimed
 }
 
 const DISPATCHABLE_LEGACY_STATUSES = ['Backlog', 'To Do']
@@ -117,7 +215,14 @@ export async function settleDispatchOnTerminal(taskId: string): Promise<void> {
 }
 
 export async function runDispatchCycle(): Promise<DispatchSummary> {
-  const summary: DispatchSummary = { candidates: 0, ready: 0, claimed: 0, dispatched: 0, skipped: [], errors: [] }
+  const summary: DispatchSummary = { reclaimed: 0, candidates: 0, ready: 0, claimed: 0, dispatched: 0, skipped: [], errors: [] }
+
+  // 0. Reclaim dead claims first so their slots/wakeups are visible below.
+  try {
+    summary.reclaimed = await reclaimStaleClaims()
+  } catch (err) {
+    console.error('[runDispatchCycle] stale reclamation failed', err)
+  }
 
   // 1. Candidate tasks: dispatchable status + agent/function assignee.
   const candidates = await db

@@ -9,9 +9,9 @@ import { check, finish, TEST_PREFIX } from './_probe-env'
 
 async function main() {
   const { db } = await import('@/lib/db')
-  const { tasks } = await import('@/lib/db/schema')
+  const { tasks, activityLog } = await import('@/lib/db/schema')
   const { evaluateReadiness } = await import('@/lib/dispatch/readiness')
-  const { eq, like } = await import('drizzle-orm')
+  const { eq, like, sql } = await import('drizzle-orm')
 
   const title = `${TEST_PREFIX} D1 stray-status probe`
   let taskId: string | null = null
@@ -48,6 +48,8 @@ async function main() {
     )
   } finally {
     if (taskId) await db.delete(tasks).where(eq(tasks.id, taskId))
+    // A DB-side hook logs task creation to activity_log — sweep that too.
+    await db.delete(activityLog).where(sql`${activityLog.entityTitle} LIKE ${TEST_PREFIX + '%'}`)
     const residue = await db.select({ id: tasks.id }).from(tasks).where(like(tasks.title, `${TEST_PREFIX}%`))
     check('residual test tasks = 0', residue.length === 0, `${residue.length} left`)
   }

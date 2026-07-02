@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Council Report — Is Cockpit overkill or necessary?</title>
+<style>
+  :root {
+    --ink: #1a1a1a; --muted: #6b7280; --line: #e5e7eb; --bg: #ffffff; --soft: #f9fafb;
+    --contrarian: #b91c1c; --firstp: #1d4ed8; --expansion: #047857; --outsider: #7c3aed; --executor: #b45309;
+    --verdict: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 80px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 32px; }
+  .kicker { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  h1 { font-size: 28px; line-height: 1.25; margin: 0 0 12px; }
+  .question { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 16px 20px; color: #374151; font-size: 15px; }
+  h2 { font-size: 20px; margin: 40px 0 12px; }
+  h3 { font-size: 16px; margin: 24px 0 8px; }
+  .verdict { border: 1px solid var(--line); border-left: 4px solid var(--verdict); border-radius: 10px; padding: 4px 24px 20px; margin-top: 16px; }
+  .verdict h2 { margin-top: 24px; font-size: 18px; }
+  .verdict .headline { font-size: 17px; font-weight: 600; background: var(--soft); border-radius: 8px; padding: 14px 16px; margin-top: 20px; }
+  .first-thing { border: 1px solid #d1d5db; background: #0f172a; color: #f8fafc; border-radius: 10px; padding: 18px 22px; margin: 24px 0; }
+  .first-thing .label { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
+  table.positions { width: 100%; border-collapse: collapse; margin: 16px 0 8px; font-size: 14px; }
+  table.positions th, table.positions td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+  table.positions th { background: var(--soft); font-weight: 600; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; }
+  .spectrum { display: flex; align-items: center; gap: 0; margin: 20px 0 6px; }
+  .spectrum .band { flex: 1; height: 8px; }
+  .spectrum-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+  .pin-row { position: relative; height: 30px; margin-top: -14px; }
+  .pin { position: absolute; transform: translateX(-50%); font-size: 11px; font-weight: 600; white-space: nowrap; top: 12px; }
+  .pin::before { content: ""; position: absolute; left: 50%; top: -10px; width: 2px; height: 8px; background: currentColor; }
+  details { border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; overflow: hidden; }
+  details summary { cursor: pointer; padding: 14px 18px; font-weight: 600; background: var(--soft); list-style: none; display: flex; align-items: center; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; margin-left: auto; color: var(--muted); font-weight: 400; }
+  details[open] summary::after { content: "–"; }
+  details .body { padding: 4px 20px 18px; font-size: 15px; color: #374151; }
+  .badge { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; border-radius: 999px; padding: 2px 10px; margin-left: 10px; }
+  .badge.won { background: #fef3c7; color: #92400e; }
+  .badge.rejected { background: #fee2e2; color: #991b1b; }
+  ul { padding-left: 22px; } li { margin: 6px 0; }
+  footer { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; color: var(--muted); }
+  strong { font-weight: 650; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="kicker">LLM Council · 5 advisors · anonymized peer review · chairman synthesis</p>
+  <h1>Is Cockpit a nice-to-have, overkill, or absolutely necessary?</h1>
+  <div class="question">
+    Oli runs three ventures solo (Byron Film, KORUS, consulting) and is betting on agentic workflows.
+    He has built Cockpit — a custom system of record with task lifecycle, activity log + vector search,
+    operator registry, wakeup queue, integrations, and a just-completed dispatch engine.
+    Reality: ~23 tasks, 2 operators, dispatch switched off, tasks admitted to go stale.
+    What's the bare minimum for a one-man band whose future workforce is agents?
+  </div>
+</header>
+
+<div class="first-thing">
+  <div class="label">The one thing to do first</div>
+  This week: pick one real revenue-adjacent deliverable (Byron Film or KORUS — <em>not</em> a Cockpit task),
+  register it, run the dispatch cron by hand on the Mac, and let Hermes execute it end-to-end with progress
+  written back through the events API. One real task through the loop settles what the council argued in five voices.
+</div>
+
+<h2>The verdict</h2>
+<div class="verdict">
+  <div class="headline">Cockpit is neither necessary nor pure overkill — it is a justified core wrapped in
+  premature infrastructure, and the verdict is decided by a test, not a debate.</div>
+
+  <h2>Where the council agrees</h2>
+  <ul>
+    <li><strong>Overbuilt for its inputs.</strong> 23 tasks and 2 operators don't need vector search, budget governance, or wakeup queues. 4 of 5 advisors, independently.</li>
+    <li><strong>The spec indicts itself.</strong> "Tasks stale for weeks / drifts from reality" is a usage failure that was answered with more infrastructure.</li>
+    <li><strong>The work has been circular.</strong> The agents' biggest project so far is the platform for coordinating agents.</li>
+    <li><strong>Freeze the roadmap.</strong> Nobody — including the Expansionist — argued for proceeding with the remaining phases as planned. Future phases are earned by usage, not scheduled.</li>
+  </ul>
+
+  <h2>Where the council clashes</h2>
+  <ul>
+    <li><strong>Demolish vs. test what exists.</strong> Three advisors said retreat to markdown for 60 days; the Executor said the loop is one step from done — run one real task through it this week and let the result decide. Peer review broke the tie: all five reviews named the Executor strongest, because a falsifiable one-week test beats an unfalsifiable abstinence pledge.</li>
+    <li><strong>Tool vs. product.</strong> The Expansionist alone saw Cockpit as a prototype of an agent-native ops category. Every review called this the biggest blind spot (a third job while two businesses starve) — but kept its one operational insight: a working demo of auto-dispatched agent labor is worth more than the next three phases combined.</li>
+  </ul>
+
+  <h2>Blind spots only peer review caught</h2>
+  <ul>
+    <li><strong>The cost accounting was wrong.</strong> Agents did much of the building — the real cost is Oli's attention + maintenance, and keeping a <em>frozen</em> Cockpit is nearly free. (Danger: agent labor makes building the wrong thing feel cheap.)</li>
+    <li><strong>Drift is medium-independent.</strong> A markdown list goes stale exactly like Cockpit unless updating is a side effect of doing the work. Agents writing state back through the events API is the actual fix — and the strongest argument that exists <em>for</em> Cockpit.</li>
+    <li><strong>Agents are the users, not Oli.</strong> Stateless agents recovering context may justify a durable system of record at task counts far below human-pain thresholds — for the record layer, not the orchestration layer.</li>
+    <li><strong>Nobody defined a success metric.</strong> Without one, any freeze just defers the same argument.</li>
+  </ul>
+
+  <h2>The recommendation</h2>
+  <p>The bare minimum for a solo agentic operator is three things Cockpit already has: a task list agents read/write
+  via API, an activity log agents update as a side effect of executing, and one working dispatch loop. Everything else
+  is inventory, not leverage — keep it frozen, build nothing new on it.</p>
+  <p><strong>The 30-day test:</strong> every task flows through Cockpit because <em>agents write to it while doing real
+  business work</em> — not because Oli hand-tends it. Pass = ≥10 real tasks dispatched end-to-end AND agents (not Oli)
+  wrote the majority of task-state updates in the activity log. Pass → Cockpit has earned its next phase. Fail → markdown
+  plus Hermes was the bare minimum all along; archive the DB and walk away without guilt (the sunk cost was mostly agent labor).</p>
+  <p>The product play is rejected as a plan, retained as a tiebreaker: if the loop works on real work, that door reopens. Not before.</p>
+</div>
+
+<h2>Advisor positions</h2>
+<div class="spectrum">
+  <div class="band" style="background:#fecaca"></div>
+  <div class="band" style="background:#fde68a"></div>
+  <div class="band" style="background:#bbf7d0"></div>
+</div>
+<div class="pin-row">
+  <span class="pin" style="left:8%; color:var(--contrarian)">Contrarian</span>
+  <span class="pin" style="left:22%; color:var(--firstp)">First Principles</span>
+  <span class="pin" style="left:36%; color:var(--outsider)">Outsider</span>
+  <span class="pin" style="left:58%; color:var(--executor)">Executor</span>
+  <span class="pin" style="left:90%; color:var(--expansion)">Expansionist</span>
+</div>
+<div class="spectrum-labels"><span>Kill it / retreat to markdown</span><span>Test what exists</span><span>Double down / productize</span></div>
+
+<table class="positions">
+  <tr><th>Advisor</th><th>Verdict</th><th>Bare minimum proposed</th></tr>
+  <tr><td><span class="dot" style="background:var(--contrarian)"></span><strong>Contrarian</strong></td>
+      <td>Overkill — usage problem answered with infrastructure; unpriced maintenance tax</td>
+      <td>Markdown list per venture + weekly review; 60-day freeze</td></tr>
+  <tr><td><span class="dot" style="background:var(--firstp)"></span><strong>First Principles</strong></td>
+      <td>Wrong question — no coordination bottleneck exists at this scale; nervous system before the organism</td>
+      <td>Markdown per workspace in git + Hermes + weekly ritual; let demand pull infrastructure</td></tr>
+  <tr><td><span class="dot" style="background:var(--outsider)"></span><strong>Outsider</strong></td>
+      <td>Air traffic control tower for an airfield with one plane; procrastination-artifact signature</td>
+      <td>One shared task list agents can read/write + daily review</td></tr>
+  <tr><td><span class="dot" style="background:var(--executor)"></span><strong>Executor</strong> <span class="badge won">named strongest by all 5 reviews</span></td>
+      <td>Overbuilt, but the loop is one step from done — test it, don't torch it</td>
+      <td>Task API + activity log + one working dispatch loop (all already exist); "Phases are earned, not planned"</td></tr>
+  <tr><td><span class="dot" style="background:var(--expansion)"></span><strong>Expansionist</strong> <span class="badge rejected">named biggest blind spot by all 5 reviews</span></td>
+      <td>Accidental prototype of the agent-native ops category; schema is the IP</td>
+      <td>Rejects the framing — turn dispatch ON this month and treat Cockpit as the flagship</td></tr>
+</table>
+
+<h2>Full advisor responses</h2>
+
+<details><summary><span class="dot" style="background:var(--contrarian)"></span>The Contrarian</summary><div class="body">
+<p>Here's the fatal flaw: Cockpit's spec admits tasks sit "In Progress for weeks" and the tool "drifts from reality" — and the response was to build a dispatch engine. You had a <em>usage</em> problem and you shipped an <em>infrastructure</em> answer. That's the tell. Twenty-three tasks don't need vector embeddings, hybrid semantic search, a wakeup-request coalescing queue, or an operator budget registry. You could hold 23 tasks in your head. You built a system of record before there was a record worth systematizing.</p>
+<p>Ask the question you're avoiding: what revenue-producing work happened in Byron Film or KORUS during the months Cockpit was built? If Cockpit vanished tomorrow, what actually breaks? Nothing auto-dispatches — the flagship feature is switched off and has never run a real agent. You've built an airport for planes that haven't been invented into service yet.</p>
+<p>The deeper trap: your two convictions don't imply this build. "Agents are the future" argues for <em>using</em> agents on business work daily and letting tooling emerge from felt friction. Instead you inverted it — the agents' biggest project is building their own filing cabinet. That's the classic solo-founder failure mode: meta-work feels like progress because it compiles.</p>
+<p>Also, nobody's pricing the maintenance tax. A custom Next.js/Postgres app with eight subsystems is a liability you alone must patch, migrate, and debug forever — on a Hobby plan, with no tests.</p>
+<p>Bare minimum: a markdown task list per venture, a weekly review, and agents pointed at <em>client-facing</em> work. Freeze Cockpit for 60 days. If you genuinely miss it — not the building of it, the <em>using</em> of it — you'll know exactly which 10% to keep. My bet: you won't miss the other 90%.</p>
+</div></details>
+
+<details><summary><span class="dot" style="background:var(--firstp)"></span>The First Principles Thinker</summary><div class="body">
+<p>Strip the question down. You asked "is this build necessary?" — wrong question. The right question: <strong>what is the actual bottleneck between Oli and revenue?</strong> It is not task coordination. A solo operator with ~23 tasks does not have a coordination problem. Coordination problems emerge from <em>scale</em> — multiple actors generating work faster than one brain can track. You have two operators, one of whom is you, and the other has never been auto-dispatched.</p>
+<p>First principles: a system of record is justified when the cost of <em>not</em> having it (dropped balls, duplicated work, lost context) exceeds the cost of maintaining it. At your scale, the cost of not having it is near zero — you can hold 23 tasks in a text file. The cost of having it is months of your only scarce resource. The spec's own admission — tasks stale for weeks, Cockpit "drifting from reality" — is the tell: the system already demands more maintenance energy than the work it organizes. That's an inverted tool.</p>
+<p>Notice what you actually built: not an ops tool, but <em>infrastructure for a hypothetical future</em> — dispatch engines for agents that don't run, budgets for operators that don't exist. You're building the nervous system before the organism. Convictions (1) and (2) don't require Cockpit; they require <strong>agents doing real business work today</strong> — invoices processed, emails drafted, Eklair shipped. The coordination layer should be <em>extracted from</em> observed agent-work friction, not speculated in advance.</p>
+<p>Bare minimum: a markdown task list per workspace in git, Hermes reading/writing it, and a weekly review ritual. When real dispatched-agent volume creates real pain, you'll know exactly which 10% of Cockpit to resurrect — and it will be a different 10% than you'd guess today.</p>
+<p>Freeze the build. Point the agents at the businesses. Let demand pull the infrastructure into existence.</p>
+</div></details>
+
+<details><summary><span class="dot" style="background:var(--expansion)"></span>The Expansionist</summary><div class="body">
+<p>Everyone is going to tell you 23 tasks doesn't justify this stack. Wrong frame. Cockpit isn't a task manager for one guy — it's an accidental prototype of the scarcest product category of the next five years: the agent-native operating layer for solo operators running multi-entity businesses. Linear, Asana, Notion — all built for human teams. Nobody has shipped the system of record where humans and agents are peers in the same operator registry, with budgets, session tracking, dispatch, and an append-only event spine agents can semantically query. You built that. Before the market has a name for it.</p>
+<p>The undervalued asset isn't the app — it's the <em>schema</em>. The operator model, activity-log-as-truth, wakeup queues, harness adapters: that's transferable IP. If agentic work goes the way you're betting, every solo operator and 5-person studio hits your exact problem in 18 months. Cockpit-as-product, Cockpit-as-open-source-with-hosted-tier, or Cockpit as the credibility artifact that makes KORUS and your consulting 10x more sellable — "the guy who runs three businesses through an agent cockpit" is a category-defining story. Byron Film becomes the case study: the first film company operated agent-first.</p>
+<p>And the compounding math: if dispatch actually works, your capacity isn't 1x — it's 1 + N operators, each logged, budgeted, measurable. The 23-task database isn't evidence of failure; it's evidence you built the airport before the planes landed. Planes are landing quarterly now.</p>
+<p>So the bigger play: stop treating this as internal tooling and start treating it as the flagship. Turn dispatch ON this month, even ugly, even for one agent — because a working demo of auto-dispatched agent labor is worth more than the next three phases combined. The bare minimum question is small-ball. The real question is whether you're building your admin tool or your next company.</p>
+</div></details>
+
+<details><summary><span class="dot" style="background:var(--outsider)"></span>The Outsider</summary><div class="body">
+<p>Here is what a stranger sees, stripped of your context: a man with 23 tasks built a coordination platform with an event spine, vector search, budget governance, operator registries, and a dispatch engine — for a team of two, one of whom is him. Twenty-three tasks fit on a napkin. You have built an air traffic control tower for an airfield with one plane, and the plane is you.</p>
+<p>Three things you can no longer see because you're inside it:</p>
+<p>1. <strong>The spec indicts itself.</strong> Your own problem statement says tasks sit "In Progress for weeks" and the system "drifts from reality." An outsider reads that plainly: the tool you built to track work is not being used, and your response was to build more tool. That is the signature of a procrastination artifact — the fix for the system failing is never phase 3 of the system.</p>
+<p>2. <strong>The work is circular.</strong> You believe agents will do an increasing share of execution. What have the agents mostly executed so far? The platform for coordinating agents. The dispatch engine has dispatched zero real tasks. Byron Film and KORUS — the actual businesses — appear in this pitch only as names. What did they ship while Cockpit was being built? A stranger would ask that first.</p>
+<p>3. <strong>You already own the answer.</strong> You built Notion sync. Notion — or Linear, or a markdown file the agents can read — already does 90% of what a one-man band needs: a list, a priority, a log. Your bare minimum is one shared task list your agents can read and write, plus a daily review habit. That's it.</p>
+<p>The convictions may be right. But convictions about the future don't require infrastructure ahead of demand. Freeze the build. Run the businesses for 60 days on what exists. Build the next feature only when a real bottleneck screams for it.</p>
+</div></details>
+
+<details><summary><span class="dot" style="background:var(--executor)"></span>The Executor</summary><div class="body">
+<p>Cockpit is overbuilt for its inputs. You have 23 tasks, one human, and a dispatch engine that has never dispatched anything. That's not a nervous system — that's a factory built before the first customer order. The tell is in your own spec: tasks rot "In Progress for weeks" while you build embeddings and wakeup queues. You're automating a workflow you don't actually run yet.</p>
+<p>What do you do Monday morning? Three things:</p>
+<p>1. <strong>Freeze the build.</strong> No tmux steering, no governance queues, no UI rebuilds. The dispatch engine ships when it has dispatched ten real tasks, not before. Phase 2 and 3 are earned, not planned.</p>
+<p>2. <strong>Turn on what exists with one real task.</strong> The dispatch engine needs a local host? Your Mac is a local host. Run the cron by hand if you must. Pick one real Byron Film or KORUS deliverable, register it, dispatch Hermes at it, and see what breaks. One end-to-end loop with real work teaches you more than a month of hardening.</p>
+<p>3. <strong>Adopt a brutal usage rule:</strong> every task in Cockpit or Cockpit dies. If next Friday the DB still has ~23 tasks, the honest answer is that a markdown file plus Hermes reading it was the bare-minimum system all along — and you already have that.</p>
+<p>The bare minimum for a one-man agentic shop is: a task list agents can read and write via API (you have it), an activity log (you have it), and one working dispatch loop (you almost have it). Everything else — priority engines, Notion sync, user tables, budgets for operators who don't exist — is inventory, not leverage.</p>
+<p>Your convictions may be right. But conviction (1) is proven by dispatching an agent, not by building the dispatcher. Ship the loop. This week.</p>
+</div></details>
+
+<h2>Peer review highlights</h2>
+<details><summary>What the five anonymous reviews said</summary><div class="body">
+<ul>
+<li><strong>Unanimous strongest: the Executor</strong> (5/5 reviews) — the only advisor who converted the shared diagnosis into a falsifiable test with a deadline, and the only one who noticed the dispatch loop is one step from done, making "run it once" the cheapest possible experiment. "Phases are earned, not planned" repeatedly cited as the operative principle.</li>
+<li><strong>Unanimous biggest blind spot: the Expansionist</strong> (5/5 reviews) — productizing an unused internal tool stacks a second unvalidated bet on the first and hands a solo operator a third job; "schema as transferable IP" is unfalsifiable without a single external user. Its one salvaged insight: turn dispatch on now, a working demo beats the remaining phases.</li>
+<li><strong>Shared miss #1 — the cost model:</strong> advisors priced the build in founder-months, but agents did most of the building; the real cost is attention + maintenance, and a frozen Cockpit is nearly free to keep. Corollary risk: agent labor makes building the wrong thing feel cheap.</li>
+<li><strong>Shared miss #2 — drift is medium-independent:</strong> markdown goes stale exactly like Cockpit unless updating happens as a side effect of agents doing the work — which Cockpit's events API supports and markdown can't. The strongest pro-Cockpit argument came from the review round, not from any advisor.</li>
+<li><strong>Shared miss #3 — agents are the users:</strong> stateless agents recovering context across sessions may justify a durable system of record at task counts far below human-pain thresholds.</li>
+<li><strong>Shared miss #4 — no success metric:</strong> a freeze without a measurable pass/fail just defers the argument; Cockpit's own activity log can supply the data.</li>
+</ul>
+</div></details>
+
+<footer>
+  Counciled 2026-07-02 23:51 (Australia/Sydney) · 5 advisors + 5 anonymous peer reviews + chairman synthesis ·
+  Full transcript: <code>council-transcript-20260702-235148.md</code>
+</footer>
+
+</div>
+</body>
+</html>

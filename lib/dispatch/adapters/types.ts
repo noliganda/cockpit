@@ -19,11 +19,23 @@ export interface DispatchResult {
   detail: string
 }
 
+/** Extra inputs the engine resolves before dispatch (spec §8 Phase 4). */
+export interface DispatchContext {
+  /** Satisfied needs_artifact prerequisites: their titles + artifact URLs. */
+  artifacts?: { title: string; artifactUrl: string }[]
+}
+
 export interface HarnessAdapter {
   type: string
+  /**
+   * How long a claimed/running wakeup may sit without completion before the
+   * engine reclaims it as stale (spec §10 Q3: per-adapter thresholds).
+   */
+  staleClaimThresholdMs: number
   dispatch(
     task: DispatchTask,
     operator: DispatchOperator,
     wakeup: DispatchWakeup,
+    context?: DispatchContext,
   ): Promise<DispatchResult>
 }

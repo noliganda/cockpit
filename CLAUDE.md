@@ -27,6 +27,8 @@ node scripts/update_operators.mjs
 ```
 There is **no test framework** in this repo — verification is `npm run build` plus manual checks. `.mjs` scripts read `.env.local` directly; API code reads `process.env`.
 
+**`.env.local` provenance:** secrets live ONLY in the SOPS-encrypted `~/workspaces/_shared/secrets.env`; `.env.local` is a gitignored, throwaway file **derived** from that store (via `~/workspaces/_shared/tools/decrypt-env.sh`) — never author it by hand, never commit it.
+
 ## Architecture
 
 **Stack:** Next.js 15 App Router + React 19, TypeScript, Drizzle ORM on Neon serverless Postgres (`neon-http`), Tailwind v4, Radix primitives, BlockNote/Mantine (note editor), `recharts` (metrics), `openai` (embeddings + chat). Path alias `@/*` → repo root.

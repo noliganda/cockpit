@@ -53,10 +53,16 @@ verification.
 
 ## 5. Open follow-up (intentionally deferred)
 
-- **Migration `drizzle/0009_task_dependencies.sql` has NOT been applied to the DB.**
+- ~~**Migration `drizzle/0009_task_dependencies.sql` has NOT been applied to the DB.**
   Per instruction only the SQL file was created (no `db:push`). Run `npm run db:push`
   (or apply 0009 directly) before the dependency routes / cascade operate against
-  live Postgres.
+  live Postgres.~~ **RESOLVED later on 2026-07-02:** 0009 applied directly to Neon
+  (table + all 3 indexes confirmed) and the cascade verified end-to-end per spec §8
+  Phase 1 — two test tasks + a `blocks` edge via the API, prereq marked Done
+  (lifecycle requires To Do → In Progress → Done), and the dependent received a
+  queued `agent_wakeup_request` (source `dependency_cascade`), a `task_unblocked`
+  task_event, and a `dependency_cascade` activity_log row. All test rows and the
+  throwaway `test-cascade-op` operator were deleted afterwards.
 - **Phase 2 was NOT started** (dispatcher, adapters, cron poller) — deliberately
   stopped after Phase 1 per the PM instruction. See
   `docs/current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md` §8 for the phase plan.

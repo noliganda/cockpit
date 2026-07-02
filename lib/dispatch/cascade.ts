@@ -89,7 +89,10 @@ export async function cascadeOnCompletion(taskId: string): Promise<CascadeResult
 
       // Enqueue a wakeup request. Readiness guarantees a registered, active
       // operator, so the operatorId FK on agent_wakeup_requests is satisfied.
-      await createWakeupRequest(
+      // A coalesced result means an earlier cascade (e.g. the inline PATCH-path
+      // run, re-observed by the cron watermark) already promoted this dependent —
+      // skip the side-effect logging so re-runs stay idempotent.
+      const enqueued = await createWakeupRequest(
         dependent.assigneeId!,
         dependent.id,
         'dependency_cascade',
@@ -101,6 +104,7 @@ export async function cascadeOnCompletion(taskId: string): Promise<CascadeResult
           idempotencyKey: dependent.id,
         },
       )
+      if (enqueued?.coalesced) continue
       result.promoted++
 
       // Structured task_event on the dependent.

@@ -58,7 +58,20 @@ export const operators = pgTable('operators', {
   lastHeartbeatAt: timestamp('last_heartbeat_at', { withTimezone: true }),
   pausedAt: timestamp('paused_at', { withTimezone: true }),
   pauseReason: text('pause_reason'),
+  // Dispatch engine fields (Phase 2 — migration 0010)
+  adapterType: text('adapter_type'), // 'hermes-oneshot' | 'hermes-delegate' | 'hermes-tmux' | 'claude-tmux'
+  dispatchConfig: jsonb('dispatch_config').notNull().default({}), // adapter-specific params: workdir, model, tmux session, etc.
+  maxConcurrent: integer('max_concurrent').notNull().default(1),
+  activeRunCount: integer('active_run_count').notNull().default(0),
   ...timestamps,
+})
+
+// ── Dispatch state (single-row watermark for the cron dispatch cycle) ─────
+export const dispatchState = pgTable('dispatch_state', {
+  id: text('id').primaryKey(), // always 'singleton'
+  lastCascadeAt: timestamp('last_cascade_at', { withTimezone: true }),
+  lastCycleAt: timestamp('last_cycle_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
 export const tasks = pgTable('tasks', {

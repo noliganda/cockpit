@@ -8,16 +8,17 @@
  * ready to be dispatched?" without mutating anything. It is consumed by the
  * dependency cascade (Phase 1) and will be consumed by the dispatcher (Phase 2).
  *
- * Phase-1 scope note: the operator dispatch columns (`adapter_type`,
- * `max_concurrent`, `active_run_count`) land in migration 0010 (Phase 2), so the
- * concurrency check is deferred. The checks implemented here are everything the
- * current schema supports: assignment, task state, dependency satisfaction,
- * operator existence/activity/budget, and no in-flight session.
+ * Checks: assignment, task state, dependency satisfaction, operator
+ * existence/activity/budget, per-operator concurrency (Phase 2, migration 0010),
+ * and no in-flight session. A missing/unregistered adapter is reported as a
+ * blocker rather than an error so seeded-but-not-yet-dispatchable operators
+ * (e.g. claude-code before Phase 3) simply never dispatch.
  */
 import { db } from '@/lib/db'
 import { tasks, operators, taskDependencies, agentTaskSessions } from '@/lib/db/schema'
 import { eq, inArray, and } from 'drizzle-orm'
 import { toNormalized } from '@/lib/task-lifecycle'
+import { getAdapter } from './adapters'
 
 export interface ReadinessResult {
   ready: boolean
@@ -106,6 +107,14 @@ export async function evaluateReadiness(taskId: string): Promise<ReadinessResult
       // Budget acts as a ceiling only when one is set (>0). 0 = unmetered.
       if (operator.budgetMonthlyCents > 0 && operator.spentMonthlyCents >= operator.budgetMonthlyCents) {
         blockers.push(`operator "${operator.id}" is over budget`)
+      }
+      if (!operator.adapterType) {
+        blockers.push(`operator "${operator.id}" has no adapter configured`)
+      } else if (!getAdapter(operator.adapterType)) {
+        blockers.push(`operator "${operator.id}" adapter "${operator.adapterType}" is not registered (yet)`)
+      }
+      if (operator.activeRunCount >= operator.maxConcurrent) {
+        blockers.push(`operator "${operator.id}" is at max concurrency (${operator.activeRunCount}/${operator.maxConcurrent})`)
       }
     }
   }

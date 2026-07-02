@@ -61,6 +61,9 @@ export async function createTaskSession(
 
 /**
  * Enqueue or coalesce an agent wakeup request for execution via heartbeat.
+ * Returns the queued request plus whether it coalesced into an existing one —
+ * callers that log per-wakeup side effects (e.g. the dependency cascade) must
+ * only do so when `coalesced` is false, or watermark re-runs duplicate events.
  */
 export async function createWakeupRequest(
   operatorId: string,
@@ -93,7 +96,7 @@ export async function createWakeupRequest(
       .update(agentWakeupRequests)
       .set({ coalescedCount: existing.coalescedCount + 1 })
       .where(eq(agentWakeupRequests.id, existing.id))
-    return
+    return { request: existing, coalesced: true as const }
   }
   // Insert new wakeup request
   const values: typeof agentWakeupRequests.$inferInsert = {
@@ -125,6 +128,7 @@ export async function createWakeupRequest(
   } catch (err) {
     console.error('Failed to log agent wakeup request', err)
   }
+  return { request, coalesced: false as const }
 }
 
 /**

@@ -15,6 +15,7 @@ import {
 } from '@/lib/task-lifecycle'
 import { applyParentRollup, validateReparent, getChildCount } from '@/lib/task-hierarchy'
 import { cascadeOnCompletion } from '@/lib/dispatch/cascade'
+import { settleDispatchOnTerminal } from '@/lib/dispatch/engine'
 
 // ── Patch schema — all fields optional, validated where needed ───────────────
 
@@ -275,11 +276,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       await applyParentRollup(current.parentTaskId, id)
     }
 
-    // ── Dependency cascade: on transition to Done, promote ready dependents ─
-    // Enqueues wakeup requests for dependents whose prerequisites are now met.
-    // Never throws (swallows its own errors); nothing claims the requests yet
-    // (the dispatcher arrives in Phase 2).
-    if (statusChanging && toNormalized(task.status) === 'done') {
+    // ── Dispatch settle + dependency cascade on terminal transitions ─
+    // Settle FIRST so freed operator concurrency slots are visible to the
+    // cascade's readiness checks. Both never throw.
+    const normalizedTarget = statusChanging ? toNormalized(task.status) : null
+    if (normalizedTarget === 'done' || normalizedTarget === 'cancelled') {
+      await settleDispatchOnTerminal(id)
+    }
+    if (normalizedTarget === 'done') {
       await cascadeOnCompletion(id)
     }
 

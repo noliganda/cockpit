@@ -4,9 +4,12 @@
  * Phase 1 of the dispatch engine (see
  * docs/current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md §5.1).
  *
- * `evaluateReadiness` is a PURE, READ-ONLY function: it answers "is this task
- * ready to be dispatched?" without mutating anything. It is consumed by the
- * dependency cascade (Phase 1) and will be consumed by the dispatcher (Phase 2).
+ * `evaluateReadiness` answers "is this task ready to be dispatched?". It is
+ * read-only with ONE deliberate exception (spec §9, Phase 4): discovering an
+ * over-budget ACTIVE operator auto-pauses it (status='paused',
+ * pauseReason='budget_exceeded') and notifies via task_event + activity_log.
+ * The pause is idempotent (guarded UPDATE ... WHERE status='active') and never
+ * throws — a notification failure must not break the readiness answer.
  *
  * Checks: assignment, task state, dependency satisfaction, operator
  * existence/activity/budget, per-operator concurrency (Phase 2, migration 0010),
@@ -15,9 +18,10 @@
  * (e.g. claude-code before Phase 3) simply never dispatch.
  */
 import { db } from '@/lib/db'
-import { tasks, operators, taskDependencies, agentTaskSessions } from '@/lib/db/schema'
+import { tasks, operators, taskDependencies, agentTaskSessions, taskEvents } from '@/lib/db/schema'
 import { eq, inArray, and } from 'drizzle-orm'
 import { toNormalized, isKnownStatus } from '@/lib/task-lifecycle'
+import { logActivity } from '@/lib/activity'
 import { getAdapter } from './adapters'
 
 export interface ReadinessResult {
@@ -48,6 +52,59 @@ function isPrerequisiteSatisfied(
     case 'blocks':
     default:
       return normalized === 'done'
+  }
+}
+
+/**
+ * Auto-pause an over-budget operator (spec §9 budget guard). Idempotent: the
+ * guarded UPDATE only fires while the operator is still 'active', so repeated
+ * readiness checks can't stack pauses or duplicate notifications. Never throws.
+ */
+async function autoPauseOverBudget(
+  operator: typeof operators.$inferSelect,
+  triggeringTaskId: string,
+): Promise<void> {
+  try {
+    if (operator.status !== 'active') return
+    const [paused] = await db
+      .update(operators)
+      .set({ status: 'paused', pausedAt: new Date(), pauseReason: 'budget_exceeded' })
+      .where(and(eq(operators.id, operator.id), eq(operators.status, 'active')))
+      .returning()
+    if (!paused) return // raced another readiness check — it did the notifying
+
+    const detail = `Operator "${operator.id}" auto-paused: spent ${operator.spentMonthlyCents}¢ of ${operator.budgetMonthlyCents}¢ monthly budget`
+    await db.insert(taskEvents).values({
+      taskId: triggeringTaskId,
+      eventType: 'operator_paused',
+      actorType: 'system',
+      actorName: 'dispatch-readiness',
+      summaryNote: `${detail} — task cannot dispatch until the budget is raised or spend reset`,
+      metadata: {
+        operatorId: operator.id,
+        pauseReason: 'budget_exceeded',
+        budgetMonthlyCents: operator.budgetMonthlyCents,
+        spentMonthlyCents: operator.spentMonthlyCents,
+      },
+    })
+    await logActivity({
+      workspaceId: 'personal',
+      actor: 'dispatch-readiness',
+      action: 'operator_paused',
+      entityType: 'operator',
+      entityId: operator.id,
+      entityTitle: operator.name,
+      description: detail,
+      metadata: { pauseReason: 'budget_exceeded', budgetMonthlyCents: operator.budgetMonthlyCents, spentMonthlyCents: operator.spentMonthlyCents, triggeringTaskId },
+      actorType: 'system',
+      actorName: 'dispatch-readiness',
+      eventFamily: 'agent',
+      eventType: 'operator_paused',
+      sourceSystem: 'api',
+      status: 'success',
+    })
+  } catch (err) {
+    console.error('[autoPauseOverBudget]', operator.id, err)
   }
 }
 
@@ -112,6 +169,7 @@ export async function evaluateReadiness(taskId: string): Promise<ReadinessResult
       // Budget acts as a ceiling only when one is set (>0). 0 = unmetered.
       if (operator.budgetMonthlyCents > 0 && operator.spentMonthlyCents >= operator.budgetMonthlyCents) {
         blockers.push(`operator "${operator.id}" is over budget`)
+        await autoPauseOverBudget(operator, taskId)
       }
       if (!operator.adapterType) {
         blockers.push(`operator "${operator.id}" has no adapter configured`)

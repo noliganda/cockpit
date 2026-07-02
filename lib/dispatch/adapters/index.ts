@@ -1,13 +1,19 @@
 /**
  * Adapter registry (spec §5.3). `operator.adapterType` selects the adapter.
- * Phase 2 ships hermes-oneshot only; hermes-delegate / hermes-tmux / claude-tmux
- * arrive in Phase 3. An unregistered type is a readiness blocker, not an error.
+ * All four spec adapters are registered (Phase 3). An unregistered type is a
+ * readiness blocker, not an error.
  */
 import type { HarnessAdapter } from './types'
 import { hermesOneshotAdapter } from './hermes-oneshot'
+import { hermesDelegateAdapter } from './hermes-delegate'
+import { hermesTmuxAdapter } from './hermes-tmux'
+import { claudeTmuxAdapter } from './claude-tmux'
 
 const adapters = new Map<string, HarnessAdapter>([
   [hermesOneshotAdapter.type, hermesOneshotAdapter],
+  [hermesDelegateAdapter.type, hermesDelegateAdapter],
+  [hermesTmuxAdapter.type, hermesTmuxAdapter],
+  [claudeTmuxAdapter.type, claudeTmuxAdapter],
 ])
 
 export function getAdapter(type: string | null): HarnessAdapter | null {
@@ -15,4 +21,8 @@ export function getAdapter(type: string | null): HarnessAdapter | null {
   return adapters.get(type) ?? null
 }
 
-export type { HarnessAdapter, DispatchResult } from './types'
+export function listAdapters(): HarnessAdapter[] {
+  return [...adapters.values()]
+}
+
+export type { HarnessAdapter, DispatchResult, DispatchContext } from './types'

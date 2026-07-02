@@ -37,8 +37,8 @@
 | E5 | Cleanup: residual test rows 0 (tasks/deps/wakeups/sessions/activity/operators) | proved | `npx tsx scripts/probes/e2e/e5-final-sweep.ts` all-pass: 0 residue across tasks/operators/deps/wakeups/sessions/events/activity + no probe/e2e tmux sessions. (Found+fixed: `trg_task_activity_on_insert` DB trigger leaks `created` activity rows on raw inserts — probes now sweep activity by title prefix.) |
 | G1 | build + lint green (final clean re-run) | proved | Final `sh scripts/probes/run-all.sh`: build ✓ (75/75 pages), lint ✓ no warnings, all 8 probes green. |
 | G2 | claude-code unpaused / DISPATCH_ENABLED unset on Vercel (verified) | proved | P3.7 probe (operator active) + prod probe: `GET https://dashboard.oliviermarcolin.com/api/cron/dispatch` w/ bearer → `{"disabled":true,"reason":"DISPATCH_ENABLED is not \"true\" on this host"}`. (Vercel CLI has no local credentials; the route-level check is the operative proof.) |
-| G3 | Prod deploy healthy post-deploy | missing | — |
-| G4 | Journal written; commits pushed to main | missing | — |
+| G3 | Prod deploy healthy post-deploy | proved | Deploy story CONFIRMED: `git push` → Vercel Git integration; new `/api/dispatch/status` went 404→200 on prod ~80s after push. Post-deploy: status 200 (dispatchEnabled:false), cron `{disabled:true}`, whoami 200, /dispatch page 307→login unauth. |
+| G4 | Journal written; commits pushed to main | proved | `docs/journal/2026-07-03-dispatch-phase3-4.md` committed; pushed f0fe627..87c9625 (15 commits) + final state commit. |
 
 ## stop
 
@@ -72,4 +72,4 @@
 - pass 10 — E3 green (manual dispatch → SIGKILL child → aged claim → status flags stale → cycle reclaims + re-dispatches, new pid). E4 thereby proved too. Note: background :3100 server gets reaped between tool calls — E2E drivers now bundle server start+run in one command. Commit e669451. Next: E2 claude-tmux E2E in fresh dispatch-e2e-claude session.
 - pass 11 — E2 green: real Claude Code completed the dispatched task from the fresh tmux session; operator config restore + session kill verified in-driver. Commit 291da1e. Next: P4.4 dashboard panel (maker→checker).
 - pass 12 — P4.4: panel built; screenshots via playwright-core + crafted local session cookie (Chrome extension unavailable); maker→checker loop 2 iterations → PASS. Full gate green (8 probes). Commit 7a2bc53. Next: E5 final sweep + G1 final gate + deploy + journal + push.
-- pass 13 — E5 sweep green (after fixing D1 probe's trigger-leaked activity rows + one-shot cleanup of 14 residual rows); final full gate green; journal finalized; committing + pushing to main; deploy verified via prod probes (G3/G4 evidence below).
+- pass 13 — E5 sweep green (after fixing D1 probe's trigger-leaked activity rows + one-shot cleanup of 14 residual rows); final full gate green; journal finalized; pushed f0fe627..87c9625; deploy confirmed live on prod (~80s); all prod probes green. → **TERMINAL: success** (every row proved; 13 passes of 30; no plateau).

@@ -47,7 +47,7 @@
 
 ## 4. Deploy
 
-- Deploy story: Vercel Git integration on push to `main` (no manual `vercel deploy`). Verified post-push: (filled at end of run).
+- Deploy story: Vercel Git integration on push to `main` (no manual `vercel deploy`). Verified post-push: the new `/api/dispatch/status` route went 404→200 on `dashboard.oliviermarcolin.com` ~80 s after `git push`; prod cron still answers `{"disabled":true}`; `/dispatch` page 307-redirects unauthenticated visitors to login.
 - `vercel.json` cron stays daily/03:00 (Hobby plan limit) and is a no-op without the flag — the REAL poller is local on the Mini, unchanged from Phase 2's conclusion.
 
 ## 5. What's NOT done / next

@@ -46,6 +46,9 @@ async function main() {
       && args[args.length - 2] === '-q' && args[args.length - 1] === prompt,
     JSON.stringify(args.slice(0, 8)))
     check('prompt carries task id + wiring protocol', prompt.includes('task-xyz') && prompt.includes('cockpit-wiring.md'))
+    check('prompt binds THIS task explicitly (anti-duplicate: start -t + -t on every call)',
+      prompt.includes('cockpit-task start -t task-xyz') && prompt.includes('never create a new one'),
+      'dispatched agents must claim the given task, not kickoff-create a duplicate')
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }

@@ -193,7 +193,9 @@ export function BriefClient({
               <span className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-widest">Brief</span>
             </div>
             {brief?.generated_at && (
-              <span className="text-xs text-[#4B5563]">
+              <span className="text-xs text-[#4B5563]" data-brief-provenance>
+                by <span className="text-[#6B7280]">{brief.generated_by}</span>
+                {' '}&middot;{' '}
                 {new Date(brief.generated_at).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true })}
                 {' '}&middot;{' '}
                 {new Date(brief.generated_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}
@@ -231,7 +233,7 @@ export function BriefClient({
               </div>
             ) : (
               <div className="text-center py-6">
-                <p className="text-[#4B5563] text-sm mb-3">No brief generated yet.</p>
+                <p className="text-[#4B5563] text-sm mb-3">No brief yet — briefs arrive automatically from the Email PA. You can also generate one now.</p>
                 <button
                   onClick={handleGenerate}
                   className="text-sm font-medium px-4 py-2 rounded-[8px] transition-all"

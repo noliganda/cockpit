@@ -12,7 +12,8 @@ import { useSidebar } from '@/hooks/use-sidebar'
 import { WorkspaceSwitcher } from './workspace-switcher'
 
 const NAV_ITEMS = [
-  { href: '/dashboard', icon: Home, label: 'Home', indent: false },
+  { href: '/', icon: Home, label: 'Home', indent: false },
+  { href: '/dashboard', icon: BarChart2, label: 'Dashboard', indent: false },
   { href: '/brief', icon: Newspaper, label: 'Brief', indent: false },
   { href: '/tasks', icon: CheckSquare, label: 'Tasks', indent: false },
   { href: '/tasks/kanban', icon: Kanban, label: 'Kanban', indent: true },
@@ -47,6 +48,7 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
   const { collapsed, toggleCollapsed } = useSidebar()
 
   const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
     if (href === '/dashboard') return pathname === '/dashboard'
     // Exact match for parent routes that have subroutes in the nav
     if (href === '/tasks') return pathname === '/tasks'

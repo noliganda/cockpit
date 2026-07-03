@@ -22,6 +22,7 @@ interface TasksClientProps {
   initialTasks: Task[]
   workspaceId: WorkspaceId
   initialStatusFilter?: string
+  initialOpenTaskId?: string
   areas?: Area[]
   projects?: Project[]
   sprints?: Sprint[]
@@ -185,7 +186,7 @@ function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOpti
   )
 }
 
-export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
+export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, initialOpenTaskId, areas = [], projects = [], sprints = [], users = [] }: TasksClientProps) {
   const [tasks, setTasks] = useState(initialTasks)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter ?? 'active')
@@ -210,6 +211,17 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, ar
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [parentForSubtask, setParentForSubtask] = useState<Task | null>(null)
   const [showIntake, setShowIntake] = useState(false)
+
+  // Deep link: /tasks?task=<id> opens that task's dialog (e.g. from /messages)
+  useEffect(() => {
+    if (!initialOpenTaskId) return
+    const linked = initialTasks.find(t => t.id === initialOpenTaskId)
+    if (linked) {
+      setEditingTask(linked)
+      setShowDialog(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialOpenTaskId])
 
   // Batch selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())

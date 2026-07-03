@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Cockpit dispatch poller: curls the local cycle every 3 min. This is the
+       REAL dispatch trigger (the deployed Vercel cron is a no-op by design). -->
+  <key>Label</key><string>com.cockpit.dispatch-poll</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>exec /Users/agentsmyth/workspaces/dev/cockpit/ops/bin/dispatch-poll.sh</string>
+  </array>
+  <key>StartInterval</key><integer>180</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/agentsmyth/Library/Logs/cockpit-dispatch/poll-launchd.log</string>
+  <key>StandardErrorPath</key><string>/Users/agentsmyth/Library/Logs/cockpit-dispatch/poll-launchd.log</string>
+</dict>
+</plist>

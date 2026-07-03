@@ -1,5 +1,5 @@
 import {
-  pgTable, text, timestamp, boolean, jsonb, uuid, integer, numeric, date, real, index, customType, unique
+  pgTable, text, timestamp, boolean, jsonb, uuid, integer, numeric, date, real, index, customType, unique, varchar
 } from 'drizzle-orm/pg-core'
 
 // Custom vector type for pgvector
@@ -644,3 +644,41 @@ export const agentWakeupRequests = pgTable('agent_wakeup_requests', {
   index('agent_wakeup_requests_operator_status_idx').on(t.operatorId, t.status),
   index('agent_wakeup_requests_task_status_idx').on(t.taskId, t.status),
 ])
+
+// ── Comm Items (message digest feed — published by the Email PA and other
+// producers; Cockpit stores previews only, never raw bodies) ─────────────────
+export const commItems = pgTable('comm_items', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  source: text('source').notNull(), // 'email' | 'whatsapp' | 'slack' | 'manual'
+  workspaceId: text('workspace_id').notNull(), // validated against workspaces on write
+  externalId: text('external_id').notNull(), // provider message id — idempotency anchor with source
+  sender: text('sender').notNull(),
+  subject: text('subject').notNull(),
+  preview: text('preview').notNull(), // 1–3 line agent-written summary, NOT the raw body
+  classification: text('classification').notNull(), // needs-reply | invoice | newsletter | notification | fyi | spam | unknown
+  actionTaken: text('action_taken').notNull().default('none'), // drafted | archived | surfaced | left | queued-task | none
+  draftId: text('draft_id'),
+  draftStatus: text('draft_status'), // awaiting-review | sent | dismissed
+  urgency: text('urgency').notNull().default('digest'), // interrupt | digest | low
+  messageTs: timestamp('message_ts', { withTimezone: true }).notNull(),
+  runId: text('run_id').notNull(), // digest/sentinel run identifier
+  linkedTaskId: uuid('linked_task_id').references(() => tasks.id),
+  ...timestamps,
+}, (t) => [
+  unique('comm_items_source_external_uq').on(t.source, t.externalId),
+  index('comm_items_message_ts_idx').on(t.messageTs),
+  index('comm_items_workspace_idx').on(t.workspaceId),
+  index('comm_items_draft_status_idx').on(t.draftStatus),
+  index('comm_items_run_idx').on(t.runId),
+])
+
+// ── Briefs (daily narrative summaries — written by the Email PA / Charlie) ───
+// Pre-existing raw-SQL table, mirrored here so drizzle-kit push stops
+// proposing to DROP it. The /api/brief route still queries it via neon sql.
+export const briefs = pgTable('briefs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  content: text('content').notNull(),
+  generatedAt: timestamp('generated_at', { withTimezone: true }).defaultNow().notNull(),
+  workspaceId: varchar('workspace_id', { length: 50 }),
+  generatedBy: varchar('generated_by', { length: 100 }).default('charlie'),
+})

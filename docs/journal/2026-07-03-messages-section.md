@@ -3,7 +3,7 @@
 **Date:** 2026-07-03 (same day as the dispatch-ops-live run; Olivier's go-ahead in the run prompt)
 **Repo:** `main`. **Run contract:** `LOOP-STATE.md`. **Cockpit task:** 65673adc.
 **Spec:** `docs/current/architecture/OPS-…/COCKPIT-MESSAGES-SECTION-SPEC.md` (da378fc) — §7 non-goals held: no mailbox reading, no credentials, previews only, no compose UI, no WhatsApp/Slack ingestion, no websockets.
-**Terminal state:** _(filled at close)_
+**Terminal state:** `success` — all 12 evidence rows proved; final gate 16/16 green; deployed and prod-verified; engine restored to pre-run live state.
 
 ## 1. What landed
 
@@ -75,4 +75,9 @@ Body: `{ "draftStatus": "sent" }` and/or `{ "linkedTaskId": "<uuid>" }` (null cl
 - The Home digest counts define "drafts awaiting" as ALL currently-awaiting drafts (standing queue), while "new"/"interrupts" are today-only (A7 in LOOP-STATE).
 - `/messages` initial server render loads the first 100 items; older items via the Load-more cursor.
 
-_(§6 terminal state, deploy verification and engine-state restore proof appended at close.)_
+## 6. Close-out proof
+
+- **Deploy (R10):** push `7ceda05` live in ~60 s. Prod matrix: bare POST `/api/messages` + `/api/brief` → 401; forged guest POST → 403; bearer GET both APIs → 200; `/messages` and `/` render 200. Smoke write `msgtest-prod-1` rendered on prod `/messages`, identical re-post returned `loggedRuns: []` (idempotency live in prod), then deleted — all `msgtest`/`[MSG-TEST]` residuals verified 0 across comm_items/briefs/tasks/activity_log.
+- **Design (R9):** independent checker (fresh context, system.md + screenshots only) — round 1 PASS with 9 minors, 6 fixed (3 skipped with reasons: two data artifacts, one already-correct), round 2 PASS with all fixes verified.
+- **Engine (R12):** paused for the whole run (`pausedBy: claude-code-msgs-run`, 11:26Z→12:08Z); dispatch host kickstarted onto the new build while still paused; then restored to the exact recorded pre-run state `{paused:false, pausedAt:null, pausedBy:null}`; the next launchd poll cycle ran live with 0 candidates, 0 dispatched. Candidate sweep at close: zero agent-assigned Backlog/To Do tasks.
+- **Incident worth remembering:** the first gate run UNPAUSED the engine — p46 forced `paused:false` in its `finally`. Fixed to snapshot/restore + assert (now matches p45); pause survived every subsequent gate run and the host restart.

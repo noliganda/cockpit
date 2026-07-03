@@ -27,18 +27,18 @@
 
 | Row | Requirement | Status | Evidence |
 |---|---|---|---|
-| R1 | §8.1 build clean + schema pushed | missing | |
-| R2 | §8.2 20-item bearer POST renders grouped-by-day in /messages; identical re-post → zero dups | missing | |
-| R3 | §8.3 brief via bearer+harness headers renders in /brief and Home with provenance | missing | |
-| R4 | §8.4 Home: brief + project status strip + resurfaced tasks (aged [MSG-TEST] urgent task appears, then cleaned) + today digest counts | missing | |
-| R5 | §8.5 drafts rail shows awaiting-review; empties after PATCH to sent | missing | |
-| R6 | §8.6 unauth POST 401; guest session write 403 | missing | |
-| R7 | §8.7 exactly ONE activity_log event per published run, visible in /logs | missing | |
+| R1 | §8.1 build clean + schema pushed | proved | gate build+lint green every pass; migration 0012 applied to Neon (17 cols, `comm_items_source_external_uq`, FK) verified by direct query; drizzle schema matches (A6) |
+| R2 | §8.2 20-item bearer POST renders grouped-by-day in /messages; identical re-post → zero dups | proved | m2 (API: 20 upserted, re-post → 20 rows exactly, cursor pagination exact-once) + m3 (HTML: each item once, correct data-day-group across 3 days, still once after re-post) |
+| R3 | §8.3 brief via bearer+harness headers renders in /brief and Home with provenance | proved | m1 (201, generated_by ← x-harness-name, GET latest) + m4 (/brief AND Home HTML contain marker + data-brief-provenance + harness name) |
+| R4 | §8.4 Home: brief + project status strip + resurfaced tasks (aged [MSG-TEST] urgent task appears, then cleaned) + today digest counts | proved | m4: strip present; 10d-aged urgent [MSG-TEST] task appears (and absent at ?staleDays=30 — tunable); digest counts equal DB truth; fixtures cleaned, residual 0 |
+| R5 | §8.5 drafts rail shows awaiting-review; empties after PATCH to sent | proved | m3: data-draft-item in rail → PATCH sent → gone from rail, item still in feed; m2: sent item leaves ?draftStatus=awaiting-review |
+| R6 | §8.6 unauth POST 401; guest session write 403 | proved | m1 (brief: 401 bare / 403 guest) + m2 (messages: 401 bare / 403 guest POST / 403 guest PATCH) |
+| R7 | §8.7 exactly ONE activity_log event per published run, visible in /logs | proved | m2: exactly 1 digest_published for the run after re-post; runId visible in rendered /logs?type=digest_published |
 | R8 | mutation checks: upsert anchor broken → probe red; workspace validation dropped → probe red; restored green | proved | mut1: conflict target → [id] ⇒ m2 red on "identical re-post" (500); mut2: validation `if(false)` ⇒ m2 red on 422 + revealed orphan row/event damage; restored ⇒ m2 green |
-| R9 | design checker PASS on /messages + Home | missing | |
-| R10 | deployed to prod, routes verified (401/200), pages render, no runtime errors | missing | |
-| R11 | producer-contract note in journal | missing | |
-| R12 | engine pause state restored to recorded value (unpaused), proof logged | missing | |
+| R9 | design checker PASS on /messages + Home | proved | checker#1 PASS w/ 9 minors → 6 fixed (2 data-artifacts + 1 already-correct skipped w/ reason) → checker#2 PASS, all fixes verified took, no regressions (2 iterations of cap 5) |
+| R10 | deployed to prod, routes verified (401/200), pages render, no runtime errors | proved | push 7ceda05 live in ~60s; prod: bare POST /api/messages+/api/brief 401, forged-guest POST 403, bearer GET both APIs 200, /messages + / render 200; smoke write msgtest-prod-1 → renders on prod /messages, re-post idempotent (loggedRuns []), cleaned via shared Neon, residual 0 |
+| R11 | producer-contract note in journal | proved | journal §2 "Producer contract for the Email PA — AS BUILT": endpoints, payload schema w/ enums, auth headers, idempotency semantics (upsert anchor + one-event-per-runId), 4 explicit deviations from spec §2–§4 |
+| R12 | engine pause state restored to recorded value (unpaused), proof logged | proved | restored 12:08Z: status {paused:false, pausedAt:null, pausedBy:null} = exact pre-run snapshot; next launchd poll (22:08:39 local) ran LIVE (no paused flag), 0 candidates, 0 dispatched; dispatch host kickstarted onto the new build first (:3200 serves /api/messages, dispatchEnabled:true); candidate sweep at close: 0 |
 
 ## stop
 
@@ -61,6 +61,8 @@ Agent-assigned test tasks; raw message bodies stored anywhere; email credentials
 
 ## pass log (append-only)
 
+- **Pass 8 — CLOSE** — prod verified (R10): 401/403/200 matrix exact, smoke write rendered + idempotent on prod, cleaned (all msgtest residuals 0). Candidate sweep: 0. Dispatch host kickstarted onto new build (healthy in 10s, still paused through restart). Engine RESTORED to recorded pre-run state (unpaused); next poll cycle ran live, 0 candidates. Journal finalized; Cockpit task closed. **TERMINAL: success** (8 passes of 20; no plateau; no boundary crossed).
+- **Pass 7** — checker#1 PASS+minors → fixed 6 (neutral icon, dividers, rail timestamps, orphan link, mobile stacking, link affordance; skipped: NCE- name + msgtest provenance = fixture/real data, font-mono already correct) → reshoot v2 → checker#2 PASS all-verified. Gate flake root-caused: design fixtures collided with m2's draft filter (fixture hygiene, not code) → m2 tightened to msgtest-m2- namespace; ALL msgtest residuals verified 0 (comm/briefs/tasks/activity). Full gate 16/16 green. Pushed 7ceda05 → prod deploy verification in flight.
 - **Pass 6** — /logs visibility check added to m2 (green). Design fixtures seeded (10 realistic items + brief), 4 shots (desktop+mobile × /messages+Home) taken via headless system Chrome; maker self-review OK; independent checker dispatched (fresh context: system.md + shots only). Journal drafted incl. §2 producer contract AS BUILT (R11 pending final close-out text). Fixtures still live pending checker — cleaned this pass after verdict.
 - **Pass 4–5** — /messages UI + drafts rail (59831c9, probe m3: HTML day-grouping, re-post dedupe render, rail empties after PATCH; task deep-link ?task=). Home today-view + /brief provenance + sidebar Home→/ (f2ee1ba, probe m4: brief provenance on both pages, aged [MSG-TEST] urgent task resurfaces, staleDays tunable, digest counts match DB). Gate 16/16 green.
 - **Pass 3** — R8 mutation checks done (break→red→restore→green, both anchors). m2 covers §8.2/§8.5/§8.6/§8.7 API halves + pagination + 422. Next: Pass 4 = /messages UI + drafts rail (read system.md first), then Home.

@@ -12,6 +12,7 @@ This repo contains a mix of **current architecture**, **historical version docs*
 - `current/architecture/OPS-V5-ROLLOUT-PLAN-CHARLIE-DEVON-CLAUDE.md`
 - `current/architecture/OPS-V5-TASK-OWNERSHIP-AND-EXECUTION-PLAN.md`
 - `current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md` — dispatch engine + dependency cascade (draft, 2026-06-30)
+- `current/architecture/COCKPIT-MESSAGES-SECTION-SPEC.md` — Messages section + Brief/Home utilization, fed by the Email PA (handoff draft, 2026-07-03)
 
 These are the current source-of-truth docs for **Cockpit / OPS v5**.
 

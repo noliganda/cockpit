@@ -1,75 +1,52 @@
-# LOOP-STATE: Complete Cockpit dispatch engine (spec §8 Phases 3+4 + Phase-2 debt), tested, deployed, proven E2E
+# LOOP-STATE: Dispatch ops live — pause toggle, dialog fix, queue command+skill, live dispatch host (four approved features, "do all four" 2026-07-03)
 
-**Run start:** 2026-07-03. Autonomous (Olivier away). Go-ahead: prompt of 2026-07-03.
-**Spec:** `docs/current/architecture/COCKPIT-DISPATCH-ENGINE-SPEC.md` §8 (Phases 3+4), §9 safety, §11 binding NOT-to-build.
-**Council reconcile:** council report (2026-07-02) recommended usage-freeze; Olivier's go-ahead supersedes — finish the plan; the E2E proof IS the demo the council asked for. After success → usage, not features.
+**Run start:** 2026-07-03 (follows Phase 3+4 run, terminal success, closed in git history).
+**Cockpit task:** bccf436a-9a14-43db-96c4-ba8b75c7e06f.
+**Prior machinery reused:** `scripts/probes/run-all.sh`, probe conventions, journal format.
 
-## done_when (machine-checkable, same commands every pass)
+## done_when (same commands every pass)
 
-1. `npm run build` exit 0 AND `npm run lint` clean.
-2. Every requirement row below = proved via scripted probe (curl / `node scripts/query_db.mjs`), not code-reading.
-3. E2E proof local w/ `DISPATCH_ENABLED=true`: (a) hermes-oneshot real dispatch → self-register → In Progress → Done → cascade promotes dependent; (b) claude-tmux dispatch into fresh tmux session `dispatch-e2e-claude` (created+killed by this run; NEVER steer `cockpit` or any other existing session); (c) stale-claim reclamation observed on a deliberately killed claim; (d) manual-trigger + status routes exercised. Residual test rows = 0 across tasks/deps/wakeups/sessions/activity/operators.
-4. `claude-code` operator unpaused; `DISPATCH_ENABLED` UNSET on Vercel (deployed cron stays no-op).
-5. Deployed to production (deploy story recorded in assumptions once discovered) + prod healthy post-deploy.
-6. Journal `docs/journal/2026-07-03-dispatch-phase3-4.md` written; all commits on `main`, pushed.
+1. `sh scripts/probes/run-all.sh` fully green (build + lint + all prior probes + p45/p46 + new probes this scope needs).
+2. R1–R4 proved by probe/E2E, mutation-checked where it matters (pause check stashed from engine → p45 red; dialog fix reverted → dialog UI probe red).
+3. E2E mobile-flow rehearsal: launchd poller live + engine on this Mac — (a) task created through the REAL dashboard UI picking an agent operator dispatches on the next poll cycle untouched; (b) `cockpit-task queue` task dispatches too. Namespaced, cleaned, residual 0 (E5 bar).
+4. Live-candidate safety sweep before leaving the engine unpaused: enumerate real qualifying tasks; any unintended → final state paused=true + say so; empty/intended → leave live. Candidate list + final state in the report.
+5. Pushed to main; prod verified: /dispatch pause toggle flips shared-DB flag + activity event (flipped back); prod cron still `{"disabled":true}`.
+6. Journal `docs/journal/2026-07-03-dispatch-ops-live.md` incl. "start using Cockpit" runbook.
 
 ## evidence table
 
 | # | Requirement | Status | Evidence |
 |---|---|---|---|
-| D1 | toNormalized footgun: stray legacy statuses (e.g. 'Completed') must never be dispatchable | proved | `npx tsx scripts/probes/d1-status-footgun.ts` all-pass; mutation check: stash fix → 'Completed' task evaluates ready:true (probe FAILs) → pop → green. Commit 0941c59 |
-| D2 | hermes-oneshot captures `session_id` from `-Q` stdout (not pid) | proved | `npx tsx scripts/probes/d2-session-id.ts`: chatty fake → sessionId `hermes-test-42`; silent → `oneshot-pid-*` fallback; missing binary → failed; real-CLI arg shape + prompt content asserted. Commit 03ace6b |
-| P3.1 | `claude-tmux` adapter (send-keys, escaped, no shell interpolation) | proved | `npx tsx scripts/probes/p3-adapters.ts`: steered probe session running `cat` received full 990-byte prompt; `$(touch …)`/backtick/quote strings literal, no pwned files created; missing/unconfigured session → failed. Commit f9f4690 |
-| P3.2 | `hermes-tmux` adapter | proved | Same probe, same assertions on the hermes-tmux leg. Commit f9f4690 |
-| P3.3 | `hermes-delegate` adapter (subagent spawn) | proved | Same probe: fake hermes captured delegate argv, session id `hermes-deleg-123` captured from stdout; 5-min stale threshold asserted. Commit f9f4690 |
-| P3.4 | Stale-claim reclamation (per-adapter thresholds: oneshot/delegate 5 min, tmux 30 min) + `task_claim_stale_reclaimed` events | proved | `npx tsx scripts/probes/p34-stale-reclaim.ts`: 7-min oneshot claim reclaimed (wakeup re-queued, session failed, slot 2→1, both spines); 4-min claim, 7-min tmux claim, and fresh-checkpoint claim all untouched. Commit 0e52bc2 |
-| P3.5 | `GET /api/dispatch/status` | proved | `npx tsx scripts/probes/p35-p36-routes.ts` (dev server): 401 no-bearer; 200 shape w/ operators/queue/staleClaims/state; running claim visible w/ isStale=false + 5-min threshold. Commit 2020b4c |
-| P3.6 | `POST /api/tasks/[id]/dispatch` manual trigger (force bypasses readiness, still logs, never double-dispatches) | proved | Same probe: 401; 409 not_ready w/ prerequisite blocker; 404; force-on-Done 409; force past unmet dep dispatched (session id `probe-routes-99` captured, forced flag in task_event); double-force 409 live-session. Commit 2020b4c |
-| P3.7 | `claude-code` operator unpaused (safely — no dispatch into sessions I didn't create) | proved | `npx tsx scripts/probes/p37-claude-code-operator.ts`: active, pause fields null, claude-tmux registered, target `dispatch-claude` (≠ cockpit). Zero real dispatch candidates in prod data at unpause time. Commit 41354cf |
-| P4.1 | Budget enforcement + auto-pause (status='paused', pauseReason='budget_exceeded', notify event) | proved | `npx tsx scripts/probes/p41-budget-pause.ts`: over-budget op blocked + auto-paused w/ both notifications; idempotent on re-eval; unmetered + under-budget ops untouched. Commit 5d1f8a5 |
-| P4.2 | `needs_artifact` injection: prerequisite artifactUrl in dependent's dispatch prompt | proved | `npx tsx scripts/probes/p42-p43-artifact-concurrency.ts`: dispatched prompt (tmux/cat capture) contains "Prerequisite artifacts" + `file:///tmp/artifact-A.txt` + prereq title; blocks-only dependent prompt has no artifact block. Commit 4c03dd4 |
-| P4.3 | Per-operator concurrency limits enforced (Phase 2 code exists — needs probe) | proved | Same probe: maxConcurrent=1 → 2nd dispatch refused (blocker "at max concurrency (1/1)"); after Done+settle slot 1→0 and 2nd task dispatches. Also P3.6 double-force 409. Commit 4c03dd4 |
-| P4.4 | Dispatch-queue dashboard panel (checker-subagent graded, ≤5 iters, system.md tokens) | proved | /dispatch page + sidebar entry; Playwright screenshot w/ representative fixtures; independent checker (fresh context: system.md + diff + screenshot only) iter 1 PASS w/ 5 minors + 4 nits → all fixed → iter 2 PASS, fixes verified in diff+screenshot, 0 blocking. Fixtures cleaned (residual 0). Commit 7a2bc53 |
-| E1 | E2E hermes-oneshot: real dispatch, self-register, In Progress→Done, cascade promotes dependent | proved | `npx tsx scripts/probes/e2e/e1-hermes-oneshot.ts` vs :3100 w/ DISPATCH_ENABLED=true: cycle 1 dispatched A (real hermes, self-registered gpt-5.5 + session id), A Done w/ artifact + proof file; B task_unblocked + dependency_cascade wakeup; cycle 2 dispatched B; B Done; slots settled 0; residual 0. Commit d51558f |
-| E2 | E2E claude-tmux into fresh `dispatch-e2e-claude` session | proved | `npx tsx scripts/probes/e2e/e2-claude-tmux.ts` vs :3100: fresh session created+booted (bypass-permissions), real claude-code operator temporarily repointed (restored after), unforced manual dispatch steered it; Claude Code (claude-opus-4-8, session 7ba60fe4…) self-registered, In Progress→Done, artifact + proof file; session killed; residual 0. Commit 291da1e |
-| E3 | E2E stale reclamation observed on deliberately killed claim | proved | `npx tsx scripts/probes/e2e/e3-stale-reclaim.ts` vs :3100: real spawn (pid 77949) SIGKILLed, claim aged 6 min; status route isStale=true; real cycle → reclaimed:1 AND re-dispatched:1 (new pid 77957), full event trail (dispatched, stale_reclaimed, dispatched). Residual 0. Commit e669451 |
-| E4 | Manual trigger + status routes exercised in E2E | proved | E3 dispatched via POST /api/tasks/[id]/dispatch (unforced) and asserted staleClaims via GET /api/dispatch/status; E1 exercised the cron route both cycles. |
-| E5 | Cleanup: residual test rows 0 (tasks/deps/wakeups/sessions/activity/operators) | proved | `npx tsx scripts/probes/e2e/e5-final-sweep.ts` all-pass: 0 residue across tasks/operators/deps/wakeups/sessions/events/activity + no probe/e2e tmux sessions. (Found+fixed: `trg_task_activity_on_insert` DB trigger leaks `created` activity rows on raw inserts — probes now sweep activity by title prefix.) |
-| G1 | build + lint green (final clean re-run) | proved | Final `sh scripts/probes/run-all.sh`: build ✓ (75/75 pages), lint ✓ no warnings, all 8 probes green. |
-| G2 | claude-code unpaused / DISPATCH_ENABLED unset on Vercel (verified) | proved | P3.7 probe (operator active) + prod probe: `GET https://dashboard.oliviermarcolin.com/api/cron/dispatch` w/ bearer → `{"disabled":true,"reason":"DISPATCH_ENABLED is not \"true\" on this host"}`. (Vercel CLI has no local credentials; the route-level check is the operative proof.) |
-| G3 | Prod deploy healthy post-deploy | proved | Deploy story CONFIRMED: `git push` → Vercel Git integration; new `/api/dispatch/status` went 404→200 on prod ~80s after push. Post-deploy: status 200 (dispatchEnabled:false), cron `{disabled:true}`, whoami 200, /dispatch page 307→login unauth. |
-| G4 | Journal written; commits pushed to main | proved | `docs/journal/2026-07-03-dispatch-phase3-4.md` committed; pushed f0fe627..87c9625 (15 commits) + final state commit. |
+| R1 | Pause toggle: dispatch_state.paused + engine gate + /dispatch UI + activity logging | proved (prod-UI half under DEP) | p45 green; mutation check: both engine pause gates neutered → paused cycle proceeded + unforced dispatch went through (3 FAILs) → restored green. Commit ed301f6 |
+| R2 | Dialog-created agent tasks genuinely dispatchable (+ dedupe of shadowed virtual harnesses) | proved | p46 (API shape → readiness ready:true, candidate filter matches) + p47 real-browser (one entry per operator id; Hermes selection shows agent typing hint); mutation check: filter reverted → duplicates → p47 red → restored. Commits 414f017, 7c28c6b, hardening |
+| R3 | `cockpit-task queue` + `dispatch` subcommands + cockpit-queue skill + wiring-doc section, brief template Goal/Done when/Artifact/Don't | proved | queue smoke (row verified: To Do/agent/hermes/prio/desc, cleaned) + E6 leg (b): queue-created task dispatched by poller + completed by real hermes. Skill registered (`cockpit-queue`); wiring §0 updated. _shared commit 3d1c986 pushed |
+| R4 | Live dispatch host: com.cockpit.dispatch-server/-poll/-claude launchd jobs installed, surviving, polling; dispatch-claude session alive | proved | 3 jobs loaded (launchctl list, exit 0); server :3200 dispatchEnabled:true; poll.log shows 3-min cycles w/ full summaries; dispatch-claude session created + "ready" in 3s; PATH bug (`spawn hermes ENOENT` under launchd) found by E6 and fixed in dispatch-server.sh. Commits 3429b72, 6c202cc |
+| E2E | Mobile-flow rehearsal (dashboard-UI task + queue task both auto-dispatch on poll cycle; cleaned) | proved | e6-mobile-flow all-pass: dialog task (agent-typed row) + queue task dispatched by the launchd poller with ZERO manual dispatch calls; both Done by real hermes (gpt-5.5), proof files written; paused-safety entry/exit; residual 0. Caught 2 real bugs on the way (launchd PATH; dialog operator-typing race — both fixed, second one probe-covered) |
+| SW | Live-candidate safety sweep + final engine state decision | missing | — |
+| DEP | Pushed; prod pause toggle verified (flip + flip back + activity); cron disabled | missing | — |
+| J | Journal + runbook; Cockpit task closed; dogfooded follow-up task queued for the council's 30-day test opener | missing | — |
 
 ## stop
 
-- Hard cap: 30 passes. Plateau: 3 passes without measurable progress → stop `stagnated` (a completed phase resets the counter).
+Hard cap 15 passes; plateau 3 passes without measurable progress → `stagnated`.
 
-## boundaries (end `approval-required` if crossed-needed)
+## boundaries (end `approval-required`)
 
-- Never mutate real (non-test) tasks/operators beyond: spec-required additive changes, `claude-code` unpause, `hermes` operator config already spec'd.
-- No destructive schema changes. No `DISPATCH_ENABLED` on Vercel. Never steer a tmux session I didn't create (esp. `cockpit`, where this run lives). No external comms. No secret printing. No spend off this machine.
+No real task/operator mutations beyond approved scope; no destructive schema changes; no DISPATCH_ENABLED on Vercel; launchd `com.cockpit.*` only; never steer tmux sessions I didn't create (dispatch-claude, which I create, is mine to steer); no external comms; no secrets printed; no spend off this machine.
 
 ## assumptions (logged at decision time)
 
-1. **Spec §10 defaults (per prompt):** stale thresholds per-adapter (oneshot/delegate 5 min, tmux 30 min); operator adapterType decides adapter (no per-task-type defaults); PM session is NOT an operator; cascade fires on Done only.
-2. **Deploy story (to verify at deploy pass):** Vercel Git integration auto-deploys on push to `main` — Phase 2 journal records a push whose bad vercel.json cron *failed the deployment*, which proves pushes trigger builds. Will confirm post-push via `vercel ls` / prod probe.
-3. **claude-code dispatch target:** spec's seed pointed `tmux_session` at `cockpit` — the very session this run (and normally the PM/Claude Code work) lives in; steering it = recursive prompt injection. Repointed to dedicated `dispatch-claude`, which doesn't exist yet: adapter fails cleanly (session-not-found) until Olivier creates it deliberately. Operator is active either way. (Decision logged at pass 8.)
-4. **hermes operator stays `hermes-oneshot`** even though `hermes-delegate` now exists — switching the live operator's adapter is a product decision for Olivier; both are registered and probed. (Pass 8.)
-5. **Council report/transcript files** (untracked in docs/journal/) committed as-is with the final push — they're project artifacts referenced by this run's reconciliation note. (Pass 13.)
-6. **Vercel CLI has no local credentials**, so G2/G3 are proved at the route level against the live prod URL rather than via `vercel ls`/`vercel env ls`. (Pass 13.)
+1. (pre-logged) MythMac is the interim dispatch host until the Mini takes over; `dispatch-claude` runs Claude Code with bypass permissions, standard config.
+2. Migration 0011 was already applied to Neon during the interrupted pass (verified: `dispatch_state.paused=false` singleton row) — landing the SQL file is bookkeeping, not a re-apply.
+3. R2 has two halves: the API path (p46) and the dialog UI (duplicate hermes/claude-code entries under "Harnesses/Functions" shadowing the registry — filtered out). UI half gets a real-browser probe (playwright-core devDep, system Chrome, graceful SKIP if Chrome absent).
+4. The dogfooded follow-up task ("queue the first real business task") is assigned to **oli (human)** on purpose — it's a decision only Olivier can make, and a human assignee keeps it permanently outside the dispatch candidate pool.
 
 ## pass log (append-only)
 
-- pass 1 — D1: readiness requires isKnownStatus() before trusting toNormalized; probe D1 green + mutation-checked red on unfixed code. Build+lint green. Commit 0941c59. Next: D2 (hermes session_id capture).
-- pass 2 — D2: oneshot output → per-dispatch log file (EPIPE-safe), polled for session_id w/ pid fallback; prompt.ts extracted (shared, artifact-injection point); adapter contract gains staleClaimThresholdMs + DispatchContext. Probe D2 green; D1 re-run green. Build+lint green. Commit 03ace6b. Next: P3.1 claude-tmux adapter.
-- pass 3 — P3.1+P3.2+P3.3: tmux steering via load-buffer/paste-buffer/Enter (fixed target-pane syntax `=name:` — bare `=name` rejected by tmux 3.7 paste-buffer, caught by probe); delegate reuses oneshot machinery. Probe P3 all green incl. injection-literal + no-execution + session cleanup. D1/D2 re-run green. Build+lint green. Commit f9f4690. Next: P3.4 stale reclamation.
-- pass 4 — P3.4: reclaimStaleClaims() opens every cycle; staleness = max(claimedAt, session.lastCheckpointAt) vs adapter threshold; race-guarded reset. Probe green (4 scenarios). All prior probes re-run green. Build+lint green. Commit 0e52bc2. Next: P3.5 status route + P3.6 manual trigger.
-- pass 5 — P3.5+P3.6: engine per-task block extracted to dispatchTaskById() (shared by cycle + manual route; hard guards immune to force; needs_artifact context plumbed); status route w/ stale flags; manual trigger route. Probe green vs local dev server; all prior probes green. Build+lint green (fixed one unused-var warning). Commit 2020b4c. Next: P4.1 budget auto-pause.
-- pass 6 — P4.1: autoPauseOverBudget() in readiness (guarded UPDATE, idempotent, never throws). Probe green. Discovered `npm run build` kills the dev server (.next clash) — added scripts/probes/run-all.sh gate (build→lint→next start :3100→all probes); full gate green. Commits 5d1f8a5, fb8438c. Next: P4.2 needs_artifact probe + P4.3 concurrency probe.
-- pass 7 — P4.2+P4.3 probed via tmux/cat prompt capture + dispatchTaskById (never runDispatchCycle in probes — it would sweep real ready tasks). 2 probe bugs fixed (blocker-vs-reason assertion; deleted-sink fd). Full gate green (7 probes). Commit 4c03dd4. Next: P3.7 unpause claude-code, then E2E.
-- pass 8 — P3.7: claude-code unpaused, target repointed cockpit→dispatch-claude (assumptions 3+4 logged). Verified zero real dispatch candidates before unpause. Full gate green (8 probes). Commit 41354cf. Next: E1 hermes-oneshot E2E.
-- pass 9 — E1 green first try: real hermes ran both tasks end-to-end through the actual cron route (DISPATCH_ENABLED=true on :3100); wrote proof files; cascade + cycle-2 dispatch observed; cleanup verified. Commit d51558f. Next: E3 stale reclamation E2E, then E2 claude-tmux E2E.
-- pass 10 — E3 green (manual dispatch → SIGKILL child → aged claim → status flags stale → cycle reclaims + re-dispatches, new pid). E4 thereby proved too. Note: background :3100 server gets reaped between tool calls — E2E drivers now bundle server start+run in one command. Commit e669451. Next: E2 claude-tmux E2E in fresh dispatch-e2e-claude session.
-- pass 11 — E2 green: real Claude Code completed the dispatched task from the fresh tmux session; operator config restore + session kill verified in-driver. Commit 291da1e. Next: P4.4 dashboard panel (maker→checker).
-- pass 12 — P4.4: panel built; screenshots via playwright-core + crafted local session cookie (Chrome extension unavailable); maker→checker loop 2 iterations → PASS. Full gate green (8 probes). Commit 7a2bc53. Next: E5 final sweep + G1 final gate + deploy + journal + push.
-- pass 13 — E5 sweep green (after fixing D1 probe's trigger-leaked activity rows + one-shot cleanup of 14 residual rows); final full gate green; journal finalized; pushed f0fe627..87c9625; deploy confirmed live on prod (~80s); all prod probes green. → **TERMINAL: success** (every row proved; 13 passes of 30; no plateau).
+- pass 1 — inventory: all uncommitted work adopted (it was this session's interrupted pass; gate green incl. p45/p46 after fixing p46's exit-skips-finally leak that left pause ON). Landed as 3 bounded repo commits (ed301f6 R1, 414f017 R2, 3429b72 R4-files) + _shared 3d1c986 (R3, pushed). Rows stay weak until mutation checks + install + E2E. Next: R1 mutation check.
+- pass 2 — R1 mutation check green (gates neutered → p45 red on exactly the pause checks → restored green). R1 proved.
+- pass 3 — p47 real-browser dialog probe (playwright-core devDep, system Chrome, SKIP if absent); R2 mutation check green (filter revert → duplicate hermes/claude-code → red). Gate flaked once on cold-start /tasks; retry+diagnostics added; full gate green. R2 proved. Next: R4 install launchd host (paused-first for safety).
+- pass 4 — R4 installed paused-first: 3 launchd jobs loaded; server :3200 up in ~20s; dispatch-claude ready in 3s; first scheduled poll ran a real cycle honoring pause. (Prod pause attempt 404'd — route not deployed yet; paused via shared DB instead.)
+- pass 5 — E6 first run: poller+engine perfect but `spawn hermes ENOENT` (launchd PATH lacks ~/.local/bin — .zprofile vs .zshrc). Fixed in dispatch-server.sh + warnings. Second run: 1 FAIL — dialog race typed assignee as 'function' (virtual entry selectable before /api/operators resolves). Fixed: optgroup gated on registry load + save-time type re-resolve. Third run: E6 all green. Commit 6c202cc.
+- pass 6 — gate regressions triaged to root causes: p42 red = probe not pause-immune (now force-based; hard guards still asserted); p47 red = STALE :3100 server serving old builds (gate EADDRINUSE unseen) — gate now owns the port; p45 was clobbering ops pause state in finally (now snapshots+restores). Full gate green. Commits d2ec520, 5a830c0.
+- pass 7 — /dispatch pause control sent to independent checker (fresh context: system.md + panel diff + running/paused screenshots). Awaiting verdict; then safety sweep + dogfood + deploy + journal.

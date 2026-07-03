@@ -18,6 +18,15 @@ async function main() {
   const bearer = { Authorization: `Bearer ${process.env.CRON_SECRET}`, 'Content-Type': 'application/json' }
   let taskId: string | null = null
 
+  // Snapshot ops pause state — restore it in finally rather than forcing it
+  // off (an operator-held pause, e.g. during a maintenance run, must survive
+  // the gate). Same discipline as p45.
+  const { dispatchState } = await import('@/lib/db/schema')
+  const { eq: eqInit } = await import('drizzle-orm')
+  const { db: dbInit } = await import('@/lib/db')
+  const [initial] = await dbInit.select().from(dispatchState).where(eqInit(dispatchState.id, 'singleton')).limit(1)
+  const initialPause = { paused: initial?.paused ?? false, pausedAt: initial?.pausedAt ?? null, pausedBy: initial?.pausedBy ?? null }
+
   try {
     // Pause dispatching first: this probe briefly parks a REAL ready task
     // assigned to hermes, and the Mini's live poller must not race us to it.
@@ -62,13 +71,15 @@ async function main() {
       await db.delete(activityLog).where(eq(activityLog.entityId, taskId))
       await db.delete(tasks).where(eq(tasks.id, taskId))
     }
-    await fetch(`${BASE}/api/dispatch/pause`, { method: 'POST', headers: bearer, body: JSON.stringify({ paused: false }) })
+    await db.update(dispatchState).set(initialPause).where(eqInit(dispatchState.id, 'singleton'))
     await db.delete(activityLog).where(sql`${activityLog.entityTitle} LIKE ${TEST_PREFIX + '%'}`)
     await db.delete(activityLog).where(
       sql`${activityLog.action} IN ('dispatch_paused','dispatch_resumed') AND ${activityLog.actor} = 'api@local'`,
     )
     const residue = await db.select({ id: tasks.id }).from(tasks).where(like(tasks.title, `${TEST_PREFIX}%`))
     check('residual test rows = 0', residue.length === 0, String(residue.length))
+    const { isDispatchPaused } = await import('@/lib/dispatch/engine')
+    check('ops pause state restored to entry value', (await isDispatchPaused()) === initialPause.paused, `expected ${initialPause.paused}`)
   }
   finish('probe P4.6 dialog-task dispatchable')
 }

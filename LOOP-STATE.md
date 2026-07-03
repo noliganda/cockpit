@@ -34,7 +34,7 @@
 | R5 | §8.5 drafts rail shows awaiting-review; empties after PATCH to sent | missing | |
 | R6 | §8.6 unauth POST 401; guest session write 403 | missing | |
 | R7 | §8.7 exactly ONE activity_log event per published run, visible in /logs | missing | |
-| R8 | mutation checks: upsert anchor broken → probe red; workspace validation dropped → probe red; restored green | missing | |
+| R8 | mutation checks: upsert anchor broken → probe red; workspace validation dropped → probe red; restored green | proved | mut1: conflict target → [id] ⇒ m2 red on "identical re-post" (500); mut2: validation `if(false)` ⇒ m2 red on 422 + revealed orphan row/event damage; restored ⇒ m2 green |
 | R9 | design checker PASS on /messages + Home | missing | |
 | R10 | deployed to prod, routes verified (401/200), pages render, no runtime errors | missing | |
 | R11 | producer-contract note in journal | missing | |
@@ -60,5 +60,7 @@ Agent-assigned test tasks; raw message bodies stored anywhere; email credentials
 
 ## pass log (append-only)
 
+- **Pass 3** — R8 mutation checks done (break→red→restore→green, both anchors). m2 covers §8.2/§8.5/§8.6/§8.7 API halves + pagination + 422. Next: Pass 4 = /messages UI + drafts rail (read system.md first), then Home.
+- **Pass 2** — comm_items in drizzle schema + migration 0012 applied to Neon (17 cols, uq+FK verified); briefs mirrored into schema to defuse db:push DROP; POST/GET /api/messages + PATCH [id] landed (8c0e502). Gate green (13 probes incl. m2). A6 logged (db:push footgun).
 - **Pass 1** — `/api/brief` fix landed (c50bd67): getSessionData + guest 403, zod, apiHandler, generated_by ← x-harness-name, one brief_published activity event. Probe m1 green; full gate green (12 probes). **Incident:** gate left engine UNPAUSED — p46's finally forced `paused:false` instead of restoring entry state. Re-paused immediately (11:32Z), fixed p46 to snapshot/restore + assert (16a235a); verified pause survives p46 against :3200. R6-for-briefs half proved via m1. Next: Pass 2 = comm_items schema + POST/GET /api/messages + probe m2.
 - **Pass 0** — oriented: read spec, run-all.sh, p45, ops-live journal, auth/api-handler/workspaces/tasks-route conventions, brief route+page, home/messages stubs. DB inspected: `briefs` exists (2 rows; id/content/generated_at/workspace_id/generated_by), `comm_items` absent. Cockpit task bound 65673adc. Engine pre-state paused=false recorded; engine PAUSED (pausedBy=claude-code-msgs-run). Fresh contract written. Note: `getSession()` already honours the bearer, so the §4 brief fix is provenance (generated_by from x-harness-name), guest 403, zod, apiHandler, logActivity — not a raw auth hole for bearer, but guest-write IS currently possible (getSession presence check only). Next: Pass 1 = /api/brief fix + probe m1.

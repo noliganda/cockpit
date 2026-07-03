@@ -97,6 +97,9 @@ export function DispatchClient() {
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [toggling, setToggling] = useState(false)
+  // Separate from the poll `error`: a failed SAFETY action must not be
+  // reworded as a refresh problem nor swept away by the next successful poll.
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const load = useCallback(async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -128,10 +131,11 @@ export function DispatchClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ paused }),
       })
-      if (!res.ok) throw new Error(`status ${res.status}`)
+      if (!res.ok) throw new Error(res.status === 401 || res.status === 403 ? 'not permitted (session expired or guest)' : `status ${res.status}`)
+      setActionError(null)
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err))
+      setActionError(`${paused ? 'Pause' : 'Resume'} failed (${err instanceof Error ? err.message : String(err)}) — dispatching state is UNCHANGED`)
     } finally {
       setToggling(false)
     }
@@ -165,7 +169,7 @@ export function DispatchClient() {
           {data.state.paused && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium text-[#F59E0B] border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.08)]">
               <Pause size={11} strokeWidth={2} />
-              paused{data.state.pausedBy ? ` by ${data.state.pausedBy}` : ''} {timeAgo(data.state.pausedAt)}
+              paused{data.state.pausedBy ? ` by ${data.state.pausedBy}` : ''}{data.state.pausedAt ? ` ${timeAgo(data.state.pausedAt)}` : ''}
             </span>
           )}
         </div>
@@ -180,7 +184,9 @@ export function DispatchClient() {
                 : 'bg-[#1A1A1A] border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222]'
             }`}
           >
-            {data.state.paused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} />}
+            {/* Amber icon differentiates this fleet-wide control from the
+                visually-identical Refresh button beside it. */}
+            {data.state.paused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} className="text-[#F59E0B]" />}
             {data.state.paused ? 'Resume dispatching' : 'Pause dispatching'}
           </button>
           <button
@@ -193,6 +199,12 @@ export function DispatchClient() {
         </div>
       </div>
 
+      {actionError && (
+        <div className="mb-4 flex items-center justify-between px-3 py-2 text-[12px] text-[#EF4444] bg-[rgba(239,68,68,0.06)] border border-[rgba(239,68,68,0.25)] rounded-[6px]">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError(null)} className="ml-3 text-[#6B7280] hover:text-[#F5F5F5]">dismiss</button>
+        </div>
+      )}
       {error && (
         <div className="mb-4 px-3 py-2 text-[12px] text-[#F59E0B] bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.25)] rounded-[6px]">
           Last refresh failed ({error}) — showing previous data; retrying automatically.

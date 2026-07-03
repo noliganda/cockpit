@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { tasks, projects, briefs, commItems } from '@/lib/db/schema'
 import { desc, eq, gte, isNull } from 'drizzle-orm'
 import { toNormalized } from '@/lib/task-lifecycle'
-import { MessageSquare, AlertTriangle, PenLine, Inbox, ArrowRight, Newspaper } from 'lucide-react'
+import { AlertTriangle, PenLine, Inbox, ArrowRight, Newspaper } from 'lucide-react'
 import { BriefMarkdown } from './home-brief-markdown'
 
 export const dynamic = 'force-dynamic'
@@ -139,9 +139,9 @@ export default async function Home({
       <div className="flex-1 p-6 space-y-6">
         {/* Digest summary — counts from today's comm_items */}
         <Link href="/messages" data-digest-counts data-new={newToday} data-drafts={draftsAwaiting} data-interrupts={interruptsToday}
-          className="grid grid-cols-3 gap-4 group">
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4 group">
           {[
-            { label: 'New messages today', value: newToday, icon: Inbox, color: '#3B82F6' },
+            { label: 'New messages today', value: newToday, icon: Inbox, color: '#A0A0A0' },
             { label: 'Drafts awaiting review', value: draftsAwaiting, icon: PenLine, color: '#F59E0B' },
             { label: 'Interrupts today', value: interruptsToday, icon: AlertTriangle, color: '#EF4444' },
           ].map(({ label, value, icon: Icon, color }) => (
@@ -183,7 +183,7 @@ export default async function Home({
               )}
             </div>
             <div className="px-4 py-2.5 border-t border-[rgba(255,255,255,0.04)]">
-              <Link href="/brief" className="inline-flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+              <Link href="/brief" className="inline-flex items-center gap-1 text-xs text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors">
                 Open brief <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
@@ -228,7 +228,7 @@ export default async function Home({
         <div data-project-strip className="rounded-[12px] border border-[rgba(255,255,255,0.06)] bg-[#141414]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
             <span className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-widest">Projects</span>
-            <Link href="/projects" className="inline-flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+            <Link href="/projects" className="inline-flex items-center gap-1 text-xs text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors">
               All projects <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -252,12 +252,6 @@ export default async function Home({
           </div>
         </div>
 
-        {/* Footer link to messages */}
-        <div className="flex justify-center pb-4">
-          <Link href="/messages" className="inline-flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
-            <MessageSquare className="w-3.5 h-3.5" /> Open the message feed
-          </Link>
-        </div>
       </div>
     </div>
   )

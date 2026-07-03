@@ -238,7 +238,6 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
             {workspaces.map((w) => (
               <FilterChip key={w} active={wsFilter === w} label={WS_LABELS[w]} color={WS_COLORS[w]} onClick={() => setWsFilter(wsFilter === w ? null : w)} />
             ))}
-            <span className="w-px h-4 bg-[rgba(255,255,255,0.06)] mx-1" />
             {sources.map((s) => (
               <FilterChip key={s} active={sourceFilter === s} label={s} onClick={() => setSourceFilter(sourceFilter === s ? null : s)} />
             ))}
@@ -247,7 +246,6 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
             {classifications.map((c) => (
               <FilterChip key={c} active={classFilter === c} label={CLASSIFICATION_STYLES[c].label} color={CLASSIFICATION_STYLES[c].color} onClick={() => setClassFilter(classFilter === c ? null : c)} />
             ))}
-            <span className="w-px h-4 bg-[rgba(255,255,255,0.06)] mx-1" />
             <button
               onClick={() => setShowHidden(!showHidden)}
               className="inline-flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors"
@@ -277,7 +275,7 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
                   <div key={d.id} data-draft-item={d.externalId} className="py-2.5 border-b border-[rgba(255,255,255,0.04)] last:border-0">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-medium text-[#F5F5F5] truncate">{d.sender}</span>
-                      <span className="text-[10px] font-mono text-[#F59E0B] shrink-0">{relativeTime(d.messageTs)}</span>
+                      <span className="text-[10px] font-mono text-[#4B5563] shrink-0">{relativeTime(d.messageTs)}</span>
                     </div>
                     <p className="text-xs text-[#6B7280] truncate mt-0.5">{d.subject}</p>
                     <WorkspacePill workspaceId={d.workspaceId} />

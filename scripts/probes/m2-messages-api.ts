@@ -106,7 +106,7 @@ async function main() {
 
     // 4 — GET filters + pagination
     const drafts = await (await fetch(`${BASE}/api/messages?draftStatus=awaiting-review&workspace=personal`, { headers: bearer })).json()
-    const draftIds = drafts.items.filter((i: { externalId: string }) => i.externalId.startsWith('msgtest-')).map((i: { externalId: string }) => i.externalId)
+    const draftIds = drafts.items.filter((i: { externalId: string }) => i.externalId.startsWith('msgtest-m2-')).map((i: { externalId: string }) => i.externalId)
     check('draftStatus filter returns the awaiting-review item', draftIds.length === 1 && draftIds[0] === 'msgtest-m2-0',
       JSON.stringify(draftIds))
 

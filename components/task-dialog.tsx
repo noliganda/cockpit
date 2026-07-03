@@ -405,7 +405,10 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   ))}
                 </optgroup>
                 <optgroup label="Harnesses / Functions" className="text-gray-400 bg-[#1A1A1A]">
-                  {VIRTUAL_HARNESSES.map(op => (
+                  {/* Hide virtual entries shadowed by a REAL registered operator —
+                      duplicate ids (hermes, claude-code) would list twice and the
+                      function-typed duplicate loses to the registry on select. */}
+                  {VIRTUAL_HARNESSES.filter(h => !operatorsList.some(o => o.id === h.id)).map(op => (
                     <option key={op.id} value={op.id} className="text-[#F5F5F5]">
                       ⚡️ {op.name}
                     </option>

@@ -60,8 +60,12 @@ async function main() {
       { prerequisiteTaskId: prereq.id, dependentTaskId: plain.id, dependencyType: 'blocks' },
     ])
 
-    // ── P4.2: artifact-needing dependent (readiness path, no force) ──
-    const first = await dispatchTaskById(dependent.id)
+    // ── P4.2: artifact-needing dependent ──
+    // force:true makes the probe immune to the global ops pause AND to claim
+    // races with the live launchd poller; every asserted behavior survives it:
+    // artifact context is resolved regardless, and concurrency/live-session
+    // are HARD guards that force never bypasses.
+    const first = await dispatchTaskById(dependent.id, { force: true, actorName: 'probe' })
     check('artifact dependent dispatched', first.outcome === 'dispatched', JSON.stringify(first))
     await sleep(800)
     const prompt1 = existsSync(sink) ? readFileSync(sink, 'utf8') : ''
@@ -70,10 +74,10 @@ async function main() {
       prompt1.includes('file:///tmp/artifact-A.txt') && prompt1.includes('artifact prereq'))
 
     // ── P4.3: operator at max concurrency refuses the second task ──
-    const second = await dispatchTaskById(plain.id)
+    const second = await dispatchTaskById(plain.id, { force: true, actorName: 'probe' })
     const refusedAtConcurrency = second.outcome === 'skipped'
       && (second.reason.includes('max concurrency') || (second.blockers ?? []).some(b => b.includes('max concurrency')))
-    check('second dispatch refused at max concurrency', refusedAtConcurrency, JSON.stringify(second))
+    check('second dispatch refused at max concurrency (hard guard, force did not bypass)', refusedAtConcurrency, JSON.stringify(second))
 
     // Settle the first task (Done path frees the slot), then retry.
     await db.update(tasks).set({ status: 'Done', completedAt: new Date() }).where(eq(tasks.id, dependent.id))
@@ -83,7 +87,7 @@ async function main() {
 
     // Don't delete the sink — cat holds the fd; slice off the new bytes instead.
     const before = readFileSync(sink, 'utf8').length
-    const third = await dispatchTaskById(plain.id)
+    const third = await dispatchTaskById(plain.id, { force: true, actorName: 'probe' })
     check('second task dispatches after slot freed', third.outcome === 'dispatched', JSON.stringify(third))
     await sleep(800)
     const prompt2 = readFileSync(sink, 'utf8').slice(before)

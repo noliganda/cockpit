@@ -13,6 +13,10 @@ echo "── lint ──"
 npm run lint 2>&1 | grep -vE 'next lint|deprecated|create-next-app|codemod|^$' | head -10
 
 echo "── server :3100 ──"
+# Own the port: a stale server from a manual probe run would silently serve an
+# OLD build to every probe (EADDRINUSE on our start goes unseen otherwise).
+lsof -ti :3100 | xargs kill 2>/dev/null || true
+sleep 1
 PORT=3100 nohup npx next start -p 3100 >/tmp/cockpit-probe-server.log 2>&1 &
 SERVER_PID=$!
 trap 'kill $SERVER_PID 2>/dev/null || true' EXIT

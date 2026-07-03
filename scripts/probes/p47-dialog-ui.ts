@@ -40,13 +40,22 @@ async function main() {
     // mid-gate can land on the error boundary, which has no New-task button.
     const newTask = page.getByRole('button', { name: /new task|add task/i }).first()
     let opened = false
-    for (let attempt = 0; attempt < 2 && !opened; attempt++) {
+    for (let attempt = 0; attempt < 4 && !opened; attempt++) {
       await page.goto(`${BASE}/tasks`, { waitUntil: 'networkidle' })
       try {
-        await newTask.click({ timeout: 20_000 })
+        await newTask.click({ timeout: 15_000 })
         opened = true
       } catch {
-        console.log(`attempt ${attempt + 1}: New-task button not found; page title "${await page.title()}" — retrying`)
+        // Under gate load the /tasks server component can transiently land on
+        // the error boundary — use its own "Try again", then back off.
+        const tryAgain = page.getByRole('button', { name: /try again/i })
+        if (await tryAgain.isVisible().catch(() => false)) {
+          console.log(`attempt ${attempt + 1}: error boundary — clicking Try again`)
+          await tryAgain.click().catch(() => {})
+        } else {
+          console.log(`attempt ${attempt + 1}: New-task button not found; page title "${await page.title()}"`)
+        }
+        await page.waitForTimeout(5_000)
       }
     }
     if (!opened) {

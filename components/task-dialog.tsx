@@ -211,11 +211,13 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
     setTimeout(() => setCopied(false), 2000)
   }
   const [operatorsList, setOperatorsList] = useState<{ id: string; name: string; operatorType: string; status?: string }[]>([])
+  const [operatorsLoaded, setOperatorsLoaded] = useState(false)
   useEffect(() => {
     fetch('/api/operators')
       .then(res => res.json())
       .then((data: unknown) => setOperatorsList(Array.isArray(data) ? (data as { id: string; name: string; operatorType: string; status?: string }[]).filter(o => o.id !== 'charlie') : []))
       .catch(() => setOperatorsList([]))
+      .finally(() => setOperatorsLoaded(true))
   }, [])
   const [region, setRegion] = useState(task?.region ?? '')
   const [areaId, setAreaId] = useState(task?.areaId ?? '')
@@ -279,7 +281,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
         assignee: assignee || undefined,
         assigneeId: assigneeId || undefined,
         assigneeName: assigneeName || undefined,
-        assigneeType: assigneeType || undefined,
+        // Registry wins at save time: whatever race put a stale type in state,
+        // an id that names a registered operator carries that operator's type.
+        assigneeType: (operatorsList.find(o => o.id === assigneeId)?.operatorType ?? assigneeType) || undefined,
         executingModel: executingModel || undefined,
         executingSessionId: executingSessionId || undefined,
         tags,
@@ -407,8 +411,11 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 <optgroup label="Harnesses / Functions" className="text-gray-400 bg-[#1A1A1A]">
                   {/* Hide virtual entries shadowed by a REAL registered operator —
                       duplicate ids (hermes, claude-code) would list twice and the
-                      function-typed duplicate loses to the registry on select. */}
-                  {VIRTUAL_HARNESSES.filter(h => !operatorsList.some(o => o.id === h.id)).map(op => (
+                      function-typed duplicate loses to the registry on select.
+                      Rendered only once the registry has LOADED: before that, the
+                      filter can't see the shadowing and a fast selection of the
+                      virtual hermes would mistype the assignee as 'function'. */}
+                  {operatorsLoaded && VIRTUAL_HARNESSES.filter(h => !operatorsList.some(o => o.id === h.id)).map(op => (
                     <option key={op.id} value={op.id} className="text-[#F5F5F5]">
                       ⚡️ {op.name}
                     </option>

@@ -35,11 +35,27 @@ async function main() {
       path: '/',
     }])
     const page = await context.newPage()
-    await page.goto(`${BASE}/tasks`, { waitUntil: 'networkidle' })
 
-    // Open the creation dialog (the page's New Task affordance).
+    // Open the creation dialog. One reload retry: a transient server hiccup
+    // mid-gate can land on the error boundary, which has no New-task button.
     const newTask = page.getByRole('button', { name: /new task|add task/i }).first()
-    await newTask.click()
+    let opened = false
+    for (let attempt = 0; attempt < 2 && !opened; attempt++) {
+      await page.goto(`${BASE}/tasks`, { waitUntil: 'networkidle' })
+      try {
+        await newTask.click({ timeout: 20_000 })
+        opened = true
+      } catch {
+        console.log(`attempt ${attempt + 1}: New-task button not found; page title "${await page.title()}" — retrying`)
+      }
+    }
+    if (!opened) {
+      const buttons = await page.locator('button').allInnerTexts()
+      await page.screenshot({ path: '/tmp/probe-p47-failure.png', fullPage: true })
+      check('tasks page shows the New-task button', false,
+        `buttons on page: ${JSON.stringify(buttons.slice(0, 20))}; screenshot /tmp/probe-p47-failure.png`)
+      finish('probe P4.7 dialog UI')
+    }
     const select = page.locator('select').filter({ has: page.locator('option', { hasText: 'Unassigned' }) }).first()
     await select.waitFor({ state: 'visible', timeout: 10_000 })
 

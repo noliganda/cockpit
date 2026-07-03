@@ -26,6 +26,11 @@ async function main() {
   const dir = mkdtempSync(join(tmpdir(), 'probe-pause-'))
   const taskIds: string[] = []
 
+  // Snapshot the ops pause state — the probe must RESTORE it, not force it
+  // off (pause may be a deliberate operational state, e.g. a safety hold).
+  const [initial] = await db.select().from(dispatchState).where(eq(dispatchState.id, 'singleton')).limit(1)
+  const initialPause = { paused: initial?.paused ?? false, pausedAt: initial?.pausedAt ?? null, pausedBy: initial?.pausedBy ?? null }
+
   try {
     const noAuth = await fetch(`${BASE}/api/dispatch/pause`, { method: 'POST', body: JSON.stringify({ paused: true }), headers: { 'Content-Type': 'application/json' } })
     check('pause: 401 without bearer', noAuth.status === 401, String(noAuth.status))
@@ -66,7 +71,7 @@ async function main() {
     const pauseActivity = await db.select().from(activityLog).where(inArray(activityLog.action, ['dispatch_paused', 'dispatch_resumed']))
     check('pause/resume logged to activity spine', pauseActivity.length >= 2, String(pauseActivity.length))
   } finally {
-    await db.update(dispatchState).set({ paused: false, pausedAt: null, pausedBy: null }).where(eq(dispatchState.id, 'singleton'))
+    await db.update(dispatchState).set(initialPause).where(eq(dispatchState.id, 'singleton'))
     if (taskIds.length) {
       await db.delete(agentWakeupRequests).where(inArray(agentWakeupRequests.taskId, taskIds))
       await db.delete(agentTaskSessions).where(inArray(agentTaskSessions.taskId, taskIds))
@@ -83,7 +88,7 @@ async function main() {
     rmSync(dir, { recursive: true, force: true })
     const residue = await db.select({ id: tasks.id }).from(tasks).where(like(tasks.title, `${TEST_PREFIX}%`))
     check('residual test rows = 0', residue.length === 0, String(residue.length))
-    check('pause left OFF', !(await isDispatchPaused()))
+    check('ops pause state restored to entry value', (await isDispatchPaused()) === initialPause.paused, `expected ${initialPause.paused}`)
   }
   finish('probe P4.5 pause toggle')
 }

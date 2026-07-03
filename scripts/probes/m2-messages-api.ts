@@ -97,6 +97,9 @@ async function main() {
       eq(activityLog.eventType, 'digest_published'), eq(activityLog.workflowRunId, RUN_ID),
     ))
     check('exactly ONE digest_published event for the run', events.length === 1, String(events.length))
+    const logsHtml = await (await fetch(`${BASE}/logs?type=digest_published`, { headers: bearer })).text()
+    check('digest_published run visible in /logs', logsHtml.includes(RUN_ID), '')
+
     check('event carries comms family + item count', events[0]?.eventFamily === 'comms'
       && (events[0]?.metadata as Record<string, unknown>)?.itemCount === 20,
       JSON.stringify({ fam: events[0]?.eventFamily, meta: events[0]?.metadata }))

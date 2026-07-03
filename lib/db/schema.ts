@@ -71,6 +71,12 @@ export const dispatchState = pgTable('dispatch_state', {
   id: text('id').primaryKey(), // always 'singleton'
   lastCascadeAt: timestamp('last_cascade_at', { withTimezone: true }),
   lastCycleAt: timestamp('last_cycle_at', { withTimezone: true }),
+  // Soft pause (migration 0011): stops new dispatches on EVERY host sharing
+  // this DB (unlike DISPATCH_ENABLED, which is a per-host capability gate).
+  // Reclamation and cascade bookkeeping keep running while paused.
+  paused: boolean('paused').notNull().default(false),
+  pausedAt: timestamp('paused_at', { withTimezone: true }),
+  pausedBy: text('paused_by'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 

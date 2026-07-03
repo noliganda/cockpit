@@ -17,7 +17,7 @@
  * tasks table doesn't carry — slot it in when that data exists.)
  */
 import { db } from '@/lib/db'
-import { tasks, operators, agentWakeupRequests, agentTaskSessions, taskEvents, taskDependencies } from '@/lib/db/schema'
+import { tasks, operators, agentWakeupRequests, agentTaskSessions, taskEvents, taskDependencies, dispatchState } from '@/lib/db/schema'
 import { eq, and, inArray } from 'drizzle-orm'
 import { evaluateReadiness } from './readiness'
 import { getAdapter, type DispatchContext } from './adapters'
@@ -26,6 +26,8 @@ import { createTaskSession, createWakeupRequest, markSessionActive, markSessionF
 import { logActivity } from '@/lib/activity'
 
 export interface DispatchSummary {
+  /** True when the soft pause stopped this cycle after reclamation. */
+  paused?: boolean
   reclaimed: number
   candidates: number
   ready: number
@@ -37,6 +39,16 @@ export interface DispatchSummary {
 
 /** Spec §5.2 default for operators whose adapter is unknown/unregistered. */
 const DEFAULT_STALE_THRESHOLD_MS = 15 * 60 * 1000
+
+/**
+ * Soft pause (migration 0011): DB-backed so the dashboard can stop dispatching
+ * on every host without touching env vars. Pause means "start no new work" —
+ * stale reclamation and cascade bookkeeping continue.
+ */
+export async function isDispatchPaused(): Promise<boolean> {
+  const [state] = await db.select({ paused: dispatchState.paused }).from(dispatchState).where(eq(dispatchState.id, 'singleton')).limit(1)
+  return state?.paused ?? false
+}
 
 /**
  * Stale-claim reclamation (spec §5.2 step 1, Phase 3). A claimed/running
@@ -225,6 +237,12 @@ export async function runDispatchCycle(): Promise<DispatchSummary> {
     console.error('[runDispatchCycle] stale reclamation failed', err)
   }
 
+  // 0b. Soft pause: reclamation ran (it starts nothing), but no new dispatches.
+  if (await isDispatchPaused()) {
+    summary.paused = true
+    return summary
+  }
+
   // 1. Candidate tasks: dispatchable status + agent/function assignee.
   const candidates = await db
     .select()
@@ -324,6 +342,11 @@ export async function dispatchTaskById(
     .limit(1)
   if (liveSessions.length > 0) {
     return { outcome: 'skipped', reason: 'task already has an active session' }
+  }
+
+  // Soft pause blocks manual dispatch too, unless explicitly forced.
+  if (!opts.force && (await isDispatchPaused())) {
+    return { outcome: 'skipped', reason: 'dispatching is paused (resume from /dispatch or force)' }
   }
 
   if (!opts.force && !opts.skipReadinessCheck) {

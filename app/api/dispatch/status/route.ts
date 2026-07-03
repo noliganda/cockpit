@@ -86,6 +86,9 @@ export const GET = apiHandler(async () => {
     state: {
       lastCycleAt: state?.lastCycleAt ?? null,
       lastCascadeAt: state?.lastCascadeAt ?? null,
+      paused: state?.paused ?? false,
+      pausedAt: state?.pausedAt ?? null,
+      pausedBy: state?.pausedBy ?? null,
     },
     operators: agentOperators.map(o => ({
       id: o.id,

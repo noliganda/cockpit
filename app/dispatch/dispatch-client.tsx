@@ -1,6 +1,6 @@
 'use client'
 import { useCallback, useEffect, useState } from 'react'
-import { Send, RefreshCw, Bot, AlertTriangle, PauseCircle } from 'lucide-react'
+import { Send, RefreshCw, Bot, AlertTriangle, PauseCircle, Pause, Play } from 'lucide-react'
 
 // ── Dispatch queue panel (spec §8 Phase 4) ────────────────────────────────────
 // Read-only monitoring over GET /api/dispatch/status: engine state, agent
@@ -46,7 +46,7 @@ interface SessionRow {
 
 interface StatusPayload {
   dispatchEnabled: boolean
-  state: { lastCycleAt: string | null; lastCascadeAt: string | null }
+  state: { lastCycleAt: string | null; lastCascadeAt: string | null; paused: boolean; pausedAt: string | null; pausedBy: string | null }
   operators: OperatorRow[]
   queue: { counts: { queued: number; claimed: number; running: number }; items: QueueItem[] }
   staleClaims: QueueItem[]
@@ -96,6 +96,7 @@ export function DispatchClient() {
   const [data, setData] = useState<StatusPayload | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [toggling, setToggling] = useState(false)
 
   const load = useCallback(async (manual = false) => {
     if (manual) setRefreshing(true)
@@ -117,6 +118,23 @@ export function DispatchClient() {
     load()
     const id = setInterval(() => load(), 30_000)
     return () => clearInterval(id)
+  }, [load])
+
+  const togglePause = useCallback(async (paused: boolean) => {
+    setToggling(true)
+    try {
+      const res = await fetch('/api/dispatch/pause', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused }),
+      })
+      if (!res.ok) throw new Error(`status ${res.status}`)
+      await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setToggling(false)
+    }
   }, [load])
 
   if (!data) {
@@ -144,9 +162,27 @@ export function DispatchClient() {
             <span className={`w-1.5 h-1.5 rounded-full ${data.dispatchEnabled ? 'bg-[#22C55E]' : 'bg-[#4B5563]'}`} />
             {data.dispatchEnabled ? 'engine on' : 'engine off (this host)'}
           </span>
+          {data.state.paused && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium text-[#F59E0B] border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.08)]">
+              <Pause size={11} strokeWidth={2} />
+              paused{data.state.pausedBy ? ` by ${data.state.pausedBy}` : ''} {timeAgo(data.state.pausedAt)}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-[#6B7280]">cycle {timeAgo(data.state.lastCycleAt)} · cascade {timeAgo(data.state.lastCascadeAt)}</span>
+          <button
+            onClick={() => togglePause(!data.state.paused)}
+            disabled={toggling}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-[6px] transition-colors disabled:opacity-40 ${
+              data.state.paused
+                ? 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.3)] text-[#22C55E] hover:bg-[rgba(34,197,94,0.14)]'
+                : 'bg-[#1A1A1A] border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222]'
+            }`}
+          >
+            {data.state.paused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} />}
+            {data.state.paused ? 'Resume dispatching' : 'Pause dispatching'}
+          </button>
           <button
             onClick={() => load(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"

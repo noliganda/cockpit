@@ -81,9 +81,17 @@ export async function reclaimStaleClaims(now: Date = new Date()): Promise<number
     if (wakeup.runId) {
       ;[session] = await db.select().from(agentTaskSessions).where(eq(agentTaskSessions.id, wakeup.runId)).limit(1)
     }
+    // Task-level activity counts as liveness: oneshot harnesses never
+    // checkpoint their session — they prove life through task events (which
+    // bump tasks.last_activity_at). Ignoring it reclaimed live runs mid-flight
+    // and leaked their re-queued wakeups (2026-07-06 stuck-queue incident).
+    const [taskAlive] = wakeup.taskId
+      ? await db.select({ lastActivityAt: tasks.lastActivityAt }).from(tasks).where(eq(tasks.id, wakeup.taskId)).limit(1)
+      : []
     const lastAlive = Math.max(
       wakeup.claimedAt?.getTime() ?? wakeup.requestedAt.getTime(),
       session?.lastCheckpointAt?.getTime() ?? 0,
+      taskAlive?.lastActivityAt?.getTime() ?? 0,
     )
     if (now.getTime() - lastAlive < thresholdMs) continue
 
@@ -222,13 +230,68 @@ export async function settleDispatchOnTerminal(taskId: string): Promise<void> {
     await db.update(agentWakeupRequests)
       .set({ status: 'completed', finishedAt: new Date() })
       .where(and(eq(agentWakeupRequests.taskId, taskId), inArray(agentWakeupRequests.status, ['claimed', 'running'])))
+    // Queued wakeups are cancelled, not completed: the task reached a terminal
+    // status without them ever being consumed (e.g. stale reclamation re-queued
+    // one mid-run). Leaving them 'queued' is how the dispatch queue showed
+    // long-Done tasks as stuck.
+    await db.update(agentWakeupRequests)
+      .set({ status: 'cancelled', finishedAt: new Date() })
+      .where(and(eq(agentWakeupRequests.taskId, taskId), eq(agentWakeupRequests.status, 'queued')))
   } catch (err) {
     console.error('[settleDispatchOnTerminal]', taskId, err)
   }
 }
 
+/**
+ * Reconciler for leaked dispatch footprints: any open wakeup whose task is
+ * already terminal gets settled through settleDispatchOnTerminal. Covers every
+ * path that skips the task-PATCH hook (direct DB status writes, historical
+ * leaks). Runs at the top of every cycle, including paused ones — pause means
+ * "start no new work", bookkeeping always continues. Never throws.
+ */
+export async function reconcileTerminalWakeups(): Promise<number> {
+  try {
+    const open = await db
+      .select({ taskId: agentWakeupRequests.taskId, taskStatus: tasks.status, taskTitle: tasks.title, workspaceId: tasks.workspaceId })
+      .from(agentWakeupRequests)
+      .innerJoin(tasks, eq(agentWakeupRequests.taskId, tasks.id))
+      .where(inArray(agentWakeupRequests.status, ['queued', 'claimed', 'running']))
+    const terminal = open.filter((r) => {
+      const norm = toNormalized(r.taskStatus)
+      return norm === 'done' || norm === 'cancelled'
+    })
+    const byTask = new Map(terminal.map((r) => [r.taskId!, r]))
+    for (const [taskId, row] of byTask) {
+      await settleDispatchOnTerminal(taskId)
+      await logActivity({
+        workspaceId: row.workspaceId,
+        actor: 'dispatch-engine',
+        action: 'wakeup_reconciled',
+        entityType: 'task',
+        entityId: taskId,
+        entityTitle: row.taskTitle,
+        description: `Open wakeup settled for already-${toNormalized(row.taskStatus)} task "${row.taskTitle}"`,
+        actorType: 'system',
+        actorName: 'dispatch-engine',
+        eventFamily: 'agent',
+        eventType: 'dispatch_wakeup_reconciled',
+        sourceSystem: 'api',
+        status: 'success',
+      })
+    }
+    return byTask.size
+  } catch (err) {
+    console.error('[reconcileTerminalWakeups]', err)
+    return 0
+  }
+}
+
 export async function runDispatchCycle(): Promise<DispatchSummary> {
   const summary: DispatchSummary = { reclaimed: 0, candidates: 0, ready: 0, claimed: 0, dispatched: 0, skipped: [], errors: [] }
+
+  // 0a. Settle open wakeups on already-terminal tasks BEFORE reclamation, so
+  //     a finished task's claimed wakeup completes instead of being re-queued.
+  await reconcileTerminalWakeups()
 
   // 0. Reclaim dead claims first so their slots/wakeups are visible below.
   try {

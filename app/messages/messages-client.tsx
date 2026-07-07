@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Mail, MessageSquare, Hash, PenLine, Inbox, Link2, Eye, EyeOff } from 'lucide-react'
+import { Mail, MessageSquare, Hash, PenLine, Inbox, Link2, Eye, EyeOff, ExternalLink } from 'lucide-react'
 
 export interface CommItemView {
   id: string
@@ -18,6 +18,23 @@ export interface CommItemView {
   messageTs: string
   runId: string
   linkedTaskId: string | null
+  account: string | null
+  sourceUrl: string | null
+}
+
+/**
+ * Deep link to the original message. Producer-supplied sourceUrl wins;
+ * email items fall back to a Gmail web link — account-precise when the
+ * producer sent the mailbox address, default account otherwise.
+ */
+function openHref(item: CommItemView): string | null {
+  if (item.sourceUrl) return item.sourceUrl
+  if (item.source === 'email' && item.externalId) {
+    return item.account
+      ? `https://mail.google.com/mail/u/${encodeURIComponent(item.account)}/#all/${item.externalId}`
+      : `https://mail.google.com/mail/#all/${item.externalId}`
+  }
+  return null
 }
 
 const WS_COLORS: Record<string, string> = {
@@ -158,9 +175,22 @@ function MessageCard({ item }: { item: CommItemView }) {
             </div>
           )}
         </div>
-        <span className="text-[11px] text-[#5C5340] font-mono shrink-0" title={new Date(item.messageTs).toLocaleString()}>
-          {relativeTime(item.messageTs)}
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          {openHref(item) && (
+            <a
+              href={openHref(item)!}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Open original message"
+              className="text-[#7A6F55] hover:text-[#A04A30] transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          )}
+          <span className="text-[11px] text-[#5C5340] font-mono" title={new Date(item.messageTs).toLocaleString()}>
+            {relativeTime(item.messageTs)}
+          </span>
+        </div>
       </div>
     </div>
   )

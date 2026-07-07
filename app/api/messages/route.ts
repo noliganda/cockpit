@@ -29,6 +29,8 @@ const itemSchema = z.object({
   messageTs: z.string().datetime({ offset: true }),
   runId: z.string().min(1),
   linkedTaskId: z.string().uuid().nullish(),
+  account: z.string().min(3).nullish(), // mailbox the item came from, e.g. hey@oliviermarcolin.com
+  sourceUrl: z.string().url().nullish(), // full deep link to the original message
 })
 
 const postSchema = z.object({ items: z.array(itemSchema).min(1).max(100) })
@@ -71,6 +73,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
         draftId: item.draftId ?? null,
         draftStatus: item.draftStatus ?? null,
         linkedTaskId: item.linkedTaskId ?? null,
+        account: item.account ?? null,
+        sourceUrl: item.sourceUrl ?? null,
         messageTs: new Date(item.messageTs),
       })
       .onConflictDoUpdate({
@@ -88,6 +92,8 @@ export const POST = apiHandler(async (req: NextRequest) => {
           messageTs: new Date(item.messageTs),
           runId: item.runId,
           linkedTaskId: item.linkedTaskId ?? null,
+          account: item.account ?? null,
+          sourceUrl: item.sourceUrl ?? null,
           updatedAt: new Date(),
         },
       })

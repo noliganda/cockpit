@@ -663,6 +663,8 @@ export const commItems = pgTable('comm_items', {
   messageTs: timestamp('message_ts', { withTimezone: true }).notNull(),
   runId: text('run_id').notNull(), // digest/sentinel run identifier
   linkedTaskId: uuid('linked_task_id').references(() => tasks.id),
+  account: text('account'), // mailbox address the item came from — enables account-precise Gmail links
+  sourceUrl: text('source_url'), // producer-supplied deep link; wins over any computed link
   ...timestamps,
 }, (t) => [
   unique('comm_items_source_external_uq').on(t.source, t.externalId),

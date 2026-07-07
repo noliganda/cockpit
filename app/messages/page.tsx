@@ -23,6 +23,8 @@ function toView(row: typeof commItems.$inferSelect): CommItemView {
     messageTs: row.messageTs.toISOString(),
     runId: row.runId,
     linkedTaskId: row.linkedTaskId,
+    account: row.account,
+    sourceUrl: row.sourceUrl,
   }
 }
 

@@ -81,3 +81,12 @@ Body: `{ "draftStatus": "sent" }` and/or `{ "linkedTaskId": "<uuid>" }` (null cl
 - **Design (R9):** independent checker (fresh context, system.md + screenshots only) — round 1 PASS with 9 minors, 6 fixed (3 skipped with reasons: two data artifacts, one already-correct), round 2 PASS with all fixes verified.
 - **Engine (R12):** paused for the whole run (`pausedBy: claude-code-msgs-run`, 11:26Z→12:08Z); dispatch host kickstarted onto the new build while still paused; then restored to the exact recorded pre-run state `{paused:false, pausedAt:null, pausedBy:null}`; the next launchd poll cycle ran live with 0 candidates, 0 dispatched. Candidate sweep at close: zero agent-assigned Backlog/To Do tasks.
 - **Incident worth remembering:** the first gate run UNPAUSED the engine — p46 forced `paused:false` in its `finally`. Fixed to snapshot/restore + assert (now matches p45); pause survived every subsequent gate run and the host restart.
+
+## 7. Contract addendum — 2026-07-08 (deep links)
+
+Two OPTIONAL fields added to the §2 item schema (migration `drizzle/0013_comm_items_links.sql`, both nullable, upsert-updated):
+
+- `account` — mailbox address the item came from (e.g. `hey@oliviermarcolin.com`). When present on `source: email` items, the UI builds an account-precise Gmail link `https://mail.google.com/mail/u/<account>/#all/<externalId>`.
+- `sourceUrl` — full deep link to the original message (must be a valid URL). Always wins over any computed link; use it for non-Gmail sources (Slack permalinks, wa.me, …).
+
+Fallback without either: email items link to `https://mail.google.com/mail/#all/<externalId>` (default Gmail account). **Producer action:** send `account` on every email item — it costs nothing and makes the link land in the right mailbox. `externalId` stays the Gmail API message id, which doubles as the link anchor.

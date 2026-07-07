@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { useSidebar } from '@/hooks/use-sidebar'
 import { WorkspaceSwitcher } from './workspace-switcher'
+import { WhisperMark } from './whisper-mark'
 
 const NAV_ITEMS = [
   { href: '/', icon: Home, label: 'Home', indent: false },
@@ -117,9 +118,12 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
 
       {/* Footer */}
       {!collapsed && (
-        <div className="p-3 border-t border-[rgba(167,155,120,0.13)]">
-          <p className="text-xs text-[#5C5340]">Cockpit v5</p>
-          <p className="text-xs text-[#5C5340] mt-0.5">{new Date().toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
+        <div className="p-3 border-t border-[rgba(167,155,120,0.13)] flex items-center gap-2.5">
+          <WhisperMark size={20} className="shrink-0 opacity-80" />
+          <div>
+            <p className="text-xs text-[#5C5340]">Cockpit v5</p>
+            <p className="text-xs text-[#5C5340] mt-0.5">{new Date().toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}</p>
+          </div>
         </div>
       )}
     </div>

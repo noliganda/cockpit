@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { WhisperMark } from '@/components/whisper-mark'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -39,6 +40,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#14100C]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
+          <div className="flex justify-center mb-4">
+            <WhisperMark size={56} draw />
+          </div>
           <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Cockpit</h1>
           <p className="text-sm text-[#A79B78] mt-1">Sign in to continue</p>
           <div className="flex items-center justify-center gap-2 mt-3">

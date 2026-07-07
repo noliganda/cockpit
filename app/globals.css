@@ -119,6 +119,25 @@ input:focus, textarea:focus, select:focus {
   color: #E8DFCE;
 }
 
+/* ---------- Whisper mark draw-in (login) ---------- */
+.mark-draw line {
+  stroke-dasharray: 68;
+  stroke-dashoffset: 68;
+  animation: markDraw 2.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+.mark-draw line:nth-of-type(2) { animation-delay: 0.2s; }
+.mark-draw line:nth-of-type(3) { animation-delay: 0.4s; }
+.mark-draw circle {
+  opacity: 0;
+  animation: markNode 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 1.8s forwards;
+}
+@keyframes markDraw { to { stroke-dashoffset: 0; } }
+@keyframes markNode { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .mark-draw line { animation: none; stroke-dashoffset: 0; }
+  .mark-draw circle { animation: none; opacity: 1; }
+}
+
 /* Animate in class for cards */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(8px); }

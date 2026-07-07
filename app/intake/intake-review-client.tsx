@@ -117,7 +117,7 @@ export function IntakeReviewClient() {
         </div>
         <button
           onClick={() => void fetchItems()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#7A6F55] hover:text-[#E8DFCE] bg-[#281E16] border border-[rgba(167,155,120,0.13)] rounded-none transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#7A6F55] hover:text-[#E8DFCE] bg-[#201A14] border border-[rgba(167,155,120,0.13)] rounded-none transition-colors"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />
           Refresh
@@ -133,7 +133,7 @@ export function IntakeReviewClient() {
             className={cn(
               'px-3 py-1.5 text-xs rounded-none border transition-colors',
               filter === f
-                ? 'bg-[#2F241A] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+                ? 'bg-[#272018] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
                 : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]',
             )}
           >
@@ -157,7 +157,7 @@ export function IntakeReviewClient() {
           {items.map(item => (
             <div
               key={item.id}
-              className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] p-4"
+              className="rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] p-4"
             >
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-4 h-4 text-[#C9962E] mt-0.5 shrink-0" />

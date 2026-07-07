@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${fraunces.variable} ${newsreader.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans bg-[#1A1410] text-[#E8DFCE] antialiased">
+      <body className="font-sans bg-[#14100C] text-[#E8DFCE] antialiased">
         <AppShell>{children}</AppShell>
         <div className="vignette" aria-hidden="true" />
         <div className="grain" aria-hidden="true" />

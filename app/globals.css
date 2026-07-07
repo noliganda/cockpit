@@ -7,11 +7,11 @@
    ============================================================ */
 
 @theme {
-  --color-bg-base: #1A1410;      /* Walnut — no pure black */
-  --color-bg-surface-1: #211913;
-  --color-bg-surface-2: #281E16;
-  --color-bg-surface-3: #2F241A;
-  --color-bg-inset: #140F0B;
+  --color-bg-base: #14100C;      /* Walnut — no pure black */
+  --color-bg-surface-1: #1A1510;
+  --color-bg-surface-2: #201A14;
+  --color-bg-surface-3: #272018;
+  --color-bg-inset: #0F0C09;
 
   --color-border-default: rgba(167, 155, 120, 0.14);  /* --rule */
   --color-border-subtle: rgba(167, 155, 120, 0.09);
@@ -57,7 +57,7 @@
 
 html,
 body {
-  background-color: #1A1410;
+  background-color: #14100C;
   color: #E8DFCE;
   font-family: var(--font-sans);
   font-optical-sizing: auto;

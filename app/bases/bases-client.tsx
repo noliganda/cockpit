@@ -21,10 +21,10 @@ const WORKSPACE_LABELS: Record<string, string> = {
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
+  'w-full px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 const selectCls =
-  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] appearance-none'
+  'w-full px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] appearance-none'
 
 interface AreaOption { id: string; name: string }
 interface ProjectOption { id: string; name: string }
@@ -85,8 +85,8 @@ function CreateBaseDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm">
-      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,8,6,0.7)] backdrop-blur-sm">
+      <div className="bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-[#E8DFCE]">New Base</h2>
           <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
@@ -166,7 +166,7 @@ function CreateBaseDialog({
           <button
             onClick={handleSave}
             disabled={!name.trim() || saving}
-            className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-none text-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] transition-colors disabled:opacity-40"
           >
             {saving ? 'Creating…' : 'Create Base'}
           </button>
@@ -247,7 +247,7 @@ export default function BasesClient() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] transition-colors"
         >
           <Plus size={14} />
           New Base
@@ -259,7 +259,7 @@ export default function BasesClient() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-32 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] animate-pulse"
+              className="h-32 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] animate-pulse"
             />
           ))}
         </div>
@@ -269,7 +269,7 @@ export default function BasesClient() {
           <p className="text-[#7A6F55] text-sm">No bases yet</p>
           <button
             onClick={() => setShowCreate(true)}
-            className="mt-4 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+            className="mt-4 px-4 py-2 rounded-none text-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] transition-colors"
           >
             Create your first base
           </button>
@@ -279,7 +279,7 @@ export default function BasesClient() {
           {bases.map((base) => (
             <div
               key={base.id}
-              className="group relative bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden hover:border-[rgba(167,155,120,0.22)] transition-colors"
+              className="group relative bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden hover:border-[rgba(167,155,120,0.22)] transition-colors"
             >
               {/* Accent bar */}
               <div

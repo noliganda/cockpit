@@ -84,7 +84,7 @@ const QUEUE_STATUS_COLOR: Record<string, string> = {
 
 function StatCard({ label, value, sublabel, accent }: { label: string; value: string | number; sublabel?: string; accent?: string }) {
   return (
-    <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none p-4">
+    <div className="bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none p-4">
       <div className="font-mono text-[28px] font-semibold tabular-nums leading-none" style={accent ? { color: accent } : undefined}>{value}</div>
       <div className="mt-2 text-xs text-[#A79B78]">{label}</div>
       {sublabel && <div className="mt-0.5 text-[11px] text-[#7A6F55]">{sublabel}</div>}
@@ -161,7 +161,7 @@ export function DispatchClient() {
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
             data.dispatchEnabled
               ? 'text-[#7D9B5E] border-[rgba(125,155,94,0.3)] bg-[rgba(125,155,94,0.08)]'
-              : 'text-[#7A6F55] border-[rgba(167,155,120,0.22)] bg-[#211913]'
+              : 'text-[#7A6F55] border-[rgba(167,155,120,0.22)] bg-[#1A1510]'
           }`}>
             <span className={`w-1.5 h-1.5 rounded-full ${data.dispatchEnabled ? 'bg-[#7D9B5E]' : 'bg-[#5C5340]'}`} />
             {data.dispatchEnabled ? 'engine on' : 'engine off (this host)'}
@@ -181,7 +181,7 @@ export function DispatchClient() {
             className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-none transition-colors disabled:opacity-40 ${
               data.state.paused
                 ? 'bg-[rgba(125,155,94,0.08)] border-[rgba(125,155,94,0.3)] text-[#7D9B5E] hover:bg-[rgba(125,155,94,0.14)]'
-                : 'bg-[#281E16] border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A]'
+                : 'bg-[#201A14] border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018]'
             }`}
           >
             {/* Amber icon differentiates this fleet-wide control from the
@@ -191,7 +191,7 @@ export function DispatchClient() {
           </button>
           <button
             onClick={() => load(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] transition-colors"
           >
             <RefreshCw size={14} strokeWidth={1.5} className={refreshing ? 'animate-spin' : ''} />
             Refresh
@@ -222,7 +222,7 @@ export function DispatchClient() {
 
       {/* Operators */}
       <h2 className="text-base font-semibold text-[#E8DFCE] mb-3">Operators</h2>
-      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden mb-8">
+      <div className="bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden mb-8">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs uppercase tracking-[0.02em] text-[#7A6F55] border-b border-[rgba(167,155,120,0.09)]">
@@ -235,7 +235,7 @@ export function DispatchClient() {
           </thead>
           <tbody>
             {data.operators.map(op => (
-              <tr key={op.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#281E16]">
+              <tr key={op.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#201A14]">
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-2">
                     <Bot size={16} strokeWidth={1.5} className="text-[#7A6F55]" />
@@ -280,7 +280,7 @@ export function DispatchClient() {
 
       {/* Queue */}
       <h2 className="text-base font-semibold text-[#E8DFCE] mb-3">Wakeup queue</h2>
-      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden mb-8">
+      <div className="bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden mb-8">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-xs uppercase tracking-[0.02em] text-[#7A6F55] border-b border-[rgba(167,155,120,0.09)]">
@@ -293,7 +293,7 @@ export function DispatchClient() {
           </thead>
           <tbody>
             {data.queue.items.map(item => (
-              <tr key={item.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#281E16]">
+              <tr key={item.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#201A14]">
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-2">
                     {item.task && (
@@ -324,13 +324,13 @@ export function DispatchClient() {
 
       {/* Active sessions */}
       <h2 className="text-base font-semibold text-[#E8DFCE] mb-3">Active sessions</h2>
-      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden">
+      <div className="bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden">
         {data.activeSessions.length === 0 ? (
           <div className="px-3 py-8 text-center text-[#7A6F55] text-sm">No harness is working a task right now</div>
         ) : (
           <ul>
             {data.activeSessions.map(s => (
-              <li key={s.id} className="flex items-center justify-between px-3 py-2.5 border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#281E16]">
+              <li key={s.id} className="flex items-center justify-between px-3 py-2.5 border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#201A14]">
                 <div className="flex items-center gap-2 min-w-0">
                   <Send size={14} strokeWidth={1.5} className="text-[#7A6F55] shrink-0" />
                   <span className="text-sm text-[#E8DFCE] truncate">{s.task?.title ?? s.taskId}</span>

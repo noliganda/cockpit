@@ -84,8 +84,8 @@ export function QuickNoteModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setOpen(false)} />
-      <div className="relative w-full max-w-lg bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={() => setOpen(false)} />
+      <div className="relative w-full max-w-lg bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[rgba(167,155,120,0.13)]">
           <StickyNote className="w-4 h-4 text-[#7A6F55] shrink-0" />
@@ -102,7 +102,7 @@ export function QuickNoteModal() {
           <select
             value={wsId}
             onChange={e => setWsId(e.target.value as WorkspaceId)}
-            className="w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#A79B78] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+            className="w-full px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#A79B78] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
           >
             {WORKSPACES.map(ws => (
               <option key={ws.id} value={ws.id}>{ws.name}</option>
@@ -116,7 +116,7 @@ export function QuickNoteModal() {
             onChange={e => setTitle(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); /* focus content */ } }}
             placeholder="Note title…"
-            className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340] font-medium"
+            className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340] font-medium"
           />
 
           {/* Content */}
@@ -125,7 +125,7 @@ export function QuickNoteModal() {
             onChange={e => setContent(e.target.value)}
             placeholder="Start writing…"
             rows={5}
-            className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340] resize-none"
+            className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340] resize-none"
           />
         </div>
 
@@ -135,7 +135,7 @@ export function QuickNoteModal() {
           <button
             onClick={() => void handleSave()}
             disabled={saving}
-            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save Note'}
           </button>

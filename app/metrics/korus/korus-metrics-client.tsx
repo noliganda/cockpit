@@ -34,7 +34,7 @@ const CHART_COLORS = ['#3E7A70', '#7D9B5E', '#5F7A72', '#C9962E', '#C0452E']
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+    <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
       <p className="text-xs text-[#A79B78] uppercase tracking-wide mb-3">{label}</p>
       <p className="text-3xl font-bold text-[#E8DFCE] font-mono tabular-nums">{value}</p>
       {sub && <p className="text-xs text-[#7A6F55] mt-1">{sub}</p>}
@@ -52,7 +52,7 @@ function SectionTitle({ n, title }: { n: number; title: string }) {
 }
 
 const TOOLTIP_STYLE = {
-  contentStyle: { background: '#2F241A', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, color: '#E8DFCE', fontSize: 12 },
+  contentStyle: { background: '#272018', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, color: '#E8DFCE', fontSize: 12 },
   cursor: { fill: 'rgba(167,155,120,0.09)' },
 }
 
@@ -68,9 +68,9 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
   const statusColors: Record<string, string> = { done: '#7D9B5E', 'in-progress': '#C9962E', pending: '#7A6F55' }
 
   return (
-    <div className="min-h-screen bg-[#1A1410] text-[#E8DFCE]">
+    <div className="min-h-screen bg-[#14100C] text-[#E8DFCE]">
       {/* Header bar */}
-      <div className="border-b border-[rgba(167,155,120,0.13)] bg-[#1A1410] sticky top-0 z-10">
+      <div className="border-b border-[rgba(167,155,120,0.13)] bg-[#14100C] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-none bg-[#3E7A70] flex items-center justify-center font-mono text-[13px] font-medium text-[#E8DFCE]">K</div>
@@ -101,7 +101,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 2: Task Volume — real data */}
         <section>
           <SectionTitle n={2} title="Task Volume — Last 30 Days" />
-          <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             {taskVolumeData.length === 0 ? (
               <p className="text-sm text-[#5C5340] py-4 text-center">No task data yet</p>
             ) : (
@@ -120,7 +120,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 3: Category Analysis */}
         <section>
           <SectionTitle n={3} title="Category Analysis" />
-          <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             {pipeline.length === 0 ? (
               <p className="text-sm text-[#5C5340] py-4 text-center">No task data</p>
             ) : pipeline.map((item, i) => (
@@ -138,7 +138,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 4: Operational Cost Trend — real activity data */}
         <section>
           <SectionTitle n={4} title="Operational Activity Trend" />
-          <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             {activityVolumeData.length === 0 ? (
               <p className="text-sm text-[#5C5340] py-4 text-center">No activity data yet</p>
             ) : (
@@ -157,7 +157,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 5: BF vs KORUS Comparison */}
         <section>
           <SectionTitle n={5} title="Byron Film vs KORUS — Capability Comparison (90 days)" />
-          <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             {[
               { category: 'Tasks Completed', bf: 45, korus: metrics.tasksCompleted },
               { category: 'Projects Active', bf: 3, korus: metrics.activeProjects },
@@ -193,7 +193,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 6: Activity Timeline */}
         <section>
           <SectionTitle n={6} title="Activity Timeline" />
-          <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             {recentActivity.length === 0 ? (
               <p className="text-sm text-[#5C5340] py-4">No recent activity</p>
             ) : (
@@ -219,7 +219,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 7: Recruitment Pipeline */}
         <section>
           <SectionTitle n={7} title="Recruitment Pipeline" />
-          <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+          <div className="rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(167,155,120,0.13)]">
@@ -247,7 +247,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
         {/* Section 8: Outreach & Business Development */}
         <section>
           <SectionTitle n={8} title="Outreach & Business Development" />
-          <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+          <div className="rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(167,155,120,0.13)]">
@@ -280,7 +280,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
               { entity: 'KORUS SG (Singapore)', status: 'Active', details: 'Registered · GST enrolled' },
               { entity: 'KORUS AU (Australia)', status: 'In Progress', details: 'ACN registration underway' },
             ].map(item => (
-              <div key={item.entity} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div key={item.entity} className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-medium text-[#E8DFCE]">{item.entity}</p>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${item.status === 'Active' ? 'bg-[rgba(125,155,94,0.12)] text-[#7D9B5E]' : 'bg-[rgba(201,150,46,0.12)] text-[#C9962E]'}`}>{item.status}</span>
@@ -303,7 +303,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
               { system: 'Vercel Deploy', status: 'Active', note: 'Auto-deploy on push' },
               { system: 'Vector Search', status: 'Ready', note: 'pgvector enabled' },
             ].map(item => (
-              <div key={item.system} className="p-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] flex items-center gap-3">
+              <div key={item.system} className="p-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] flex items-center gap-3">
                 <div className={`w-2 h-2 rounded-full shrink-0 ${item.status === 'Live' || item.status === 'Active' || item.status === 'Ready' ? 'bg-[#7D9B5E]' : item.status === 'Syncing' ? 'bg-[#C9962E]' : 'bg-[#7A6F55]'}`} />
                 <div>
                   <p className="text-xs font-medium text-[#E8DFCE]">{item.system}</p>
@@ -320,7 +320,7 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
           <div className="relative pl-6 border-l border-[rgba(167,155,120,0.13)]">
             {milestones.map((m, i) => (
               <div key={i} className="mb-6 last:mb-0 relative">
-                <div className="absolute -left-7 w-3 h-3 rounded-full border-2 border-[#1A1410]" style={{ backgroundColor: statusColors[m.status] ?? '#7A6F55' }} />
+                <div className="absolute -left-7 w-3 h-3 rounded-full border-2 border-[#14100C]" style={{ backgroundColor: statusColors[m.status] ?? '#7A6F55' }} />
                 <p className="text-xs text-[#7A6F55] mb-0.5">{m.date}</p>
                 <p className="text-sm font-medium text-[#E8DFCE]">{m.title}</p>
                 <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${m.status === 'done' ? 'bg-[rgba(125,155,94,0.12)] text-[#7D9B5E]' : m.status === 'in-progress' ? 'bg-[rgba(201,150,46,0.12)] text-[#C9962E]' : 'bg-[rgba(167,155,120,0.13)] text-[#7A6F55]'}`}>

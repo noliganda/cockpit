@@ -106,7 +106,7 @@ function FilterChip({ active, label, color, onClick }: { active: boolean; label:
       onClick={onClick}
       className={`text-xs px-2.5 py-1 rounded-none border transition-all ${
         active
-          ? 'text-[#E8DFCE] border-[rgba(167,155,120,0.35)] bg-[#281E16]'
+          ? 'text-[#E8DFCE] border-[rgba(167,155,120,0.35)] bg-[#201A14]'
           : 'text-[#7A6F55] border-[rgba(167,155,120,0.13)] hover:text-[#A79B78] hover:border-[rgba(167,155,120,0.22)]'
       }`}
       style={active && color ? { color, borderColor: `${color}50`, background: `${color}14` } : undefined}
@@ -122,7 +122,7 @@ function MessageCard({ item }: { item: CommItemView }) {
   return (
     <div
       data-msg-item={item.externalId}
-      className={`relative rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913] px-4 py-3 hover:border-[rgba(167,155,120,0.22)] transition-colors ${
+      className={`relative rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510] px-4 py-3 hover:border-[rgba(167,155,120,0.22)] transition-colors ${
         item.urgency === 'low' ? 'opacity-70' : ''
       }`}
     >
@@ -260,7 +260,7 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
       <div className="flex-1 flex flex-col lg:flex-row gap-6 p-6">
         {/* Drafts rail — top on mobile, right rail on desktop */}
         <aside data-drafts-rail className="lg:order-2 lg:w-72 shrink-0">
-          <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913]">
+          <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510]">
             <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
               <span className="text-xs font-semibold text-[#A79B78] uppercase tracking-widest">Drafts awaiting review</span>
               {initialDrafts.length > 0 && (

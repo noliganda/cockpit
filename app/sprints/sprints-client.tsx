@@ -82,7 +82,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
         <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Sprints</h1>
         <button
           onClick={openDialog}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] hover:border-[rgba(167,155,120,0.26)] hover:bg-[#2F241A] transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] hover:border-[rgba(167,155,120,0.26)] hover:bg-[#272018] transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
           New Sprint
@@ -104,7 +104,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
               <Link
                 key={sprint.id}
                 href={`/sprints/${sprint.id}`}
-                className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all block"
+                className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all block"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -133,10 +133,10 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
       {dialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm"
+            className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm"
             onClick={closeDialog}
           />
-          <div className="relative z-10 w-full max-w-md rounded-none bg-[#211913] border border-[rgba(167,155,120,0.18)] p-6">
+          <div className="relative z-10 w-full max-w-md rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.18)] p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-semibold text-[#E8DFCE]">New Sprint</h2>
               <button
@@ -159,7 +159,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Sprint 1 — Launch Prep"
                   required
-                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors"
+                  className="w-full px-3 py-2 rounded-none bg-[#14100C] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors"
                 />
               </div>
 
@@ -173,7 +173,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                   value={form.startDate}
                   onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors [color-scheme:dark]"
+                  className="w-full px-3 py-2 rounded-none bg-[#14100C] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors [color-scheme:dark]"
                 />
               </div>
 
@@ -187,7 +187,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                   value={form.endDate}
                   onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors [color-scheme:dark]"
+                  className="w-full px-3 py-2 rounded-none bg-[#14100C] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors [color-scheme:dark]"
                 />
               </div>
 
@@ -201,7 +201,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                   onChange={e => setForm(f => ({ ...f, goal: e.target.value }))}
                   placeholder="What do you want to achieve in this sprint?"
                   rows={3}
-                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors resize-none"
+                  className="w-full px-3 py-2 rounded-none bg-[#14100C] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors resize-none"
                 />
               </div>
 
@@ -216,7 +216,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                 <button
                   type="submit"
                   disabled={saving || !form.name.trim() || !form.startDate || !form.endDate}
-                  className="px-4 py-1.5 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Creating…' : 'Create Sprint'}
                 </button>

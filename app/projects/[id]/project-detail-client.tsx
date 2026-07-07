@@ -219,7 +219,7 @@ export function ProjectDetailClient({
               : '—' },
           { label: 'Notes', value: String(projectNotes.length) },
         ].map(s => (
-          <div key={s.label} className="p-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div key={s.label} className="p-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">{s.label}</p>
             <p className="text-lg font-bold text-[#E8DFCE] font-mono">{s.value}</p>
           </div>
@@ -272,7 +272,7 @@ export function ProjectDetailClient({
         <div className="space-y-4">
           {/* Description */}
           {project.description && (
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-2">Description</h3>
               <div className="text-sm [&_.bn-editor]:pointer-events-none">
                 <BlockEditor initialContent={project.description} onChange={() => {}} className="[&_.bn-editor]:min-h-0" />
@@ -283,25 +283,25 @@ export function ProjectDetailClient({
           {/* Quick info */}
           <div className="grid grid-cols-2 gap-3">
             {project.endDate && (
-              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">End Date</p>
                 <p className="text-sm text-[#E8DFCE]">{formatDate(project.endDate)}</p>
               </div>
             )}
             {area && (
-              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">Area</p>
                 <p className="text-sm text-[#E8DFCE]">{area.icon} {area.name}</p>
               </div>
             )}
             {project.region && (
-              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">Region</p>
                 <p className="text-sm text-[#E8DFCE]">{project.region}</p>
               </div>
             )}
             {project.slackChannelName && (
-              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">Slack Channel</p>
                 <a
                   href={project.slackChannelId ? `slack://channel?team=&id=${project.slackChannelId}` : '#'}
@@ -317,7 +317,7 @@ export function ProjectDetailClient({
           </div>
 
           {/* Milestones */}
-          <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-[#E8DFCE]">Milestones</h3>
               <span className="text-xs text-[#7A6F55]">{milestones.filter(m => m.status === 'completed').length}/{milestones.length} done</span>
@@ -369,18 +369,18 @@ export function ProjectDetailClient({
                 onChange={e => setNewMilestoneTitle(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addMilestone() }}
                 placeholder="Add milestone..."
-                className="flex-1 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+                className="flex-1 px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
               />
               <input
                 type="date"
                 value={newMilestoneDate}
                 onChange={e => setNewMilestoneDate(e.target.value)}
-                className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]"
+                className="px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]"
               />
               <button
                 onClick={addMilestone}
                 disabled={addingMilestone || !newMilestoneTitle.trim()}
-                className="p-2 rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-none bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -388,7 +388,7 @@ export function ProjectDetailClient({
           </div>
 
           {/* Links */}
-          <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             <h3 className="text-sm font-semibold text-[#E8DFCE] mb-4">Links</h3>
 
             {/* Preset buttons */}
@@ -431,19 +431,19 @@ export function ProjectDetailClient({
                 value={newBookmarkTitle}
                 onChange={e => setNewBookmarkTitle(e.target.value)}
                 placeholder="Title"
-                className="w-28 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+                className="w-28 px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
               />
               <input
                 value={newBookmarkUrl}
                 onChange={e => setNewBookmarkUrl(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addBookmark() }}
                 placeholder="https://..."
-                className="flex-1 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+                className="flex-1 px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
               />
               <button
                 onClick={() => addBookmark()}
                 disabled={!newBookmarkTitle.trim() || !newBookmarkUrl.trim()}
-                className="p-2 rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-none bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -454,7 +454,7 @@ export function ProjectDetailClient({
 
       {/* Tasks tab */}
       {activeTab === 'tasks' && (
-        <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+        <div className="rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden">
           {projectTasks.length === 0 ? (
             <p className="text-sm text-[#5C5340] text-center py-12">No tasks linked to this project.</p>
           ) : (
@@ -496,7 +496,7 @@ export function ProjectDetailClient({
           {projectNotes.length === 0 ? (
             <p className="text-sm text-[#5C5340] text-center py-12">No notes linked to this project.</p>
           ) : projectNotes.map(note => (
-            <div key={note.id} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div key={note.id} className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center gap-2 mb-1">
                 {note.pinned && <span className="text-xs text-[#C9962E]">📌 Pinned</span>}
                 <h3 className="text-sm font-medium text-[#E8DFCE]">{note.title}</h3>
@@ -519,7 +519,7 @@ export function ProjectDetailClient({
               {projectContacts.map(pc => {
                 const c = pc.contact!
                 return (
-                  <div key={pc.id} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] group">
+                  <div key={pc.id} className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] group">
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="text-sm font-medium text-[#E8DFCE]">{c.name}</p>
@@ -558,13 +558,13 @@ export function ProjectDetailClient({
 
           {/* Add contact */}
           {workspaceContacts.length > 0 && (
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-3">Add Contact</h3>
               <div className="flex items-center gap-2">
                 <select
                   value={addContactId}
                   onChange={e => setAddContactId(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
+                  className="flex-1 px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
                 >
                   <option value="">— Select contact —</option>
                   {workspaceContacts
@@ -575,14 +575,14 @@ export function ProjectDetailClient({
                 <select
                   value={addContactRole}
                   onChange={e => setAddContactRole(e.target.value)}
-                  className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
+                  className="px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
                 >
                   {CONTACT_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
                 <button
                   onClick={addContact}
                   disabled={!addContactId || addingContact}
-                  className="px-3 py-2 rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-sm hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
+                  className="px-3 py-2 rounded-none bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-sm hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
                 >
                   Add
                 </button>
@@ -611,7 +611,7 @@ export function ProjectDetailClient({
             </div>
           ) : projectBases.map(base => (
             <Link key={base.id} href={`/bases/${base.id}`}
-              className="flex items-center gap-3 p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all group">
+              className="flex items-center gap-3 p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all group">
               <Database className="w-4 h-4 text-[#5C5340] shrink-0 group-hover:text-[#7A6F55] transition-colors" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[#E8DFCE] truncate">{base.name}</p>

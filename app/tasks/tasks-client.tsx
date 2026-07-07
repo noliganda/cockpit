@@ -61,7 +61,7 @@ function PortalDropdown({
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
-        className="fixed z-50 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
+        className="fixed z-50 bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
         style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
       >
         {children}
@@ -124,7 +124,7 @@ function InlineDueDate({ task, onUpdate }: { task: Task; onUpdate: (id: string, 
           }
         }}
         onKeyDown={e => { if (e.key === 'Escape') setEditing(false) }}
-        className="text-xs bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none px-1 py-0.5 outline-none w-32"
+        className="text-xs bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none px-1 py-0.5 outline-none w-32"
       />
     )
   }
@@ -508,8 +508,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
     return (
       <div
         className={cn(
-          'p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]',
-          selectedIds.has(task.id) && 'border-[rgba(167,155,120,0.22)] bg-[#281E16]'
+          'p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]',
+          selectedIds.has(task.id) && 'border-[rgba(167,155,120,0.22)] bg-[#201A14]'
         )}
       >
         <div className="flex items-start gap-2 mb-2">
@@ -600,7 +600,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           onClick={() => toggleExpand(task.id)}
           className={cn(
             'flex items-center gap-1 text-[10px] mt-1 ml-2 transition-colors',
-            hasChildren ? 'text-[#7A6F55] hover:text-[#A79B78]' : 'text-[#332820] hover:text-[#5C5340]',
+            hasChildren ? 'text-[#7A6F55] hover:text-[#A79B78]' : 'text-[#2B221A] hover:text-[#5C5340]',
           )}
         >
           <ListTree className="w-3 h-3" />
@@ -635,21 +635,21 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
         <div className="flex items-center gap-2">
           <button
             onClick={exportMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#272018] transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
             Export
           </button>
           <button
             onClick={() => setShowIntake(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#6E8B7E] rounded-none hover:bg-[#2F241A] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-[#6E8B7E] rounded-none hover:bg-[#272018] transition-colors"
           >
             <Inbox className="w-3.5 h-3.5" />
             Intake
           </button>
           <button
             onClick={() => { setEditingTask(null); setParentForSubtask(null); setShowDialog(true) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] transition-colors"
           >
             <Plus className="w-4 h-4" />
             New task
@@ -659,7 +659,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] flex-1 max-w-xs">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] flex-1 max-w-xs">
           <Search className="w-3.5 h-3.5 text-[#7A6F55]" />
           <input
             value={search}
@@ -676,7 +676,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
               className={cn(
                 'px-2.5 py-1 text-xs rounded-none border transition-colors',
                 statusFilter === s
-                  ? 'bg-[#2F241A] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+                  ? 'bg-[#272018] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
                   : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
               )}
             >{s === 'all' ? 'All' : s === 'active' ? 'Active' : s}</button>
@@ -785,7 +785,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
 
       {/* Batch Toolbar */}
       {selectedCount > 0 && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)] sticky top-2 z-10">
+        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.22)] sticky top-2 z-10">
           <span className="text-xs text-[#A79B78] font-medium mr-1">{selectedCount} of {filtered.length} selected</span>
 
           {/* Change Status */}
@@ -793,7 +793,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
             <button
               ref={batchStatusRef}
               onClick={() => { setBatchStatusOpen(v => !v); setBatchAssigneeOpen(false) }}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
             >
               Status <ChevronDown className="w-3 h-3" />
             </button>
@@ -816,7 +816,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
               <button
                 ref={batchAssigneeRef}
                 onClick={() => { setBatchAssigneeOpen(v => !v); setBatchStatusOpen(false) }}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
               >
                 Assignee <ChevronDown className="w-3 h-3" />
               </button>
@@ -842,19 +842,19 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
 
           <button
             onClick={() => void batchToggle('urgent')}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
           >
             <Zap className="w-3 h-3" /> Urgent
           </button>
           <button
             onClick={() => void batchToggle('important')}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C9962E] hover:bg-[rgba(201,150,46,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#C9962E] hover:bg-[rgba(201,150,46,0.10)] transition-colors"
           >
             <Star className="w-3 h-3" /> Important
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
           >
             <Trash2 className="w-3 h-3" /> Delete
           </button>
@@ -875,7 +875,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           {groups.map(group => (
             <CollapsibleGroup key={group.key} group={group}>
               {/* Desktop */}
-              <div className="hidden md:block rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden mb-2">
+              <div className="hidden md:block rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden mb-2">
                 <table className="w-full">
                   <tbody>
                     {group.tasks.map((task) => {
@@ -902,7 +902,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
       ) : (
         <>
           {/* Ungrouped desktop table */}
-          <div className="hidden md:block rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+          <div className="hidden md:block rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(167,155,120,0.13)]">
@@ -946,8 +946,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
+          <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
             <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete {selectedCount} task{selectedCount !== 1 ? 's' : ''}?</h2>
             <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
             <div className="flex gap-2 justify-end">

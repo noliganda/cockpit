@@ -19,11 +19,11 @@ export function MainContent({ children, onSearchOpen }: MainContentProps) {
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Top bar — shown on all screen sizes */}
-      <div className="flex items-center h-12 px-4 border-b border-[rgba(167,155,120,0.13)] bg-[#1A1410] shrink-0">
+      <div className="flex items-center h-12 px-4 border-b border-[rgba(167,155,120,0.13)] bg-[#14100C] shrink-0">
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(true)}
-          className="md:hidden w-11 h-11 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913] transition-colors mr-1"
+          className="md:hidden w-11 h-11 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#1A1510] transition-colors mr-1"
         >
           <Menu className="w-4 h-4" />
         </button>
@@ -36,7 +36,7 @@ export function MainContent({ children, onSearchOpen }: MainContentProps) {
         {onSearchOpen && (
           <button
             onClick={onSearchOpen}
-            className="ml-3 flex items-center gap-2 px-3 py-1.5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78] hover:border-[rgba(167,155,120,0.22)] text-xs transition-colors"
+            className="ml-3 flex items-center gap-2 px-3 py-1.5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78] hover:border-[rgba(167,155,120,0.22)] text-xs transition-colors"
           >
             <Search className="w-3 h-3" />
             <span className="hidden sm:inline">Search</span>
@@ -47,7 +47,7 @@ export function MainContent({ children, onSearchOpen }: MainContentProps) {
         <button
           onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: '/', metaKey: true, bubbles: true }))}
           title="Keyboard shortcuts (⌘/)"
-          className="ml-2 w-7 h-7 flex items-center justify-center rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#5C5340] hover:text-[#A79B78] hover:border-[rgba(167,155,120,0.22)] transition-colors"
+          className="ml-2 w-7 h-7 flex items-center justify-center rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#5C5340] hover:text-[#A79B78] hover:border-[rgba(167,155,120,0.22)] transition-colors"
         >
           <Keyboard className="w-3.5 h-3.5" />
         </button>

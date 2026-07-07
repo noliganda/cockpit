@@ -88,7 +88,7 @@ export function GroupToggle({ value, onChange, options }: GroupToggleProps) {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
           {filtered.map(opt => (
             <button
               key={opt.value}

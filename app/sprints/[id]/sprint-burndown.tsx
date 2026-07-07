@@ -43,14 +43,14 @@ export function SprintBurndown({ totalTasks, completedTasks, startDate, endDate 
   const data = buildBurndownData(totalTasks, completedTasks, startDate ?? null, endDate ?? null)
 
   return (
-    <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+    <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
       <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide mb-4">Burndown Chart</h3>
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
           <XAxis dataKey="day" tick={{ fill: "#7A6F55", fontSize: 10 }} axisLine={false} tickLine={false} interval={Math.floor(data.length / 5)} />
           <YAxis tick={{ fill: "#7A6F55", fontSize: 10 }} axisLine={false} tickLine={false} />
           <Tooltip
-            contentStyle={{ background: "#2F241A", border: "1px solid rgba(167,155,120,0.22)", borderRadius: 0, color: "#E8DFCE", fontSize: 12 }}
+            contentStyle={{ background: "#272018", border: "1px solid rgba(167,155,120,0.22)", borderRadius: 0, color: "#E8DFCE", fontSize: 12 }}
           />
           <Legend wrapperStyle={{ fontSize: 11, color: "#7A6F55" }} />
           <Line

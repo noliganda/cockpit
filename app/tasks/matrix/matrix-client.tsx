@@ -124,7 +124,7 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
   const filterBtnCls = (active: boolean, color?: string) => cn(
     'px-2.5 py-1 text-xs rounded-none border transition-colors whitespace-nowrap',
     active
-      ? color ?? 'bg-[#2F241A] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+      ? color ?? 'bg-[#272018] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
       : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]',
   )
 
@@ -144,7 +144,7 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] max-w-[200px]">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] max-w-[200px]">
           <Search className="w-3 h-3 text-[#7A6F55]" />
           <input
             value={search}
@@ -166,7 +166,7 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
           <select
             value={projectFilter ?? ''}
             onChange={e => setProjectFilter(e.target.value || null)}
-            className="px-2.5 py-1 text-xs rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#A79B78] outline-none appearance-none"
+            className="px-2.5 py-1 text-xs rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#A79B78] outline-none appearance-none"
           >
             <option value="">All projects</option>
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -176,7 +176,7 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
           <select
             value={areaFilter ?? ''}
             onChange={e => setAreaFilter(e.target.value || null)}
-            className="px-2.5 py-1 text-xs rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#A79B78] outline-none appearance-none"
+            className="px-2.5 py-1 text-xs rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#A79B78] outline-none appearance-none"
           >
             <option value="">All areas</option>
             {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -228,8 +228,8 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={cn(
-                                'p-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] cursor-grab active:cursor-grabbing transition-all',
-                                snapshot.isDragging && ' border-[rgba(167,155,120,0.26)] bg-[#281E16]'
+                                'p-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] cursor-grab active:cursor-grabbing transition-all',
+                                snapshot.isDragging && ' border-[rgba(167,155,120,0.26)] bg-[#201A14]'
                               )}
                             >
                               <p className="text-sm text-[#E8DFCE] font-medium leading-snug mb-1.5">{task.title}</p>

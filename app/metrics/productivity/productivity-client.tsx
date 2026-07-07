@@ -41,7 +41,7 @@ const WS_COLORS: Record<string, string> = {
 
 const TOOLTIP_STYLE = {
   contentStyle: {
-    background: '#281E16',
+    background: '#201A14',
     border: '1px solid rgba(167,155,120,0.22)',
     borderRadius: 0,
     color: '#E8DFCE',
@@ -57,7 +57,7 @@ const INTERVENTION_COLORS = ['#C0452E', '#C9962E', '#9B6B4F', '#B0584A', '#7A6F5
 function SectionTitle({ n, title, sub }: { n: number; title: string; sub?: string }) {
   return (
     <div className="flex items-start gap-3 mb-5">
-      <div className="w-6 h-6 rounded-full bg-[#281E16] border border-[rgba(167,155,120,0.22)] flex items-center justify-center text-xs font-bold text-[#A79B78] shrink-0 mt-0.5">
+      <div className="w-6 h-6 rounded-full bg-[#201A14] border border-[rgba(167,155,120,0.22)] flex items-center justify-center text-xs font-bold text-[#A79B78] shrink-0 mt-0.5">
         {n}
       </div>
       <div>
@@ -70,7 +70,7 @@ function SectionTitle({ n, title, sub }: { n: number; title: string; sub?: strin
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] ${className}`}>
+    <div className={`p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] ${className}`}>
       {children}
     </div>
   )
@@ -678,7 +678,7 @@ function Section7AccessComparison({ byWorkspace }: { byWorkspace: WorkspaceMetri
               </div>
 
               {/* Systems */}
-              <div className="px-4 py-3 bg-[#211913]">
+              <div className="px-4 py-3 bg-[#1A1510]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-2">Connected systems</p>
                 <ul className="space-y-1">
                   {cfg.systems.map(s => (
@@ -690,7 +690,7 @@ function Section7AccessComparison({ byWorkspace }: { byWorkspace: WorkspaceMetri
               </div>
 
               {/* Capabilities */}
-              <div className="px-4 py-3 bg-[#1A1410] border-t border-[rgba(167,155,120,0.09)]">
+              <div className="px-4 py-3 bg-[#14100C] border-t border-[rgba(167,155,120,0.09)]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-2">Capabilities</p>
                 <ul className="space-y-1">
                   {cfg.capabilities.map(c => (
@@ -709,7 +709,7 @@ function Section7AccessComparison({ byWorkspace }: { byWorkspace: WorkspaceMetri
       </div>
 
       {/* Multiplier summary */}
-      <div className="mt-4 p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+      <div className="mt-4 p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
         <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-3">Productivity multiplier — what full access enables</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {ACCESS_CONFIGS.map(cfg => {
@@ -739,9 +739,9 @@ function Section7AccessComparison({ byWorkspace }: { byWorkspace: WorkspaceMetri
 
 export function ProductivityClient({ byWorkspace }: ProductivityClientProps) {
   return (
-    <div className="min-h-screen bg-[#1A1410] text-[#E8DFCE]">
+    <div className="min-h-screen bg-[#14100C] text-[#E8DFCE]">
       {/* Header */}
-      <div className="border-b border-[rgba(167,155,120,0.13)] bg-[#1A1410] sticky top-0 z-10">
+      <div className="border-b border-[rgba(167,155,120,0.13)] bg-[#14100C] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-sm font-bold text-[#E8DFCE]">AI Productivity Comparison</h1>

@@ -10,7 +10,7 @@ interface IntakeDialogProps {
   onComplete?: (result: IntakeResult) => void
 }
 
-const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
+const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
 const selectCls = `${inputCls} appearance-none`
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
@@ -66,8 +66,8 @@ export function IntakeDialog({ workspaceId, onClose, onComplete }: IntakeDialogP
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-md bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-md bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <div className="flex items-center gap-2">
@@ -159,7 +159,7 @@ export function IntakeDialog({ workspaceId, onClose, onComplete }: IntakeDialogP
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
           {result ? (
             <button onClick={onClose}
-              className="px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] transition-colors min-h-[44px]">
+              className="px-4 py-2.5 text-sm font-medium bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] transition-colors min-h-[44px]">
               Done
             </button>
           ) : (
@@ -168,7 +168,7 @@ export function IntakeDialog({ workspaceId, onClose, onComplete }: IntakeDialogP
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !rawText.trim()}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors min-h-[44px]"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors min-h-[44px]"
               >
                 {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 {submitting ? 'Processing...' : 'Submit'}

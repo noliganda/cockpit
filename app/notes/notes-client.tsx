@@ -63,8 +63,8 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={onClose} />
-      <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none w-full max-w-sm overflow-hidden">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={onClose} />
+      <div className="relative bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none w-full max-w-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)]">
           <h2 className="text-sm font-semibold text-[#E8DFCE]">Share note</h2>
           <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
@@ -72,28 +72,28 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
         <div className="p-4 space-y-2">
           <button
             onClick={copyMarkdown}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
           >
             <Copy className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span>Copy as Markdown</span>
           </button>
           <button
             onClick={openEmail}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
           >
             <Mail className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span>Send via Email</span>
           </button>
           <button
             onClick={openWhatsApp}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
           >
             <MessageCircle className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span>Share via WhatsApp</span>
           </button>
 
           {/* Download with format picker */}
-          <div className="flex items-center gap-2 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
             <FileDown className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span className="text-sm text-[#E8DFCE] flex-1">Download as</span>
             <div className="flex gap-1">
@@ -102,7 +102,7 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
                 className={cn(
                   'px-2 py-0.5 text-xs rounded-none border transition-colors',
                   downloadFormat === 'md'
-                    ? 'bg-[#2F241A] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
+                    ? 'bg-[#272018] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
                     : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
                 )}
               >.md</button>
@@ -111,14 +111,14 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
                 className={cn(
                   'px-2 py-0.5 text-xs rounded-none border transition-colors',
                   downloadFormat === 'txt'
-                    ? 'bg-[#2F241A] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
+                    ? 'bg-[#272018] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
                     : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
                 )}
               >.txt</button>
             </div>
             <button
               onClick={download}
-              className="px-2.5 py-1 text-xs bg-[#E8DFCE] text-[#1A1410] rounded-none font-medium hover:bg-[#E8DFCE] transition-colors ml-1"
+              className="px-2.5 py-1 text-xs bg-[#E8DFCE] text-[#14100C] rounded-none font-medium hover:bg-[#E8DFCE] transition-colors ml-1"
             >
               Download
             </button>
@@ -133,8 +133,8 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
 function DeleteConfirmModal({ onConfirm, onClose }: { onConfirm: () => void; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={onClose} />
-      <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={onClose} />
+      <div className="relative bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
         <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete this note?</h2>
         <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
         <div className="flex gap-2 justify-end">
@@ -296,7 +296,7 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
         <div className="p-3 border-b border-[rgba(167,155,120,0.13)] flex items-center justify-between">
           <h1 className="text-sm font-semibold text-[#E8DFCE]">Notes</h1>
           <button onClick={handleCreate} disabled={creating}
-            className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913] transition-colors">
+            className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#1A1510] transition-colors">
             <Plus className="w-4 h-4" />
           </button>
         </div>
@@ -309,7 +309,7 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
               <button key={note.id} onClick={() => { setSelectedId(note.id); setMobileShowEditor(true) }}
                 className={cn(
                   'w-full text-left px-3 py-2.5 rounded-none mb-1 transition-colors group',
-                  selectedId === note.id ? 'bg-[#281E16]' : 'hover:bg-[#211913]'
+                  selectedId === note.id ? 'bg-[#201A14]' : 'hover:bg-[#1A1510]'
                 )}
                 style={selectedId === note.id ? { borderLeft: `2px solid ${workspace.color}`, paddingLeft: '10px' } : undefined}
               >
@@ -354,7 +354,7 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setShowShare(true)}
-                  className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913] transition-colors"
+                  className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#1A1510] transition-colors"
                   title="Share note"
                 >
                   <Share2 className="w-3.5 h-3.5" />
@@ -362,14 +362,14 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
                 <button
                   onClick={() => handlePin(selectedNote.id, !selectedNote.pinned)}
                   className={cn('w-7 h-7 flex items-center justify-center rounded-none transition-colors',
-                    selectedNote.pinned ? 'text-[#E8DFCE] bg-[rgba(167,155,120,0.18)]' : 'text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913]'
+                    selectedNote.pinned ? 'text-[#E8DFCE] bg-[rgba(167,155,120,0.18)]' : 'text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#1A1510]'
                   )}
                 >
                   <Pin className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#C0452E] hover:bg-[#211913] transition-colors"
+                  className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#C0452E] hover:bg-[#1A1510] transition-colors"
                   title="Delete note"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -416,7 +416,7 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
             <div className="text-center">
               <p className="text-sm text-[#5C5340] mb-3">No note selected</p>
               <button onClick={handleCreate}
-                className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors">
+                className="px-4 py-2 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] transition-colors">
                 Create your first note
               </button>
             </div>

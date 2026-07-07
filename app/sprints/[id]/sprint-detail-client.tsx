@@ -47,7 +47,7 @@ function TaskCard({ task, index }: TaskCardProps) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`p-3 rounded-none bg-[#211913] border transition-all select-none ${
+          className={`p-3 rounded-none bg-[#1A1510] border transition-all select-none ${
             snapshot.isDragging
               ? 'border-[rgba(167,155,120,0.35)] opacity-95'
               : 'border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)]'
@@ -207,7 +207,7 @@ export function SprintDetailClient({ sprint, sprintTasks: initialSprintTasks, ba
         {/* Main split layout */}
         <div className="flex flex-1 min-h-0">
           {/* Left panel — Backlog */}
-          <div className="w-72 shrink-0 flex flex-col bg-[#1A1410] border-r border-[rgba(167,155,120,0.13)]">
+          <div className="w-72 shrink-0 flex flex-col bg-[#14100C] border-r border-[rgba(167,155,120,0.13)]">
             <div className="p-4 border-b border-[rgba(167,155,120,0.13)]">
               <h2 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide mb-3">
                 Backlog
@@ -220,7 +220,7 @@ export function SprintDetailClient({ sprint, sprintTasks: initialSprintTasks, ba
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search tasks…"
-                  className="w-full pl-8 pr-3 py-1.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.31)] transition-colors"
+                  className="w-full pl-8 pr-3 py-1.5 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.31)] transition-colors"
                 />
               </div>
             </div>

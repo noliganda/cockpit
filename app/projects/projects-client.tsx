@@ -54,7 +54,7 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
   const [confirmDelete, setConfirmDelete] = useState(false)
   const isKorus = workspaceId === 'korus'
 
-  const selectCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]'
+  const selectCls = 'w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]'
   const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
   async function handleSave() {
@@ -90,8 +90,8 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <h2 className="text-sm font-semibold text-[#E8DFCE]">{project ? 'Edit Project' : 'New Project'}</h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)] transition-colors">
@@ -101,7 +101,7 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {/* Row 1: Name */}
           <input value={name} onChange={e => setName(e.target.value)} placeholder="Project name" autoFocus
-            className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
+            className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
 
           {/* Row 2: Status + Region (KORUS) */}
           <div className="grid grid-cols-2 gap-3">
@@ -123,7 +123,7 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
               <div>
                 <label className={labelCls}>End Date</label>
                 <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]" />
+                  className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]" />
               </div>
             )}
           </div>
@@ -142,7 +142,7 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
             <div>
               <label className={labelCls}>Budget (+ revenue / − cost)</label>
               <input type="number" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. -3200 or 12500"
-                className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
+                className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
             </div>
           </div>
 
@@ -178,7 +178,7 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
             <div>
               <label className={labelCls}>End Date</label>
               <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]" />
+                className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]" />
             </div>
           )}
 
@@ -187,19 +187,19 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
             <div>
               <label className={labelCls}>Slack Channel Name (optional)</label>
               <input value={slackChannelName} onChange={e => setSlackChannelName(e.target.value)} placeholder="#channel-name"
-                className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
+                className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
             </div>
             <div>
               <label className={labelCls}>Slack Channel ID (optional)</label>
               <input value={slackChannelId} onChange={e => setSlackChannelId(e.target.value)} placeholder="C0XXXXXXXX"
-                className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
+                className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
             </div>
           </div>
 
           {/* Description */}
           <div>
             <label className={labelCls}>Description</label>
-            <div className="rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] overflow-hidden max-h-40 overflow-y-auto">
+            <div className="rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] overflow-hidden max-h-40 overflow-y-auto">
               <BlockEditor
                 initialContent={project?.description}
                 onChange={(blocks) => setDescription(blocks)}
@@ -230,7 +230,7 @@ function ProjectDialog({ project, workspaceId, areas, contacts, onClose, onSave,
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors">Cancel</button>
             <button onClick={handleSave} disabled={saving || !name.trim()}
-              className="px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors">
+              className="px-4 py-2.5 text-sm font-medium bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors">
               {saving ? 'Saving...' : project ? 'Save changes' : 'Create project'}
             </button>
           </div>
@@ -396,11 +396,11 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
         <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Projects</h1>
         <div className="flex items-center gap-2">
           <button onClick={exportMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#2F241A] transition-colors">
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#272018] transition-colors">
             <Download className="w-3.5 h-3.5" /> Export
           </button>
           <button onClick={() => { setEditingProject(null); setShowDialog(true) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors">
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] transition-colors">
             <Plus className="w-4 h-4" /> New project
           </button>
         </div>
@@ -414,7 +414,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
           { label: 'Active Projects', value: String(stats.activeCount), sub: `${projects.length} total`, icon: Folders, color: GOLD },
           { label: 'Avg Completion', value: `${stats.avgProgress}%`, sub: `${stats.completedCount} completed`, icon: CheckCircle2, color: '#A79B78' },
         ].map(({ label, value, sub, icon: Icon, color }) => (
-          <div key={label} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] flex flex-col gap-1">
+          <div key={label} className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] flex flex-col gap-1">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-[#7A6F55] uppercase tracking-wide">{label}</span>
               <Icon className="w-4 h-4" style={{ color }} />
@@ -439,7 +439,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             {/* Status donut */}
-            <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide mb-4">By Status</h3>
               <div className="flex items-center gap-4">
                 <ResponsiveContainer width={100} height={100}>
@@ -449,7 +449,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
                         <Cell key={i} fill={STATUS_CHART_COLORS[entry.name] ?? MUTED} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ background: '#281E16', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ background: '#201A14', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex flex-col gap-1.5 flex-1">
@@ -467,7 +467,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
             </div>
 
             {/* Internal vs External donut */}
-            <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide mb-4">Internal vs External</h3>
               <div className="flex items-center gap-4">
                 <ResponsiveContainer width={100} height={100}>
@@ -477,7 +477,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
                         <Cell key={i} fill={entry.name === 'Internal' ? GOLD : entry.name === 'External' ? TEAL : MUTED} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ background: '#281E16', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, fontSize: 11 }} />
+                    <Tooltip contentStyle={{ background: '#201A14', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex flex-col gap-1.5 flex-1">
@@ -496,7 +496,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
             </div>
 
             {/* Xero placeholder */}
-            <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] border-dashed flex flex-col items-center justify-center text-center gap-2">
+            <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] border-dashed flex flex-col items-center justify-center text-center gap-2">
               <Link2 className="w-6 h-6 text-[#5C5340]" />
               <p className="text-xs font-semibold text-[#7A6F55]">Xero not connected</p>
               <p className="text-[10px] text-[#5C5340] max-w-[180px]">Connect Xero to pull actual invoice & expense data per project</p>
@@ -506,7 +506,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
 
           {/* ── Pipeline bar chart ── */}
           {pipelineData.length > 0 && (
-            <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide mb-4">Project Pipeline (Top {pipelineData.length} by value)</h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={pipelineData} layout="vertical" margin={{ left: 0, right: 20, top: 0, bottom: 0 }}>
@@ -514,7 +514,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
                   <XAxis type="number" tick={{ fill: '#7A6F55', fontSize: 10 }} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
                   <YAxis type="category" dataKey="name" tick={{ fill: '#A79B78', fontSize: 11 }} width={120} axisLine={false} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ background: '#281E16', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, fontSize: 11 }}
+                    contentStyle={{ background: '#201A14', border: '1px solid rgba(167,155,120,0.22)', borderRadius: 0, fontSize: 11 }}
                     formatter={(v: number, _n: string, props: { payload?: { isRevenue?: boolean } }) => [`$${v.toLocaleString()}`, props.payload?.isRevenue ? 'Revenue' : 'Cost']}
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={16}>
@@ -542,7 +542,7 @@ export function ProjectsClient({ initialProjects, allTasks, allAreas, allContact
               const accentColor = area?.context === 'Internal' ? GOLD : area?.context === 'External' ? TEAL : MUTED
               return (
                 <div key={project.id}
-                  className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all group"
+                  className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all group"
                   style={{ borderLeftColor: accentColor, borderLeftWidth: 2 }}>
                   <div className="flex items-start justify-between mb-2">
                     <Link href={`/projects/${project.id}?workspace=${workspaceId}`}

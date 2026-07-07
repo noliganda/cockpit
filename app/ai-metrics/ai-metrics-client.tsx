@@ -81,8 +81,8 @@ const ENTITY_LABELS: Record<string, string> = {
   shared: 'Shared',
 }
 
-const statCard = 'rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4'
-const inputCls = 'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
+const statCard = 'rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4'
+const inputCls = 'w-full px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1'
 
 // ── Log Entry Dialog (writes to ai_metrics — manual supplementary entries) ──
@@ -156,8 +156,8 @@ function LogEntryDialog({ onClose, onSaved }: LogDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-lg bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)]">
           <h2 className="text-sm font-semibold text-[#E8DFCE]">Log Metrics Entry</h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)]">
@@ -225,7 +225,7 @@ function LogEntryDialog({ onClose, onSaved }: LogDialogProps) {
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)]">
           <button onClick={onClose} className="px-4 py-2 text-sm text-[#A79B78] hover:text-[#E8DFCE]">Cancel</button>
           <button onClick={handleSave} disabled={saving || !periodStart || !periodEnd}
-            className="px-4 py-2 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40">
+            className="px-4 py-2 text-sm font-medium bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40">
             {saving ? 'Saving...' : 'Log Entry'}
           </button>
         </div>
@@ -238,7 +238,7 @@ function LogEntryDialog({ onClose, onSaved }: LogDialogProps) {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] px-3 py-2 text-xs">
+    <div className="rounded-none bg-[#272018] border border-[rgba(167,155,120,0.22)] px-3 py-2 text-xs">
       <p className="text-[#A79B78] mb-1">{label}</p>
       {payload.map((p: { name: string; value: number; color: string }, i: number) => (
         <p key={i} style={{ color: p.color }}>{p.name}: <span className="text-[#E8DFCE] font-medium">{p.value}</span></p>
@@ -272,7 +272,7 @@ export function AIMetricsClient({
         </div>
         <button
           onClick={() => setShowLog(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] transition-colors"
         >
           <Plus className="w-4 h-4" />
           Log Entry
@@ -339,7 +339,7 @@ export function AIMetricsClient({
       {/* Charts — derived from canonical daily series */}
       {dailySeries.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4">
+          <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4">
             <h3 className="text-sm font-semibold text-[#E8DFCE] mb-4">Agent Events per Day</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={dailySeries} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -352,7 +352,7 @@ export function AIMetricsClient({
             </ResponsiveContainer>
           </div>
 
-          <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4">
+          <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4">
             <h3 className="text-sm font-semibold text-[#E8DFCE] mb-4">Daily API Cost (USD)</h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={dailySeries} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -369,7 +369,7 @@ export function AIMetricsClient({
 
       {/* Agent Breakdown */}
       {agentBreakdown.length > 0 && (
-        <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4 mb-8">
+        <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4 mb-8">
           <h3 className="text-sm font-semibold text-[#E8DFCE] mb-4">Agent Breakdown</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {agentBreakdown.map(a => {
@@ -407,7 +407,7 @@ export function AIMetricsClient({
       {/* Event Family + Entity Breakdowns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {familyBreakdown.length > 0 && (
-          <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4">
+          <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4">
             <h3 className="text-sm font-semibold text-[#E8DFCE] mb-3">Event Families</h3>
             <div className="space-y-2">
               {familyBreakdown.map(f => {
@@ -427,7 +427,7 @@ export function AIMetricsClient({
         )}
 
         {entityBreakdown.length > 0 && (
-          <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4">
+          <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4">
             <h3 className="text-sm font-semibold text-[#E8DFCE] mb-3">By Entity</h3>
             <div className="space-y-2">
               {entityBreakdown.map(e => {
@@ -448,7 +448,7 @@ export function AIMetricsClient({
       </div>
 
       {/* Reporting schedule */}
-      <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] p-4 mb-8">
+      <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] p-4 mb-8">
         <div className="flex items-center gap-2 mb-3">
           <Calendar className="w-4 h-4 text-[#7A6F55]" />
           <h3 className="text-sm font-semibold text-[#E8DFCE]">Reporting Schedule</h3>
@@ -468,7 +468,7 @@ export function AIMetricsClient({
       </div>
 
       {/* Recent task log from DB */}
-      <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] overflow-hidden mb-8">
+      <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] overflow-hidden mb-8">
         <div className="px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
           <h3 className="text-sm font-semibold text-[#E8DFCE]">Recent Task Log (from DB)</h3>
         </div>
@@ -510,7 +510,7 @@ export function AIMetricsClient({
 
       {/* Manual logged entries table (from ai_metrics) */}
       {entries.length > 0 && (
-        <div className="rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+        <div className="rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] overflow-hidden">
           <div className="px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
             <h3 className="text-sm font-semibold text-[#E8DFCE]">Manual Metric Entries (ai_metrics)</h3>
           </div>

@@ -71,7 +71,7 @@ UI/`tasks.workspaceId` use **`byron-film` | `korus` | `personal`** (`types/index
 Numbered SQL files in `drizzle/` (`0000`–`0007`) are the canonical OPS v5 migration history. Day-to-day schema changes flow through editing `lib/db/schema.ts` then `npm run db:push`. `db:push` uses `DATABASE_URL_UNPOOLED`; the running app uses the pooled `DATABASE_URL`.
 
 ## Key design rules (from `.interface-design/system.md` — OM system since 2026-07-07)
-- Walnut canvas `#1A1410` (no pure black); sidebar background = canvas background
+- Walnut canvas `#14100C` (no pure black); sidebar background = canvas background
 - Borders are taupe hairlines `rgba(167,155,120,0.14)`; **borders-only depth, no shadows**; radius 0 (discs excepted)
 - Text is the Field Beige ramp — primary `#E8DFCE`, never pure white
 - Fraunces for page titles (`font-display`), Newsreader body, JetBrains Mono for labels/nav/data

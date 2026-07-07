@@ -65,7 +65,7 @@ export function ExpandChevron({
       onClick={(e) => { e.stopPropagation(); onClick() }}
       className={cn(
         'w-4 h-4 flex items-center justify-center transition-colors shrink-0',
-        hasChildren ? 'text-[#7A6F55] hover:text-[#E8DFCE]' : 'text-[#332820] hover:text-[#5C5340]',
+        hasChildren ? 'text-[#7A6F55] hover:text-[#E8DFCE]' : 'text-[#2B221A] hover:text-[#5C5340]',
       )}
     >
       <ChevronRight

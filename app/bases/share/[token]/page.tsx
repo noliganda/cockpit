@@ -93,13 +93,13 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
   }, [token])
 
   if (loading) return (
-    <div className="min-h-screen bg-[#1A1410] flex items-center justify-center">
+    <div className="min-h-screen bg-[#14100C] flex items-center justify-center">
       <div className="text-[#7A6F55] text-sm">Loading…</div>
     </div>
   )
 
   if (error || !base) return (
-    <div className="min-h-screen bg-[#1A1410] flex items-center justify-center">
+    <div className="min-h-screen bg-[#14100C] flex items-center justify-center">
       <div className="text-center">
         <Database className="w-10 h-10 text-[#5C5340] mx-auto mb-3" />
         <p className="text-[#7A6F55] text-sm">{error ?? 'Base not found or not shared publicly.'}</p>
@@ -111,7 +111,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
   const sortedColumns = [...(currentTable?.columns ?? [])].sort((a, b) => a.order - b.order)
 
   return (
-    <div className="min-h-screen bg-[#1A1410] text-[#E8DFCE]">
+    <div className="min-h-screen bg-[#14100C] text-[#E8DFCE]">
       {/* Header */}
       <div className="border-b border-[rgba(167,155,120,0.13)] px-6 py-4 flex items-center gap-3">
         <Table2 className="w-5 h-5 text-[#C98A54]" />
@@ -119,7 +119,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
           <h1 className="text-base font-semibold">{base.name}</h1>
           {base.description && <p className="text-xs text-[#7A6F55]">{base.description}</p>}
         </div>
-        <span className="ml-auto text-xs text-[#5C5340] bg-[#211913] border border-[rgba(167,155,120,0.13)] px-2 py-1 rounded-none">Read only</span>
+        <span className="ml-auto text-xs text-[#5C5340] bg-[#1A1510] border border-[rgba(167,155,120,0.13)] px-2 py-1 rounded-none">Read only</span>
       </div>
 
       {/* Table tabs */}
@@ -131,7 +131,7 @@ export default function SharePage({ params }: { params: Promise<{ token: string 
               onClick={() => setActiveTable(t.id)}
               className={`px-3 py-1.5 text-sm rounded-t-[4px] transition-colors ${
                 activeTable === t.id
-                  ? 'text-[#E8DFCE] bg-[#211913] border border-b-0 border-[rgba(167,155,120,0.18)]'
+                  ? 'text-[#E8DFCE] bg-[#1A1510] border border-b-0 border-[rgba(167,155,120,0.18)]'
                   : 'text-[#7A6F55] hover:text-[#A79B78]'
               }`}
             >

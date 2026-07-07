@@ -150,7 +150,7 @@ function StatsBar({ stats }: StatsBarProps) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
       {items.map((s, i) => (
         <div key={i} style={{
-          background: '#211913', borderRadius: 0, padding: '14px 16px',
+          background: '#1A1510', borderRadius: 0, padding: '14px 16px',
           border: '1px solid rgba(167,155,120,0.13)',
         }}>
           <div style={{ fontSize: 11, color: '#7A6F55', fontWeight: 500, marginBottom: 6 }}>{s.icon} {s.label}</div>
@@ -165,7 +165,7 @@ function StatsBar({ stats }: StatsBarProps) {
 function TaskCard({ task }: { task: ScoredTask }) {
   return (
     <div style={{
-      background: '#211913',
+      background: '#1A1510',
       borderRadius: 0, padding: '12px 14px',
       border: task.priority === 'P1'
         ? '1px solid rgba(181,67,52,0.30)'
@@ -434,7 +434,7 @@ export function PriorityClient({ projects, tasks, stats }: PriorityClientProps) 
   ]
 
   return (
-    <div style={{ background: '#1A1410', minHeight: '100vh', padding: '24px 28px', color: '#E8DFCE' }}>
+    <div style={{ background: '#14100C', minHeight: '100vh', padding: '24px 28px', color: '#E8DFCE' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
@@ -462,7 +462,7 @@ export function PriorityClient({ projects, tasks, stats }: PriorityClientProps) 
               <button key={v.key} onClick={() => setActiveView(v.key)} style={{
                 padding: '6px 16px', borderRadius: 0, border: 'none', cursor: 'pointer',
                 fontSize: 12, fontWeight: 600,
-                background: activeView === v.key ? '#2C2218' : 'transparent',
+                background: activeView === v.key ? '#251D16' : 'transparent',
                 color: activeView === v.key ? '#E8DFCE' : '#5C5340',
                 boxShadow: activeView === v.key ? '0 1px 3px rgba(0,0,0,0.4)' : 'none',
               }}>
@@ -484,7 +484,7 @@ export function PriorityClient({ projects, tasks, stats }: PriorityClientProps) 
       )}
       {activeView === 'projects' && <ProjectHealthView projects={projects} />}
       {activeView === 'allocation' && (
-        <div style={{ background: '#211913', borderRadius: 0, padding: 24, border: '1px solid rgba(167,155,120,0.13)' }}>
+        <div style={{ background: '#1A1510', borderRadius: 0, padding: 24, border: '1px solid rgba(167,155,120,0.13)' }}>
           <h3 style={{ fontSize: 13, fontWeight: 700, color: '#A79B78', margin: '0 0 20px', textTransform: 'uppercase', letterSpacing: 0.8 }}>
             Time Allocation vs Targets
           </h3>

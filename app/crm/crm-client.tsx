@@ -66,7 +66,7 @@ function PortalDropdown({
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
-        className="fixed z-50 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
+        className="fixed z-50 bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
         style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
       >
         {children}
@@ -79,7 +79,7 @@ function PortalDropdown({
 const PIPELINE_STAGES_LIST = [...PIPELINE_STAGES]
 
 // ─── Shared Input Styles ───────────────────────────────────────────────────
-const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
+const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 // ─── Tag Multi-Select ──────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[
 function DialogOverlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={onClose} />
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={onClose} />
       {children}
     </div>
   )
@@ -233,7 +233,7 @@ function ContactDialog({
 
   return (
     <DialogOverlay onClose={onClose}>
-      <div className="relative w-full sm:max-w-2xl bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
+      <div className="relative w-full sm:max-w-2xl bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <h2 className="text-sm font-semibold text-[#E8DFCE]">{mode === 'create' ? 'New Contact' : 'Edit Contact'}</h2>
@@ -337,7 +337,7 @@ function ContactDialog({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : mode === 'create' ? 'Create Contact' : 'Save Changes'}
           </button>
@@ -435,7 +435,7 @@ function OrgDialog({
 
   return (
     <DialogOverlay onClose={onClose}>
-      <div className="relative w-full sm:max-w-xl bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
+      <div className="relative w-full sm:max-w-xl bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <h2 className="text-sm font-semibold text-[#E8DFCE]">{mode === 'create' ? 'New Organisation' : 'Edit Organisation'}</h2>
           <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
@@ -503,7 +503,7 @@ function OrgDialog({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : mode === 'create' ? 'Create Organisation' : 'Save Changes'}
           </button>
@@ -563,7 +563,7 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
           <span className="text-xs text-[#7A6F55] font-mono">{contacts.length} contacts</span>
           <button
             onClick={() => downloadVCF(contacts)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#272018] transition-colors"
             title="Export all contacts as VCF"
           >
             <Download className="w-3.5 h-3.5" />
@@ -728,7 +728,7 @@ function ContactsTab({
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
           <input
-            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
+            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
             placeholder="Search contacts…"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -736,7 +736,7 @@ function ContactsTab({
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
         >
           <Plus className="w-3.5 h-3.5" /> New Contact
         </button>
@@ -744,7 +744,7 @@ function ContactsTab({
 
       {/* Batch Toolbar */}
       {selectedCount > 0 && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)]">
+        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.22)]">
           <span className="text-xs text-[#A79B78] font-medium mr-1">{selectedCount} selected</span>
 
           {/* Change Pipeline Stage */}
@@ -752,7 +752,7 @@ function ContactsTab({
             <button
               ref={batchStageRef}
               onClick={() => setBatchStageOpen(v => !v)}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
             >
               Pipeline Stage <ChevronDown className="w-3 h-3" />
             </button>
@@ -775,7 +775,7 @@ function ContactsTab({
               const selected = contacts.filter(c => selectedIds.has(c.id))
               downloadVCF(selected)
             }}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
           >
             <Download className="w-3 h-3" /> Export VCF
           </button>
@@ -783,7 +783,7 @@ function ContactsTab({
           {/* Delete */}
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
           >
             <Trash2 className="w-3 h-3" /> Delete
           </button>
@@ -807,7 +807,7 @@ function ContactsTab({
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden md:block rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+          <div className="hidden md:block rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(167,155,120,0.13)]">
@@ -901,8 +901,8 @@ function ContactsTab({
               <div
                 key={contact.id}
                 className={cn(
-                  'rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] p-4 hover:border-[rgba(167,155,120,0.22)]',
-                  selectedIds.has(contact.id) && 'border-[rgba(167,155,120,0.22)] bg-[#281E16]'
+                  'rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] p-4 hover:border-[rgba(167,155,120,0.22)]',
+                  selectedIds.has(contact.id) && 'border-[rgba(167,155,120,0.22)] bg-[#201A14]'
                 )}
               >
                 <div className="flex items-start gap-2 mb-2">
@@ -935,8 +935,8 @@ function ContactsTab({
       {/* Delete confirmation */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
+          <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
             <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete {selectedCount} contact{selectedCount !== 1 ? 's' : ''}?</h2>
             <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
             <div className="flex gap-2 justify-end">
@@ -1004,7 +1004,7 @@ function OrgsTab({
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
           <input
-            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
+            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
             placeholder="Search organisations…"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -1012,7 +1012,7 @@ function OrgsTab({
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
         >
           <Plus className="w-3.5 h-3.5" /> New Organisation
         </button>
@@ -1030,7 +1030,7 @@ function OrgsTab({
             return (
               <div
                 key={org.id}
-                className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all cursor-pointer"
+                className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all cursor-pointer"
                 onClick={() => setEditing(org)}
               >
                 <div className="flex items-start justify-between mb-2">
@@ -1152,7 +1152,7 @@ function PipelineTab({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={cn(
-                                'p-3 mb-2 last:mb-0 rounded-none bg-[#211913] border cursor-grab active:cursor-grabbing transition-all',
+                                'p-3 mb-2 last:mb-0 rounded-none bg-[#1A1510] border cursor-grab active:cursor-grabbing transition-all',
                                 snapshot.isDragging
                                   ? 'border-[rgba(167,155,120,0.35)]'
                                   : 'border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)]'

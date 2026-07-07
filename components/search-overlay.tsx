@@ -111,8 +111,8 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh]">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl mx-4 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-2xl mx-4 bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[rgba(167,155,120,0.13)]">
           <Search className="w-4 h-4 text-[#7A6F55] shrink-0" />
@@ -168,7 +168,7 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                 onMouseEnter={() => setSelectedIdx(idx)}
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
-                  idx === selectedIdx ? 'bg-[#2F241A]' : 'hover:bg-[#281E16]'
+                  idx === selectedIdx ? 'bg-[#272018]' : 'hover:bg-[#201A14]'
                 )}
               >
                 <div className="w-6 h-6 rounded-none flex items-center justify-center shrink-0 bg-[rgba(167,155,120,0.13)]">

@@ -46,32 +46,32 @@ function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
   }
 
   return (
-    <div className="p-3 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] space-y-3">
+    <div className="p-3 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] space-y-3">
       <input
         type="text"
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Full name (optional)"
-        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+        className="w-full px-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
       />
       <input
         type="email"
         value={email}
         onChange={e => setEmail(e.target.value)}
         placeholder="Email address"
-        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+        className="w-full px-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
       />
       <input
         type="password"
         value={password}
         onChange={e => setPassword(e.target.value)}
         placeholder="Password (min 6 chars)"
-        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
+        className="w-full px-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
       />
       <select
         value={role}
         onChange={e => setRole(e.target.value as 'admin' | 'collaborator' | 'guest')}
-        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] appearance-none"
+        className="w-full px-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] appearance-none"
       >
         <option value="admin">Admin — full access</option>
         <option value="collaborator">Collaborator — create/edit, no settings</option>
@@ -79,11 +79,11 @@ function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
       </select>
       <div className="flex gap-2">
         <button onClick={handleCreate} disabled={creating || !email || !password}
-          className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] disabled:opacity-40 transition-colors">
+          className="px-4 py-2 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] disabled:opacity-40 transition-colors">
           {creating ? 'Creating...' : 'Create user'}
         </button>
         <button onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors">
+          className="px-4 py-2 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] transition-colors">
           Cancel
         </button>
       </div>
@@ -201,7 +201,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
   }
 
   const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-    <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+    <div className="p-5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
       <div className="flex items-center gap-2.5 mb-4">
         <Icon className="w-4 h-4 text-[#7A6F55]" />
         <h2 className="text-sm font-semibold text-[#E8DFCE]">{title}</h2>
@@ -212,7 +212,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
 
   const Btn = ({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: React.ReactNode }) => (
     <button onClick={onClick} disabled={disabled}
-      className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] disabled:opacity-40 transition-colors">
+      className="px-4 py-2 text-sm font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#272018] disabled:opacity-40 transition-colors">
       {children}
     </button>
   )
@@ -270,7 +270,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
                             <select
                               value={editRole}
                               onChange={e => setEditRole(e.target.value as 'admin' | 'collaborator' | 'guest')}
-                              className="px-2 py-1 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-xs outline-none"
+                              className="px-2 py-1 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-xs outline-none"
                             >
                               <option value="admin">admin</option>
                               <option value="collaborator">collaborator</option>
@@ -294,7 +294,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
                                   value={editPassword}
                                   onChange={e => setEditPassword(e.target.value)}
                                   placeholder="New password"
-                                  className="px-2 py-1 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-xs outline-none w-32"
+                                  className="px-2 py-1 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-xs outline-none w-32"
                                 />
                                 <button
                                   onClick={() => handleSaveEdit(user.id)}
@@ -355,7 +355,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
 
         <Section icon={RefreshCw} title="Notion Sync">
           <p className="text-xs text-[#7A6F55] mb-2">Pull tasks from Notion databases into Cockpit.</p>
-          <p className="text-xs text-[#C9962E] mb-3">⚠️ Currently disabled — <code className="text-xs bg-[#140F0B] px-1 rounded-none">NOTION_SYNC_ENABLED=false</code> is set in Vercel. Clicking &quot;Sync now&quot; will show a message instead of syncing. To re-enable, update <code className="text-xs bg-[#140F0B] px-1 rounded-none">NOTION_SYNC_ENABLED</code> to <code className="text-xs bg-[#140F0B] px-1 rounded-none">true</code> in Vercel environment variables.</p>
+          <p className="text-xs text-[#C9962E] mb-3">⚠️ Currently disabled — <code className="text-xs bg-[#0F0C09] px-1 rounded-none">NOTION_SYNC_ENABLED=false</code> is set in Vercel. Clicking &quot;Sync now&quot; will show a message instead of syncing. To re-enable, update <code className="text-xs bg-[#0F0C09] px-1 rounded-none">NOTION_SYNC_ENABLED</code> to <code className="text-xs bg-[#0F0C09] px-1 rounded-none">true</code> in Vercel environment variables.</p>
           <Btn onClick={handleNotionSync} disabled={syncing}>
             {syncing ? 'Syncing…' : 'Sync now'}
           </Btn>

@@ -18,11 +18,11 @@ const EXTS = new Set(['.tsx', '.ts'])
 
 // ---------- The token map (old hex → new hex, case-insensitive) ----------
 const HEX_MAP = {
-  '0F0F0F': '1A1410', // base → walnut
-  '141414': '211913', // surface-1
-  '1A1A1A': '281E16', // surface-2
-  '222222': '2F241A', // surface-3
-  '0A0A0A': '140F0B', // inset
+  '0F0F0F': '14100C', // base → walnut
+  '141414': '1A1510', // surface-1
+  '1A1A1A': '201A14', // surface-2
+  '222222': '272018', // surface-3
+  '0A0A0A': '0F0C09', // inset
   'F5F5F5': 'E8DFCE', // text primary → fg-strong
   'A0A0A0': 'A79B78', // text secondary → Field Beige
   '6B7280': '7A6F55', // text tertiary
@@ -59,29 +59,29 @@ const HEX_MAP = {
   '06B6D4': '4A8578', // cyan
   'EAB308': 'C9962E', // yellow
   'E9C46A': 'C9A94F', // chart sand
-  '2A2A2A': '332820', // hover surface
-  '1F1F1F': '2C2218',
-  '1E1E1E': '281E16',
-  '121212': '1A1410',
+  '2A2A2A': '2B221A', // hover surface
+  '1F1F1F': '251D16',
+  '1E1E1E': '201A14',
+  '121212': '14100C',
 }
 
 // 3-digit hexes get their own word-bounded pass
 const SHORT_HEX_MAP = {
   'FFF': 'E8DFCE',
-  '111': '140F0B',
-  '222': '2F241A',
+  '111': '0F0C09',
+  '222': '272018',
 }
 
 // Named Tailwind classes → OM equivalents. Longest/most-specific first.
 const CLASS_MAP = [
-  ['bg-black/60', 'bg-[rgba(15,11,8,0.7)]'],
+  ['bg-black/60', 'bg-[rgba(10,8,6,0.7)]'],
   ['bg-white/20', 'bg-[rgba(232,223,206,0.2)]'],
   ['text-gray-400', 'text-[#A79B78]'],
   ['text-white', 'text-[#E8DFCE]'],
   ['bg-white', 'bg-[#E8DFCE]'],
-  ['text-black', 'text-[#1A1410]'],
+  ['text-black', 'text-[#14100C]'],
   ['border-white', 'border-[#E8DFCE]'],
-  ['bg-black', 'bg-[#140F0B]'],
+  ['bg-black', 'bg-[#0F0C09]'],
 ]
 
 const hexToRgbTriplet = hex => {
@@ -159,7 +159,7 @@ console.log(`\n${touched}/${files.length} files updated`)
 const leftover = new Map()
 const KNOWN_NEW = new Set(
   Object.values(HEX_MAP).concat([
-    '1A1410', '211913', '281E16', '2F241A', '140F0B',
+    '14100C', '1A1510', '201A14', '272018', '0F0C09',
     'E8DFCE', 'A79B78', '7A6F55', '5C5340', '4A4234',
     '8B3A23', 'A04A30',
   ].map(h => h.toUpperCase()))

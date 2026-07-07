@@ -186,7 +186,7 @@ export function BriefClient({
 
       <div className="flex-1 p-6 space-y-6">
         {/* AI Brief Card */}
-        <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913] overflow-hidden">
+        <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510] overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: workspace.color }} />
@@ -209,7 +209,7 @@ export function BriefClient({
             {isPending ? (
               <div className="space-y-2">
                 {[80, 95, 70, 85, 60].map((w, i) => (
-                  <div key={i} className="h-3 rounded-full bg-[#2F241A] animate-pulse" style={{ width: `${w}%` }} />
+                  <div key={i} className="h-3 rounded-full bg-[#272018] animate-pulse" style={{ width: `${w}%` }} />
                 ))}
               </div>
             ) : brief ? (
@@ -380,7 +380,7 @@ function DataCard({
   emptyText: string
 }) {
   return (
-    <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913] overflow-hidden">
+    <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510] overflow-hidden">
       <div
         className="flex items-center gap-2 px-4 py-3 border-b border-[rgba(167,155,120,0.13)]"
         style={{ borderTopColor: accentColor }}

@@ -25,13 +25,13 @@
 
 ### Surfaces (Walnut ramp)
 ```
---bg-base:      #1A1410    /* App canvas — walnut */
---bg-surface-1: #211913    /* Cards, panels */
---bg-surface-2: #281E16    /* Elevated, active states */
---bg-surface-3: #2F241A    /* Dropdowns, popovers */
---bg-inset:     #140F0B    /* Inputs, recessed areas */
+--bg-base:      #14100C    /* App canvas — walnut */
+--bg-surface-1: #1A1510    /* Cards, panels */
+--bg-surface-2: #201A14    /* Elevated, active states */
+--bg-surface-3: #272018    /* Dropdowns, popovers */
+--bg-inset:     #0F0C09    /* Inputs, recessed areas */
 ```
-Scrims: `rgba(15,11,8,0.7)`.
+Scrims: `rgba(10,8,6,0.7)`.
 
 ### Borders (taupe hairlines — the `--rule` family)
 ```
@@ -136,7 +136,7 @@ Centered, `--text-tertiary`, single line, optional action. No illustrations.
 
 ## Anti-Patterns
 
-- ❌ Pure black (#000) or pure white (#FFF) — walnut `#1A1410` / fg-strong `#E8DFCE`
+- ❌ Pure black (#000) or pure white (#FFF) — walnut `#14100C` / fg-strong `#E8DFCE`
 - ❌ Any shadow (`shadow-*`) — depth is borders + vignette
 - ❌ Rounded rectangle corners — radius 0 (discs excepted)
 - ❌ Blue, purple, pink — warm-map them (see `om-sweep.mjs` table)

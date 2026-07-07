@@ -57,7 +57,7 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
   return (
     <div
       className={cn(
-        'flex flex-col h-full bg-[#1A1410] border-r border-[rgba(167,155,120,0.13)] transition-all duration-300',
+        'flex flex-col h-full bg-[#14100C] border-r border-[rgba(167,155,120,0.13)] transition-all duration-300',
         collapsed ? 'w-14' : 'w-60'
       )}
     >
@@ -70,7 +70,7 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
         )}
         <button
           onClick={onClose ?? toggleCollapsed}
-          className="w-8 h-8 flex items-center justify-center rounded-none hover:bg-[#211913] text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-none hover:bg-[#1A1510] text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0"
         >
           {onClose ? <X className="w-4 h-4" /> : collapsed ? <Menu className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -91,8 +91,8 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
                     'flex items-center gap-2.5 rounded-none h-8 transition-colors relative group',
                     item.indent ? 'pl-8' : 'px-2',
                     active
-                      ? 'bg-[#281E16] text-[#E8DFCE]'
-                      : 'text-[#7A6F55] hover:bg-[#211913] hover:text-[#A79B78]'
+                      ? 'bg-[#201A14] text-[#E8DFCE]'
+                      : 'text-[#7A6F55] hover:bg-[#1A1510] hover:text-[#A79B78]'
                   )}
                   style={active ? {
                     borderLeft: `2px solid ${workspace.color}`,
@@ -104,7 +104,7 @@ function SidebarInner({ onClose }: SidebarInnerProps) {
                     <span className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] truncate">{item.label}</span>
                   )}
                   {collapsed && (
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-[#2F241A] border border-[rgba(167,155,120,0.22)] rounded-none font-mono text-[10px] uppercase tracking-[0.2em] text-[#E8DFCE] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                    <div className="absolute left-full ml-2 px-2 py-1 bg-[#272018] border border-[rgba(167,155,120,0.22)] rounded-none font-mono text-[10px] uppercase tracking-[0.2em] text-[#E8DFCE] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                       {item.label}
                     </div>
                   )}
@@ -140,7 +140,7 @@ export function Sidebar() {
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div
-            className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm"
+            className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
           <div className="relative z-10 flex h-full">

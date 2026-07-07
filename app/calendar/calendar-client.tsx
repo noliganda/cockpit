@@ -162,7 +162,7 @@ export function CalendarClient({ initialTasks, initialMilestones, initialSprints
       })()
 
   return (
-    <div className="flex flex-col h-full bg-[#1A1410]">
+    <div className="flex flex-col h-full bg-[#14100C]">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 md:px-6 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
         <Calendar className="w-4 h-4 text-[#7A6F55]" />
@@ -178,7 +178,7 @@ export function CalendarClient({ initialTasks, initialMilestones, initialSprints
               className={cn(
                 'px-3 py-1.5 text-xs font-medium transition-colors capitalize',
                 view === v
-                  ? 'bg-[#281E16] text-[#E8DFCE]'
+                  ? 'bg-[#201A14] text-[#E8DFCE]'
                   : 'text-[#7A6F55] hover:text-[#A79B78]'
               )}
             >
@@ -191,19 +191,19 @@ export function CalendarClient({ initialTasks, initialMilestones, initialSprints
         <div className="flex items-center gap-1">
           <button
             onClick={() => navigate(-1)}
-            className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#281E16] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#201A14] transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={goToToday}
-            className="px-3 h-8 text-xs font-medium text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#281E16] rounded-none transition-colors"
+            className="px-3 h-8 text-xs font-medium text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#201A14] rounded-none transition-colors"
           >
             Today
           </button>
           <button
             onClick={() => navigate(1)}
-            className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#281E16] transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#201A14] transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -265,8 +265,8 @@ export function CalendarClient({ initialTasks, initialMilestones, initialSprints
       {/* Create task modal */}
       {creatingTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setCreatingTask(false)} />
-          <div className="relative w-full max-w-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-4">
+          <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={() => setCreatingTask(false)} />
+          <div className="relative w-full max-w-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none p-4">
             <h3 className="text-sm font-semibold text-[#E8DFCE] mb-3">
               New Task — {selectedDay ? selectedDay.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}
             </h3>
@@ -276,25 +276,25 @@ export function CalendarClient({ initialTasks, initialMilestones, initialSprints
               onChange={e => setNewTaskTitle(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') createTask(); if (e.key === 'Escape') setCreatingTask(false) }}
               placeholder="Task title..."
-              className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none placeholder-[#5C5340] focus:border-[rgba(167,155,120,0.35)] mb-3"
+              className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none placeholder-[#5C5340] focus:border-[rgba(167,155,120,0.35)] mb-3"
             />
             <input
               type="date"
               value={newTaskDate}
               onChange={e => setNewTaskDate(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] mb-4"
+              className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] mb-4"
             />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setCreatingTask(false)}
-                className="px-3 py-1.5 rounded-none text-xs text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+                className="px-3 py-1.5 rounded-none text-xs text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#272018] transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={createTask}
                 disabled={saving || !newTaskTitle.trim()}
-                className="px-3 py-1.5 rounded-none text-xs font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] disabled:opacity-40 transition-colors"
+                className="px-3 py-1.5 rounded-none text-xs font-medium bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] disabled:opacity-40 transition-colors"
                 style={{ borderColor: workspace.color + '40' }}
               >
                 {saving ? 'Creating...' : 'Create Task'}
@@ -335,7 +335,7 @@ function MonthView({ cells, today, getTasksForDay, getMilestonesForDay, getSprin
       <div className="grid grid-cols-7 gap-px bg-[rgba(167,155,120,0.09)] rounded-none overflow-hidden border border-[rgba(167,155,120,0.09)]">
         {cells.map((day, i) => {
           if (!day) {
-            return <div key={i} className="bg-[#140F0B] min-h-[80px] md:min-h-[100px]" />
+            return <div key={i} className="bg-[#0F0C09] min-h-[80px] md:min-h-[100px]" />
           }
           const isToday = isSameDay(day, today)
           const dayTasks = getTasksForDay(day)
@@ -348,7 +348,7 @@ function MonthView({ cells, today, getTasksForDay, getMilestonesForDay, getSprin
               key={i}
               onClick={() => onDayClick(day)}
               className={cn(
-                'bg-[#1A1410] min-h-[80px] md:min-h-[100px] p-1.5 cursor-pointer group transition-colors hover:bg-[#211913]',
+                'bg-[#14100C] min-h-[80px] md:min-h-[100px] p-1.5 cursor-pointer group transition-colors hover:bg-[#1A1510]',
                 isPast && 'opacity-60'
               )}
             >
@@ -363,7 +363,7 @@ function MonthView({ cells, today, getTasksForDay, getMilestonesForDay, getSprin
                   className={cn(
                     'text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full',
                     isToday
-                      ? 'text-[#1A1410] font-bold'
+                      ? 'text-[#14100C] font-bold'
                       : 'text-[#7A6F55] group-hover:text-[#A79B78]'
                   )}
                   style={isToday ? { backgroundColor: '#E8DFCE' } : undefined}
@@ -445,7 +445,7 @@ function WeekView({ weekDays, today, getTasksForDay, getMilestonesForDay, getSpr
             <div
               key={i}
               className={cn(
-                'bg-[#1A1410] min-h-[400px] flex flex-col cursor-pointer hover:bg-[#211913] transition-colors group',
+                'bg-[#14100C] min-h-[400px] flex flex-col cursor-pointer hover:bg-[#1A1510] transition-colors group',
                 isPast && 'opacity-70'
               )}
               onClick={() => onDayClick(day)}
@@ -453,7 +453,7 @@ function WeekView({ weekDays, today, getTasksForDay, getMilestonesForDay, getSpr
               {/* Day header */}
               <div className={cn(
                 'p-2 border-b border-[rgba(167,155,120,0.09)] text-center',
-                isToday && 'bg-[#281E16]'
+                isToday && 'bg-[#201A14]'
               )}>
                 <div className="text-[10px] uppercase font-medium text-[#5C5340] mb-0.5">
                   {DAYS[day.getDay()]}
@@ -461,7 +461,7 @@ function WeekView({ weekDays, today, getTasksForDay, getMilestonesForDay, getSpr
                 <div
                   className={cn(
                     'w-7 h-7 rounded-full flex items-center justify-center mx-auto text-xs font-semibold',
-                    isToday ? 'text-[#1A1410]' : 'text-[#A79B78]'
+                    isToday ? 'text-[#14100C]' : 'text-[#A79B78]'
                   )}
                   style={isToday ? { backgroundColor: '#E8DFCE' } : undefined}
                 >

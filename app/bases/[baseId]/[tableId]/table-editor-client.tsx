@@ -92,7 +92,7 @@ const WORKSPACE_COLORS: Record<string, string> = {
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
+  'w-full px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 // ─── Column type icon ─────────────────────────────────────────────────────────
@@ -129,8 +129,8 @@ function AddColumnDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm">
-      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-sm p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,8,6,0.7)] backdrop-blur-sm">
+      <div className="bg-[#1A1510] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-sm p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-base font-semibold text-[#E8DFCE]">Add Column</h2>
           <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
@@ -159,8 +159,8 @@ function AddColumnDialog({
                   onClick={() => setType(value)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-none text-sm border transition-colors ${
                     type === value
-                      ? 'bg-[#2F241A] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
-                      : 'bg-[#140F0B] border-[rgba(167,155,120,0.13)] text-[#A79B78] hover:text-[#E8DFCE]'
+                      ? 'bg-[#272018] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
+                      : 'bg-[#0F0C09] border-[rgba(167,155,120,0.13)] text-[#A79B78] hover:text-[#E8DFCE]'
                   }`}
                 >
                   <Icon size={13} />
@@ -192,7 +192,7 @@ function AddColumnDialog({
           <button
             onClick={handleAdd}
             disabled={!name.trim() || saving}
-            className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-none text-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] transition-colors disabled:opacity-40"
           >
             {saving ? 'Adding…' : 'Add Column'}
           </button>
@@ -250,9 +250,9 @@ function CellEditor({
       >
         <div
           className="w-4 h-4 rounded-none border flex items-center justify-center transition-colors"
-          style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(167,155,120,0.35)', background: '#140F0B' }}
+          style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(167,155,120,0.35)', background: '#0F0C09' }}
         >
-          {checked && <Check size={10} className="text-[#1A1410]" />}
+          {checked && <Check size={10} className="text-[#14100C]" />}
         </div>
       </button>
     )
@@ -266,7 +266,7 @@ function CellEditor({
         value={val as string}
         onChange={(e) => setVal(e.target.value)}
         onBlur={commit}
-        className="w-full h-full bg-[#140F0B] border border-[rgba(167,155,120,0.35)] text-[#E8DFCE] text-xs px-2 outline-none rounded-none"
+        className="w-full h-full bg-[#0F0C09] border border-[rgba(167,155,120,0.35)] text-[#E8DFCE] text-xs px-2 outline-none rounded-none"
       >
         <option value="">— none —</option>
         {choices.map((c) => (
@@ -287,7 +287,7 @@ function CellEditor({
         if (e.key === 'Enter') commit()
         if (e.key === 'Escape') onCancel()
       }}
-      className="w-full h-full bg-[#140F0B] border border-[rgba(167,155,120,0.35)] text-[#E8DFCE] text-xs px-2 outline-none font-mono rounded-none"
+      className="w-full h-full bg-[#0F0C09] border border-[rgba(167,155,120,0.35)] text-[#E8DFCE] text-xs px-2 outline-none font-mono rounded-none"
     />
   )
 }
@@ -305,7 +305,7 @@ function CellDisplay({ value, column, accentColor }: { value: unknown; column: U
         className="w-4 h-4 rounded-none border flex items-center justify-center"
         style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(167,155,120,0.35)', background: 'transparent' }}
       >
-        {checked && <Check size={10} className="text-[#1A1410]" />}
+        {checked && <Check size={10} className="text-[#14100C]" />}
       </div>
     )
   }
@@ -324,7 +324,7 @@ function CellDisplay({ value, column, accentColor }: { value: unknown; column: U
   }
   if (column.columnType === 'select') {
     return (
-      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] bg-[#2F241A] text-[#A79B78] border border-[rgba(167,155,120,0.13)]">
+      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] bg-[#272018] text-[#A79B78] border border-[rgba(167,155,120,0.13)]">
         {String(value)}
       </span>
     )
@@ -452,7 +452,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             : { background: 'transparent', borderColor: accentColor, opacity: 0.6 }
           }
         >
-          {allSelected && <Check size={10} className="text-[#1A1410] stroke-[3]" />}
+          {allSelected && <Check size={10} className="text-[#14100C] stroke-[3]" />}
         </button>
       ),
       cell: ({ row }) => {
@@ -475,7 +475,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
               : { background: 'transparent', borderColor: accentColor, opacity: 0.6 }
             }
           >
-            {isSelected && <Check size={10} className="text-[#1A1410] stroke-[3]" />}
+            {isSelected && <Check size={10} className="text-[#14100C] stroke-[3]" />}
           </button>
         )
       },
@@ -504,7 +504,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                     : { borderColor: 'rgba(167,155,120,0.48)', background: 'transparent' }
                   }
                 >
-                  {checked && <Check size={10} className="text-[#1A1410]" />}
+                  {checked && <Check size={10} className="text-[#14100C]" />}
                 </div>
               </div>
             )
@@ -558,8 +558,8 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
   if (loading) {
     return (
       <div className="p-6">
-        <div className="h-8 w-48 bg-[#281E16] rounded-none animate-pulse mb-4" />
-        <div className="h-64 bg-[#211913] rounded-none animate-pulse" />
+        <div className="h-8 w-48 bg-[#201A14] rounded-none animate-pulse mb-4" />
+        <div className="h-64 bg-[#1A1510] rounded-none animate-pulse" />
       </div>
     )
   }
@@ -573,7 +573,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
 
   return (
     // h-full (not min-h-screen) so the layout's scroll container controls height
-    <div className="flex flex-col h-full bg-[#1A1410]">
+    <div className="flex flex-col h-full bg-[#14100C]">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-5 py-3 border-b border-[rgba(167,155,120,0.13)] flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
@@ -613,7 +613,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
               <button
                 key={fmt}
                 onClick={() => downloadExport(fmt)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-none text-xs text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#281E16] border border-transparent hover:border-[rgba(167,155,120,0.13)] transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-none text-xs text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#201A14] border border-transparent hover:border-[rgba(167,155,120,0.13)] transition-colors"
               >
                 <Download size={11} />
                 {fmt.toUpperCase()}
@@ -644,7 +644,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder="Search rows…"
-            className="w-full pl-7 pr-3 py-1.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
+            className="w-full pl-7 pr-3 py-1.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
           />
         </div>
         <span className="text-xs text-[#5C5340]">
@@ -663,7 +663,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             <p className="text-xs text-[#5C5340] mb-4">Add columns to start building your table</p>
             <button
               onClick={() => setShowAddCol(true)}
-              className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+              className="px-4 py-2 rounded-none text-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] transition-colors"
             >
               Add first column
             </button>
@@ -679,7 +679,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             </colgroup>
 
             {/* Header */}
-            <thead className="sticky top-0 z-10 bg-[#1A1410]">
+            <thead className="sticky top-0 z-10 bg-[#14100C]">
               {tanTable.getHeaderGroups().map((hg) => (
                 <tr key={hg.id} className="border-b border-[rgba(167,155,120,0.13)]">
                   {hg.headers.map((header) => {
@@ -738,7 +738,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                         <span className="text-sm text-[#7A6F55]">No rows yet</span>
                         <button
                           onClick={addRow}
-                          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#272018] transition-colors"
                         >
                           <Plus size={14} />
                           Add first row
@@ -751,8 +751,8 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                 tanTable.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`border-b border-[rgba(167,155,120,0.09)] hover:bg-[#211913] transition-colors ${
-                      selected.has(row.original.id) ? 'bg-[#211913]' : ''
+                    className={`border-b border-[rgba(167,155,120,0.09)] hover:bg-[#1A1510] transition-colors ${
+                      selected.has(row.original.id) ? 'bg-[#1A1510]' : ''
                     }`}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -775,10 +775,10 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
 
       {/* ── Add Row footer — always visible at bottom ───────────────────────── */}
       {columns.length > 0 && (
-        <div className="flex-shrink-0 border-t border-[rgba(167,155,120,0.13)] bg-[#1A1410] px-4 py-2">
+        <div className="flex-shrink-0 border-t border-[rgba(167,155,120,0.13)] bg-[#14100C] px-4 py-2">
           <button
             onClick={addRow}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-none text-xs text-[#A79B78] hover:text-[#E8DFCE] hover:bg-[#281E16] transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-none text-xs text-[#A79B78] hover:text-[#E8DFCE] hover:bg-[#201A14] transition-colors"
           >
             <Plus size={13} />
             Add Row

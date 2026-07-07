@@ -145,7 +145,7 @@ export default async function Home({
             { label: 'Drafts awaiting review', value: draftsAwaiting, icon: PenLine, color: '#C9962E' },
             { label: 'Interrupts today', value: interruptsToday, icon: AlertTriangle, color: '#C0452E' },
           ].map(({ label, value, icon: Icon, color }) => (
-            <div key={label} className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913] p-4 group-hover:border-[rgba(167,155,120,0.22)] transition-colors">
+            <div key={label} className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510] p-4 group-hover:border-[rgba(167,155,120,0.22)] transition-colors">
               <div className="flex items-start justify-between">
                 <span className="font-mono text-[28px] font-semibold text-[#E8DFCE] tabular-nums leading-none">{value}</span>
                 <span className="rounded-none p-1.5" style={{ background: `${color}1A` }}>
@@ -159,7 +159,7 @@ export default async function Home({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Latest brief */}
-          <div data-home-brief className="lg:col-span-2 rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913] overflow-hidden">
+          <div data-home-brief className="lg:col-span-2 rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510] overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center gap-2">
                 <Newspaper className="w-3.5 h-3.5 text-[#7A6F55]" />
@@ -190,7 +190,7 @@ export default async function Home({
           </div>
 
           {/* Resurfaced important tasks */}
-          <div data-resurfaced className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913]">
+          <div data-resurfaced className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510]">
             <div className="px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
               <span className="text-xs font-semibold text-[#A79B78] uppercase tracking-widest">Don&apos;t let it rot</span>
               <p className="text-[11px] text-[#5C5340] mt-0.5">Important, untouched ≥ {staleDays} days</p>
@@ -225,7 +225,7 @@ export default async function Home({
         </div>
 
         {/* Project status strip */}
-        <div data-project-strip className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913]">
+        <div data-project-strip className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1510]">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
             <span className="text-xs font-semibold text-[#A79B78] uppercase tracking-widest">Projects</span>
             <Link href="/projects" className="inline-flex items-center gap-1 text-xs text-[#A79B78] hover:text-[#E8DFCE] transition-colors">
@@ -240,7 +240,7 @@ export default async function Home({
                 const s = SIGNAL_STYLES[p.signal] ?? SIGNAL_STYLES.on_track
                 return (
                   <div key={p.id} data-project-signal={p.signal}
-                    className="flex items-center gap-2 rounded-none border border-[rgba(167,155,120,0.13)] bg-[#1A1410] px-3 py-2">
+                    className="flex items-center gap-2 rounded-none border border-[rgba(167,155,120,0.13)] bg-[#14100C] px-3 py-2">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} title={s.label} />
                     <span className="text-sm text-[#E8DFCE] font-medium truncate max-w-[14rem]">{p.name}</span>
                     <WorkspacePill workspaceId={p.workspaceId} />

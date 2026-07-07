@@ -183,7 +183,7 @@ const VIRTUAL_HARNESSES = [
   { id: 'pie', name: 'Pie', operatorType: 'function' },
 ]
 
-const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
+const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
 const selectCls = `${inputCls} appearance-none`
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
@@ -314,8 +314,8 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <div className="flex items-center gap-2">
@@ -394,21 +394,21 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 className={selectCls}
               >
                 <option value="">— Unassigned —</option>
-                <optgroup label="Humans" className="text-[#A79B78] bg-[#281E16]">
+                <optgroup label="Humans" className="text-[#A79B78] bg-[#201A14]">
                   {operatorsList.filter(op => op.operatorType === 'human' && op.status !== 'retired').map(op => (
                     <option key={op.id} value={op.id} className="text-[#E8DFCE]">
                       🧑 {op.name}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Autonomous Agents" className="text-[#A79B78] bg-[#281E16]">
+                <optgroup label="Autonomous Agents" className="text-[#A79B78] bg-[#201A14]">
                   {operatorsList.filter(op => op.operatorType === 'agent' && op.status !== 'retired').map(op => (
                     <option key={op.id} value={op.id} className="text-[#E8DFCE]">
                       🤖 {op.name}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Harnesses / Functions" className="text-[#A79B78] bg-[#281E16]">
+                <optgroup label="Harnesses / Functions" className="text-[#A79B78] bg-[#201A14]">
                   {/* Hide virtual entries shadowed by a REAL registered operator —
                       duplicate ids (hermes, claude-code) would list twice and the
                       function-typed duplicate loses to the registry on select.
@@ -465,7 +465,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   placeholder="Add tag..."
                   className={cn(inputCls, 'flex-1')}
                 />
-                <button onClick={addTag} className="p-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0">
+                <button onClick={addTag} className="p-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0">
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -528,7 +528,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <div>
                 <label className={labelCls}>Area {projectAreaId ? '(from project)' : ''}</label>
                 {projectAreaId ? (
-                  <div className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.09)] text-[#7A6F55] text-sm">
+                  <div className="w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.09)] text-[#7A6F55] text-sm">
                     {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
                   </div>
                 ) : (
@@ -555,7 +555,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   'flex items-center gap-1.5 px-3 py-2 rounded-none border text-sm font-medium transition-colors',
                   urgent
                     ? 'bg-[rgba(192,69,46,0.12)] border-[rgba(192,69,46,0.30)] text-[#C0452E]'
-                    : 'bg-[#140F0B] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
+                    : 'bg-[#0F0C09] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
                 )}
               >
                 <Zap className="w-3.5 h-3.5" />
@@ -567,7 +567,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   'flex items-center gap-1.5 px-3 py-2 rounded-none border text-sm font-medium transition-colors',
                   important
                     ? 'bg-[rgba(201,150,46,0.12)] border-[rgba(201,150,46,0.30)] text-[#C9962E]'
-                    : 'bg-[#140F0B] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
+                    : 'bg-[#0F0C09] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
                 )}
               >
                 <Star className="w-3.5 h-3.5" />
@@ -576,14 +576,14 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <div className="flex items-center gap-2 ml-auto">
                 <div>
                   <select value={impact} onChange={e => setImpact(e.target.value)}
-                    className="px-2.5 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]">
+                    className="px-2.5 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]">
                     <option value="">Impact</option>
                     {IMPACT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
                 </div>
                 <div>
                   <select value={effort} onChange={e => setEffort(e.target.value)}
-                    className="px-2.5 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]">
+                    className="px-2.5 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]">
                     <option value="">Effort</option>
                     {EFFORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
@@ -628,7 +628,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           {/* Row 7: Description */}
           <div>
             <label className={labelCls}>Description</label>
-            <div className="rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] overflow-hidden max-h-48 overflow-y-auto">
+            <div className="rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] overflow-hidden max-h-48 overflow-y-auto">
               <BlockEditor
                 initialContent={task?.description}
                 onChange={(blocks) => setDescription(blocks)}
@@ -648,7 +648,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 {task?.executingModel && (
                   <div>
                     <span className="text-[#7A6F55] block mb-1">Executing Model</span>
-                    <div className="font-mono text-[#E8DFCE] bg-[#140F0B] px-2.5 py-1.5 rounded-none border border-[rgba(167,155,120,0.09)] truncate flex items-center gap-1.5">
+                    <div className="font-mono text-[#E8DFCE] bg-[#0F0C09] px-2.5 py-1.5 rounded-none border border-[rgba(167,155,120,0.09)] truncate flex items-center gap-1.5">
                       <span>🤖</span>
                       <span className="truncate">{task.executingModel}</span>
                     </div>
@@ -657,7 +657,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 {task?.executingSessionId && (
                   <div>
                     <span className="text-[#7A6F55] block mb-1">Session ID</span>
-                    <div className="font-mono text-[#E8DFCE] bg-[#140F0B] px-2.5 py-1.5 rounded-none border border-[rgba(167,155,120,0.09)] flex items-center justify-between gap-1.5 min-w-0">
+                    <div className="font-mono text-[#E8DFCE] bg-[#0F0C09] px-2.5 py-1.5 rounded-none border border-[rgba(167,155,120,0.09)] flex items-center justify-between gap-1.5 min-w-0">
                       <span className="truncate">{task.executingSessionId}</span>
                       <button
                         onClick={() => handleCopySessionId(task.executingSessionId!)}
@@ -723,7 +723,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors min-h-[44px]">Cancel</button>
             <button onClick={handleSave} disabled={saving || !title.trim()}
-              className="px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors min-h-[44px]">
+              className="px-4 py-2.5 text-sm font-medium bg-[#272018] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors min-h-[44px]">
               {saving ? 'Saving...' : isCreatingSubtask ? 'Create subtask' : task ? 'Save changes' : 'Create task'}
             </button>
           </div>

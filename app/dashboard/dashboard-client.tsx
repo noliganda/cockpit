@@ -89,10 +89,10 @@ function QuickModal({ title, onClose, onSubmit, saving, children, submitLabel = 
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(10,8,6,0.7)] backdrop-blur-sm"
       onMouseDown={e => { if (e.target === overlayRef.current) onClose() }}
     >
-      <div className="w-full max-w-sm mx-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.18)]">
+      <div className="w-full max-w-sm mx-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.18)]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
           <h2 className="text-sm font-semibold text-[#E8DFCE]">{title}</h2>
           <button onClick={onClose} className="p-1 rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)] transition-colors">
@@ -105,12 +105,12 @@ function QuickModal({ title, onClose, onSubmit, saving, children, submitLabel = 
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-sm font-medium text-[#E8DFCE] hover:bg-[#2F241A] disabled:opacity-40 transition-all"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-sm font-medium text-[#E8DFCE] hover:bg-[#272018] disabled:opacity-40 transition-all"
             >
               {saving ? 'Creating…' : <><Plus className="w-3.5 h-3.5" />{submitLabel}</>}
             </button>
             <button type="button" onClick={onClose}
-              className="px-4 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
+              className="px-4 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
               Cancel
             </button>
           </div>
@@ -120,7 +120,7 @@ function QuickModal({ title, onClose, onSubmit, saving, children, submitLabel = 
   )
 }
 
-const inputCls = 'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
+const inputCls = 'w-full px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1'
 
 function WorkspaceSelect({ value, onChange }: { value: WorkspaceId; onChange: (v: WorkspaceId) => void }) {
@@ -348,7 +348,7 @@ export function DashboardClient({
     { label: 'Overdue', value: stats.overdueItems, icon: AlertCircle, color: stats.overdueItems > 0 ? '#C0452E' : '#7A6F55', href: `/tasks?workspace=${ws}&filter=overdue` },
   ]
 
-  const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-xs text-[#A79B78] hover:text-[#E8DFCE] hover:border-[rgba(167,155,120,0.22)] transition-colors cursor-pointer'
+  const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-xs text-[#A79B78] hover:text-[#E8DFCE] hover:border-[rgba(167,155,120,0.22)] transition-colors cursor-pointer'
 
   return (
     <>
@@ -392,7 +392,7 @@ export function DashboardClient({
             const Icon = stat.icon
             return (
               <Link key={stat.label} href={stat.href}
-                className="group p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] transition-colors">
+                className="group p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <p className="text-xs text-[#7A6F55] font-medium uppercase tracking-wide">{stat.label}</p>
                   <div className="w-7 h-7 rounded-none flex items-center justify-center shrink-0"
@@ -416,7 +416,7 @@ export function DashboardClient({
           <div className="lg:col-span-2 space-y-4">
 
             {/* Upcoming — Tasks + Events */}
-            <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[rgba(167,155,120,0.13)]">
                 <h2 className="text-sm font-semibold text-[#E8DFCE] flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-[#7A6F55]" />
@@ -424,12 +424,12 @@ export function DashboardClient({
                 </h2>
                 <div className="flex items-center gap-3">
                   {/* Tab toggle */}
-                  <div className="flex items-center gap-1 p-0.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)]">
+                  <div className="flex items-center gap-1 p-0.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)]">
                     <button
                       onClick={() => setUpcomingTab('tasks')}
                       className={cn('px-2.5 py-1 rounded-none text-xs font-medium transition-colors',
                         upcomingTab === 'tasks'
-                          ? 'bg-[#281E16] text-[#E8DFCE]'
+                          ? 'bg-[#201A14] text-[#E8DFCE]'
                           : 'text-[#7A6F55] hover:text-[#A79B78]'
                       )}
                     >
@@ -439,7 +439,7 @@ export function DashboardClient({
                       onClick={() => setUpcomingTab('events')}
                       className={cn('px-2.5 py-1 rounded-none text-xs font-medium transition-colors',
                         upcomingTab === 'events'
-                          ? 'bg-[#281E16] text-[#E8DFCE]'
+                          ? 'bg-[#201A14] text-[#E8DFCE]'
                           : 'text-[#7A6F55] hover:text-[#A79B78]'
                       )}
                     >
@@ -459,7 +459,7 @@ export function DashboardClient({
                 {upcomingTab === 'tasks' ? (
                   upcomingTasks.length === 0 ? (
                     <div className="py-6 text-center">
-                      <CheckSquare className="w-7 h-7 text-[#2C2218] mx-auto mb-2" />
+                      <CheckSquare className="w-7 h-7 text-[#251D16] mx-auto mb-2" />
                       <p className="text-sm text-[#5C5340]">No tasks due in the next 7 days</p>
                     </div>
                   ) : (
@@ -487,7 +487,7 @@ export function DashboardClient({
                     </div>
                   ) : events.length === 0 ? (
                     <div className="py-6 text-center">
-                      <Calendar className="w-7 h-7 text-[#2C2218] mx-auto mb-2" />
+                      <Calendar className="w-7 h-7 text-[#251D16] mx-auto mb-2" />
                       <p className="text-sm text-[#5C5340]">No upcoming events found</p>
                       <button
                         onClick={() => void fetchEvents()}
@@ -523,7 +523,7 @@ export function DashboardClient({
             </div>
 
             {/* Workspace task progress */}
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h2 className="text-sm font-semibold text-[#E8DFCE] mb-1">Task Progress by Workspace</h2>
               <p className="text-xs text-[#7A6F55] mb-4">Tasks completed vs total across all workspaces</p>
               <div className="space-y-3">
@@ -558,7 +558,7 @@ export function DashboardClient({
           <div className="space-y-4">
 
             {/* Featured Projects */}
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-[#E8DFCE] flex items-center gap-2">
                   <Star className="w-3.5 h-3.5 text-[#C99A1F]" />
@@ -617,7 +617,7 @@ export function DashboardClient({
             </div>
 
             {/* Recent Activity */}
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-[#E8DFCE] flex items-center gap-2">
                   <Activity className="w-3.5 h-3.5 text-[#7A6F55]" />

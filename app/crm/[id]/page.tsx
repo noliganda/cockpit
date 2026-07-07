@@ -60,7 +60,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {/* Fields */}
-      <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] mb-4">
+      <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] mb-4">
         <div className="space-y-3">
           {fields.map(field => (
             <div key={field.label} className="flex items-start gap-4">
@@ -76,7 +76,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
       {/* Notes */}
       {contact.notes && (
-        <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+        <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
           <h2 className="text-xs font-semibold text-[#7A6F55] uppercase tracking-wide mb-2">Notes</h2>
           <p className="text-sm text-[#A79B78] whitespace-pre-wrap">{contact.notes}</p>
         </div>

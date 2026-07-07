@@ -225,7 +225,7 @@ export function CharlieChat() {
 
       {/* Camera viewfinder overlay */}
       {cameraOpen && (
-        <div className="fixed inset-0 z-50 bg-[#140F0B] flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-[#0F0C09] flex flex-col items-center justify-center">
           <div className="relative w-full max-w-sm">
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video ref={videoRef} className="w-full rounded-none" playsInline autoPlay muted />
@@ -251,7 +251,7 @@ export function CharlieChat() {
       {/* Chat panel */}
       {open && (
         <div className={cn(
-          'fixed z-40 flex flex-col bg-[#211913] border border-[rgba(167,155,120,0.22)] overflow-hidden',
+          'fixed z-40 flex flex-col bg-[#1A1510] border border-[rgba(167,155,120,0.22)] overflow-hidden',
           isMobile
             ? 'inset-0 rounded-none'
             : 'bottom-20 right-6 w-80 h-[520px] rounded-none'
@@ -290,7 +290,7 @@ export function CharlieChat() {
                     'max-w-[85%] rounded-none px-3 py-2',
                     msg.role === 'user'
                       ? 'text-[#E8DFCE] text-sm'
-                      : 'bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm'
+                      : 'bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm'
                   )}
                   style={msg.role === 'user' ? { backgroundColor: workspace.color } : undefined}
                 >
@@ -305,7 +305,7 @@ export function CharlieChat() {
             ))}
             {sending && (
               <div className="flex justify-start">
-                <div className="bg-[#281E16] border border-[rgba(167,155,120,0.13)] rounded-none px-3 py-2">
+                <div className="bg-[#201A14] border border-[rgba(167,155,120,0.13)] rounded-none px-3 py-2">
                   <div className="flex gap-1">
                     {[0, 1, 2].map(i => (
                       <div
@@ -347,7 +347,7 @@ export function CharlieChat() {
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void sendMessage() } }}
               onPaste={handlePaste}
               placeholder="Message…"
-              className="flex-1 bg-[#140F0B] border border-[rgba(167,155,120,0.13)] rounded-none px-3 py-2 text-sm text-[#E8DFCE] placeholder-[#5C5340] outline-none focus:border-[rgba(167,155,120,0.35)]"
+              className="flex-1 bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] rounded-none px-3 py-2 text-sm text-[#E8DFCE] placeholder-[#5C5340] outline-none focus:border-[rgba(167,155,120,0.35)]"
             />
             <input
               ref={fileInputRef}

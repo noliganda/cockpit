@@ -65,7 +65,7 @@ export function AgentsClient() {
                 <td className="px-3 py-2">{o.operatorType === 'agent' ? '🤖 Agent' : '🧑 Human'}</td>
                 <td className="px-3 py-2">{o.status === 'active' ? '🟢 Active' : '🔴 Paused'}</td>
                 <td className="px-3 py-2">
-                  <div className="w-full bg-[#140F0B] rounded-none overflow-hidden h-2 mb-1">
+                  <div className="w-full bg-[#0F0C09] rounded-none overflow-hidden h-2 mb-1">
                     <div className={`${color} h-2`} style={{ width: `${pct * 100}%` }} />
                   </div>
                   <div className="text-xs">{(o.spentMonthlyCents/100).toFixed(2)} / {(o.budgetMonthlyCents/100).toFixed(2)}</div>
@@ -89,7 +89,7 @@ export function AgentsClient() {
                         toast.error('Failed to update')
                       }
                     }}
-                    className="px-2 py-1 bg-[#281E16] rounded-none hover:bg-[#2F241A]"
+                    className="px-2 py-1 bg-[#201A14] rounded-none hover:bg-[#272018]"
                   >
                     {o.status === 'active' ? 'Pause' : 'Resume'}
                   </button>

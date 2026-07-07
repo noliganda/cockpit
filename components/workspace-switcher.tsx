@@ -23,7 +23,7 @@ export function WorkspaceSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-2 px-2 py-2 rounded-none hover:bg-[#211913] transition-colors text-left"
+        className="w-full flex items-center gap-2 px-2 py-2 rounded-none hover:bg-[#1A1510] transition-colors text-left"
       >
         <span
           className="w-2 h-2 rounded-full shrink-0"
@@ -38,7 +38,7 @@ export function WorkspaceSwitcher() {
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute top-full left-0 right-0 mt-1 py-1 bg-[#2F241A] border border-[rgba(167,155,120,0.22)] rounded-none z-20">
+          <div className="absolute top-full left-0 right-0 mt-1 py-1 bg-[#272018] border border-[rgba(167,155,120,0.22)] rounded-none z-20">
             {WORKSPACES.map(ws => (
               <button
                 key={ws.id}

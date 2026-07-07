@@ -48,11 +48,11 @@ function blocksToPlaintext(blocks: Block[]): string {
 const THEME_CONFIG = {
   colors: {
     editor: { text: '#E8DFCE', background: 'transparent' },
-    menu: { text: '#E8DFCE', background: '#281E16' },
-    tooltip: { text: '#E8DFCE', background: '#2F241A' },
-    hovered: { text: '#E8DFCE', background: '#2F241A' },
-    selected: { text: '#E8DFCE', background: '#332820' },
-    disabled: { text: '#7A6F55', background: '#211913' },
+    menu: { text: '#E8DFCE', background: '#201A14' },
+    tooltip: { text: '#E8DFCE', background: '#272018' },
+    hovered: { text: '#E8DFCE', background: '#272018' },
+    selected: { text: '#E8DFCE', background: '#2B221A' },
+    disabled: { text: '#7A6F55', background: '#1A1510' },
     shadow: 'rgba(0,0,0,0.5)',
     border: 'rgba(167,155,120,0.18)',
     sideMenu: '#5C5340',

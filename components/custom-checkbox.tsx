@@ -43,7 +43,7 @@ export function CustomCheckbox({
         }
         aria-label={checked ? 'Checked' : 'Unchecked'}
       >
-        {checked && <Check className="w-2.5 h-2.5 stroke-[3]" style={{ color: '#140F0B' }} />}
+        {checked && <Check className="w-2.5 h-2.5 stroke-[3]" style={{ color: '#0F0C09' }} />}
       </button>
     )
   }
@@ -64,7 +64,7 @@ export function CustomCheckbox({
       aria-label={checked ? 'Checked' : 'Unchecked'}
     >
       {checked && (
-        <Check className="w-2.5 h-2.5 text-[#140F0B] stroke-[3]" />
+        <Check className="w-2.5 h-2.5 text-[#0F0C09] stroke-[3]" />
       )}
     </button>
   )

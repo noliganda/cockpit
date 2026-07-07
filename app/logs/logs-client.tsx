@@ -221,7 +221,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
       </div>
 
       {/* Filters */}
-      <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] mb-4 space-y-3">
+      <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] mb-4 space-y-3">
         <div className="flex gap-2 flex-wrap">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
@@ -231,14 +231,14 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
               onChange={e => setQ(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && applyFilters()}
               placeholder="Search events…"
-              className="w-full pl-9 pr-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors"
+              className="w-full pl-9 pr-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors"
             />
           </div>
           {!isGuest && (
             <select
               value={entity}
               onChange={e => setEntity(e.target.value)}
-              className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
+              className="px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
             >
               <option value="">All workspaces</option>
               <option value="byron-film">Byron Film</option>
@@ -249,7 +249,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
           <select
             value={actorType}
             onChange={e => setActorType(e.target.value)}
-            className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
+            className="px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
           >
             <option value="">All actors</option>
             {actorTypes.map(at => (
@@ -261,7 +261,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
           <select
             value={agent}
             onChange={e => setAgent(e.target.value)}
-            className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
+            className="px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
           >
             <option value="">All agents</option>
             {agentIds.map(a => {
@@ -272,7 +272,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
           <select
             value={type}
             onChange={e => setType(e.target.value)}
-            className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
+            className="px-3 py-2 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
           >
             <option value="">All event types</option>
             {eventTypes.map(t => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
@@ -283,7 +283,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
               'px-3 py-2 rounded-none border text-sm flex items-center gap-1.5 transition-colors',
               semanticMode
                 ? 'bg-[rgba(155,107,79,0.12)] border-[rgba(155,107,79,0.3)] text-[#9B6B4F]'
-                : 'bg-[#281E16] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
+                : 'bg-[#201A14] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
             )}
             title={semanticMode ? 'Semantic search on — uses AI embeddings' : 'Switch to semantic search'}
           >
@@ -292,14 +292,14 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
           </button>
           <button
             onClick={applyFilters}
-            className="px-4 py-2 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] hover:bg-[#2F241A] transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] hover:bg-[#272018] transition-colors flex items-center gap-1.5"
           >
             <Filter className="w-3.5 h-3.5" />
             {semanticMode ? 'Search' : 'Filter'}
           </button>
           {hasActiveFilters && (
             <button onClick={clearFilters}
-              className="px-3 py-2 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
+              className="px-3 py-2 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
               <X className="w-3.5 h-3.5" />
             </button>
           )}
@@ -315,7 +315,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
       </div>
 
       {/* Log table */}
-      <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
+      <div className="rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] overflow-hidden">
         {displayEntries.length === 0 ? (
           <div className="py-12 text-center">
             <p className="text-sm text-[#5C5340]">{semanticMode ? 'No semantic results — try a different query' : 'No events found'}</p>
@@ -438,7 +438,7 @@ export function LogsClient({ entries, eventTypes, agentIds, actorTypes, currentF
                             </div>
                           )}
                           {isExpanded && entry.metadata != null && (
-                            <pre className="text-[#5C5340] text-[10px] mt-2 overflow-x-auto bg-[#140F0B] rounded-none p-2">
+                            <pre className="text-[#5C5340] text-[10px] mt-2 overflow-x-auto bg-[#0F0C09] rounded-none p-2">
                               {JSON.stringify(entry.metadata as Record<string, unknown>, null, 2)}
                             </pre>
                           )}

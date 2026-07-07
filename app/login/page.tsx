@@ -36,7 +36,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1A1410]">
+    <div className="min-h-screen flex items-center justify-center bg-[#14100C]">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Cockpit</h1>
@@ -56,7 +56,7 @@ export default function LoginPage() {
             placeholder="Email"
             autoFocus
             required
-            className="w-full px-4 py-3 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.35)] text-sm transition-colors"
+            className="w-full px-4 py-3 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.35)] text-sm transition-colors"
           />
           <input
             type="password"
@@ -64,7 +64,7 @@ export default function LoginPage() {
             onChange={e => setPassword(e.target.value)}
             placeholder="Password"
             required
-            className="w-full px-4 py-3 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.35)] text-sm transition-colors"
+            className="w-full px-4 py-3 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.35)] text-sm transition-colors"
           />
 
           {error && (
@@ -74,7 +74,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || !password || !email}
-            className="w-full py-3 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm font-medium hover:bg-[#2F241A] hover:border-[rgba(167,155,120,0.22)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            className="w-full py-3 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm font-medium hover:bg-[#272018] hover:border-[rgba(167,155,120,0.22)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>

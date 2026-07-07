@@ -128,7 +128,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
               { label: 'Total Tasks', value: tasks.length },
               { label: 'Active Tasks', value: activeTasks.length },
             ].map(stat => (
-              <div key={stat.label} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div key={stat.label} className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">{stat.label}</p>
                 <p className="text-xl font-bold text-[#E8DFCE] font-mono">{stat.value}</p>
               </div>
@@ -137,7 +137,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
 
           {/* Description card */}
           {area.description && (
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-2">Description</h3>
               <p className="text-sm text-[#A79B78] leading-relaxed">{area.description}</p>
             </div>
@@ -145,7 +145,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
 
           {/* Context + spheres card */}
           {(area.context || spheres.length > 0) && (
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-3">Context & Responsibilities</h3>
               {area.context && (
                 <div className="mb-3">
@@ -182,7 +182,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
         <div className="space-y-4">
           {/* Active projects */}
           {activeProjects.length > 0 && (
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
               <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-3">Active ({activeProjects.length})</h3>
               <div className="space-y-2">
                 {activeProjects.map(project => {
@@ -210,7 +210,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
 
           {/* Archived projects */}
           {archivedProjects.length > 0 && (
-            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] opacity-60">
+            <div className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] opacity-60">
               <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-3">Archived ({archivedProjects.length})</h3>
               <div className="space-y-2">
                 {archivedProjects.map(project => {
@@ -269,7 +269,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
 
               return (
                 <Link key={note.id} href={`/notes?workspace=${workspaceId}&note=${note.id}`}
-                  className="flex items-start gap-3 p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all group">
+                  className="flex items-start gap-3 p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all group">
                   <FileText className="w-4 h-4 text-[#5C5340] shrink-0 mt-0.5 group-hover:text-[#7A6F55] transition-colors" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[#E8DFCE] truncate mb-0.5">{note.title || 'Untitled'}</p>
@@ -298,7 +298,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
             </div>
           ) : (
             Object.entries(tasksByStatus).map(([status, statusTasks]) => (
-              <div key={status} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div key={status} className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)]">
                 <div className="flex items-center gap-2 mb-3">
                   <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide">{status}</h3>
                   <span className="text-xs text-[#5C5340]">({statusTasks.length})</span>
@@ -343,7 +343,7 @@ export function AreaDetailClient({ area, projects, tasks, notes, bases, workspac
           ) : (
             bases.map(base => (
               <Link key={base.id} href={`/bases/${base.id}`}
-                className="flex items-start gap-3 p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all group">
+                className="flex items-start gap-3 p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all group">
                 <Table2 className="w-4 h-4 text-[#5C5340] shrink-0 mt-0.5 group-hover:text-[#7A6F55] transition-colors" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[#E8DFCE] truncate mb-0.5">{base.name}</p>

@@ -7,8 +7,8 @@ export default async function DocumentsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight mb-2">Documents</h1>
-      <p className="text-sm text-[#6B7280]">Coming soon.</p>
+      <h1 className="font-display text-[26px] font-medium text-[#E8DFCE] mb-2">Documents</h1>
+      <p className="text-sm text-[#7A6F55]">Coming soon.</p>
     </div>
   )
 }

@@ -21,9 +21,9 @@ const QUADRANTS = [
     subtitle: 'Urgent + Important',
     urgent: true,
     important: true,
-    color: '#EF4444',
-    bg: 'rgba(239,68,68,0.08)',
-    border: 'rgba(239,68,68,0.20)',
+    color: '#C0452E',
+    bg: 'rgba(192,69,46,0.08)',
+    border: 'rgba(192,69,46,0.20)',
   },
   {
     id: 'schedule',
@@ -31,9 +31,9 @@ const QUADRANTS = [
     subtitle: 'Important, not urgent',
     urgent: false,
     important: true,
-    color: '#3B82F6',
-    bg: 'rgba(59,130,246,0.08)',
-    border: 'rgba(59,130,246,0.20)',
+    color: '#5F7A72',
+    bg: 'rgba(95,122,114,0.08)',
+    border: 'rgba(95,122,114,0.20)',
   },
   {
     id: 'delegate',
@@ -41,9 +41,9 @@ const QUADRANTS = [
     subtitle: 'Urgent, not important',
     urgent: true,
     important: false,
-    color: '#F59E0B',
-    bg: 'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.20)',
+    color: '#C9962E',
+    bg: 'rgba(201,150,46,0.08)',
+    border: 'rgba(201,150,46,0.20)',
   },
   {
     id: 'eliminate',
@@ -51,9 +51,9 @@ const QUADRANTS = [
     subtitle: 'Neither urgent nor important',
     urgent: false,
     important: false,
-    color: '#6B7280',
-    bg: 'rgba(107,114,128,0.06)',
-    border: 'rgba(107,114,128,0.15)',
+    color: '#7A6F55',
+    bg: 'rgba(122,111,85,0.06)',
+    border: 'rgba(122,111,85,0.15)',
   },
 ]
 
@@ -122,10 +122,10 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
   }
 
   const filterBtnCls = (active: boolean, color?: string) => cn(
-    'px-2.5 py-1 text-xs rounded-[6px] border transition-colors whitespace-nowrap',
+    'px-2.5 py-1 text-xs rounded-none border transition-colors whitespace-nowrap',
     active
-      ? color ?? 'bg-[#222222] border-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
-      : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]',
+      ? color ?? 'bg-[#2F241A] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+      : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]',
   )
 
   return (
@@ -133,24 +133,24 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Eisenhower Matrix</h1>
-          <p className="text-xs text-[#6B7280] mt-0.5">Drag tasks between quadrants to set urgency and importance</p>
+          <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Eisenhower Matrix</h1>
+          <p className="text-xs text-[#7A6F55] mt-0.5">Drag tasks between quadrants to set urgency and importance</p>
         </div>
         <div className="ml-auto flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: workspace.color }} />
-          <span className="text-xs text-[#A0A0A0]">{workspace.name}</span>
+          <span className="text-xs text-[#A79B78]">{workspace.name}</span>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] max-w-[200px]">
-          <Search className="w-3 h-3 text-[#6B7280]" />
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] max-w-[200px]">
+          <Search className="w-3 h-3 text-[#7A6F55]" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Filter..."
-            className="bg-transparent text-xs text-[#F5F5F5] placeholder-[#4B5563] outline-none flex-1 w-0"
+            className="bg-transparent text-xs text-[#E8DFCE] placeholder-[#5C5340] outline-none flex-1 w-0"
           />
         </div>
         {['active', 'all', ...TASK_STATUSES].map(s => (
@@ -166,7 +166,7 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
           <select
             value={projectFilter ?? ''}
             onChange={e => setProjectFilter(e.target.value || null)}
-            className="px-2.5 py-1 text-xs rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] outline-none appearance-none"
+            className="px-2.5 py-1 text-xs rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#A79B78] outline-none appearance-none"
           >
             <option value="">All projects</option>
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -176,7 +176,7 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
           <select
             value={areaFilter ?? ''}
             onChange={e => setAreaFilter(e.target.value || null)}
-            className="px-2.5 py-1 text-xs rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] outline-none appearance-none"
+            className="px-2.5 py-1 text-xs rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#A79B78] outline-none appearance-none"
           >
             <option value="">All areas</option>
             {areas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
@@ -192,16 +192,16 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
             return (
               <div
                 key={quadrant.id}
-                className="rounded-[8px] border overflow-hidden flex flex-col min-h-[280px]"
+                className="rounded-none border overflow-hidden flex flex-col min-h-[280px]"
                 style={{ borderColor: quadrant.border, backgroundColor: quadrant.bg }}
               >
                 <div className="px-4 py-3 border-b" style={{ borderColor: quadrant.border }}>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold" style={{ color: quadrant.color }}>{quadrant.label}</p>
-                      <p className="text-xs text-[#6B7280] mt-0.5">{quadrant.subtitle}</p>
+                      <p className="text-xs text-[#7A6F55] mt-0.5">{quadrant.subtitle}</p>
                     </div>
-                    <span className="text-xs font-mono text-[#A0A0A0] bg-[rgba(255,255,255,0.06)] px-2 py-0.5 rounded-full">
+                    <span className="text-xs font-mono text-[#A79B78] bg-[rgba(167,155,120,0.13)] px-2 py-0.5 rounded-full">
                       {qtasks.length}
                     </span>
                   </div>
@@ -214,11 +214,11 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
                       {...provided.droppableProps}
                       className={cn(
                         'flex-1 p-3 space-y-2 transition-colors min-h-[200px]',
-                        snapshot.isDraggingOver && 'bg-[rgba(255,255,255,0.03)]'
+                        snapshot.isDraggingOver && 'bg-[rgba(167,155,120,0.07)]'
                       )}
                     >
                       {qtasks.length === 0 && !snapshot.isDraggingOver && (
-                        <p className="text-xs text-[#4B5563] text-center pt-8">Drop tasks here</p>
+                        <p className="text-xs text-[#5C5340] text-center pt-8">Drop tasks here</p>
                       )}
                       {qtasks.map((task, index) => (
                         <Draggable key={task.id} draggableId={task.id} index={index}>
@@ -228,22 +228,22 @@ export function MatrixClient({ initialTasks, workspaceId, areas = [], projects =
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={cn(
-                                'p-3 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] cursor-grab active:cursor-grabbing transition-all',
-                                snapshot.isDragging && 'shadow-lg border-[rgba(255,255,255,0.12)] bg-[#1A1A1A]'
+                                'p-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] cursor-grab active:cursor-grabbing transition-all',
+                                snapshot.isDragging && ' border-[rgba(167,155,120,0.26)] bg-[#281E16]'
                               )}
                             >
-                              <p className="text-sm text-[#F5F5F5] font-medium leading-snug mb-1.5">{task.title}</p>
+                              <p className="text-sm text-[#E8DFCE] font-medium leading-snug mb-1.5">{task.title}</p>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">
+                                <span className="text-xs px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.13)] text-[#A79B78]">
                                   {task.status}
                                 </span>
                                 {task.dueDate && (
-                                  <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
+                                  <span className={cn('text-xs', isOverdue(task.dueDate) ? 'text-[#C0452E]' : 'text-[#7A6F55]')}>
                                     {formatDate(task.dueDate)}
                                   </span>
                                 )}
                                 {task.assignee && (
-                                  <span className="text-xs text-[#6B7280]">{task.assignee}</span>
+                                  <span className="text-xs text-[#7A6F55]">{task.assignee}</span>
                                 )}
                               </div>
                             </div>

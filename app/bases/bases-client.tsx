@@ -9,9 +9,9 @@ import { toast } from 'sonner'
 import { type UserBase } from '@/types'
 
 const WORKSPACE_COLORS: Record<string, string> = {
-  byron_film: '#D4A017',
-  korus: '#008080',
-  personal: '#F97316',
+  byron_film: '#C99A1F',
+  korus: '#3E7A70',
+  personal: '#C96F2E',
 }
 
 const WORKSPACE_LABELS: Record<string, string> = {
@@ -21,10 +21,10 @@ const WORKSPACE_LABELS: Record<string, string> = {
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]'
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 const selectCls =
-  'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none'
+  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] appearance-none'
 
 interface AreaOption { id: string; name: string }
 interface ProjectOption { id: string; name: string }
@@ -85,11 +85,11 @@ function CreateBaseDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm">
+      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-[#F5F5F5]">New Base</h2>
-          <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+          <h2 className="text-base font-semibold text-[#E8DFCE]">New Base</h2>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -146,7 +146,7 @@ function CreateBaseDialog({
             </div>
           </div>
           {(areaId || projectId) && (
-            <p className="text-xs text-[#6B7280] -mt-1">
+            <p className="text-xs text-[#7A6F55] -mt-1">
               This base will appear in the{' '}
               {areaId
                 ? `"${areas.find((a) => a.id === areaId)?.name ?? ''}" area`
@@ -159,14 +159,14 @@ function CreateBaseDialog({
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-[6px] text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+            className="px-4 py-2 rounded-none text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!name.trim() || saving}
-            className="px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors disabled:opacity-40"
           >
             {saving ? 'Creating…' : 'Create Base'}
           </button>
@@ -185,7 +185,7 @@ export default function BasesClient() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const wsKey = workspaceId ?? 'personal'
-  const accentColor = WORKSPACE_COLORS[wsKey] ?? '#F97316'
+  const accentColor = WORKSPACE_COLORS[wsKey] ?? '#C96F2E'
 
   useEffect(() => {
     setLoading(true)
@@ -242,12 +242,12 @@ export default function BasesClient() {
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Bases</h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">Spreadsheets &amp; databases</p>
+          <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Bases</h1>
+          <p className="text-sm text-[#7A6F55] mt-0.5">Spreadsheets &amp; databases</p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
         >
           <Plus size={14} />
           New Base
@@ -259,17 +259,17 @@ export default function BasesClient() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-32 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] animate-pulse"
+              className="h-32 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] animate-pulse"
             />
           ))}
         </div>
       ) : bases.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Database size={32} className="text-[#4B5563] mb-3" />
-          <p className="text-[#6B7280] text-sm">No bases yet</p>
+          <Database size={32} className="text-[#5C5340] mb-3" />
+          <p className="text-[#7A6F55] text-sm">No bases yet</p>
           <button
             onClick={() => setShowCreate(true)}
-            className="mt-4 px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+            className="mt-4 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
           >
             Create your first base
           </button>
@@ -279,7 +279,7 @@ export default function BasesClient() {
           {bases.map((base) => (
             <div
               key={base.id}
-              className="group relative bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] overflow-hidden hover:border-[rgba(255,255,255,0.10)] transition-colors"
+              className="group relative bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden hover:border-[rgba(167,155,120,0.22)] transition-colors"
             >
               {/* Accent bar */}
               <div
@@ -289,23 +289,23 @@ export default function BasesClient() {
               <Link href={`/bases/${base.id}`} className="block p-5 pt-6">
                 <div className="flex items-start gap-3">
                   <div
-                    className="p-2 rounded-[6px] mt-0.5 flex-shrink-0"
+                    className="p-2 rounded-none mt-0.5 flex-shrink-0"
                     style={{ background: `${accentColor}18` }}
                   >
                     <Table2 size={16} style={{ color: accentColor }} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm font-semibold text-[#F5F5F5] truncate">{base.name}</h3>
+                      <h3 className="text-sm font-semibold text-[#E8DFCE] truncate">{base.name}</h3>
                       {base.isPublic && (
-                        <span className="text-xs px-1.5 py-0 rounded-full bg-[rgba(34,197,94,0.12)] text-[#22C55E] shrink-0">Shared</span>
+                        <span className="text-xs px-1.5 py-0 rounded-full bg-[rgba(125,155,94,0.12)] text-[#7D9B5E] shrink-0">Shared</span>
                       )}
                     </div>
                     {base.description && (
-                      <p className="text-xs text-[#6B7280] mt-0.5 truncate">{base.description}</p>
+                      <p className="text-xs text-[#7A6F55] mt-0.5 truncate">{base.description}</p>
                     )}
                     <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      <span className="text-xs text-[#4B5563]">
+                      <span className="text-xs text-[#5C5340]">
                         {WORKSPACE_LABELS[base.workspace] ?? base.workspace}
                       </span>
                     </div>
@@ -316,14 +316,14 @@ export default function BasesClient() {
               <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => { e.preventDefault(); void handleShare(base) }}
-                  className="w-6 h-6 flex items-center justify-center rounded text-[#4B5563] hover:text-[#2A9D8F] transition-colors"
+                  className="w-6 h-6 flex items-center justify-center rounded-none text-[#5C5340] hover:text-[#3E7A70] transition-colors"
                   title={base.isPublic ? 'Copy share link' : 'Enable sharing'}
                 >
-                  {copiedId === base.id ? <Check size={12} className="text-[#22C55E]" /> : <Share2 size={12} />}
+                  {copiedId === base.id ? <Check size={12} className="text-[#7D9B5E]" /> : <Share2 size={12} />}
                 </button>
                 <button
                   onClick={() => handleDelete(base.id, base.name)}
-                  className="w-6 h-6 flex items-center justify-center rounded text-[#4B5563] hover:text-[#EF4444] transition-colors"
+                  className="w-6 h-6 flex items-center justify-center rounded-none text-[#5C5340] hover:text-[#C0452E] transition-colors"
                   title="Delete base"
                 >
                   <Trash2 size={12} />

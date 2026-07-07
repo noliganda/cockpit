@@ -46,32 +46,32 @@ function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
   }
 
   return (
-    <div className="p-3 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] space-y-3">
+    <div className="p-3 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] space-y-3">
       <input
         type="text"
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Full name (optional)"
-        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
       />
       <input
         type="email"
         value={email}
         onChange={e => setEmail(e.target.value)}
         placeholder="Email address"
-        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
       />
       <input
         type="password"
         value={password}
         onChange={e => setPassword(e.target.value)}
         placeholder="Password (min 6 chars)"
-        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
       />
       <select
         value={role}
         onChange={e => setRole(e.target.value as 'admin' | 'collaborator' | 'guest')}
-        className="w-full px-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] appearance-none"
+        className="w-full px-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] appearance-none"
       >
         <option value="admin">Admin — full access</option>
         <option value="collaborator">Collaborator — create/edit, no settings</option>
@@ -79,11 +79,11 @@ function CreateUserForm({ onCreated, onCancel }: CreateUserFormProps) {
       </select>
       <div className="flex gap-2">
         <button onClick={handleCreate} disabled={creating || !email || !password}
-          className="px-4 py-2 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] disabled:opacity-40 transition-colors">
+          className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] disabled:opacity-40 transition-colors">
           {creating ? 'Creating...' : 'Create user'}
         </button>
         <button onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors">
+          className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors">
           Cancel
         </button>
       </div>
@@ -201,10 +201,10 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
   }
 
   const Section = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-    <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+    <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
       <div className="flex items-center gap-2.5 mb-4">
-        <Icon className="w-4 h-4 text-[#6B7280]" />
-        <h2 className="text-sm font-semibold text-[#F5F5F5]">{title}</h2>
+        <Icon className="w-4 h-4 text-[#7A6F55]" />
+        <h2 className="text-sm font-semibold text-[#E8DFCE]">{title}</h2>
       </div>
       {children}
     </div>
@@ -212,25 +212,25 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
 
   const Btn = ({ onClick, disabled, children }: { onClick: () => void; disabled?: boolean; children: React.ReactNode }) => (
     <button onClick={onClick} disabled={disabled}
-      className="px-4 py-2 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] disabled:opacity-40 transition-colors">
+      className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] disabled:opacity-40 transition-colors">
       {children}
     </button>
   )
 
   const ROLE_COLORS: Record<string, string> = {
-    admin: 'text-[#D4A017] bg-[rgba(212,160,23,0.12)]',
-    collaborator: 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]',
-    guest: 'text-[#6B7280] bg-[rgba(107,114,128,0.12)]',
+    admin: 'text-[#C99A1F] bg-[rgba(201,154,31,0.12)]',
+    collaborator: 'text-[#5F7A72] bg-[rgba(95,122,114,0.12)]',
+    guest: 'text-[#7A6F55] bg-[rgba(122,111,85,0.12)]',
   }
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Settings</h1>
+        <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Settings</h1>
         {sessionData && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#6B7280]">{sessionData.email}</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${ROLE_COLORS[sessionData.role] ?? 'text-[#6B7280]'}`}>
+            <span className="text-xs text-[#7A6F55]">{sessionData.email}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${ROLE_COLORS[sessionData.role] ?? 'text-[#7A6F55]'}`}>
               {sessionData.role}
             </span>
           </div>
@@ -241,48 +241,48 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
         {/* User Management — admin only */}
         {isAdmin && (
           <Section icon={Users} title="User Management">
-            <p className="text-xs text-[#6B7280] mb-4">
+            <p className="text-xs text-[#7A6F55] mb-4">
               Manage user accounts and roles.
-              <span className="text-[#D4A017]"> Admin</span> — full access.
-              <span className="text-[#3B82F6]"> Collaborator</span> — create/edit, no settings.
-              <span className="text-[#6B7280]"> Guest</span> — view only.
+              <span className="text-[#C99A1F]"> Admin</span> — full access.
+              <span className="text-[#5F7A72]"> Collaborator</span> — create/edit, no settings.
+              <span className="text-[#7A6F55]"> Guest</span> — view only.
             </p>
 
             {userList.length > 0 && (
-              <div className="rounded-[6px] border border-[rgba(255,255,255,0.06)] overflow-hidden mb-4">
+              <div className="rounded-none border border-[rgba(167,155,120,0.13)] overflow-hidden mb-4">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-[rgba(255,255,255,0.06)]">
-                      <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Name</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Email</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Role</th>
-                      <th className="px-3 py-2 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Created</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-[#6B7280] uppercase tracking-wide">Actions</th>
+                    <tr className="border-b border-[rgba(167,155,120,0.13)]">
+                      <th className="px-3 py-2 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Name</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Email</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Role</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Created</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {userList.map(user => (
-                      <tr key={user.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0">
-                        <td className="px-3 py-2.5 text-sm text-[#F5F5F5]">{user.name ?? <span className="text-[#4B5563]">—</span>}</td>
-                        <td className="px-3 py-2.5 text-sm text-[#A0A0A0]">{user.email}</td>
+                      <tr key={user.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-0">
+                        <td className="px-3 py-2.5 text-sm text-[#E8DFCE]">{user.name ?? <span className="text-[#5C5340]">—</span>}</td>
+                        <td className="px-3 py-2.5 text-sm text-[#A79B78]">{user.email}</td>
                         <td className="px-3 py-2.5">
                           {editingUserId === user.id ? (
                             <select
                               value={editRole}
                               onChange={e => setEditRole(e.target.value as 'admin' | 'collaborator' | 'guest')}
-                              className="px-2 py-1 rounded-[4px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] text-xs outline-none"
+                              className="px-2 py-1 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-xs outline-none"
                             >
                               <option value="admin">admin</option>
                               <option value="collaborator">collaborator</option>
                               <option value="guest">guest</option>
                             </select>
                           ) : (
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${ROLE_COLORS[user.role ?? 'guest'] ?? 'text-[#6B7280]'}`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${ROLE_COLORS[user.role ?? 'guest'] ?? 'text-[#7A6F55]'}`}>
                               {user.role ?? 'guest'}
                             </span>
                           )}
                         </td>
-                        <td className="px-3 py-2.5 text-xs text-[#6B7280]">
+                        <td className="px-3 py-2.5 text-xs text-[#7A6F55]">
                           {new Date(user.createdAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </td>
                         <td className="px-3 py-2.5">
@@ -294,18 +294,18 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
                                   value={editPassword}
                                   onChange={e => setEditPassword(e.target.value)}
                                   placeholder="New password"
-                                  className="px-2 py-1 rounded-[4px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] text-xs outline-none w-32"
+                                  className="px-2 py-1 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-xs outline-none w-32"
                                 />
                                 <button
                                   onClick={() => handleSaveEdit(user.id)}
                                   disabled={savingEdit}
-                                  className="p-1.5 rounded-[4px] text-[#22C55E] hover:bg-[rgba(34,197,94,0.1)] transition-colors"
+                                  className="p-1.5 rounded-none text-[#7D9B5E] hover:bg-[rgba(125,155,94,0.1)] transition-colors"
                                 >
                                   <Check className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => { setEditingUserId(null); setEditPassword('') }}
-                                  className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+                                  className="p-1.5 rounded-none text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
                                 >
                                   <X className="w-3.5 h-3.5" />
                                 </button>
@@ -314,14 +314,14 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
                               <>
                                 <button
                                   onClick={() => { setEditingUserId(user.id); setEditRole((user.role ?? 'collaborator') as 'admin' | 'collaborator' | 'guest') }}
-                                  className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors"
+                                  className="p-1.5 rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)] transition-colors"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => { if (confirm(`Delete user ${user.email}?`)) handleDeleteUser(user.id) }}
                                   disabled={deletingUserId === user.id || user.id === sessionData?.userId}
-                                  className="p-1.5 rounded-[4px] text-[#6B7280] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)] transition-colors disabled:opacity-30"
+                                  className="p-1.5 rounded-none text-[#7A6F55] hover:text-[#C0452E] hover:bg-[rgba(192,69,46,0.08)] transition-colors disabled:opacity-30"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -344,7 +344,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
             ) : (
               <button
                 onClick={() => setShowCreateUser(true)}
-                className="flex items-center gap-1.5 text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+                className="flex items-center gap-1.5 text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Add user
@@ -354,24 +354,24 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
         )}
 
         <Section icon={RefreshCw} title="Notion Sync">
-          <p className="text-xs text-[#6B7280] mb-2">Pull tasks from Notion databases into Cockpit.</p>
-          <p className="text-xs text-[#F59E0B] mb-3">⚠️ Currently disabled — <code className="text-xs bg-[#111] px-1 rounded">NOTION_SYNC_ENABLED=false</code> is set in Vercel. Clicking &quot;Sync now&quot; will show a message instead of syncing. To re-enable, update <code className="text-xs bg-[#111] px-1 rounded">NOTION_SYNC_ENABLED</code> to <code className="text-xs bg-[#111] px-1 rounded">true</code> in Vercel environment variables.</p>
+          <p className="text-xs text-[#7A6F55] mb-2">Pull tasks from Notion databases into Cockpit.</p>
+          <p className="text-xs text-[#C9962E] mb-3">⚠️ Currently disabled — <code className="text-xs bg-[#140F0B] px-1 rounded-none">NOTION_SYNC_ENABLED=false</code> is set in Vercel. Clicking &quot;Sync now&quot; will show a message instead of syncing. To re-enable, update <code className="text-xs bg-[#140F0B] px-1 rounded-none">NOTION_SYNC_ENABLED</code> to <code className="text-xs bg-[#140F0B] px-1 rounded-none">true</code> in Vercel environment variables.</p>
           <Btn onClick={handleNotionSync} disabled={syncing}>
             {syncing ? 'Syncing…' : 'Sync now'}
           </Btn>
         </Section>
 
         <Section icon={Database} title="Seed Defaults">
-          <p className="text-xs text-[#6B7280] mb-3">Seed default workspaces and areas into the database.</p>
+          <p className="text-xs text-[#7A6F55] mb-3">Seed default workspaces and areas into the database.</p>
           <Btn onClick={handleSeed} disabled={seeding}>
             {seeding ? 'Seeding…' : 'Seed defaults'}
           </Btn>
         </Section>
 
         <Section icon={HardDrive} title="Obsidian Backup">
-          <p className="text-xs text-[#6B7280] mb-3">
+          <p className="text-xs text-[#7A6F55] mb-3">
             Back up all tasks and notes to your Obsidian vault.
-            {lastBackup && <span className="ml-2 text-[#A0A0A0]">Last backup: {lastBackup}</span>}
+            {lastBackup && <span className="ml-2 text-[#A79B78]">Last backup: {lastBackup}</span>}
           </p>
           <Btn onClick={handleObsidianBackup} disabled={backing}>
             {backing ? 'Backing up…' : 'Backup to Obsidian'}
@@ -379,7 +379,7 @@ export function SettingsClient({ sessionData, initialUsers }: SettingsClientProp
         </Section>
 
         <Section icon={Shield} title="Auth">
-          <p className="text-xs text-[#6B7280] mb-3">Session management. Password set via AUTH_PASSWORD_HASH env var.</p>
+          <p className="text-xs text-[#7A6F55] mb-3">Session management. Password set via AUTH_PASSWORD_HASH env var.</p>
           <Btn onClick={async () => { await fetch('/api/auth', { method: 'DELETE' }); window.location.href = '/login' }}>
             Sign out
           </Btn>

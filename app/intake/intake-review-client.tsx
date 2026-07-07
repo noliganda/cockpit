@@ -30,10 +30,10 @@ interface ReviewItem {
 
 function confidenceColor(confidence?: string) {
   switch (confidence) {
-    case 'high': return 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]'
-    case 'medium': return 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]'
-    case 'low': return 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]'
-    default: return 'text-[#6B7280] bg-[rgba(255,255,255,0.06)]'
+    case 'high': return 'text-[#7D9B5E] bg-[rgba(125,155,94,0.12)]'
+    case 'medium': return 'text-[#C9962E] bg-[rgba(201,150,46,0.12)]'
+    case 'low': return 'text-[#C0452E] bg-[rgba(192,69,46,0.12)]'
+    default: return 'text-[#7A6F55] bg-[rgba(167,155,120,0.13)]'
   }
 }
 
@@ -107,17 +107,17 @@ export function IntakeReviewClient() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Inbox className="w-5 h-5 text-[#60A5FA]" />
-          <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Intake Review</h1>
+          <Inbox className="w-5 h-5 text-[#6E8B7E]" />
+          <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Intake Review</h1>
           {filter === 'pending' && items.length > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(239,68,68,0.12)] text-[#EF4444] font-medium">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(192,69,46,0.12)] text-[#C0452E] font-medium">
               {items.length} pending
             </span>
           )}
         </div>
         <button
           onClick={() => void fetchItems()}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#6B7280] hover:text-[#F5F5F5] bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] rounded-[6px] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#7A6F55] hover:text-[#E8DFCE] bg-[#281E16] border border-[rgba(167,155,120,0.13)] rounded-none transition-colors"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} />
           Refresh
@@ -131,10 +131,10 @@ export function IntakeReviewClient() {
             key={f}
             onClick={() => setFilter(f)}
             className={cn(
-              'px-3 py-1.5 text-xs rounded-[6px] border transition-colors',
+              'px-3 py-1.5 text-xs rounded-none border transition-colors',
               filter === f
-                ? 'bg-[#222222] border-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
-                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]',
+                ? 'bg-[#2F241A] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+                : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]',
             )}
           >
             {f === 'pending' ? 'Needs Review' : f === 'approved' ? 'Reviewed' : 'All'}
@@ -144,11 +144,11 @@ export function IntakeReviewClient() {
 
       {/* Queue */}
       {loading ? (
-        <p className="text-sm text-[#4B5563] py-12 text-center">Loading...</p>
+        <p className="text-sm text-[#5C5340] py-12 text-center">Loading...</p>
       ) : items.length === 0 ? (
         <div className="py-16 text-center">
-          <Inbox className="w-8 h-8 text-[#374151] mx-auto mb-3" />
-          <p className="text-sm text-[#4B5563]">
+          <Inbox className="w-8 h-8 text-[#4A4234] mx-auto mb-3" />
+          <p className="text-sm text-[#5C5340]">
             {filter === 'pending' ? 'No items need review' : 'No items found'}
           </p>
         </div>
@@ -157,32 +157,32 @@ export function IntakeReviewClient() {
           {items.map(item => (
             <div
               key={item.id}
-              className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] p-4"
+              className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] p-4"
             >
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-4 h-4 text-[#F59E0B] mt-0.5 shrink-0" />
+                <AlertTriangle className="w-4 h-4 text-[#C9962E] mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   {/* Title + badges */}
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-sm font-medium text-[#F5F5F5] truncate">
+                    <span className="text-sm font-medium text-[#E8DFCE] truncate">
                       {item.entityTitle ?? 'Untitled'}
                     </span>
                     <span className={cn('text-[10px] px-1.5 py-0.5 rounded-full font-medium', confidenceColor(item.metadata?.confidence))}>
                       {item.metadata?.confidence ?? '?'}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">
                       {objectTypeLabel(item.metadata?.objectType)}
                     </span>
                     {item.metadata?.isDraft && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(245,158,11,0.12)] text-[#F59E0B]">draft</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(201,150,46,0.12)] text-[#C9962E]">draft</span>
                     )}
                   </div>
 
                   {/* Review reason */}
-                  <p className="text-xs text-[#6B7280] mb-2">{reviewReason(item)}</p>
+                  <p className="text-xs text-[#7A6F55] mb-2">{reviewReason(item)}</p>
 
                   {/* Source + context row */}
-                  <div className="flex items-center gap-3 text-[10px] text-[#4B5563] flex-wrap">
+                  <div className="flex items-center gap-3 text-[10px] text-[#5C5340] flex-wrap">
                     <span>Source: {item.metadata?.sourceType ?? item.sourceSystem}</span>
                     {item.metadata?.sourceChannel && <span>Channel: {item.metadata.sourceChannel}</span>}
                     <span>Workspace: {item.workspaceId}</span>
@@ -197,7 +197,7 @@ export function IntakeReviewClient() {
                         href={item.entityType === 'project'
                           ? `/projects/${item.entityId}?workspace=${item.workspaceId}`
                           : `/tasks?workspace=${item.workspaceId}`}
-                        className="flex items-center gap-1 text-xs text-[#60A5FA] hover:text-[#93C5FD] transition-colors"
+                        className="flex items-center gap-1 text-xs text-[#6E8B7E] hover:text-[#6E8B7E] transition-colors"
                       >
                         <ExternalLink className="w-3 h-3" />
                         View {objectTypeLabel(item.metadata?.objectType)}
@@ -208,7 +208,7 @@ export function IntakeReviewClient() {
                         href={item.metadata.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors"
+                        className="flex items-center gap-1 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Source
@@ -223,26 +223,26 @@ export function IntakeReviewClient() {
                     <button
                       onClick={() => void markReviewed(item.id, 'approved')}
                       title="Mark reviewed"
-                      className="w-8 h-8 flex items-center justify-center rounded-[6px] text-[#22C55E] hover:bg-[rgba(34,197,94,0.12)] transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-none text-[#7D9B5E] hover:bg-[rgba(125,155,94,0.12)] transition-colors"
                     >
                       <Check className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => void markReviewed(item.id, 'rejected')}
                       title="Dismiss"
-                      className="w-8 h-8 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)] transition-colors"
+                      className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#C0452E] hover:bg-[rgba(192,69,46,0.08)] transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 )}
                 {item.approvalStatus === 'approved' && (
-                  <span className="text-[10px] text-[#22C55E] px-2 py-0.5 rounded-full bg-[rgba(34,197,94,0.08)]">
+                  <span className="text-[10px] text-[#7D9B5E] px-2 py-0.5 rounded-full bg-[rgba(125,155,94,0.08)]">
                     Reviewed{item.approvedBy ? ` by ${item.approvedBy}` : ''}
                   </span>
                 )}
                 {item.approvalStatus === 'rejected' && (
-                  <span className="text-[10px] text-[#6B7280] px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.04)]">
+                  <span className="text-[10px] text-[#7A6F55] px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.09)]">
                     Dismissed
                   </span>
                 )}

@@ -31,11 +31,11 @@ interface TasksClientProps {
 
 function statusColor(status: string) {
   switch (status) {
-    case 'Done': return 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]'
-    case 'In Progress': return 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]'
-    case 'Needs Review': return 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]'
-    case 'Cancelled': return 'text-[#6B7280] bg-[rgba(107,114,128,0.08)]'
-    default: return 'text-[#A0A0A0] bg-[rgba(255,255,255,0.06)]'
+    case 'Done': return 'text-[#7D9B5E] bg-[rgba(125,155,94,0.12)]'
+    case 'In Progress': return 'text-[#5F7A72] bg-[rgba(95,122,114,0.12)]'
+    case 'Needs Review': return 'text-[#C9962E] bg-[rgba(201,150,46,0.12)]'
+    case 'Cancelled': return 'text-[#7A6F55] bg-[rgba(122,111,85,0.08)]'
+    default: return 'text-[#A79B78] bg-[rgba(167,155,120,0.13)]'
   }
 }
 
@@ -61,7 +61,7 @@ function PortalDropdown({
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
-        className="fixed z-50 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[6px] overflow-hidden shadow-lg"
+        className="fixed z-50 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
         style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
       >
         {children}
@@ -92,8 +92,8 @@ function InlineStatus({ task, onUpdate }: { task: Task; onUpdate: (id: string, d
             key={s}
             onClick={async () => { setOpen(false); await onUpdate(task.id, { status: s }) }}
             className={cn(
-              'w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] transition-colors flex items-center gap-2',
-              task.status === s ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]'
+              'w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] transition-colors flex items-center gap-2',
+              task.status === s ? 'text-[#E8DFCE]' : 'text-[#A79B78]'
             )}
           >
             {task.status === s ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
@@ -124,7 +124,7 @@ function InlineDueDate({ task, onUpdate }: { task: Task; onUpdate: (id: string, 
           }
         }}
         onKeyDown={e => { if (e.key === 'Escape') setEditing(false) }}
-        className="text-xs bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[4px] px-1 py-0.5 outline-none w-32"
+        className="text-xs bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none px-1 py-0.5 outline-none w-32"
       />
     )
   }
@@ -132,9 +132,9 @@ function InlineDueDate({ task, onUpdate }: { task: Task; onUpdate: (id: string, 
   return (
     <button
       onClick={e => { e.stopPropagation(); setEditing(true) }}
-      className={cn('text-xs hover:underline transition-colors text-left', isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280] hover:text-[#A0A0A0]')}
+      className={cn('text-xs hover:underline transition-colors text-left', isOverdue(task.dueDate) ? 'text-[#C0452E]' : 'text-[#7A6F55] hover:text-[#A79B78]')}
     >
-      {task.dueDate ? formatDate(task.dueDate) : <span className="text-[#4B5563]">—</span>}
+      {task.dueDate ? formatDate(task.dueDate) : <span className="text-[#5C5340]">—</span>}
     </button>
   )
 }
@@ -149,7 +149,7 @@ function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOpti
       <button
         ref={btnRef}
         onClick={() => setOpen(v => !v)}
-        className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors flex items-center gap-1"
+        className="text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors flex items-center gap-1"
       >
         {task.assigneeName
           ? `${task.assigneeType === 'agent' ? '🤖' : '🧑'} ${task.assigneeName}`
@@ -159,7 +159,7 @@ function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOpti
       <PortalDropdown anchorRef={btnRef} isOpen={open} onClose={() => setOpen(false)} minWidth={160}>
         <button
           onClick={async () => { setOpen(false); await onUpdate(task.id, { assignee: null }) }}
-          className="w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2 text-[#6B7280]"
+          className="w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] flex items-center gap-2 text-[#7A6F55]"
         >
           {!task.assignee ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
           — Unassigned
@@ -172,8 +172,8 @@ function InlineAssignee({ task, users, onUpdate }: { task: Task; users: UserOpti
               key={u.id}
               onClick={async () => { setOpen(false); await onUpdate(task.id, { assignee: label }) }}
               className={cn(
-                'w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2',
-                isSelected ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]'
+                'w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] flex items-center gap-2',
+                isSelected ? 'text-[#E8DFCE]' : 'text-[#A79B78]'
               )}
             >
               {isSelected ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />}
@@ -418,8 +418,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
       <tr
         onClick={() => { setEditingTask(task); setShowDialog(true) }}
         className={cn(
-          'border-b border-[rgba(255,255,255,0.04)] hover:bg-[rgba(255,255,255,0.02)] cursor-pointer transition-colors',
-          selectedIds.has(task.id) && 'bg-[rgba(255,255,255,0.03)]'
+          'border-b border-[rgba(167,155,120,0.09)] hover:bg-[rgba(167,155,120,0.04)] cursor-pointer transition-colors',
+          selectedIds.has(task.id) && 'bg-[rgba(167,155,120,0.07)]'
         )}
       >
         <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
@@ -435,7 +435,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
               hasChildren={parentFlags.get(task.id) ?? false}
               onClick={() => toggleExpand(task.id)}
             />
-            <span className="text-sm text-[#F5F5F5]">{task.title}</span>
+            <span className="text-sm text-[#E8DFCE]">{task.title}</span>
             {rollups.has(task.id) && (
               <RollupBadge rollup={rollups.get(task.id)!} />
             )}
@@ -445,26 +445,26 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           {task.projectId ? (
             <button
               onClick={e => { e.stopPropagation(); setProjectFilter(task.projectId ?? null) }}
-              className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(59,130,246,0.10)] text-[#60A5FA] hover:bg-[rgba(59,130,246,0.20)] transition-colors truncate max-w-[120px] block"
+              className="text-xs px-2 py-0.5 rounded-none bg-[rgba(95,122,114,0.10)] text-[#6E8B7E] hover:bg-[rgba(95,122,114,0.20)] transition-colors truncate max-w-[120px] block"
               title={projects.find(p => p.id === task.projectId)?.name}
             >
               {projects.find(p => p.id === task.projectId)?.name ?? '…'}
             </button>
           ) : (
-            <span className="text-xs text-[#374151]">—</span>
+            <span className="text-xs text-[#4A4234]">—</span>
           )}
         </td>
         <td className="px-4 py-2.5">
           {task.areaId ? (
             <button
               onClick={e => { e.stopPropagation(); setAreaFilter(task.areaId ?? null) }}
-              className="text-xs px-2 py-0.5 rounded-[4px] bg-[rgba(139,92,246,0.10)] text-[#A78BFA] hover:bg-[rgba(139,92,246,0.20)] transition-colors truncate max-w-[120px] block"
+              className="text-xs px-2 py-0.5 rounded-none bg-[rgba(155,107,79,0.10)] text-[#AD7B5C] hover:bg-[rgba(155,107,79,0.20)] transition-colors truncate max-w-[120px] block"
               title={areas.find(a => a.id === task.areaId)?.name}
             >
               {areas.find(a => a.id === task.areaId)?.name ?? '…'}
             </button>
           ) : (
-            <span className="text-xs text-[#374151]">—</span>
+            <span className="text-xs text-[#4A4234]">—</span>
           )}
         </td>
         <td className="px-2 py-2.5 text-center">
@@ -472,8 +472,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
             onClick={e => toggleFlag(e, task, 'urgent')}
             title="Toggle Urgent"
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
-              task.urgent ? 'text-[#EF4444] bg-[rgba(239,68,68,0.12)]' : 'text-[#4B5563] hover:text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)]'
+              'w-7 h-7 flex items-center justify-center rounded-none transition-colors mx-auto',
+              task.urgent ? 'text-[#C0452E] bg-[rgba(192,69,46,0.12)]' : 'text-[#5C5340] hover:text-[#C0452E] hover:bg-[rgba(192,69,46,0.08)]'
             )}
           >
             <Zap className="w-3.5 h-3.5" />
@@ -484,8 +484,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
             onClick={e => toggleFlag(e, task, 'important')}
             title="Toggle Important"
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-[4px] transition-colors mx-auto',
-              task.important ? 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]' : 'text-[#4B5563] hover:text-[#F59E0B] hover:bg-[rgba(245,158,11,0.08)]'
+              'w-7 h-7 flex items-center justify-center rounded-none transition-colors mx-auto',
+              task.important ? 'text-[#C9962E] bg-[rgba(201,150,46,0.12)]' : 'text-[#5C5340] hover:text-[#C9962E] hover:bg-[rgba(201,150,46,0.08)]'
             )}
           >
             <Star className="w-3.5 h-3.5" />
@@ -508,8 +508,8 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
     return (
       <div
         className={cn(
-          'p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]',
-          selectedIds.has(task.id) && 'border-[rgba(255,255,255,0.10)] bg-[#1A1A1A]'
+          'p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]',
+          selectedIds.has(task.id) && 'border-[rgba(167,155,120,0.22)] bg-[#281E16]'
         )}
       >
         <div className="flex items-start gap-2 mb-2">
@@ -520,16 +520,16 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
             />
           </div>
           <p
-            className="text-sm font-medium text-[#F5F5F5] flex-1 cursor-pointer"
+            className="text-sm font-medium text-[#E8DFCE] flex-1 cursor-pointer"
             onClick={() => { setEditingTask(task); setShowDialog(true) }}
           >
             {task.title}
           </p>
           <div className="flex items-center gap-1 shrink-0">
-            <button onClick={e => toggleFlag(e, task, 'urgent')} className={cn('p-1 rounded transition-colors', task.urgent ? 'text-[#EF4444]' : 'text-[#4B5563]')}>
+            <button onClick={e => toggleFlag(e, task, 'urgent')} className={cn('p-1 rounded-none transition-colors', task.urgent ? 'text-[#C0452E]' : 'text-[#5C5340]')}>
               <Zap className="w-3.5 h-3.5" />
             </button>
-            <button onClick={e => toggleFlag(e, task, 'important')} className={cn('p-1 rounded transition-colors', task.important ? 'text-[#F59E0B]' : 'text-[#4B5563]')}>
+            <button onClick={e => toggleFlag(e, task, 'important')} className={cn('p-1 rounded-none transition-colors', task.important ? 'text-[#C9962E]' : 'text-[#5C5340]')}>
               <Star className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -538,7 +538,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           <InlineStatus task={task} onUpdate={handleUpdate} />
           <InlineDueDate task={task} onUpdate={handleUpdate} />
           {task.assigneeName ? (
-            <span className="text-xs text-[#6B7280]">
+            <span className="text-xs text-[#7A6F55]">
               {task.assigneeType === 'agent' ? '🤖 ' : '🧑 '}{task.assigneeName}
             </span>
           ) : null}
@@ -600,7 +600,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           onClick={() => toggleExpand(task.id)}
           className={cn(
             'flex items-center gap-1 text-[10px] mt-1 ml-2 transition-colors',
-            hasChildren ? 'text-[#6B7280] hover:text-[#A0A0A0]' : 'text-[#2A2A2A] hover:text-[#4B5563]',
+            hasChildren ? 'text-[#7A6F55] hover:text-[#A79B78]' : 'text-[#332820] hover:text-[#5C5340]',
           )}
         >
           <ListTree className="w-3 h-3" />
@@ -616,7 +616,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
             {/* Mobile add-subtask for empty parents */}
             <button
               onClick={() => { setEditingTask(null); setParentForSubtask(task); setShowDialog(true) }}
-              className="flex items-center gap-1.5 text-xs text-[#4B5563] hover:text-[#60A5FA] transition-colors ml-7 mt-1 mb-1"
+              className="flex items-center gap-1.5 text-xs text-[#5C5340] hover:text-[#6E8B7E] transition-colors ml-7 mt-1 mb-1"
             >
               <Plus className="w-3 h-3" />
               Add subtask
@@ -631,25 +631,25 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Tasks</h1>
+        <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Tasks</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={exportMarkdown}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
           >
             <Download className="w-3.5 h-3.5" />
             Export
           </button>
           <button
             onClick={() => setShowIntake(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#60A5FA] rounded-[6px] hover:bg-[#222222] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#6E8B7E] rounded-none hover:bg-[#2F241A] transition-colors"
           >
             <Inbox className="w-3.5 h-3.5" />
             Intake
           </button>
           <button
             onClick={() => { setEditingTask(null); setParentForSubtask(null); setShowDialog(true) }}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors"
           >
             <Plus className="w-4 h-4" />
             New task
@@ -659,13 +659,13 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-5">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] flex-1 max-w-xs">
-          <Search className="w-3.5 h-3.5 text-[#6B7280]" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] flex-1 max-w-xs">
+          <Search className="w-3.5 h-3.5 text-[#7A6F55]" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Filter tasks..."
-            className="bg-transparent text-sm text-[#F5F5F5] placeholder-[#4B5563] outline-none flex-1"
+            className="bg-transparent text-sm text-[#E8DFCE] placeholder-[#5C5340] outline-none flex-1"
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -674,20 +674,20 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
               key={s}
               onClick={() => setStatusFilter(s)}
               className={cn(
-                'px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+                'px-2.5 py-1 text-xs rounded-none border transition-colors',
                 statusFilter === s
-                  ? 'bg-[#222222] border-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
-                  : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                  ? 'bg-[#2F241A] border-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+                  : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
               )}
             >{s === 'all' ? 'All' : s === 'active' ? 'Active' : s}</button>
           ))}
           <button
             onClick={() => setUrgentFilter(f => !f)}
             className={cn(
-              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-none border transition-colors',
               urgentFilter
-                ? 'bg-[rgba(239,68,68,0.15)] border-[rgba(239,68,68,0.4)] text-[#EF4444]'
-                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                ? 'bg-[rgba(192,69,46,0.15)] border-[rgba(192,69,46,0.4)] text-[#C0452E]'
+                : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
             )}
           >
             <Zap className="w-3 h-3" />Urgent
@@ -695,10 +695,10 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           <button
             onClick={() => setImportantFilter(f => !f)}
             className={cn(
-              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-none border transition-colors',
               importantFilter
-                ? 'bg-[rgba(245,158,11,0.15)] border-[rgba(245,158,11,0.4)] text-[#F59E0B]'
-                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                ? 'bg-[rgba(201,150,46,0.15)] border-[rgba(201,150,46,0.4)] text-[#C9962E]'
+                : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
             )}
           >
             <Star className="w-3 h-3" />Important
@@ -711,20 +711,20 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
                 ref={projectFilterRef}
                 onClick={() => { setProjectFilterOpen(v => !v); setAreaFilterOpen(false) }}
                 className={cn(
-                  'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+                  'flex items-center gap-1 px-2.5 py-1 text-xs rounded-none border transition-colors',
                   projectFilter
-                    ? 'bg-[rgba(59,130,246,0.15)] border-[rgba(59,130,246,0.4)] text-[#60A5FA]'
-                    : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                    ? 'bg-[rgba(95,122,114,0.15)] border-[rgba(95,122,114,0.4)] text-[#6E8B7E]'
+                    : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
                 )}
               >
                 Project{projectFilter ? `: ${projects.find(p => p.id === projectFilter)?.name ?? '?'}` : ''} <ChevronDown className="w-2.5 h-2.5" />
               </button>
               <PortalDropdown anchorRef={projectFilterRef} isOpen={projectFilterOpen} onClose={() => setProjectFilterOpen(false)} minWidth={180}>
-                <button onClick={() => { setProjectFilter(null); setProjectFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', !projectFilter ? 'text-[#F5F5F5]' : 'text-[#6B7280]')}>
+                <button onClick={() => { setProjectFilter(null); setProjectFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] flex items-center gap-2', !projectFilter ? 'text-[#E8DFCE]' : 'text-[#7A6F55]')}>
                   {!projectFilter ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} All projects
                 </button>
                 {projects.map(p => (
-                  <button key={p.id} onClick={() => { setProjectFilter(p.id); setProjectFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', projectFilter === p.id ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]')}>
+                  <button key={p.id} onClick={() => { setProjectFilter(p.id); setProjectFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] flex items-center gap-2', projectFilter === p.id ? 'text-[#E8DFCE]' : 'text-[#A79B78]')}>
                     {projectFilter === p.id ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} {p.name}
                   </button>
                 ))}
@@ -739,20 +739,20 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
                 ref={areaFilterRef}
                 onClick={() => { setAreaFilterOpen(v => !v); setProjectFilterOpen(false) }}
                 className={cn(
-                  'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+                  'flex items-center gap-1 px-2.5 py-1 text-xs rounded-none border transition-colors',
                   areaFilter
-                    ? 'bg-[rgba(139,92,246,0.15)] border-[rgba(139,92,246,0.4)] text-[#A78BFA]'
-                    : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                    ? 'bg-[rgba(155,107,79,0.15)] border-[rgba(155,107,79,0.4)] text-[#AD7B5C]'
+                    : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
                 )}
               >
                 Area{areaFilter ? `: ${areas.find(a => a.id === areaFilter)?.name ?? '?'}` : ''} <ChevronDown className="w-2.5 h-2.5" />
               </button>
               <PortalDropdown anchorRef={areaFilterRef} isOpen={areaFilterOpen} onClose={() => setAreaFilterOpen(false)} minWidth={180}>
-                <button onClick={() => { setAreaFilter(null); setAreaFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', !areaFilter ? 'text-[#F5F5F5]' : 'text-[#6B7280]')}>
+                <button onClick={() => { setAreaFilter(null); setAreaFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] flex items-center gap-2', !areaFilter ? 'text-[#E8DFCE]' : 'text-[#7A6F55]')}>
                   {!areaFilter ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} All areas
                 </button>
                 {areas.map(a => (
-                  <button key={a.id} onClick={() => { setAreaFilter(a.id); setAreaFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(255,255,255,0.04)] flex items-center gap-2', areaFilter === a.id ? 'text-[#F5F5F5]' : 'text-[#A0A0A0]')}>
+                  <button key={a.id} onClick={() => { setAreaFilter(a.id); setAreaFilterOpen(false) }} className={cn('w-full text-left px-3 py-1.5 text-xs hover:bg-[rgba(167,155,120,0.09)] flex items-center gap-2', areaFilter === a.id ? 'text-[#E8DFCE]' : 'text-[#A79B78]')}>
                     {areaFilter === a.id ? <Check className="w-3 h-3 shrink-0" /> : <span className="w-3 shrink-0" />} {a.name}
                   </button>
                 ))}
@@ -765,10 +765,10 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
             onClick={() => setOrphanFilter(f => !f)}
             title="Show tasks with no project or area"
             className={cn(
-              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+              'flex items-center gap-1 px-2.5 py-1 text-xs rounded-none border transition-colors',
               orphanFilter
-                ? 'bg-[rgba(239,68,68,0.15)] border-[rgba(239,68,68,0.4)] text-[#EF4444]'
-                : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                ? 'bg-[rgba(192,69,46,0.15)] border-[rgba(192,69,46,0.4)] text-[#C0452E]'
+                : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
             )}
           >
             Unassigned
@@ -785,15 +785,15 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
 
       {/* Batch Toolbar */}
       {selectedCount > 0 && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-[8px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] sticky top-2 z-10">
-          <span className="text-xs text-[#A0A0A0] font-medium mr-1">{selectedCount} of {filtered.length} selected</span>
+        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)] sticky top-2 z-10">
+          <span className="text-xs text-[#A79B78] font-medium mr-1">{selectedCount} of {filtered.length} selected</span>
 
           {/* Change Status */}
           <div className="relative">
             <button
               ref={batchStatusRef}
               onClick={() => { setBatchStatusOpen(v => !v); setBatchAssigneeOpen(false) }}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
             >
               Status <ChevronDown className="w-3 h-3" />
             </button>
@@ -802,7 +802,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
                 <button
                   key={s}
                   onClick={() => { setBatchStatusOpen(false); void batchUpdate({ status: s }) }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5] transition-colors"
+                  className="w-full text-left px-3 py-1.5 text-xs text-[#A79B78] hover:bg-[rgba(167,155,120,0.09)] hover:text-[#E8DFCE] transition-colors"
                 >
                   {s}
                 </button>
@@ -816,14 +816,14 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
               <button
                 ref={batchAssigneeRef}
                 onClick={() => { setBatchAssigneeOpen(v => !v); setBatchStatusOpen(false) }}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
               >
                 Assignee <ChevronDown className="w-3 h-3" />
               </button>
               <PortalDropdown anchorRef={batchAssigneeRef} isOpen={batchAssigneeOpen} onClose={() => setBatchAssigneeOpen(false)} minWidth={160}>
                 <button
                   onClick={() => { setBatchAssigneeOpen(false); void batchUpdate({ assignee: null }) }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-[#6B7280] hover:bg-[rgba(255,255,255,0.04)] transition-colors"
+                  className="w-full text-left px-3 py-1.5 text-xs text-[#7A6F55] hover:bg-[rgba(167,155,120,0.09)] transition-colors"
                 >
                   — Unassigned
                 </button>
@@ -831,7 +831,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
                   <button
                     key={u.id}
                     onClick={() => { setBatchAssigneeOpen(false); void batchUpdate({ assignee: u.name ?? u.email }) }}
-                    className="w-full text-left px-3 py-1.5 text-xs text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5] transition-colors"
+                    className="w-full text-left px-3 py-1.5 text-xs text-[#A79B78] hover:bg-[rgba(167,155,120,0.09)] hover:text-[#E8DFCE] transition-colors"
                   >
                     {u.name ?? u.email}
                   </button>
@@ -842,25 +842,25 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
 
           <button
             onClick={() => void batchToggle('urgent')}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
           >
             <Zap className="w-3 h-3" /> Urgent
           </button>
           <button
             onClick={() => void batchToggle('important')}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#F59E0B] hover:bg-[rgba(245,158,11,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C9962E] hover:bg-[rgba(201,150,46,0.10)] transition-colors"
           >
             <Star className="w-3 h-3" /> Important
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
           >
             <Trash2 className="w-3 h-3" /> Delete
           </button>
           <button
             onClick={() => { setSelectedIds(new Set()); setLastClickedIdx(null) }}
-            className="ml-auto flex items-center gap-1 p-1 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            className="ml-auto flex items-center gap-1 p-1 text-xs text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
             title="Deselect all"
           >
             <X className="w-3.5 h-3.5" />
@@ -875,7 +875,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           {groups.map(group => (
             <CollapsibleGroup key={group.key} group={group}>
               {/* Desktop */}
-              <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden mb-2">
+              <div className="hidden md:block rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden mb-2">
                 <table className="w-full">
                   <tbody>
                     {group.tasks.map((task) => {
@@ -902,29 +902,29 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
       ) : (
         <>
           {/* Ungrouped desktop table */}
-          <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
+          <div className="hidden md:block rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[rgba(255,255,255,0.06)]">
+                <tr className="border-b border-[rgba(167,155,120,0.13)]">
                   <th className="px-3 py-3 w-8">
                     <CustomCheckbox
                       checked={allFilteredSelected}
                       onChange={toggleSelectAll}
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Project</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Area</th>
-                  <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⚡</th>
-                  <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide w-10">⭐</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Assignee</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Title</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Project</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Area</th>
+                  <th className="px-2 py-3 text-center text-xs font-medium text-[#7A6F55] uppercase tracking-wide w-10">⚡</th>
+                  <th className="px-2 py-3 text-center text-xs font-medium text-[#7A6F55] uppercase tracking-wide w-10">⭐</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Due</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Assignee</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-[#4B5563]">No tasks found</td></tr>
+                  <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-[#5C5340]">No tasks found</td></tr>
                 ) : filtered.map((task, idx) => (
                   <TaskRowWithSubtasks key={task.id} task={task} idx={idx} />
                 ))}
@@ -935,7 +935,7 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
           {/* Ungrouped mobile cards */}
           <div className="md:hidden space-y-2">
             {filtered.length === 0 ? (
-              <p className="text-center text-sm text-[#4B5563] py-12">No tasks found</p>
+              <p className="text-center text-sm text-[#5C5340] py-12">No tasks found</p>
             ) : filtered.map((task, idx) => (
               <TaskCardWithSubtasks key={task.id} task={task} idx={idx} />
             ))}
@@ -946,13 +946,13 @@ export function TasksClient({ initialTasks, workspaceId, initialStatusFilter, in
       {/* Delete confirmation modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-6 max-w-sm w-full">
-            <h2 className="text-sm font-semibold text-[#F5F5F5] mb-2">Delete {selectedCount} task{selectedCount !== 1 ? 's' : ''}?</h2>
-            <p className="text-xs text-[#6B7280] mb-4">This cannot be undone.</p>
+          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
+            <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete {selectedCount} task{selectedCount !== 1 ? 's' : ''}?</h2>
+            <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
-              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#EF4444] text-white rounded-[6px] hover:bg-red-500 transition-colors">Delete</button>
+              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
+              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#C0452E] text-[#E8DFCE] rounded-none hover:bg-red-500 transition-colors">Delete</button>
             </div>
           </div>
         </div>

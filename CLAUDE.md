@@ -70,12 +70,13 @@ UI/`tasks.workspaceId` use **`byron-film` | `korus` | `personal`** (`types/index
 ### Database migrations
 Numbered SQL files in `drizzle/` (`0000`–`0007`) are the canonical OPS v5 migration history. Day-to-day schema changes flow through editing `lib/db/schema.ts` then `npm run db:push`. `db:push` uses `DATABASE_URL_UNPOOLED`; the running app uses the pooled `DATABASE_URL`.
 
-## Key design rules (from `.interface-design/system.md`)
-- Sidebar background = canvas background (`#0F0F0F`) — not a different color
-- Borders use `rgba(255,255,255,0.06)`; **borders-only depth, no shadows**
-- Text is `#F5F5F5`, never pure white
-- `font-sans` on the body; Geist Mono only for data/stats/IDs
-- Workspace identity through accent color (Byron Film gold, KORUS teal, Personal orange)
+## Key design rules (from `.interface-design/system.md` — OM system since 2026-07-07)
+- Walnut canvas `#1A1410` (no pure black); sidebar background = canvas background
+- Borders are taupe hairlines `rgba(167,155,120,0.14)`; **borders-only depth, no shadows**; radius 0 (discs excepted)
+- Text is the Field Beige ramp — primary `#E8DFCE`, never pure white
+- Fraunces for page titles (`font-display`), Newsreader body, JetBrains Mono for labels/nav/data
+- Brick `#8B3A23` is the app accent (punctuation, never a fill); workspace identity via warm-tuned accents (BF gold `#C99A1F`, KORUS teal `#3E7A70`, Personal terracotta `#C96F2E`)
+- Grain + vignette atmosphere is global (mounted in `app/layout.tsx`); no emoji in chrome
 
 ## After each milestone
 1. `npm run build` — fix ALL errors before moving on

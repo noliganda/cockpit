@@ -74,7 +74,7 @@ export default async function PriorityPage({
     console.error('Failed to calculate priorities:', error)
     return (
       <div className="p-6 text-center">
-        <p className="text-sm text-[#6B7280]">Failed to load task prioritization data</p>
+        <p className="text-sm text-[#7A6F55]">Failed to load task prioritization data</p>
       </div>
     )
   }

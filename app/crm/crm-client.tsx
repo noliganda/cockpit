@@ -66,7 +66,7 @@ function PortalDropdown({
     <>
       <div className="fixed inset-0 z-40" onClick={onClose} />
       <div
-        className="fixed z-50 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[6px] overflow-hidden shadow-lg"
+        className="fixed z-50 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
         style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
       >
         {children}
@@ -79,8 +79,8 @@ function PortalDropdown({
 const PIPELINE_STAGES_LIST = [...PIPELINE_STAGES]
 
 // ─── Shared Input Styles ───────────────────────────────────────────────────
-const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]'
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 // ─── Tag Multi-Select ──────────────────────────────────────────────────────
 function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
@@ -94,9 +94,9 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[
     <div>
       <div className="flex gap-1 flex-wrap mb-1.5">
         {value.map(tag => (
-          <span key={tag} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.08)] text-[#A0A0A0]">
+          <span key={tag} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.18)] text-[#A79B78]">
             {tag}
-            <button onClick={() => onChange(value.filter(t => t !== tag))} className="hover:text-white"><X className="w-2.5 h-2.5" /></button>
+            <button onClick={() => onChange(value.filter(t => t !== tag))} className="hover:text-[#E8DFCE]"><X className="w-2.5 h-2.5" /></button>
           </span>
         ))}
       </div>
@@ -108,7 +108,7 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
         />
-        <button onClick={add} className="px-3 rounded-[6px] bg-[rgba(255,255,255,0.06)] text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.10)] text-sm">+</button>
+        <button onClick={add} className="px-3 rounded-none bg-[rgba(167,155,120,0.13)] text-[#A79B78] hover:bg-[rgba(167,155,120,0.22)] text-sm">+</button>
       </div>
     </div>
   )
@@ -118,7 +118,7 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[
 function DialogOverlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={onClose} />
       {children}
     </div>
   )
@@ -233,11 +233,11 @@ function ContactDialog({
 
   return (
     <DialogOverlay onClose={onClose}>
-      <div className="relative w-full sm:max-w-2xl bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] sm:rounded-[12px] rounded-t-[16px] flex flex-col max-h-[90vh]">
+      <div className="relative w-full sm:max-w-2xl bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(255,255,255,0.06)] shrink-0">
-          <h2 className="text-sm font-semibold text-[#F5F5F5]">{mode === 'create' ? 'New Contact' : 'Edit Contact'}</h2>
-          <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors"><X className="w-4 h-4" /></button>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
+          <h2 className="text-sm font-semibold text-[#E8DFCE]">{mode === 'create' ? 'New Contact' : 'Edit Contact'}</h2>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
         </div>
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-5 py-4">
@@ -332,12 +332,12 @@ function ContactDialog({
           </div>
         </div>
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(255,255,255,0.06)] shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-[6px] bg-[#F5F5F5] text-[#0F0F0F] text-sm font-medium hover:bg-white transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : mode === 'create' ? 'Create Contact' : 'Save Changes'}
           </button>
@@ -435,10 +435,10 @@ function OrgDialog({
 
   return (
     <DialogOverlay onClose={onClose}>
-      <div className="relative w-full sm:max-w-xl bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] sm:rounded-[12px] rounded-t-[16px] flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(255,255,255,0.06)] shrink-0">
-          <h2 className="text-sm font-semibold text-[#F5F5F5]">{mode === 'create' ? 'New Organisation' : 'Edit Organisation'}</h2>
-          <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors"><X className="w-4 h-4" /></button>
+      <div className="relative w-full sm:max-w-xl bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
+          <h2 className="text-sm font-semibold text-[#E8DFCE]">{mode === 'create' ? 'New Organisation' : 'Edit Organisation'}</h2>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="overflow-y-auto flex-1 px-5 py-4">
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
@@ -498,12 +498,12 @@ function OrgDialog({
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(255,255,255,0.06)] shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-[6px] bg-[#F5F5F5] text-[#0F0F0F] text-sm font-medium hover:bg-white transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : mode === 'create' ? 'Create Organisation' : 'Save Changes'}
           </button>
@@ -558,12 +558,12 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 md:px-6 pt-4 md:pt-6 pb-0 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Contacts</h1>
+        <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Contacts</h1>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#6B7280] font-mono">{contacts.length} contacts</span>
+          <span className="text-xs text-[#7A6F55] font-mono">{contacts.length} contacts</span>
           <button
             onClick={() => downloadVCF(contacts)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] rounded-[6px] hover:text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#A79B78] rounded-none hover:text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
             title="Export all contacts as VCF"
           >
             <Download className="w-3.5 h-3.5" />
@@ -573,7 +573,7 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
       </div>
 
       {/* Tabs */}
-      <div className="px-4 md:px-6 mt-4 border-b border-[rgba(255,255,255,0.06)]">
+      <div className="px-4 md:px-6 mt-4 border-b border-[rgba(167,155,120,0.13)]">
         <div className="flex gap-0">
           {TABS.map(t => (
             <button
@@ -582,8 +582,8 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
               className={cn(
                 'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors',
                 tab === t.id
-                  ? 'text-[#F5F5F5] border-current'
-                  : 'text-[#6B7280] border-transparent hover:text-[#A0A0A0]'
+                  ? 'text-[#E8DFCE] border-current'
+                  : 'text-[#7A6F55] border-transparent hover:text-[#A79B78]'
               )}
               style={tab === t.id ? { color: workspace.color, borderColor: workspace.color } : undefined}
             >
@@ -726,9 +726,9 @@ function ContactsTab({
       {/* Search + New */}
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4B5563]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
           <input
-            className="w-full pl-8 pr-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-sm text-[#F5F5F5] outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]"
+            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
             placeholder="Search contacts…"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -736,7 +736,7 @@ function ContactsTab({
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-[#F5F5F5] text-[#0F0F0F] text-sm font-medium hover:bg-white transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
         >
           <Plus className="w-3.5 h-3.5" /> New Contact
         </button>
@@ -744,15 +744,15 @@ function ContactsTab({
 
       {/* Batch Toolbar */}
       {selectedCount > 0 && (
-        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-[8px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)]">
-          <span className="text-xs text-[#A0A0A0] font-medium mr-1">{selectedCount} selected</span>
+        <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)]">
+          <span className="text-xs text-[#A79B78] font-medium mr-1">{selectedCount} selected</span>
 
           {/* Change Pipeline Stage */}
           <div className="relative">
             <button
               ref={batchStageRef}
               onClick={() => setBatchStageOpen(v => !v)}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
             >
               Pipeline Stage <ChevronDown className="w-3 h-3" />
             </button>
@@ -761,7 +761,7 @@ function ContactsTab({
                 <button
                   key={s}
                   onClick={() => { setBatchStageOpen(false); void batchSetStage(s) }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5] transition-colors"
+                  className="w-full text-left px-3 py-1.5 text-xs text-[#A79B78] hover:bg-[rgba(167,155,120,0.09)] hover:text-[#E8DFCE] transition-colors"
                 >
                   {s}
                 </button>
@@ -775,7 +775,7 @@ function ContactsTab({
               const selected = contacts.filter(c => selectedIds.has(c.id))
               downloadVCF(selected)
             }}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
           >
             <Download className="w-3 h-3" /> Export VCF
           </button>
@@ -783,7 +783,7 @@ function ContactsTab({
           {/* Delete */}
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.08)] text-[#EF4444] hover:bg-[rgba(239,68,68,0.10)] transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
           >
             <Trash2 className="w-3 h-3" /> Delete
           </button>
@@ -791,7 +791,7 @@ function ContactsTab({
           {/* Deselect All */}
           <button
             onClick={() => { setSelectedIds(new Set()); setLastClickedIdx(null) }}
-            className="ml-auto flex items-center p-1 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            className="ml-auto flex items-center p-1 text-xs text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
             title="Deselect all"
           >
             <X className="w-3.5 h-3.5" />
@@ -801,16 +801,16 @@ function ContactsTab({
 
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <User className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
-          <p className="text-sm text-[#4B5563]">{search ? 'No contacts match your search' : 'No contacts yet'}</p>
+          <User className="w-8 h-8 text-[#5C5340] mx-auto mb-3" />
+          <p className="text-sm text-[#5C5340]">{search ? 'No contacts match your search' : 'No contacts yet'}</p>
         </div>
       ) : (
         <>
           {/* Desktop table */}
-          <div className="hidden md:block rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
+          <div className="hidden md:block rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[rgba(255,255,255,0.06)]">
+                <tr className="border-b border-[rgba(167,155,120,0.13)]">
                   <th className="px-3 py-3 w-8">
                     <CustomCheckbox
                       checked={allFilteredSelected}
@@ -819,7 +819,7 @@ function ContactsTab({
                     />
                   </th>
                   {['Name', 'Position', 'Mobile', 'Email', 'Links', 'Pipeline Stage'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">{h}</th>
+                    <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -828,8 +828,8 @@ function ContactsTab({
                   <tr
                     key={contact.id}
                     className={cn(
-                      'border-b border-[rgba(255,255,255,0.04)] last:border-0 hover:bg-[rgba(255,255,255,0.02)] cursor-pointer',
-                      selectedIds.has(contact.id) && 'bg-[rgba(255,255,255,0.03)]'
+                      'border-b border-[rgba(167,155,120,0.09)] last:border-0 hover:bg-[rgba(167,155,120,0.04)] cursor-pointer',
+                      selectedIds.has(contact.id) && 'bg-[rgba(167,155,120,0.07)]'
                     )}
                     onClick={() => setEditing(contact)}
                   >
@@ -841,52 +841,52 @@ function ContactsTab({
                       />
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className="text-sm text-[#F5F5F5] hover:text-white transition-colors">
+                      <span className="text-sm text-[#E8DFCE] hover:text-[#E8DFCE] transition-colors">
                         {contact.name}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-sm text-[#A0A0A0]">{contact.role ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-sm text-[#A79B78]">{contact.role ?? '—'}</td>
                     <td className="px-4 py-2.5">
                       {contact.mobile ? (
-                        <a href={`tel:${contact.mobile}`} className="text-sm text-[#A0A0A0] hover:text-[#F5F5F5]" onClick={e => e.stopPropagation()}>
+                        <a href={`tel:${contact.mobile}`} className="text-sm text-[#A79B78] hover:text-[#E8DFCE]" onClick={e => e.stopPropagation()}>
                           {contact.mobile}
                         </a>
-                      ) : <span className="text-sm text-[#4B5563]">—</span>}
+                      ) : <span className="text-sm text-[#5C5340]">—</span>}
                     </td>
                     <td className="px-4 py-2.5">
                       {contact.email ? (
-                        <a href={`mailto:${contact.email}`} className="text-sm text-[#A0A0A0] hover:text-[#F5F5F5]" onClick={e => e.stopPropagation()}>
+                        <a href={`mailto:${contact.email}`} className="text-sm text-[#A79B78] hover:text-[#E8DFCE]" onClick={e => e.stopPropagation()}>
                           {contact.email}
                         </a>
-                      ) : <span className="text-sm text-[#4B5563]">—</span>}
+                      ) : <span className="text-sm text-[#5C5340]">—</span>}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                         {contact.portfolioUrl && (
-                          <a href={contact.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-[#4B5563] hover:text-[#A0A0A0] transition-colors">
+                          <a href={contact.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-[#5C5340] hover:text-[#A79B78] transition-colors">
                             <Globe className="w-3.5 h-3.5" />
                           </a>
                         )}
                         {contact.linkedinUrl && (
-                          <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-[#4B5563] hover:text-[#A0A0A0] transition-colors">
+                          <a href={contact.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-[#5C5340] hover:text-[#A79B78] transition-colors">
                             <Linkedin className="w-3.5 h-3.5" />
                           </a>
                         )}
                         {contact.instagramUrl && (
-                          <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-[#4B5563] hover:text-[#A0A0A0] transition-colors">
+                          <a href={contact.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-[#5C5340] hover:text-[#A79B78] transition-colors">
                             <Instagram className="w-3.5 h-3.5" />
                           </a>
                         )}
                         {!contact.portfolioUrl && !contact.linkedinUrl && !contact.instagramUrl && (
-                          <span className="text-sm text-[#4B5563]">—</span>
+                          <span className="text-sm text-[#5C5340]">—</span>
                         )}
                       </div>
                     </td>
                     <td className="px-4 py-2.5">
                       {contact.pipelineStage ? (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{contact.pipelineStage}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">{contact.pipelineStage}</span>
                       ) : (
-                        <span className="text-sm text-[#4B5563]">—</span>
+                        <span className="text-sm text-[#5C5340]">—</span>
                       )}
                     </td>
                   </tr>
@@ -901,8 +901,8 @@ function ContactsTab({
               <div
                 key={contact.id}
                 className={cn(
-                  'rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] p-4 hover:border-[rgba(255,255,255,0.10)]',
-                  selectedIds.has(contact.id) && 'border-[rgba(255,255,255,0.10)] bg-[#1A1A1A]'
+                  'rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] p-4 hover:border-[rgba(167,155,120,0.22)]',
+                  selectedIds.has(contact.id) && 'border-[rgba(167,155,120,0.22)] bg-[#281E16]'
                 )}
               >
                 <div className="flex items-start gap-2 mb-2">
@@ -914,18 +914,18 @@ function ContactsTab({
                     />
                   </div>
                   <p
-                    className="text-sm font-medium text-[#F5F5F5] flex-1 cursor-pointer"
+                    className="text-sm font-medium text-[#E8DFCE] flex-1 cursor-pointer"
                     onClick={() => setEditing(contact)}
                   >
                     {contact.name}
                   </p>
                   {contact.pipelineStage && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0] shrink-0">{contact.pipelineStage}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78] shrink-0">{contact.pipelineStage}</span>
                   )}
                 </div>
-                {contact.role && <p className="text-xs text-[#6B7280] mb-1 ml-5">{contact.role}</p>}
-                {contact.email && <p className="text-xs text-[#A0A0A0] ml-5">{contact.email}</p>}
-                {contact.mobile && <p className="text-xs text-[#A0A0A0] mt-0.5 ml-5">{contact.mobile}</p>}
+                {contact.role && <p className="text-xs text-[#7A6F55] mb-1 ml-5">{contact.role}</p>}
+                {contact.email && <p className="text-xs text-[#A79B78] ml-5">{contact.email}</p>}
+                {contact.mobile && <p className="text-xs text-[#A79B78] mt-0.5 ml-5">{contact.mobile}</p>}
               </div>
             ))}
           </div>
@@ -935,13 +935,13 @@ function ContactsTab({
       {/* Delete confirmation */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-6 max-w-sm w-full">
-            <h2 className="text-sm font-semibold text-[#F5F5F5] mb-2">Delete {selectedCount} contact{selectedCount !== 1 ? 's' : ''}?</h2>
-            <p className="text-xs text-[#6B7280] mb-4">This cannot be undone.</p>
+          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
+          <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
+            <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete {selectedCount} contact{selectedCount !== 1 ? 's' : ''}?</h2>
+            <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
-              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#EF4444] text-white rounded-[6px] hover:bg-red-500 transition-colors">Delete</button>
+              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
+              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#C0452E] text-[#E8DFCE] rounded-none hover:bg-red-500 transition-colors">Delete</button>
             </div>
           </div>
         </div>
@@ -1002,9 +1002,9 @@ function OrgsTab({
       {/* Toolbar */}
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#4B5563]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
           <input
-            className="w-full pl-8 pr-3 py-2 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-sm text-[#F5F5F5] outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]"
+            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
             placeholder="Search organisations…"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -1012,7 +1012,7 @@ function OrgsTab({
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-[#F5F5F5] text-[#0F0F0F] text-sm font-medium hover:bg-white transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
         >
           <Plus className="w-3.5 h-3.5" /> New Organisation
         </button>
@@ -1020,8 +1020,8 @@ function OrgsTab({
 
       {filtered.length === 0 ? (
         <div className="text-center py-16">
-          <Building2 className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
-          <p className="text-sm text-[#4B5563]">{search ? 'No organisations match your search' : 'No organisations yet'}</p>
+          <Building2 className="w-8 h-8 text-[#5C5340] mx-auto mb-3" />
+          <p className="text-sm text-[#5C5340]">{search ? 'No organisations match your search' : 'No organisations yet'}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1030,17 +1030,17 @@ function OrgsTab({
             return (
               <div
                 key={org.id}
-                className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all cursor-pointer"
+                className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all cursor-pointer"
                 onClick={() => setEditing(org)}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-semibold text-[#F5F5F5] leading-snug">{org.name}</p>
+                  <p className="text-sm font-semibold text-[#E8DFCE] leading-snug">{org.name}</p>
                   {org.pipelineStage && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0] ml-2 shrink-0">{org.pipelineStage}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78] ml-2 shrink-0">{org.pipelineStage}</span>
                   )}
                 </div>
                 {org.industry && (
-                  <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.04)] text-[#6B7280] mb-2">{org.industry}</span>
+                  <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.09)] text-[#7A6F55] mb-2">{org.industry}</span>
                 )}
                 <div className="space-y-1">
                   {org.website && (
@@ -1048,7 +1048,7 @@ function OrgsTab({
                       href={org.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors"
+                      className="flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors"
                       onClick={e => e.stopPropagation()}
                     >
                       <ExternalLink className="w-3 h-3" />
@@ -1056,11 +1056,11 @@ function OrgsTab({
                     </a>
                   )}
                   {org.size && (
-                    <p className="text-xs text-[#6B7280]">{org.size} employees</p>
+                    <p className="text-xs text-[#7A6F55]">{org.size} employees</p>
                   )}
                 </div>
-                <div className="mt-3 pt-3 border-t border-[rgba(255,255,255,0.04)]">
-                  <span className="text-xs text-[#4B5563]">{linkedCount} contact{linkedCount !== 1 ? 's' : ''}</span>
+                <div className="mt-3 pt-3 border-t border-[rgba(167,155,120,0.09)]">
+                  <span className="text-xs text-[#5C5340]">{linkedCount} contact{linkedCount !== 1 ? 's' : ''}</span>
                 </div>
               </div>
             )
@@ -1106,8 +1106,8 @@ function PipelineTab({
   if (contacts.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-sm text-[#4B5563]">No contacts in pipeline</p>
-        <p className="text-xs text-[#4B5563] mt-1">Add contacts to see them in the pipeline</p>
+        <p className="text-sm text-[#5C5340]">No contacts in pipeline</p>
+        <p className="text-xs text-[#5C5340] mt-1">Add contacts to see them in the pipeline</p>
       </div>
     )
   }
@@ -1123,8 +1123,8 @@ function PipelineTab({
           return (
             <div key={stage} className="flex-shrink-0 w-56">
               <div className="flex items-center gap-2 mb-3 px-1">
-                <h3 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide flex-1">{stage}</h3>
-                <span className="text-xs font-mono text-[#4B5563]">{stageContacts.length}</span>
+                <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide flex-1">{stage}</h3>
+                <span className="text-xs font-mono text-[#5C5340]">{stageContacts.length}</span>
               </div>
               <Droppable droppableId={stage}>
                 {(provided, snapshot) => (
@@ -1132,14 +1132,14 @@ function PipelineTab({
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={cn(
-                      'min-h-[200px] rounded-[8px] p-2 transition-colors',
+                      'min-h-[200px] rounded-none p-2 transition-colors',
                       snapshot.isDraggingOver
-                        ? 'bg-[rgba(255,255,255,0.04)]'
-                        : 'bg-[rgba(255,255,255,0.02)]'
+                        ? 'bg-[rgba(167,155,120,0.09)]'
+                        : 'bg-[rgba(167,155,120,0.04)]'
                     )}
                     style={snapshot.isDraggingOver
                       ? { border: `1px solid ${workspaceColor}40` }
-                      : { border: '1px solid rgba(255,255,255,0.04)' }}
+                      : { border: '1px solid rgba(167,155,120,0.09)' }}
                   >
                     {stageContacts.map((contact, index) => {
                       const isPast = contact.nextReachDate && contact.nextReachDate < today
@@ -1152,15 +1152,15 @@ function PipelineTab({
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={cn(
-                                'p-3 mb-2 last:mb-0 rounded-[6px] bg-[#141414] border cursor-grab active:cursor-grabbing transition-all',
+                                'p-3 mb-2 last:mb-0 rounded-none bg-[#211913] border cursor-grab active:cursor-grabbing transition-all',
                                 snapshot.isDragging
-                                  ? 'border-[rgba(255,255,255,0.16)]'
-                                  : 'border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)]'
+                                  ? 'border-[rgba(167,155,120,0.35)]'
+                                  : 'border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)]'
                               )}
                             >
-                              <p className="text-sm font-medium text-[#F5F5F5] mb-0.5">{contact.name}</p>
+                              <p className="text-sm font-medium text-[#E8DFCE] mb-0.5">{contact.name}</p>
                               {contact.company && (
-                                <p className="text-xs text-[#6B7280]">{contact.company}</p>
+                                <p className="text-xs text-[#7A6F55]">{contact.company}</p>
                               )}
                               {contact.nextReachDate && (
                                 <p className={cn('text-xs mt-1', isPast ? 'text-red-400' : 'text-amber-400')}>
@@ -1170,7 +1170,7 @@ function PipelineTab({
                               {contact.tags && contact.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-1.5">
                                   {contact.tags.slice(0, 2).map(tag => (
-                                    <span key={tag} className="text-xs px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[#6B7280]">{tag}</span>
+                                    <span key={tag} className="text-xs px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.13)] text-[#7A6F55]">{tag}</span>
                                   ))}
                                 </div>
                               )}

@@ -1,149 +1,128 @@
-# Ops Dashboard — Design System
+# Cockpit — Design System (OM / Bayfield Deepened)
+
+> Aligned 2026-07-07 with the Olivier Marcolin brand system
+> (`~/workspaces/om/olivier-marcolin-design-system/`, claude.ai/design project `019e1bf6…`).
+> Spec + decision log: `docs/journal/2026-07-07-ui-refresh-om-alignment-SPEC.md`.
+> Mechanical token map: `scripts/design/om-sweep.mjs`.
 
 ## Identity
 
-**Who:** Olivier Marcolin — CEO running two businesses (film production + commercial fit-out) from Byron Bay. Opens this between calls, on set, on iPad on the couch. Not a developer — wants it to feel like a premium tool, not a coding project.
+**Who:** Olivier Marcolin — producer & system designer. Byron Film + KORUS Group APAC, run from Ocean Shores. Opens this between calls, on set, on iPad on the couch.
 
-**What:** Unified operations dashboard replacing Notion. Tasks, projects, CRM, sprints, metrics. Used daily, needs to feel like home.
+**What:** Cockpit — the operational system of record. Tasks, dispatch, messages, CRM, metrics. Used daily, needs to feel like home.
 
-**Feel:** Command center for a one-person army. Dense but not cramped. Calm authority. Like Linear meets Vercel — precision without coldness. The kind of tool where you open it and immediately know where you stand.
+**Feel:** A producer's editorial terminal. Cinematic, analog-warm, restrained. Dense but breathing. *"Not the artist. The producer & system designer."*
 
 ## Direction
 
-- **Personality:** Precision & Density with warmth from workspace accent colors
-- **Foundation:** Neutral dark (not blue-dark, not warm-dark — true neutral)
-- **Depth:** Borders-only with subtle surface elevation shifts
-- **Signature:** Workspace identity through color — a thin accent line or glow that tells you which world you're in (Byron Film gold, KORUS teal, Personal orange)
+- **Foundation:** Walnut — warm dark, never pure black, never blue-dark
+- **Depth:** Borders-only (taupe hairlines) + the vignette. **No shadows, ever.**
+- **Corners:** Radius 0. The brand has no curves — except discs (`rounded-full` dots/avatars)
+- **Atmosphere:** Film grain (5%, overlay) + radial vignette on every screen — mounted once in `app/layout.tsx`
+- **Signature:** Workspace identity through warm-tuned accent color; brick is the app's own accent — punctuation, never surface
 
 ## Tokens
 
-### Surfaces (Dark Mode — Neutral)
+### Surfaces (Walnut ramp)
 ```
---bg-base:      #0F0F0F    /* App canvas */
---bg-surface-1: #141414    /* Cards, panels — barely above base */
---bg-surface-2: #1A1A1A    /* Elevated cards, active states */
---bg-surface-3: #222222    /* Dropdowns, popovers, hover */
---bg-inset:     #0A0A0A    /* Inputs, recessed areas */
+--bg-base:      #1A1410    /* App canvas — walnut */
+--bg-surface-1: #211913    /* Cards, panels */
+--bg-surface-2: #281E16    /* Elevated, active states */
+--bg-surface-3: #2F241A    /* Dropdowns, popovers */
+--bg-inset:     #140F0B    /* Inputs, recessed areas */
+```
+Scrims: `rgba(15,11,8,0.7)`.
+
+### Borders (taupe hairlines — the `--rule` family)
+```
+--border-subtle:   rgba(167,155,120,0.09)
+--border-default:  rgba(167,155,120,0.14)   /* --rule */
+--border-strong:   rgba(167,155,120,0.22)
+--border-stronger: rgba(167,155,120,0.32)   /* --rule-strong */
 ```
 
-### Borders
+### Text (Field Beige ramp)
 ```
---border-default:  rgba(255, 255, 255, 0.06)   /* Standard separation */
---border-subtle:   rgba(255, 255, 255, 0.04)   /* Softer separation */
---border-strong:   rgba(255, 255, 255, 0.10)   /* Emphasis, hover */
---border-stronger: rgba(255, 255, 255, 0.16)   /* Focus rings */
-```
-
-### Text
-```
---text-primary:   #F5F5F5   /* Not pure white — slightly softer */
---text-secondary: #A0A0A0   /* Supporting text */
---text-tertiary:  #6B7280   /* Metadata, timestamps */
---text-muted:     #4B5563   /* Disabled, placeholder */
+--text-primary:   #E8DFCE   /* fg-strong — highest contrast on walnut */
+--text-secondary: #A79B78   /* Field Beige — body on dark */
+--text-tertiary:  #7A6F55   /* Metadata, timestamps */
+--text-muted:     #5C5340   /* Disabled, placeholder */
 ```
 
-### Workspace Accents
+### Accents
 ```
---accent-bf:       #D4A017   /* Byron Film — warm gold */
---accent-korus:    #008080   /* KORUS — teal */
---accent-personal: #F97316   /* Personal — orange */
+--brick:           #8B3A23   /* App accent: focus, links, active nav. NEVER a button fill */
+--brick-warm:      #A04A30   /* Brick hover only */
+--accent-bf:       #C99A1F   /* Byron Film — gold */
+--accent-korus:    #3E7A70   /* KORUS — warmed teal */
+--accent-personal: #C96F2E   /* Personal — terracotta */
 ```
-Each workspace accent is used for:
-- Active sidebar indicator (left border or background tint)
-- Stat card icons/badges
-- Active tab underlines
-- Workspace switcher dot
-- Page title accent (optional subtle use)
+Workspace accents are functional identity (sidebar indicator, stat icons, switcher dot) — kept per Oli's 2026-07-07 decision, warm-tuned to sit in the palette.
 
-### Semantic
+### Semantic (warm-tuned — the brand has no blue)
 ```
---color-success:  #22C55E
---color-warning:  #F59E0B
---color-danger:   #EF4444
---color-info:     #3B82F6
-```
-Slightly desaturated in dark mode. Never used purely for decoration.
-
-### Spacing
-```
-Base: 4px
-Scale: 4, 8, 12, 16, 20, 24, 32, 40, 48
-```
-- Micro: 4px (icon gaps, tight pairs)
-- Component: 8-12px (within buttons, inputs)
-- Card padding: 16-20px
-- Section gap: 24-32px
-- Major separation: 40-48px
-
-### Border Radius
-```
---radius-sm: 6px    /* Inputs, buttons, badges */
---radius-md: 8px    /* Cards, dialogs */
---radius-lg: 12px   /* Large containers, modals */
---radius-full: 9999px  /* Pills, avatars */
+--color-success:  #7D9B5E
+--color-warning:  #C9962E
+--color-danger:   #C0452E   /* distinct from brick */
+--color-info:     #5F7A72
 ```
 
 ### Typography
 ```
-Font: Geist Sans (headings + body), Geist Mono (data, stats, IDs)
+Display:  Fraunces  (variable: opsz + SOFT) — page titles, marquee numbers' labels
+Body:     Newsreader (variable: opsz, italic for emphasis) — all body text
+Mono:     JetBrains Mono — labels, nav, data, stats, IDs
 ```
-- Page title: 24px / 700 / -0.02em tracking
-- Section heading: 16px / 600
-- Body: 14px / 400
-- Label: 12px / 500 / 0.02em tracking / uppercase for form labels
-- Data/stat: Geist Mono / 24-32px / 600 / tabular-nums
+- Page title: `font-display text-[26px] font-medium` (Fraunces, `SOFT 30`, −0.01em — the `.font-display` helper in globals.css adds the variation settings)
+- Labels/nav: JetBrains Mono, UPPERCASE, `tracking-[0.2em]`, 10–11px
+- Body: Newsreader 14–15px, line-height ≥1.5; *italics for emphasis, never bold body*
+- Data/stats: JetBrains Mono, tabular-nums
+- Fonts load via `next/font/google` in `app/layout.tsx` (`--font-fraunces`, `--font-newsreader`, `--font-jbm`)
+
+### Radius
+```
+All rectangle radii: 0 (set at @theme level — rounded-sm/md/lg/xl all resolve to 0)
+--radius-full: 9999px (dots, avatars, pills that are genuinely discs)
+```
+
+### Spacing
+Base 4px; scale 4, 8, 12, 16, 20, 24, 32, 40, 48. Let sections breathe — generous top padding on page headers.
 
 ## Patterns
 
+### Atmosphere (mandatory, already global)
+`.grain` + `.vignette` divs are mounted in `app/layout.tsx` on every page including login. Don't re-add per page; don't remove.
+
 ### Sidebar
-- Width: 240px (collapsed: 56px)
-- Background: same as --bg-base (NOT different color)
-- Right border: var(--border-default)
-- Active link: bg-surface-2 + left 2px accent border in workspace color
-- Hover: bg-surface-1
-- Icons: 16px, --text-tertiary (active: --text-primary)
-- Nav items: 32px height, 8px padding horizontal
+- Background = canvas (`--bg-base`), right hairline border
+- Nav labels: JetBrains Mono 11px UPPERCASE `tracking-[0.2em]`
+- Active: `--bg-surface-2` + 2px left border in workspace color
+- Workspace switcher: colored dot (no emoji — emoji are banned from chrome)
 
-### Stat Cards
-- bg-surface-1 with border-default
-- 16px padding
-- Icon in top-right with 10% opacity workspace accent background
-- Value: Geist Mono, 28px, 600
-- Label: 12px, --text-secondary
-- Sublabel: 11px, --text-tertiary
+### Stat cards
+- `--bg-surface-1`, hairline border, radius 0
+- Value: JetBrains Mono, 28px, tabular
+- Label: mono uppercase tracked, `--text-secondary`
 
-### Data Tables
-- Header: --text-tertiary, 12px, 500, uppercase
-- Row hover: bg-surface-1
-- Row border: border-subtle
-- Cell padding: 12px horizontal, 10px vertical
-- On mobile: collapse to card layout, NOT horizontal scroll
+### Buttons & interaction
+- Primary action: hairline border + brick text/underline — **brick is never a fill**
+- Hover: `opacity 0.7` on labels; surface tint elsewhere; press: opacity ~0.5, no shrink, no shadow
+- Focus: `--border-stronger` or brick outline
+- Easing `cubic-bezier(0.25,0.1,0.25,1)`; no bounces, no springs; honor `prefers-reduced-motion`
 
-### Task Cards (Kanban)
-- bg-surface-1, border-default, radius-md
-- 12px padding
-- Title: 14px/500
-- Meta row: badges + due date + assignee avatar
-- Priority dot: left edge, 3px width, colored by priority
-- Drag handle: visible on hover
+### Iconography
+- Lucide at stroke ~1.5 (the brand's sanctioned exception for app surfaces)
+- **No emoji in chrome.** Workspace = colored dot; when something must be marked, use a mono label, a hairline, or a dot
+- Em-dash — is the separator of choice
 
-### Empty States
-- Centered, --text-tertiary
-- Single line description
-- Optional action button
-- No illustrations (keep it clean)
-
-### Command Palette
-- bg-surface-2, border-strong, radius-lg
-- Centered overlay with backdrop blur
-- Input at top (bg-inset)
-- Results list with keyboard navigation
+### Empty states
+Centered, `--text-tertiary`, single line, optional action. No illustrations.
 
 ## Workspace-Specific Rules
 
 ### Region Property
 - **KORUS only** — never show region selector on Byron Film or Personal workspaces
-- Regions: 🇸🇬 Singapore, 🇦🇺 Australia, 🇫🇷 France, 🌏 Global
+- Regions: Singapore, Australia, France, Global
 
 ### Status Options (per workspace)
 - **Byron Film:** Backlog → Pre-Prod → In Prod → Post-Prod → Review → Delivered → Invoiced → Paid
@@ -157,13 +136,13 @@ Font: Geist Sans (headings + body), Geist Mono (data, stats, IDs)
 
 ## Anti-Patterns
 
-- ❌ Pure white text (#FFFFFF) — use #F5F5F5
-- ❌ Sidebar different background color from canvas
-- ❌ Dramatic surface jumps between elevation levels
-- ❌ Generic blue accent — always use workspace color
-- ❌ Region selector outside KORUS workspace
-- ❌ Chat widget bubble (removed — Phase 5+ feature)
-- ❌ Harsh 1px solid borders — use rgba
-- ❌ Cards without visible border/elevation distinction
-- ❌ Missing hover/focus/active states
-- ❌ Monospace font for non-data text
+- ❌ Pure black (#000) or pure white (#FFF) — walnut `#1A1410` / fg-strong `#E8DFCE`
+- ❌ Any shadow (`shadow-*`) — depth is borders + vignette
+- ❌ Rounded rectangle corners — radius 0 (discs excepted)
+- ❌ Blue, purple, pink — warm-map them (see `om-sweep.mjs` table)
+- ❌ Brick as a button/background fill — it is punctuation
+- ❌ Emoji in chrome (workspace icons, nav, buttons)
+- ❌ Cool grays (`#6B7280` family) — use the beige ramp
+- ❌ White-alpha borders `rgba(255,255,255,…)` — use taupe `rgba(167,155,120,…)`
+- ❌ Bold body text — use Newsreader italic for emphasis
+- ❌ Marketing verbs, exclamation marks, title case in body

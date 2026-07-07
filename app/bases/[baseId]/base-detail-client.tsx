@@ -25,14 +25,14 @@ interface UserBase {
 }
 
 const WORKSPACE_COLORS: Record<string, string> = {
-  byron_film: '#D4A017',
-  korus: '#008080',
-  personal: '#F97316',
+  byron_film: '#C99A1F',
+  korus: '#3E7A70',
+  personal: '#C96F2E',
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]'
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 function CreateTableDialog({
   baseId,
@@ -69,11 +69,11 @@ function CreateTableDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm">
+      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-[#F5F5F5]">New Table</h2>
-          <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+          <h2 className="text-base font-semibold text-[#E8DFCE]">New Table</h2>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -104,14 +104,14 @@ function CreateTableDialog({
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-[6px] text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+            className="px-4 py-2 rounded-none text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!name.trim() || saving}
-            className="px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors disabled:opacity-40"
           >
             {saving ? 'Creating…' : 'Create Table'}
           </button>
@@ -130,7 +130,7 @@ export default function BaseDetailClient({ baseId }: { baseId: string }) {
   const [showCreate, setShowCreate] = useState(false)
 
   const wsKey = base?.workspace ?? workspaceId ?? 'personal'
-  const accentColor = WORKSPACE_COLORS[wsKey] ?? '#F97316'
+  const accentColor = WORKSPACE_COLORS[wsKey] ?? '#C96F2E'
 
   useEffect(() => {
     setLoading(true)
@@ -159,10 +159,10 @@ export default function BaseDetailClient({ baseId }: { baseId: string }) {
   if (loading) {
     return (
       <div className="p-6 max-w-4xl mx-auto">
-        <div className="h-8 w-48 bg-[#1A1A1A] rounded animate-pulse mb-6" />
+        <div className="h-8 w-48 bg-[#281E16] rounded-none animate-pulse mb-6" />
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-[#141414] rounded-[8px] animate-pulse" />
+            <div key={i} className="h-16 bg-[#211913] rounded-none animate-pulse" />
           ))}
         </div>
       </div>
@@ -176,22 +176,22 @@ export default function BaseDetailClient({ baseId }: { baseId: string }) {
         <div className="flex items-center gap-3">
           <Link
             href="/bases"
-            className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+            className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
           >
             <ArrowLeft size={16} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">
+            <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">
               {base?.name ?? 'Base'}
             </h1>
             {base?.description && (
-              <p className="text-sm text-[#6B7280] mt-0.5">{base.description}</p>
+              <p className="text-sm text-[#7A6F55] mt-0.5">{base.description}</p>
             )}
           </div>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
         >
           <Plus size={14} />
           New Table
@@ -207,11 +207,11 @@ export default function BaseDetailClient({ baseId }: { baseId: string }) {
       {/* Table list */}
       {tables.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Table2 size={32} className="text-[#4B5563] mb-3" />
-          <p className="text-[#6B7280] text-sm">No tables in this base</p>
+          <Table2 size={32} className="text-[#5C5340] mb-3" />
+          <p className="text-[#7A6F55] text-sm">No tables in this base</p>
           <button
             onClick={() => setShowCreate(true)}
-            className="mt-4 px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+            className="mt-4 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
           >
             Create first table
           </button>
@@ -221,28 +221,28 @@ export default function BaseDetailClient({ baseId }: { baseId: string }) {
           {tables.map((table) => (
             <div
               key={table.id}
-              className="group flex items-center justify-between bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] px-4 py-3 hover:border-[rgba(255,255,255,0.10)] transition-colors"
+              className="group flex items-center justify-between bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none px-4 py-3 hover:border-[rgba(167,155,120,0.22)] transition-colors"
             >
               <Link
                 href={`/bases/${baseId}/${table.id}`}
                 className="flex items-center gap-3 flex-1 min-w-0"
               >
                 <div
-                  className="p-1.5 rounded-[4px]"
+                  className="p-1.5 rounded-none"
                   style={{ background: `${accentColor}18` }}
                 >
                   <FileText size={13} style={{ color: accentColor }} />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-sm font-medium text-[#F5F5F5]">{table.name}</span>
+                  <span className="text-sm font-medium text-[#E8DFCE]">{table.name}</span>
                   {table.description && (
-                    <p className="text-xs text-[#6B7280] truncate">{table.description}</p>
+                    <p className="text-xs text-[#7A6F55] truncate">{table.description}</p>
                   )}
                 </div>
               </Link>
               <button
                 onClick={() => handleDeleteTable(table.id, table.name)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-[#4B5563] hover:text-[#EF4444] ml-4"
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-[#5C5340] hover:text-[#C0452E] ml-4"
               >
                 <Trash2 size={13} />
               </button>

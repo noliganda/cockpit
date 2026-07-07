@@ -89,13 +89,13 @@ function QuickModal({ title, onClose, onSubmit, saving, children, submitLabel = 
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm"
       onMouseDown={e => { if (e.target === overlayRef.current) onClose() }}
     >
-      <div className="w-full max-w-sm mx-4 rounded-[10px] bg-[#141414] border border-[rgba(255,255,255,0.08)] shadow-2xl">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
-          <h2 className="text-sm font-semibold text-[#F5F5F5]">{title}</h2>
-          <button onClick={onClose} className="p-1 rounded-[4px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors">
+      <div className="w-full max-w-sm mx-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.18)]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
+          <h2 className="text-sm font-semibold text-[#E8DFCE]">{title}</h2>
+          <button onClick={onClose} className="p-1 rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -105,12 +105,12 @@ function QuickModal({ title, onClose, onSubmit, saving, children, submitLabel = 
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-sm font-medium text-[#F5F5F5] hover:bg-[#222222] disabled:opacity-40 transition-all"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-sm font-medium text-[#E8DFCE] hover:bg-[#2F241A] disabled:opacity-40 transition-all"
             >
               {saving ? 'Creating…' : <><Plus className="w-3.5 h-3.5" />{submitLabel}</>}
             </button>
             <button type="button" onClick={onClose}
-              className="px-4 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+              className="px-4 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
               Cancel
             </button>
           </div>
@@ -120,8 +120,8 @@ function QuickModal({ title, onClose, onSubmit, saving, children, submitLabel = 
   )
 }
 
-const inputCls = 'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors'
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1'
+const inputCls = 'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1'
 
 function WorkspaceSelect({ value, onChange }: { value: WorkspaceId; onChange: (v: WorkspaceId) => void }) {
   return (
@@ -129,7 +129,7 @@ function WorkspaceSelect({ value, onChange }: { value: WorkspaceId; onChange: (v
       <label className={labelCls}>Workspace</label>
       <select value={value} onChange={e => onChange(e.target.value as WorkspaceId)}
         className={`${inputCls} appearance-none`}>
-        {WORKSPACES.map(w => <option key={w.id} value={w.id}>{w.icon} {w.name}</option>)}
+        {WORKSPACES.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
       </select>
     </div>
   )
@@ -227,7 +227,7 @@ function NewContactModal({ defaultWs, onClose, onCreated }: { defaultWs: Workspa
           placeholder="Name" className={inputCls} required />
       </div>
       <div>
-        <label className={labelCls}>Email <span className="normal-case text-[#4B5563]">(optional)</span></label>
+        <label className={labelCls}>Email <span className="normal-case text-[#5C5340]">(optional)</span></label>
         <input type="email" value={email} onChange={e => setEmail(e.target.value)}
           placeholder="email@example.com" className={inputCls} />
       </div>
@@ -247,8 +247,8 @@ function LiveClock() {
   const date = now.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   return (
     <div>
-      <p className="text-3xl font-bold text-[#F5F5F5] font-mono tracking-tight">{time}</p>
-      <p className="text-sm text-[#6B7280] mt-0.5">{date}</p>
+      <p className="text-3xl font-bold text-[#E8DFCE] font-mono tracking-tight">{time}</p>
+      <p className="text-sm text-[#7A6F55] mt-0.5">{date}</p>
     </div>
   )
 }
@@ -273,11 +273,11 @@ function formatEventDate(start: Date) {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  Active: '#22C55E',
-  Planning: '#3B82F6',
-  'On Hold': '#F59E0B',
-  Completed: '#6B7280',
-  Archived: '#4B5563',
+  Active: '#7D9B5E',
+  Planning: '#5F7A72',
+  'On Hold': '#C9962E',
+  Completed: '#7A6F55',
+  Archived: '#5C5340',
 }
 
 // ── Main dashboard ────────────────────────────────────────────────────────────
@@ -343,12 +343,12 @@ export function DashboardClient({
 
   const STAT_CARDS = [
     { label: 'Open Tasks', value: stats.openTasks, icon: CheckSquare, color: workspace.color, href: `/tasks?workspace=${ws}&filter=active` },
-    { label: 'Active Projects', value: stats.activeProjects, icon: FolderOpen, color: '#22C55E', href: `/projects?workspace=${ws}&status=Active` },
-    { label: 'Contacts', value: stats.contactCount, icon: Users, color: '#3B82F6', href: `/crm?workspace=${ws}` },
-    { label: 'Overdue', value: stats.overdueItems, icon: AlertCircle, color: stats.overdueItems > 0 ? '#EF4444' : '#6B7280', href: `/tasks?workspace=${ws}&filter=overdue` },
+    { label: 'Active Projects', value: stats.activeProjects, icon: FolderOpen, color: '#7D9B5E', href: `/projects?workspace=${ws}&status=Active` },
+    { label: 'Contacts', value: stats.contactCount, icon: Users, color: '#5F7A72', href: `/crm?workspace=${ws}` },
+    { label: 'Overdue', value: stats.overdueItems, icon: AlertCircle, color: stats.overdueItems > 0 ? '#C0452E' : '#7A6F55', href: `/tasks?workspace=${ws}&filter=overdue` },
   ]
 
-  const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#141414] border border-[rgba(255,255,255,0.06)] text-xs text-[#A0A0A0] hover:text-[#F5F5F5] hover:border-[rgba(255,255,255,0.10)] transition-colors cursor-pointer'
+  const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] text-xs text-[#A79B78] hover:text-[#E8DFCE] hover:border-[rgba(167,155,120,0.22)] transition-colors cursor-pointer'
 
   return (
     <>
@@ -361,8 +361,12 @@ export function DashboardClient({
         {/* Header */}
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-lg font-semibold text-[#F5F5F5] mb-0.5">
-              <span style={{ color: workspace.color }}>{workspace.icon}</span>{' '}{workspace.name}
+            <h1 className="font-display text-lg font-medium text-[#E8DFCE] mb-0.5 flex items-center gap-2">
+              <span
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ backgroundColor: workspace.color }}
+              />
+              {workspace.name}
             </h1>
             <LiveClock />
           </div>
@@ -388,16 +392,16 @@ export function DashboardClient({
             const Icon = stat.icon
             return (
               <Link key={stat.label} href={stat.href}
-                className="group p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] transition-colors">
+                className="group p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] transition-colors">
                 <div className="flex items-start justify-between mb-3">
-                  <p className="text-xs text-[#6B7280] font-medium uppercase tracking-wide">{stat.label}</p>
-                  <div className="w-7 h-7 rounded-[6px] flex items-center justify-center shrink-0"
+                  <p className="text-xs text-[#7A6F55] font-medium uppercase tracking-wide">{stat.label}</p>
+                  <div className="w-7 h-7 rounded-none flex items-center justify-center shrink-0"
                     style={{ backgroundColor: `${stat.color}18` }}>
                     <Icon className="w-3.5 h-3.5" style={{ color: stat.color }} />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-[#F5F5F5] font-mono tabular-nums">{stat.value}</p>
-                <div className="mt-2 flex items-center gap-1 text-xs text-[#4B5563] group-hover:text-[#6B7280] transition-colors">
+                <p className="text-2xl font-bold text-[#E8DFCE] font-mono tabular-nums">{stat.value}</p>
+                <div className="mt-2 flex items-center gap-1 text-xs text-[#5C5340] group-hover:text-[#7A6F55] transition-colors">
                   <span>View all</span><ArrowRight className="w-3 h-3" />
                 </div>
               </Link>
@@ -412,39 +416,39 @@ export function DashboardClient({
           <div className="lg:col-span-2 space-y-4">
 
             {/* Upcoming — Tasks + Events */}
-            <div className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-              <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[rgba(255,255,255,0.06)]">
-                <h2 className="text-sm font-semibold text-[#F5F5F5] flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-[#6B7280]" />
+            <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[rgba(167,155,120,0.13)]">
+                <h2 className="text-sm font-semibold text-[#E8DFCE] flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-[#7A6F55]" />
                   Upcoming
                 </h2>
                 <div className="flex items-center gap-3">
                   {/* Tab toggle */}
-                  <div className="flex items-center gap-1 p-0.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)]">
+                  <div className="flex items-center gap-1 p-0.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)]">
                     <button
                       onClick={() => setUpcomingTab('tasks')}
-                      className={cn('px-2.5 py-1 rounded-[4px] text-xs font-medium transition-colors',
+                      className={cn('px-2.5 py-1 rounded-none text-xs font-medium transition-colors',
                         upcomingTab === 'tasks'
-                          ? 'bg-[#1A1A1A] text-[#F5F5F5]'
-                          : 'text-[#6B7280] hover:text-[#A0A0A0]'
+                          ? 'bg-[#281E16] text-[#E8DFCE]'
+                          : 'text-[#7A6F55] hover:text-[#A79B78]'
                       )}
                     >
                       Tasks {upcomingTasks.length > 0 && <span className="ml-1 text-[10px] opacity-60">({upcomingTasks.length})</span>}
                     </button>
                     <button
                       onClick={() => setUpcomingTab('events')}
-                      className={cn('px-2.5 py-1 rounded-[4px] text-xs font-medium transition-colors',
+                      className={cn('px-2.5 py-1 rounded-none text-xs font-medium transition-colors',
                         upcomingTab === 'events'
-                          ? 'bg-[#1A1A1A] text-[#F5F5F5]'
-                          : 'text-[#6B7280] hover:text-[#A0A0A0]'
+                          ? 'bg-[#281E16] text-[#E8DFCE]'
+                          : 'text-[#7A6F55] hover:text-[#A79B78]'
                       )}
                     >
                       Events {events.length > 0 && <span className="ml-1 text-[10px] opacity-60">({events.length})</span>}
                     </button>
                   </div>
                   {upcomingTab === 'tasks'
-                    ? <Link href={`/tasks?workspace=${ws}`} className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">View all</Link>
-                    : <button onClick={() => void fetchEvents()} disabled={eventsLoading} className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors disabled:opacity-40">
+                    ? <Link href={`/tasks?workspace=${ws}`} className="text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors">View all</Link>
+                    : <button onClick={() => void fetchEvents()} disabled={eventsLoading} className="flex items-center gap-1 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors disabled:opacity-40">
                         <RefreshCw className={cn('w-3 h-3', eventsLoading && 'animate-spin')} />Refresh
                       </button>
                   }
@@ -455,8 +459,8 @@ export function DashboardClient({
                 {upcomingTab === 'tasks' ? (
                   upcomingTasks.length === 0 ? (
                     <div className="py-6 text-center">
-                      <CheckSquare className="w-7 h-7 text-[#1F1F1F] mx-auto mb-2" />
-                      <p className="text-sm text-[#4B5563]">No tasks due in the next 7 days</p>
+                      <CheckSquare className="w-7 h-7 text-[#2C2218] mx-auto mb-2" />
+                      <p className="text-sm text-[#5C5340]">No tasks due in the next 7 days</p>
                     </div>
                   ) : (
                     <div className="space-y-1">
@@ -464,10 +468,10 @@ export function DashboardClient({
                         const color = getWorkspaceColor(task.workspaceId)
                         const isToday = task.dueDate === new Date().toISOString().split('T')[0]
                         return (
-                          <div key={task.id} className="flex items-center gap-3 py-2 border-b border-[rgba(255,255,255,0.04)] last:border-0">
+                          <div key={task.id} className="flex items-center gap-3 py-2 border-b border-[rgba(167,155,120,0.09)] last:border-0">
                             <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                            <span className="flex-1 text-sm text-[#F5F5F5] truncate">{task.title}</span>
-                            <span className={cn('text-xs shrink-0 font-mono', isToday ? 'text-[#F59E0B]' : 'text-[#6B7280]')}>
+                            <span className="flex-1 text-sm text-[#E8DFCE] truncate">{task.title}</span>
+                            <span className={cn('text-xs shrink-0 font-mono', isToday ? 'text-[#C9962E]' : 'text-[#7A6F55]')}>
                               {isToday ? 'Today' : task.dueDate}
                             </span>
                           </div>
@@ -478,16 +482,16 @@ export function DashboardClient({
                 ) : (
                   eventsLoading ? (
                     <div className="py-6 text-center">
-                      <RefreshCw className="w-5 h-5 text-[#4B5563] mx-auto mb-2 animate-spin" />
-                      <p className="text-sm text-[#4B5563]">Fetching calendars…</p>
+                      <RefreshCw className="w-5 h-5 text-[#5C5340] mx-auto mb-2 animate-spin" />
+                      <p className="text-sm text-[#5C5340]">Fetching calendars…</p>
                     </div>
                   ) : events.length === 0 ? (
                     <div className="py-6 text-center">
-                      <Calendar className="w-7 h-7 text-[#1F1F1F] mx-auto mb-2" />
-                      <p className="text-sm text-[#4B5563]">No upcoming events found</p>
+                      <Calendar className="w-7 h-7 text-[#2C2218] mx-auto mb-2" />
+                      <p className="text-sm text-[#5C5340]">No upcoming events found</p>
                       <button
                         onClick={() => void fetchEvents()}
-                        className="mt-3 flex items-center gap-1.5 mx-auto text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors"
+                        className="mt-3 flex items-center gap-1.5 mx-auto text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors"
                       >
                         <RefreshCw className="w-3 h-3" />
                         Fetch from Google Calendar
@@ -496,18 +500,18 @@ export function DashboardClient({
                   ) : (
                     <div className="space-y-1">
                       {events.map(event => {
-                        const COLOR_MAP: Record<string, string> = { 'byron-film': '#D4A017', korus: '#008080', personal: '#F97316' }
-                        const dotColor = COLOR_MAP[event.workspace] ?? '#6B7280'
+                        const COLOR_MAP: Record<string, string> = { 'byron-film': '#C99A1F', korus: '#3E7A70', personal: '#C96F2E' }
+                        const dotColor = COLOR_MAP[event.workspace] ?? '#7A6F55'
                         return (
-                          <div key={event.id} className="flex items-start gap-3 py-2 border-b border-[rgba(255,255,255,0.04)] last:border-0">
+                          <div key={event.id} className="flex items-start gap-3 py-2 border-b border-[rgba(167,155,120,0.09)] last:border-0">
                             <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: dotColor }} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-[#F5F5F5] truncate">{event.title}</p>
-                              <p className="text-[10px] text-[#4B5563] mt-0.5">{event.calendarLabel}{event.location ? ` · ${event.location}` : ''}</p>
+                              <p className="text-sm text-[#E8DFCE] truncate">{event.title}</p>
+                              <p className="text-[10px] text-[#5C5340] mt-0.5">{event.calendarLabel}{event.location ? ` · ${event.location}` : ''}</p>
                             </div>
                             <div className="text-right shrink-0">
-                              <p className="text-xs text-[#F59E0B] font-mono">{formatEventDate(new Date(event.startTime))}</p>
-                              <p className="text-[10px] text-[#6B7280]">{formatEventTime(new Date(event.startTime), new Date(event.endTime), event.allDay)}</p>
+                              <p className="text-xs text-[#C9962E] font-mono">{formatEventDate(new Date(event.startTime))}</p>
+                              <p className="text-[10px] text-[#7A6F55]">{formatEventTime(new Date(event.startTime), new Date(event.endTime), event.allDay)}</p>
                             </div>
                           </div>
                         )
@@ -519,23 +523,23 @@ export function DashboardClient({
             </div>
 
             {/* Workspace task progress */}
-            <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-              <h2 className="text-sm font-semibold text-[#F5F5F5] mb-1">Task Progress by Workspace</h2>
-              <p className="text-xs text-[#6B7280] mb-4">Tasks completed vs total across all workspaces</p>
+            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <h2 className="text-sm font-semibold text-[#E8DFCE] mb-1">Task Progress by Workspace</h2>
+              <p className="text-xs text-[#7A6F55] mb-4">Tasks completed vs total across all workspaces</p>
               <div className="space-y-3">
                 {workspaceBreakdown.map(wsBk => (
                   <div key={wsBk.id}>
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5">
                         <span className="text-sm">{wsBk.icon}</span>
-                        <span className="text-xs text-[#F5F5F5]">{wsBk.name}</span>
+                        <span className="text-xs text-[#E8DFCE]">{wsBk.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[#6B7280]">{wsBk.completed} done</span>
-                        <span className="text-xs text-[#4B5563] font-mono">{wsBk.total} total</span>
+                        <span className="text-xs text-[#7A6F55]">{wsBk.completed} done</span>
+                        <span className="text-xs text-[#5C5340] font-mono">{wsBk.total} total</span>
                       </div>
                     </div>
-                    <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-[rgba(167,155,120,0.13)] overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{
@@ -554,23 +558,23 @@ export function DashboardClient({
           <div className="space-y-4">
 
             {/* Featured Projects */}
-            <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-[#F5F5F5] flex items-center gap-2">
-                  <Star className="w-3.5 h-3.5 text-[#D4A017]" />
+                <h2 className="text-sm font-semibold text-[#E8DFCE] flex items-center gap-2">
+                  <Star className="w-3.5 h-3.5 text-[#C99A1F]" />
                   Projects
                 </h2>
                 <Link href={`/projects?workspace=${ws}`}
-                  className="text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+                  className="text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors">
                   View all
                 </Link>
               </div>
 
               {featuredProjects.length === 0 ? (
                 <div className="py-4 text-center">
-                  <p className="text-xs text-[#4B5563]">No active projects</p>
+                  <p className="text-xs text-[#5C5340]">No active projects</p>
                   <button onClick={() => setModal('project')}
-                    className="mt-2 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+                    className="mt-2 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors">
                     + New Project
                   </button>
                 </div>
@@ -583,14 +587,14 @@ export function DashboardClient({
                       <div key={proj.id} className="group flex items-center gap-2 py-1.5">
                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
                         <Link href={`/projects?workspace=${proj.workspaceId}`}
-                          className="flex-1 min-w-0 text-sm text-[#F5F5F5] truncate hover:text-[#A0A0A0] transition-colors">
+                          className="flex-1 min-w-0 text-sm text-[#E8DFCE] truncate hover:text-[#A79B78] transition-colors">
                           {proj.name}
                         </Link>
                         <span
                           className="text-[10px] px-1.5 py-0.5 rounded-full"
                           style={{
-                            color: STATUS_COLORS[proj.status ?? 'Planning'] ?? '#6B7280',
-                            backgroundColor: `${STATUS_COLORS[proj.status ?? 'Planning'] ?? '#6B7280'}18`,
+                            color: STATUS_COLORS[proj.status ?? 'Planning'] ?? '#7A6F55',
+                            backgroundColor: `${STATUS_COLORS[proj.status ?? 'Planning'] ?? '#7A6F55'}18`,
                           }}
                         >
                           {proj.status ?? 'Planning'}
@@ -598,8 +602,8 @@ export function DashboardClient({
                         <button
                           onClick={() => toggleStar(proj.id, isStarred)}
                           className={cn(
-                            'p-0.5 rounded transition-colors opacity-0 group-hover:opacity-100',
-                            isStarred ? 'text-[#D4A017] opacity-100' : 'text-[#4B5563] hover:text-[#D4A017]'
+                            'p-0.5 rounded-none transition-colors opacity-0 group-hover:opacity-100',
+                            isStarred ? 'text-[#C99A1F] opacity-100' : 'text-[#5C5340] hover:text-[#C99A1F]'
                           )}
                           title={isStarred ? 'Remove from featured' : 'Add to featured'}
                         >
@@ -613,20 +617,20 @@ export function DashboardClient({
             </div>
 
             {/* Recent Activity */}
-            <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-[#F5F5F5] flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-[#6B7280]" />
+                <h2 className="text-sm font-semibold text-[#E8DFCE] flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5 text-[#7A6F55]" />
                   Recent Activity
                 </h2>
                 <Link href="/logs"
-                  className="flex items-center gap-1 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+                  className="flex items-center gap-1 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors">
                   View all <ExternalLink className="w-3 h-3" />
                 </Link>
               </div>
 
               {recentActivity.length === 0 ? (
-                <p className="text-xs text-[#4B5563] text-center py-4">No activity yet.</p>
+                <p className="text-xs text-[#5C5340] text-center py-4">No activity yet.</p>
               ) : (
                 <div className="space-y-2.5">
                   {recentActivity.slice(0, 8).map(entry => {
@@ -635,13 +639,13 @@ export function DashboardClient({
                       <div key={entry.id} className="flex items-start gap-2">
                         <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: wsColor }} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[#A0A0A0] leading-snug">
-                            <span className="text-[#F5F5F5]">{entry.actor}</span>
+                          <p className="text-xs text-[#A79B78] leading-snug">
+                            <span className="text-[#E8DFCE]">{entry.actor}</span>
                             {' '}{entry.action}{' '}
-                            <span className="text-[#6B7280]">{entry.entityType}</span>
-                            {entry.entityTitle && <span className="text-[#A0A0A0]">: {entry.entityTitle}</span>}
+                            <span className="text-[#7A6F55]">{entry.entityType}</span>
+                            {entry.entityTitle && <span className="text-[#A79B78]">: {entry.entityTitle}</span>}
                           </p>
-                          <p className="text-[10px] text-[#4B5563] mt-0.5">{formatRelativeDate(entry.createdAt)}</p>
+                          <p className="text-[10px] text-[#5C5340] mt-0.5">{formatRelativeDate(entry.createdAt)}</p>
                         </div>
                       </div>
                     )

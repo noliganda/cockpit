@@ -31,17 +31,17 @@ export function AgentsClient() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold text-[#F5F5F5]">Agents & Operators</h1>
-      <p className="text-sm text-[#A0A0A0] mb-4">Manage your AI agent team</p>
-      <div className="flex flex-wrap gap-4 mb-6 text-sm text-[#F5F5F5]">
+      <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Agents & Operators</h1>
+      <p className="text-sm text-[#A79B78] mb-4">Manage your AI agent team</p>
+      <div className="flex flex-wrap gap-4 mb-6 text-sm text-[#E8DFCE]">
         <div>🟢 Active agents: {activeCount}</div>
         <div>💰 Budget: ${(totalBudget / 100).toFixed(2)}</div>
         <div>💸 Spent: ${(totalSpent / 100).toFixed(2)}</div>
         <div>📋 Tasks in queue: {tasksCount}</div>
       </div>
-      <table className="w-full text-sm text-left text-[#F5F5F5] border-collapse">
+      <table className="w-full text-sm text-left text-[#E8DFCE] border-collapse">
         <thead>
-          <tr className="border-b border-[rgba(255,255,255,0.06)]">
+          <tr className="border-b border-[rgba(167,155,120,0.13)]">
             <th className="px-3 py-2">Name</th>
             <th className="px-3 py-2">Role</th>
             <th className="px-3 py-2">Type</th>
@@ -59,13 +59,13 @@ export function AgentsClient() {
               ? Math.floor((Date.now() - new Date(o.lastHeartbeatAt).getTime()) / 60000)
               : null
             return (
-              <tr key={o.id} className="border-b border-[rgba(255,255,255,0.04)]">
+              <tr key={o.id} className="border-b border-[rgba(167,155,120,0.09)]">
                 <td className="px-3 py-2">{o.name}</td>
                 <td className="px-3 py-2">{o.role}</td>
                 <td className="px-3 py-2">{o.operatorType === 'agent' ? '🤖 Agent' : '🧑 Human'}</td>
                 <td className="px-3 py-2">{o.status === 'active' ? '🟢 Active' : '🔴 Paused'}</td>
                 <td className="px-3 py-2">
-                  <div className="w-full bg-[#0A0A0A] rounded overflow-hidden h-2 mb-1">
+                  <div className="w-full bg-[#140F0B] rounded-none overflow-hidden h-2 mb-1">
                     <div className={`${color} h-2`} style={{ width: `${pct * 100}%` }} />
                   </div>
                   <div className="text-xs">{(o.spentMonthlyCents/100).toFixed(2)} / {(o.budgetMonthlyCents/100).toFixed(2)}</div>
@@ -89,7 +89,7 @@ export function AgentsClient() {
                         toast.error('Failed to update')
                       }
                     }}
-                    className="px-2 py-1 bg-[#1A1A1A] rounded hover:bg-[#222222]"
+                    className="px-2 py-1 bg-[#281E16] rounded-none hover:bg-[#2F241A]"
                   >
                     {o.status === 'active' ? 'Pause' : 'Resume'}
                   </button>

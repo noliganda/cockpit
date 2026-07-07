@@ -160,27 +160,27 @@ export function CommandPalette() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm"
             onClick={() => { setOpen(false); setQuery('') }}
           />
-          <div className="relative w-full max-w-lg mx-4 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] overflow-hidden">
+          <div className="relative w-full max-w-lg mx-4 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
             {/* Search input */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
-              <Search className="w-4 h-4 text-[#6B7280] shrink-0" />
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
+              <Search className="w-4 h-4 text-[#7A6F55] shrink-0" />
               <input
                 autoFocus
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search or navigate..."
-                className="flex-1 bg-transparent text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none"
+                className="flex-1 bg-transparent text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none"
               />
-              <kbd className="text-xs text-[#4B5563] border border-[rgba(255,255,255,0.06)] rounded px-1.5 py-0.5">ESC</kbd>
+              <kbd className="text-xs text-[#5C5340] border border-[rgba(167,155,120,0.13)] rounded-none px-1.5 py-0.5">ESC</kbd>
             </div>
 
             {/* Results */}
             <div className="max-h-80 overflow-y-auto p-1.5">
               {filtered.length === 0 ? (
-                <p className="text-sm text-[#4B5563] text-center py-6">No results</p>
+                <p className="text-sm text-[#5C5340] text-center py-6">No results</p>
               ) : (
                 filtered.map((action, i) => {
                   const Icon = action.icon
@@ -189,8 +189,8 @@ export function CommandPalette() {
                       key={action.id}
                       onClick={() => navigate(action.href)}
                       className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2 rounded-[6px] text-left transition-colors',
-                        i === selected ? 'bg-[#222222] text-[#F5F5F5]' : 'text-[#A0A0A0] hover:bg-[#222222] hover:text-[#F5F5F5]'
+                        'w-full flex items-center gap-3 px-3 py-2 rounded-none text-left transition-colors',
+                        i === selected ? 'bg-[#2F241A] text-[#E8DFCE]' : 'text-[#A79B78] hover:bg-[#2F241A] hover:text-[#E8DFCE]'
                       )}
                     >
                       <Icon className="w-4 h-4 shrink-0" />
@@ -203,19 +203,19 @@ export function CommandPalette() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-4 px-4 py-2 border-t border-[rgba(255,255,255,0.06)]">
-              <span className="text-xs text-[#4B5563]">↑↓ navigate</span>
-              <span className="text-xs text-[#4B5563]">↵ open</span>
+            <div className="flex items-center gap-4 px-4 py-2 border-t border-[rgba(167,155,120,0.13)]">
+              <span className="text-xs text-[#5C5340]">↑↓ navigate</span>
+              <span className="text-xs text-[#5C5340]">↵ open</span>
               <div className="flex-1" />
               <button
                 onClick={() => { setOpen(false); setShowHelp(true) }}
-                className="flex items-center gap-1 text-xs text-[#4B5563] hover:text-[#6B7280] transition-colors"
+                className="flex items-center gap-1 text-xs text-[#5C5340] hover:text-[#7A6F55] transition-colors"
               >
                 <Keyboard className="w-3 h-3" />
                 <span>Shortcuts</span>
               </button>
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: workspace.color }} />
-              <span className="text-xs text-[#4B5563]">{workspace.name}</span>
+              <span className="text-xs text-[#5C5340]">{workspace.name}</span>
             </div>
           </div>
         </div>
@@ -224,11 +224,11 @@ export function CommandPalette() {
       {/* Quick task creation */}
       {showQuickTask && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowQuickTask(false)} />
-          <div className="relative w-full max-w-md mx-4 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-4">
+          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={() => setShowQuickTask(false)} />
+          <div className="relative w-full max-w-md mx-4 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-[#F5F5F5]">Quick Task</h3>
-              <button onClick={() => setShowQuickTask(false)} className="w-6 h-6 flex items-center justify-center text-[#6B7280] hover:text-[#F5F5F5]">
+              <h3 className="text-sm font-semibold text-[#E8DFCE]">Quick Task</h3>
+              <button onClick={() => setShowQuickTask(false)} className="w-6 h-6 flex items-center justify-center text-[#7A6F55] hover:text-[#E8DFCE]">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -238,21 +238,21 @@ export function CommandPalette() {
               onChange={e => setQuickTaskTitle(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') createQuickTask() }}
               placeholder="Task title..."
-              className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] mb-3"
+              className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] mb-3"
             />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: workspace.color }} />
-                <span className="text-xs text-[#6B7280]">{workspace.name}</span>
+                <span className="text-xs text-[#7A6F55]">{workspace.name}</span>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => setShowQuickTask(false)} className="px-3 py-1.5 text-xs text-[#6B7280] hover:text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors">
+                <button onClick={() => setShowQuickTask(false)} className="px-3 py-1.5 text-xs text-[#7A6F55] hover:text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors">
                   Cancel
                 </button>
                 <button
                   onClick={createQuickTask}
                   disabled={saving || !quickTaskTitle.trim()}
-                  className="px-3 py-1.5 text-xs font-medium text-[#F5F5F5] rounded-[6px] border border-[rgba(255,255,255,0.10)] hover:bg-[#222222] disabled:opacity-40 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium text-[#E8DFCE] rounded-none border border-[rgba(167,155,120,0.22)] hover:bg-[#2F241A] disabled:opacity-40 transition-colors"
                 >
                   {saving ? 'Creating...' : 'Create ↵'}
                 </button>
@@ -265,26 +265,26 @@ export function CommandPalette() {
       {/* Keyboard shortcuts help overlay */}
       {showHelp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowHelp(false)} />
-          <div className="relative w-full max-w-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
+          <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={() => setShowHelp(false)} />
+          <div className="relative w-full max-w-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center gap-2">
-                <Keyboard className="w-4 h-4 text-[#6B7280]" />
-                <h3 className="text-sm font-semibold text-[#F5F5F5]">Keyboard Shortcuts</h3>
+                <Keyboard className="w-4 h-4 text-[#7A6F55]" />
+                <h3 className="text-sm font-semibold text-[#E8DFCE]">Keyboard Shortcuts</h3>
               </div>
-              <button onClick={() => setShowHelp(false)} className="w-7 h-7 flex items-center justify-center text-[#6B7280] hover:text-[#F5F5F5] rounded-[6px] hover:bg-[#222222]">
+              <button onClick={() => setShowHelp(false)} className="w-7 h-7 flex items-center justify-center text-[#7A6F55] hover:text-[#E8DFCE] rounded-none hover:bg-[#2F241A]">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="p-3 space-y-1">
               {SHORTCUTS.map((s, i) => (
                 <div key={i} className="flex items-center justify-between py-1.5 px-1">
-                  <span className="text-sm text-[#A0A0A0]">{s.label}</span>
+                  <span className="text-sm text-[#A79B78]">{s.label}</span>
                   <div className="flex items-center gap-1">
                     {s.keys.map((k, j) => (
                       <kbd
                         key={j}
-                        className="text-[11px] text-[#6B7280] bg-[#0F0F0F] border border-[rgba(255,255,255,0.10)] rounded px-1.5 py-0.5 font-mono"
+                        className="text-[11px] text-[#7A6F55] bg-[#1A1410] border border-[rgba(167,155,120,0.22)] rounded-none px-1.5 py-0.5 font-mono"
                       >
                         {k}
                       </kbd>
@@ -293,9 +293,9 @@ export function CommandPalette() {
                 </div>
               ))}
             </div>
-            <div className="px-4 py-3 border-t border-[rgba(255,255,255,0.06)] flex items-center gap-2">
+            <div className="px-4 py-3 border-t border-[rgba(167,155,120,0.13)] flex items-center gap-2">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: workspace.color }} />
-              <span className="text-xs text-[#4B5563]">Current: {workspace.name}</span>
+              <span className="text-xs text-[#5C5340]">Current: {workspace.name}</span>
             </div>
           </div>
         </div>

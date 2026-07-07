@@ -10,9 +10,9 @@ interface IntakeDialogProps {
   onComplete?: (result: IntakeResult) => void
 }
 
-const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors'
+const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
 const selectCls = `${inputCls} appearance-none`
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 const OBJECT_TYPES: { value: IntakeObjectType | ''; label: string }[] = [
   { value: '', label: 'Auto-detect' },
@@ -66,15 +66,15 @@ export function IntakeDialog({ workspaceId, onClose, onComplete }: IntakeDialogP
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-md bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] sm:rounded-[12px] rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-md bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(255,255,255,0.06)] shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <div className="flex items-center gap-2">
-            <Inbox className="w-4 h-4 text-[#60A5FA]" />
-            <h2 className="text-sm font-semibold text-[#F5F5F5]">Quick Intake</h2>
+            <Inbox className="w-4 h-4 text-[#6E8B7E]" />
+            <h2 className="text-sm font-semibold text-[#E8DFCE]">Quick Intake</h2>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -84,13 +84,13 @@ export function IntakeDialog({ workspaceId, onClose, onComplete }: IntakeDialogP
           {result ? (
             // Success state
             <div className="space-y-3">
-              <div className="flex items-center gap-2 px-3 py-3 rounded-[6px] bg-[rgba(34,197,94,0.08)] border border-[rgba(34,197,94,0.15)]">
-                <span className="text-xs text-[#22C55E] font-medium">Created</span>
-                <span className="text-xs text-[#A0A0A0]">{result.objectType}</span>
-                {result.isDraft && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(245,158,11,0.15)] text-[#F59E0B]">draft</span>}
+              <div className="flex items-center gap-2 px-3 py-3 rounded-none bg-[rgba(125,155,94,0.08)] border border-[rgba(125,155,94,0.15)]">
+                <span className="text-xs text-[#7D9B5E] font-medium">Created</span>
+                <span className="text-xs text-[#A79B78]">{result.objectType}</span>
+                {result.isDraft && <span className="text-[10px] px-1.5 py-0.5 rounded-none bg-[rgba(201,150,46,0.15)] text-[#C9962E]">draft</span>}
               </div>
-              <p className="text-sm text-[#F5F5F5]">{result.title}</p>
-              <div className="flex items-center gap-2 text-[10px] text-[#6B7280]">
+              <p className="text-sm text-[#E8DFCE]">{result.title}</p>
+              <div className="flex items-center gap-2 text-[10px] text-[#7A6F55]">
                 <span>Confidence: {result.confidence}</span>
                 <span>ID: {result.objectId.slice(0, 8)}...</span>
               </div>
@@ -149,26 +149,26 @@ export function IntakeDialog({ workspaceId, onClose, onComplete }: IntakeDialogP
               )}
 
               {error && (
-                <p className="text-xs text-[#EF4444]">{error}</p>
+                <p className="text-xs text-[#C0452E]">{error}</p>
               )}
             </>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-[rgba(255,255,255,0.06)] shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
           {result ? (
             <button onClick={onClose}
-              className="px-4 py-2.5 text-sm font-medium bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[rgba(255,255,255,0.08)] transition-colors min-h-[44px]">
+              className="px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] transition-colors min-h-[44px]">
               Done
             </button>
           ) : (
             <>
-              <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors min-h-[44px]">Cancel</button>
+              <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors min-h-[44px]">Cancel</button>
               <button
                 onClick={handleSubmit}
                 disabled={submitting || !rawText.trim()}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors min-h-[44px]"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors min-h-[44px]"
               >
                 {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 {submitting ? 'Processing...' : 'Submit'}

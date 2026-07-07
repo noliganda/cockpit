@@ -52,14 +52,14 @@ function humanizeEventType(type: string): string {
 function eventVisual(ev: TaskEvent): { Icon: typeof Circle; color: string } {
   const t = ev.eventType
   if (ev.blockedReason || t.includes('blocked') || t.includes('at_risk') || t.includes('failed'))
-    return { Icon: AlertTriangle, color: '#EF4444' }
+    return { Icon: AlertTriangle, color: '#C0452E' }
   if (t.includes('completed') || t.includes('done') || t.includes('verification') || t.includes('unblocked') || t.includes('ready_for_review'))
-    return { Icon: CheckCircle2, color: '#34D399' }
+    return { Icon: CheckCircle2, color: '#8FAF6E' }
   if (ev.artifactUrl || t.includes('artifact'))
-    return { Icon: ExternalLink, color: '#60A5FA' }
+    return { Icon: ExternalLink, color: '#6E8B7E' }
   if (t.includes('created') || t.includes('assigned') || t.includes('started') || t.includes('submitted'))
-    return { Icon: Circle, color: '#60A5FA' }
-  return { Icon: Circle, color: '#6B7280' }
+    return { Icon: Circle, color: '#6E8B7E' }
+  return { Icon: Circle, color: '#7A6F55' }
 }
 
 function TaskTimeline({ taskId }: { taskId: string }) {
@@ -79,15 +79,15 @@ function TaskTimeline({ taskId }: { taskId: string }) {
   if (events && events.length === 0) return null
 
   return (
-    <div className="p-3.5 rounded-[8px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] space-y-3">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
-        <History className="w-3.5 h-3.5 text-[#60A5FA]" />
+    <div className="p-3.5 rounded-none bg-[rgba(167,155,120,0.07)] border border-[rgba(167,155,120,0.13)] space-y-3">
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A79B78] uppercase tracking-wider">
+        <History className="w-3.5 h-3.5 text-[#6E8B7E]" />
         <span>Timeline</span>
-        {events && <span className="text-[#6B7280] normal-case font-normal tracking-normal">· {events.length}</span>}
+        {events && <span className="text-[#7A6F55] normal-case font-normal tracking-normal">· {events.length}</span>}
       </div>
 
       {!events ? (
-        <p className="text-xs text-[#6B7280]">Loading…</p>
+        <p className="text-xs text-[#7A6F55]">Loading…</p>
       ) : (
         <ol className="relative space-y-3">
           {events.map((ev, i) => {
@@ -100,35 +100,35 @@ function TaskTimeline({ taskId }: { taskId: string }) {
                 {/* Rail */}
                 <div className="flex flex-col items-center shrink-0">
                   <Icon className="w-3.5 h-3.5 mt-0.5" style={{ color }} />
-                  {!isLast && <span className="w-px flex-1 mt-1 bg-[rgba(255,255,255,0.08)]" />}
+                  {!isLast && <span className="w-px flex-1 mt-1 bg-[rgba(167,155,120,0.18)]" />}
                 </div>
                 {/* Content */}
                 <div className="min-w-0 flex-1 pb-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-xs font-medium text-[#F5F5F5]">{humanizeEventType(ev.eventType)}</span>
-                    <span className="text-[10px] text-[#6B7280] shrink-0" title={new Date(ev.createdAt).toLocaleString()}>
+                    <span className="text-xs font-medium text-[#E8DFCE]">{humanizeEventType(ev.eventType)}</span>
+                    <span className="text-[10px] text-[#7A6F55] shrink-0" title={new Date(ev.createdAt).toLocaleString()}>
                       {formatRelativeTime(ev.createdAt)}
                     </span>
                   </div>
                   {ev.fromStatus && ev.toStatus && (
-                    <p className="text-[11px] text-[#6B7280] font-mono mt-0.5">{ev.fromStatus} → {ev.toStatus}</p>
+                    <p className="text-[11px] text-[#7A6F55] font-mono mt-0.5">{ev.fromStatus} → {ev.toStatus}</p>
                   )}
-                  {ev.summaryNote && <p className="text-xs text-[#A0A0A0] mt-0.5 break-words">{ev.summaryNote}</p>}
+                  {ev.summaryNote && <p className="text-xs text-[#A79B78] mt-0.5 break-words">{ev.summaryNote}</p>}
                   {ev.blockedReason && (
-                    <p className="text-xs text-[#EF4444] mt-0.5 break-words">Blocked: {ev.blockedReason}</p>
+                    <p className="text-xs text-[#C0452E] mt-0.5 break-words">Blocked: {ev.blockedReason}</p>
                   )}
                   {ev.artifactUrl && (
                     <a href={ev.artifactUrl} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] text-[#60A5FA] hover:underline mt-0.5 break-all">
+                      className="inline-flex items-center gap-1 text-[11px] text-[#6E8B7E] hover:underline mt-0.5 break-all">
                       <ExternalLink className="w-3 h-3 shrink-0" />
                       <span className="truncate">{ev.artifactUrl}</span>
                     </a>
                   )}
                   {(ev.actorName || model || session) && (
-                    <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-[#6B7280] font-mono">
+                    <div className="flex items-center gap-1.5 flex-wrap mt-1 text-[10px] text-[#7A6F55] font-mono">
                       {ev.actorName && <span>{ev.actorName}</span>}
-                      {model && <span className="px-1.5 py-0.5 rounded-[3px] bg-[rgba(255,255,255,0.04)]">🤖 {model}</span>}
-                      {session && <span className="px-1.5 py-0.5 rounded-[3px] bg-[rgba(255,255,255,0.04)] truncate max-w-[140px]">{session}</span>}
+                      {model && <span className="px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.09)]">🤖 {model}</span>}
+                      {session && <span className="px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.09)] truncate max-w-[140px]">{session}</span>}
                     </div>
                   )}
                 </div>
@@ -183,9 +183,9 @@ const VIRTUAL_HARNESSES = [
   { id: 'pie', name: 'Pie', operatorType: 'function' },
 ]
 
-const inputCls = 'w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] transition-colors'
+const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] transition-colors'
 const selectCls = `${inputCls} appearance-none`
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, onDelete, onCreateSubtask, parentTask, areas = [], projects = [], sprints = [] }: TaskDialogProps) {
   const [title, setTitle] = useState(task?.title ?? '')
@@ -314,15 +314,15 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] sm:rounded-[12px] rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg bg-[#281E16] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(255,255,255,0.06)] shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
           <div className="flex items-center gap-2">
-            {isSubtask && <ListTree className="w-3.5 h-3.5 text-[#6B7280]" />}
-            <h2 className="text-sm font-semibold text-[#F5F5F5]">{dialogTitle}</h2>
+            {isSubtask && <ListTree className="w-3.5 h-3.5 text-[#7A6F55]" />}
+            <h2 className="text-sm font-semibold text-[#E8DFCE]">{dialogTitle}</h2>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.06)] transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.13)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -332,11 +332,11 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
           {/* Parent context banner */}
           {(isCreatingSubtask || (isSubtask && task)) && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-[6px] bg-[rgba(59,130,246,0.08)] border border-[rgba(59,130,246,0.15)]">
-              <ArrowUpRight className="w-3.5 h-3.5 text-[#60A5FA] shrink-0" />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-none bg-[rgba(95,122,114,0.08)] border border-[rgba(95,122,114,0.15)]">
+              <ArrowUpRight className="w-3.5 h-3.5 text-[#6E8B7E] shrink-0" />
               <div className="min-w-0">
-                <span className="text-[10px] uppercase tracking-wide text-[#60A5FA]">Parent task</span>
-                <p className="text-xs text-[#A0A0A0] truncate">
+                <span className="text-[10px] uppercase tracking-wide text-[#6E8B7E]">Parent task</span>
+                <p className="text-xs text-[#A79B78] truncate">
                   {effectiveParent?.title ?? 'Parent task'}
                 </p>
               </div>
@@ -349,7 +349,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
             onChange={e => setTitle(e.target.value)}
             placeholder={isSubtask ? 'Subtask title *' : 'Task title *'}
             autoFocus
-            className={cn(inputCls, !title.trim() && title !== '' && 'border-[rgba(239,68,68,0.5)]')}
+            className={cn(inputCls, !title.trim() && title !== '' && 'border-[rgba(192,69,46,0.5)]')}
           />
 
           {/* Row 2: Status | Due Date */}
@@ -394,21 +394,21 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 className={selectCls}
               >
                 <option value="">— Unassigned —</option>
-                <optgroup label="Humans" className="text-gray-400 bg-[#1A1A1A]">
+                <optgroup label="Humans" className="text-[#A79B78] bg-[#281E16]">
                   {operatorsList.filter(op => op.operatorType === 'human' && op.status !== 'retired').map(op => (
-                    <option key={op.id} value={op.id} className="text-[#F5F5F5]">
+                    <option key={op.id} value={op.id} className="text-[#E8DFCE]">
                       🧑 {op.name}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Autonomous Agents" className="text-gray-400 bg-[#1A1A1A]">
+                <optgroup label="Autonomous Agents" className="text-[#A79B78] bg-[#281E16]">
                   {operatorsList.filter(op => op.operatorType === 'agent' && op.status !== 'retired').map(op => (
-                    <option key={op.id} value={op.id} className="text-[#F5F5F5]">
+                    <option key={op.id} value={op.id} className="text-[#E8DFCE]">
                       🤖 {op.name}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="Harnesses / Functions" className="text-gray-400 bg-[#1A1A1A]">
+                <optgroup label="Harnesses / Functions" className="text-[#A79B78] bg-[#281E16]">
                   {/* Hide virtual entries shadowed by a REAL registered operator —
                       duplicate ids (hermes, claude-code) would list twice and the
                       function-typed duplicate loses to the registry on select.
@@ -416,7 +416,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                       filter can't see the shadowing and a fast selection of the
                       virtual hermes would mistype the assignee as 'function'. */}
                   {operatorsLoaded && VIRTUAL_HARNESSES.filter(h => !operatorsList.some(o => o.id === h.id)).map(op => (
-                    <option key={op.id} value={op.id} className="text-[#F5F5F5]">
+                    <option key={op.id} value={op.id} className="text-[#E8DFCE]">
                       ⚡️ {op.name}
                     </option>
                   ))}
@@ -439,17 +439,17 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 className={cn(inputCls, 'mt-2')}
               />
               {assigneeType === 'function' && (
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#60A5FA]">
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#6E8B7E]">
                   <span>⚡️ Ephemeral Function Harness</span>
                 </div>
               )}
               {assigneeType === 'agent' && (
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#A78BFA]">
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#AD7B5C]">
                   <span>🤖 Autonomous Agent Operator</span>
                 </div>
               )}
               {assigneeType === 'human' && (
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#34D399]">
+                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-[#8FAF6E]">
                   <span>🧑 Human Operator</span>
                 </div>
               )}
@@ -465,16 +465,16 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   placeholder="Add tag..."
                   className={cn(inputCls, 'flex-1')}
                 />
-                <button onClick={addTag} className="p-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0">
+                <button onClick={addTag} className="p-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0">
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
               {tags.length > 0 && (
                 <div className="flex items-center gap-1 flex-wrap mt-1.5">
                   {tags.map(tag => (
-                    <span key={tag} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.08)] text-[#A0A0A0]">
+                    <span key={tag} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.18)] text-[#A79B78]">
                       {tag}
-                      <button onClick={() => removeTag(tag)} className="text-[#6B7280] hover:text-[#EF4444] transition-colors">×</button>
+                      <button onClick={() => removeTag(tag)} className="text-[#7A6F55] hover:text-[#C0452E] transition-colors">×</button>
                     </span>
                   ))}
                 </div>
@@ -484,9 +484,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
           {/* Execution identity — required for harness/API work tracking */}
           {(assigneeType === 'function' || assigneeType === 'agent' || executingModel || executingSessionId) && (
-            <div className="p-3.5 rounded-[8px] bg-[rgba(59,130,246,0.05)] border border-[rgba(59,130,246,0.12)] space-y-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
-                <Zap className="w-3.5 h-3.5 text-[#60A5FA]" />
+            <div className="p-3.5 rounded-none bg-[rgba(95,122,114,0.05)] border border-[rgba(95,122,114,0.12)] space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A79B78] uppercase tracking-wider">
+                <Zap className="w-3.5 h-3.5 text-[#6E8B7E]" />
                 <span>Execution identity</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -509,7 +509,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                   />
                 </div>
               </div>
-              <p className="text-[11px] text-[#6B7280]">
+              <p className="text-[11px] text-[#7A6F55]">
                 These fields are written to task metadata and operational logs so work can be traced back to the exact harness, model, and resumable session.
               </p>
             </div>
@@ -528,7 +528,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <div>
                 <label className={labelCls}>Area {projectAreaId ? '(from project)' : ''}</label>
                 {projectAreaId ? (
-                  <div className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.04)] text-[#6B7280] text-sm">
+                  <div className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.09)] text-[#7A6F55] text-sm">
                     {(() => { const a = areas.find(ar => ar.id === projectAreaId); return a ? `${a.icon ?? ''} ${a.name}` : '—' })()}
                   </div>
                 ) : (
@@ -552,10 +552,10 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <button
                 onClick={() => setUrgent(u => !u)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-[6px] border text-sm font-medium transition-colors',
+                  'flex items-center gap-1.5 px-3 py-2 rounded-none border text-sm font-medium transition-colors',
                   urgent
-                    ? 'bg-[rgba(239,68,68,0.12)] border-[rgba(239,68,68,0.30)] text-[#EF4444]'
-                    : 'bg-[#0A0A0A] border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5]'
+                    ? 'bg-[rgba(192,69,46,0.12)] border-[rgba(192,69,46,0.30)] text-[#C0452E]'
+                    : 'bg-[#140F0B] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
                 )}
               >
                 <Zap className="w-3.5 h-3.5" />
@@ -564,10 +564,10 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <button
                 onClick={() => setImportant(i => !i)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-[6px] border text-sm font-medium transition-colors',
+                  'flex items-center gap-1.5 px-3 py-2 rounded-none border text-sm font-medium transition-colors',
                   important
-                    ? 'bg-[rgba(245,158,11,0.12)] border-[rgba(245,158,11,0.30)] text-[#F59E0B]'
-                    : 'bg-[#0A0A0A] border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5]'
+                    ? 'bg-[rgba(201,150,46,0.12)] border-[rgba(201,150,46,0.30)] text-[#C9962E]'
+                    : 'bg-[#140F0B] border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE]'
                 )}
               >
                 <Star className="w-3.5 h-3.5" />
@@ -576,14 +576,14 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
               <div className="flex items-center gap-2 ml-auto">
                 <div>
                   <select value={impact} onChange={e => setImpact(e.target.value)}
-                    className="px-2.5 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-xs outline-none appearance-none focus:border-[rgba(255,255,255,0.16)]">
+                    className="px-2.5 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]">
                     <option value="">Impact</option>
                     {IMPACT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
                 </div>
                 <div>
                   <select value={effort} onChange={e => setEffort(e.target.value)}
-                    className="px-2.5 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-xs outline-none appearance-none focus:border-[rgba(255,255,255,0.16)]">
+                    className="px-2.5 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none appearance-none focus:border-[rgba(167,155,120,0.35)]">
                     <option value="">Effort</option>
                     {EFFORT_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
@@ -628,7 +628,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           {/* Row 7: Description */}
           <div>
             <label className={labelCls}>Description</label>
-            <div className="rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] overflow-hidden max-h-48 overflow-y-auto">
+            <div className="rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] overflow-hidden max-h-48 overflow-y-auto">
               <BlockEditor
                 initialContent={task?.description}
                 onChange={(blocks) => setDescription(blocks)}
@@ -639,16 +639,16 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
 
           {/* Execution Footprint Panel */}
           {(task?.executingModel || task?.executingSessionId) && (
-            <div className="p-3.5 rounded-[8px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A0A0A0] uppercase tracking-wider">
-                <Zap className="w-3.5 h-3.5 text-[#60A5FA]" />
+            <div className="p-3.5 rounded-none bg-[rgba(167,155,120,0.07)] border border-[rgba(167,155,120,0.13)] space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#A79B78] uppercase tracking-wider">
+                <Zap className="w-3.5 h-3.5 text-[#6E8B7E]" />
                 <span>Execution Footprint</span>
               </div>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 {task?.executingModel && (
                   <div>
-                    <span className="text-[#6B7280] block mb-1">Executing Model</span>
-                    <div className="font-mono text-[#F5F5F5] bg-[#0A0A0A] px-2.5 py-1.5 rounded-[4px] border border-[rgba(255,255,255,0.04)] truncate flex items-center gap-1.5">
+                    <span className="text-[#7A6F55] block mb-1">Executing Model</span>
+                    <div className="font-mono text-[#E8DFCE] bg-[#140F0B] px-2.5 py-1.5 rounded-none border border-[rgba(167,155,120,0.09)] truncate flex items-center gap-1.5">
                       <span>🤖</span>
                       <span className="truncate">{task.executingModel}</span>
                     </div>
@@ -656,16 +656,16 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
                 )}
                 {task?.executingSessionId && (
                   <div>
-                    <span className="text-[#6B7280] block mb-1">Session ID</span>
-                    <div className="font-mono text-[#F5F5F5] bg-[#0A0A0A] px-2.5 py-1.5 rounded-[4px] border border-[rgba(255,255,255,0.04)] flex items-center justify-between gap-1.5 min-w-0">
+                    <span className="text-[#7A6F55] block mb-1">Session ID</span>
+                    <div className="font-mono text-[#E8DFCE] bg-[#140F0B] px-2.5 py-1.5 rounded-none border border-[rgba(167,155,120,0.09)] flex items-center justify-between gap-1.5 min-w-0">
                       <span className="truncate">{task.executingSessionId}</span>
                       <button
                         onClick={() => handleCopySessionId(task.executingSessionId!)}
-                        className="p-1 rounded-[4px] hover:bg-[rgba(255,255,255,0.08)] text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0"
+                        className="p-1 rounded-none hover:bg-[rgba(167,155,120,0.18)] text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0"
                         title="Copy resume command"
                       >
                         {copied ? (
-                          <Check className="w-3 h-3 text-[#34D399]" />
+                          <Check className="w-3 h-3 text-[#8FAF6E]" />
                         ) : (
                           <Copy className="w-3 h-3" />
                         )}
@@ -681,7 +681,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
           {task?.id && <TaskTimeline taskId={task.id} />}
 
           {task?.notionId && (
-            <div className="flex items-center gap-2 text-xs text-[#6B7280]">
+            <div className="flex items-center gap-2 text-xs text-[#7A6F55]">
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Synced from Notion</span>
             </div>
@@ -689,21 +689,21 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-4 border-t border-[rgba(255,255,255,0.06)] shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
           <div className="flex items-center gap-2">
             {task && onDelete && (
               confirmDelete ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[#EF4444]">Delete this task?</span>
+                  <span className="text-xs text-[#C0452E]">Delete this task?</span>
                   <button onClick={handleDelete} disabled={deleting}
-                    className="text-xs text-[#EF4444] hover:underline font-medium">
+                    className="text-xs text-[#C0452E] hover:underline font-medium">
                     {deleting ? 'Deleting...' : 'Yes, delete'}
                   </button>
-                  <button onClick={() => setConfirmDelete(false)} className="text-xs text-[#6B7280] hover:text-[#F5F5F5]">Cancel</button>
+                  <button onClick={() => setConfirmDelete(false)} className="text-xs text-[#7A6F55] hover:text-[#E8DFCE]">Cancel</button>
                 </div>
               ) : (
                 <button onClick={() => setConfirmDelete(true)}
-                  className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#EF4444] transition-colors min-h-[44px] px-2">
+                  className="flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#C0452E] transition-colors min-h-[44px] px-2">
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete
                 </button>
@@ -713,7 +713,7 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
             {isEditingParent && task && onCreateSubtask && (
               <button
                 onClick={() => onCreateSubtask(task)}
-                className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#60A5FA] transition-colors min-h-[44px] px-2"
+                className="flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#6E8B7E] transition-colors min-h-[44px] px-2"
               >
                 <ListTree className="w-3.5 h-3.5" />
                 Add subtask
@@ -721,9 +721,9 @@ export function TaskDialog({ task, workspaceId, defaultStatus, onClose, onSave, 
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors min-h-[44px]">Cancel</button>
+            <button onClick={onClose} className="px-4 py-2.5 text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors min-h-[44px]">Cancel</button>
             <button onClick={handleSave} disabled={saving || !title.trim()}
-              className="px-4 py-2.5 text-sm font-medium bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors min-h-[44px]">
+              className="px-4 py-2.5 text-sm font-medium bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors min-h-[44px]">
               {saving ? 'Saving...' : isCreatingSubtask ? 'Create subtask' : task ? 'Save changes' : 'Create task'}
             </button>
           </div>

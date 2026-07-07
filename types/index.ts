@@ -9,9 +9,9 @@ export interface Workspace {
 }
 
 export const WORKSPACES: Workspace[] = [
-  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
-  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🌏' },
-  { id: 'personal', name: 'Personal', slug: 'personal', color: '#F97316', icon: '👤' },
+  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#C99A1F', icon: '🎬' },
+  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#3E7A70', icon: '🌏' },
+  { id: 'personal', name: 'Personal', slug: 'personal', color: '#C96F2E', icon: '👤' },
 ]
 
 export const WORKSPACE_STATUSES: Record<WorkspaceId, string[]> = {
@@ -378,11 +378,11 @@ export interface AgentDef {
 }
 
 export const AGENTS: AgentDef[] = [
-  { id: 'hunter', name: 'Hunter', emoji: '🎯', color: '#14B8A6', slackChannel: '#om-hunter', mission: 'Business Development — outreach & pipeline' },
-  { id: 'finn', name: 'Finn', emoji: '💰', color: '#22C55E', slackChannel: '#om-finn', mission: 'Finance — invoicing, cost tracking, reporting' },
-  { id: 'marcus', name: 'Marcus', emoji: '📝', color: '#F97316', slackChannel: '#om-marcus', mission: 'Content — social media, copy, briefs' },
-  { id: 'devon', name: 'Devon', emoji: '🛠️', color: '#3B82F6', slackChannel: '#om-devon', mission: 'Engineering — code, infrastructure, dashboard' },
-  { id: 'scout', name: 'Scout', emoji: '🔍', color: '#A855F7', slackChannel: '#om-scout', mission: 'Research — market intel, competitor analysis' },
+  { id: 'hunter', name: 'Hunter', emoji: '🎯', color: '#4A8578', slackChannel: '#om-hunter', mission: 'Business Development — outreach & pipeline' },
+  { id: 'finn', name: 'Finn', emoji: '💰', color: '#7D9B5E', slackChannel: '#om-finn', mission: 'Finance — invoicing, cost tracking, reporting' },
+  { id: 'marcus', name: 'Marcus', emoji: '📝', color: '#C96F2E', slackChannel: '#om-marcus', mission: 'Content — social media, copy, briefs' },
+  { id: 'devon', name: 'Devon', emoji: '🛠️', color: '#5F7A72', slackChannel: '#om-devon', mission: 'Engineering — code, infrastructure, dashboard' },
+  { id: 'scout', name: 'Scout', emoji: '🔍', color: '#9B6B4F', slackChannel: '#om-scout', mission: 'Research — market intel, competitor analysis' },
 ]
 
 // ── Agent Actions (Phase 2B) ──────────────────────────────────────────────────

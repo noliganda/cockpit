@@ -111,27 +111,27 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh]">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl mx-4 bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] overflow-hidden shadow-2xl">
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-2xl mx-4 bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[rgba(255,255,255,0.06)]">
-          <Search className="w-4 h-4 text-[#6B7280] shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[rgba(167,155,120,0.13)]">
+          <Search className="w-4 h-4 text-[#7A6F55] shrink-0" />
           <input
             ref={inputRef}
             autoFocus
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search tasks, projects, notes, contacts…"
-            className="flex-1 bg-transparent text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none"
+            className="flex-1 bg-transparent text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none"
           />
-          {loading && <div className="w-3.5 h-3.5 border border-[#6B7280] border-t-transparent rounded-full animate-spin shrink-0" />}
-          <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0">
+          {loading && <div className="w-3.5 h-3.5 border border-[#7A6F55] border-t-transparent rounded-full animate-spin shrink-0" />}
+          <button onClick={onClose} className="w-6 h-6 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Filter chips */}
-        <div className="flex items-center gap-1.5 px-4 py-2 border-b border-[rgba(255,255,255,0.04)] overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1.5 px-4 py-2 border-b border-[rgba(167,155,120,0.09)] overflow-x-auto scrollbar-hide">
           {FILTERS.map(f => (
             <button
               key={f.id}
@@ -139,8 +139,8 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
               className={cn(
                 'px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-colors',
                 filter === f.id
-                  ? 'bg-[rgba(255,255,255,0.10)] text-[#F5F5F5]'
-                  : 'text-[#6B7280] hover:text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)]'
+                  ? 'bg-[rgba(167,155,120,0.22)] text-[#E8DFCE]'
+                  : 'text-[#7A6F55] hover:text-[#A79B78] hover:bg-[rgba(167,155,120,0.09)]'
               )}
             >
               {f.label}
@@ -151,12 +151,12 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
         {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto py-1">
           {query && !loading && filteredResults.length === 0 && (
-            <p className="text-sm text-[#4B5563] text-center py-8">No results for &ldquo;{query}&rdquo;</p>
+            <p className="text-sm text-[#5C5340] text-center py-8">No results for &ldquo;{query}&rdquo;</p>
           )}
           {!query && (
             <div className="py-8 text-center">
-              <p className="text-sm text-[#4B5563]">Type to search…</p>
-              <p className="text-xs text-[#4B5563] mt-1">Use ↑↓ to navigate, Enter to open</p>
+              <p className="text-sm text-[#5C5340]">Type to search…</p>
+              <p className="text-xs text-[#5C5340] mt-1">Use ↑↓ to navigate, Enter to open</p>
             </div>
           )}
           {filteredResults.map((r, idx) => {
@@ -168,23 +168,23 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                 onMouseEnter={() => setSelectedIdx(idx)}
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
-                  idx === selectedIdx ? 'bg-[#222222]' : 'hover:bg-[#1E1E1E]'
+                  idx === selectedIdx ? 'bg-[#2F241A]' : 'hover:bg-[#281E16]'
                 )}
               >
-                <div className="w-6 h-6 rounded flex items-center justify-center shrink-0 bg-[rgba(255,255,255,0.06)]">
-                  <Icon className="w-3.5 h-3.5 text-[#6B7280]" />
+                <div className="w-6 h-6 rounded-none flex items-center justify-center shrink-0 bg-[rgba(167,155,120,0.13)]">
+                  <Icon className="w-3.5 h-3.5 text-[#7A6F55]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#F5F5F5] truncate">{r.title}</p>
+                  <p className="text-sm text-[#E8DFCE] truncate">{r.title}</p>
                   {(r.meta ?? r.description) && (
-                    <p className="text-xs text-[#6B7280] truncate mt-0.5">{r.meta ?? r.description}</p>
+                    <p className="text-xs text-[#7A6F55] truncate mt-0.5">{r.meta ?? r.description}</p>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-[#4B5563] capitalize">{r.type}</span>
+                  <span className="text-xs text-[#5C5340] capitalize">{r.type}</span>
                   {r.score !== undefined && (
-                    <span className="text-xs font-mono text-[#4B5563] flex items-center gap-0.5">
-                      <Sparkles className="w-2.5 h-2.5 text-[#A855F7]" />{Math.round(r.score * 100)}%
+                    <span className="text-xs font-mono text-[#5C5340] flex items-center gap-0.5">
+                      <Sparkles className="w-2.5 h-2.5 text-[#9B6B4F]" />{Math.round(r.score * 100)}%
                     </span>
                   )}
                 </div>
@@ -195,10 +195,10 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
 
         {/* Footer hint */}
         {filteredResults.length > 0 && (
-          <div className="px-4 py-2 border-t border-[rgba(255,255,255,0.04)] flex items-center gap-4">
-            <span className="text-xs text-[#4B5563]">↑↓ navigate</span>
-            <span className="text-xs text-[#4B5563]">↵ open</span>
-            <span className="text-xs text-[#4B5563]">esc close</span>
+          <div className="px-4 py-2 border-t border-[rgba(167,155,120,0.09)] flex items-center gap-4">
+            <span className="text-xs text-[#5C5340]">↑↓ navigate</span>
+            <span className="text-xs text-[#5C5340]">↵ open</span>
+            <span className="text-xs text-[#5C5340]">esc close</span>
           </div>
         )}
       </div>

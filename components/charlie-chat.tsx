@@ -219,29 +219,29 @@ export function CharlieChat() {
           }}
           aria-label="Open chat"
         >
-          {open ? <ChevronDown className="w-5 h-5 text-white" /> : <MessageSquare className="w-5 h-5 text-white" />}
+          {open ? <ChevronDown className="w-5 h-5 text-[#E8DFCE]" /> : <MessageSquare className="w-5 h-5 text-[#E8DFCE]" />}
         </button>
       </div>
 
       {/* Camera viewfinder overlay */}
       {cameraOpen && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-[#140F0B] flex flex-col items-center justify-center">
           <div className="relative w-full max-w-sm">
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-            <video ref={videoRef} className="w-full rounded-[12px]" playsInline autoPlay muted />
+            <video ref={videoRef} className="w-full rounded-none" playsInline autoPlay muted />
             <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-6">
               <button
                 onClick={closeCamera}
-                className="w-12 h-12 rounded-full bg-[rgba(255,255,255,0.2)] flex items-center justify-center text-white"
+                className="w-12 h-12 rounded-full bg-[rgba(167,155,120,0.44)] flex items-center justify-center text-[#E8DFCE]"
               >
                 <X className="w-5 h-5" />
               </button>
               <button
                 onClick={captureFrame}
-                className="w-16 h-16 rounded-full border-4 border-white bg-white/20 flex items-center justify-center"
+                className="w-16 h-16 rounded-full border-4 border-[#E8DFCE] bg-[rgba(232,223,206,0.2)] flex items-center justify-center"
                 aria-label="Capture photo"
               >
-                <Camera className="w-6 h-6 text-white" />
+                <Camera className="w-6 h-6 text-[#E8DFCE]" />
               </button>
             </div>
           </div>
@@ -251,24 +251,24 @@ export function CharlieChat() {
       {/* Chat panel */}
       {open && (
         <div className={cn(
-          'fixed z-40 flex flex-col bg-[#141414] border border-[rgba(255,255,255,0.10)] overflow-hidden',
+          'fixed z-40 flex flex-col bg-[#211913] border border-[rgba(167,155,120,0.22)] overflow-hidden',
           isMobile
             ? 'inset-0 rounded-none'
-            : 'bottom-20 right-6 w-80 h-[520px] rounded-[12px]'
+            : 'bottom-20 right-6 w-80 h-[520px] rounded-none'
         )}>
           {/* Header */}
           <div
-            className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)] shrink-0"
+            className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)] shrink-0"
             style={{ borderTop: `2px solid ${workspace.color}` }}
           >
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: wsConnected ? '#22C55E' : '#6B7280' }} />
-              <span className="text-sm font-semibold text-[#F5F5F5]">Assistant</span>
-              <span className="text-xs text-[#4B5563]">{wsConnected ? 'connected' : 'offline'}</span>
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: wsConnected ? '#7D9B5E' : '#7A6F55' }} />
+              <span className="text-sm font-semibold text-[#E8DFCE]">Assistant</span>
+              <span className="text-xs text-[#5C5340]">{wsConnected ? 'connected' : 'offline'}</span>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-8 h-8 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
               aria-label="Close chat"
             >
               <X className="w-4 h-4" />
@@ -279,24 +279,24 @@ export function CharlieChat() {
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
             {messages.length === 0 && (
               <div className="text-center pt-8">
-                <p className="text-sm text-[#4B5563]">Send a message</p>
-                <p className="text-xs text-[#4B5563] mt-1">Context: {workspace.name}</p>
+                <p className="text-sm text-[#5C5340]">Send a message</p>
+                <p className="text-xs text-[#5C5340] mt-1">Context: {workspace.name}</p>
               </div>
             )}
             {messages.map(msg => (
               <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
                 <div
                   className={cn(
-                    'max-w-[85%] rounded-[8px] px-3 py-2',
+                    'max-w-[85%] rounded-none px-3 py-2',
                     msg.role === 'user'
-                      ? 'text-white text-sm'
-                      : 'bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm'
+                      ? 'text-[#E8DFCE] text-sm'
+                      : 'bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm'
                   )}
                   style={msg.role === 'user' ? { backgroundColor: workspace.color } : undefined}
                 >
                   {msg.images?.map((img, i) => (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img key={i} src={img} alt="attached" className="rounded mb-1 max-h-32 object-contain" />
+                    <img key={i} src={img} alt="attached" className="rounded-none mb-1 max-h-32 object-contain" />
                   ))}
                   <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   <p className="text-xs opacity-50 mt-0.5">{formatTime(msg.timestamp)}</p>
@@ -305,12 +305,12 @@ export function CharlieChat() {
             ))}
             {sending && (
               <div className="flex justify-start">
-                <div className="bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] rounded-[8px] px-3 py-2">
+                <div className="bg-[#281E16] border border-[rgba(167,155,120,0.13)] rounded-none px-3 py-2">
                   <div className="flex gap-1">
                     {[0, 1, 2].map(i => (
                       <div
                         key={i}
-                        className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce"
+                        className="w-1.5 h-1.5 rounded-full bg-[#7A6F55] animate-bounce"
                         style={{ animationDelay: `${i * 0.15}s` }}
                       />
                     ))}
@@ -323,14 +323,14 @@ export function CharlieChat() {
 
           {/* Image previews */}
           {images.length > 0 && (
-            <div className="flex gap-2 px-3 py-2 border-t border-[rgba(255,255,255,0.06)] shrink-0">
+            <div className="flex gap-2 px-3 py-2 border-t border-[rgba(167,155,120,0.13)] shrink-0">
               {images.map((img, i) => (
                 <div key={i} className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={img} alt="" className="w-12 h-12 rounded object-cover" />
+                  <img src={img} alt="" className="w-12 h-12 rounded-none object-cover" />
                   <button
                     onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
-                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF4444] flex items-center justify-center text-white"
+                    className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#C0452E] flex items-center justify-center text-[#E8DFCE]"
                   >
                     <X className="w-2.5 h-2.5" />
                   </button>
@@ -340,14 +340,14 @@ export function CharlieChat() {
           )}
 
           {/* Input */}
-          <div className="flex items-center gap-1.5 px-3 py-2.5 border-t border-[rgba(255,255,255,0.06)] shrink-0">
+          <div className="flex items-center gap-1.5 px-3 py-2.5 border-t border-[rgba(167,155,120,0.13)] shrink-0">
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void sendMessage() } }}
               onPaste={handlePaste}
               placeholder="Message…"
-              className="flex-1 bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] rounded-[6px] px-3 py-2 text-sm text-[#F5F5F5] placeholder-[#4B5563] outline-none focus:border-[rgba(255,255,255,0.16)]"
+              className="flex-1 bg-[#140F0B] border border-[rgba(167,155,120,0.13)] rounded-none px-3 py-2 text-sm text-[#E8DFCE] placeholder-[#5C5340] outline-none focus:border-[rgba(167,155,120,0.35)]"
             />
             <input
               ref={fileInputRef}
@@ -359,14 +359,14 @@ export function CharlieChat() {
             />
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="w-8 h-8 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
               title="Upload image"
             >
               <ImagePlus className="w-4 h-4" />
             </button>
             <button
               onClick={() => void openCamera()}
-              className="w-8 h-8 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
               title="Camera"
             >
               <Camera className="w-4 h-4" />
@@ -374,8 +374,8 @@ export function CharlieChat() {
             <button
               onClick={startVoice}
               className={cn(
-                'w-8 h-8 flex items-center justify-center rounded transition-colors',
-                listening ? 'text-[#EF4444]' : 'text-[#6B7280] hover:text-[#F5F5F5]'
+                'w-8 h-8 flex items-center justify-center rounded-none transition-colors',
+                listening ? 'text-[#C0452E]' : 'text-[#7A6F55] hover:text-[#E8DFCE]'
               )}
               title="Voice input"
             >
@@ -384,7 +384,7 @@ export function CharlieChat() {
             <button
               onClick={() => void sendMessage()}
               disabled={(!input.trim() && images.length === 0) || sending}
-              className="w-8 h-8 flex items-center justify-center rounded disabled:opacity-40 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-none disabled:opacity-40 transition-colors"
               style={{ color: workspace.color }}
             >
               <Send className="w-4 h-4" />

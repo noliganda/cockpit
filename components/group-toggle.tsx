@@ -76,10 +76,10 @@ export function GroupToggle({ value, onChange, options }: GroupToggleProps) {
       <button
         onClick={() => setOpen(v => !v)}
         className={cn(
-          'flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-[6px] border transition-colors',
+          'flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-none border transition-colors',
           value !== 'none'
-            ? 'bg-[rgba(139,92,246,0.12)] border-[rgba(139,92,246,0.35)] text-[#A78BFA]'
-            : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+            ? 'bg-[rgba(155,107,79,0.12)] border-[rgba(155,107,79,0.35)] text-[#AD7B5C]'
+            : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
         )}
       >
         <Layers className="w-3 h-3" />
@@ -88,7 +88,7 @@ export function GroupToggle({ value, onChange, options }: GroupToggleProps) {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[6px] overflow-hidden shadow-lg">
+        <div className="absolute top-full left-0 mt-1 z-50 min-w-[160px] bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
           {filtered.map(opt => (
             <button
               key={opt.value}
@@ -104,8 +104,8 @@ export function GroupToggle({ value, onChange, options }: GroupToggleProps) {
               className={cn(
                 'w-full text-left px-3 py-1.5 text-xs transition-colors flex items-center gap-2',
                 value === opt.value
-                  ? 'text-[#F5F5F5] bg-[rgba(255,255,255,0.04)]'
-                  : 'text-[#A0A0A0] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#F5F5F5]'
+                  ? 'text-[#E8DFCE] bg-[rgba(167,155,120,0.09)]'
+                  : 'text-[#A79B78] hover:bg-[rgba(167,155,120,0.09)] hover:text-[#E8DFCE]'
               )}
             >
               {opt.label}
@@ -142,14 +142,14 @@ export function CollapsibleGroup<T>({ group, children }: CollapsibleGroupProps<T
     <div className="mb-3">
       <button
         onClick={toggle}
-        className="flex items-center gap-2 w-full py-2 px-3 rounded-[6px] hover:bg-[rgba(255,255,255,0.03)] transition-colors group/header"
+        className="flex items-center gap-2 w-full py-2 px-3 rounded-none hover:bg-[rgba(167,155,120,0.07)] transition-colors group/header"
       >
         {isCollapsed
-          ? <ChevronRight className="w-3.5 h-3.5 text-[#6B7280] transition-transform" />
-          : <ChevronDown className="w-3.5 h-3.5 text-[#6B7280] transition-transform" />
+          ? <ChevronRight className="w-3.5 h-3.5 text-[#7A6F55] transition-transform" />
+          : <ChevronDown className="w-3.5 h-3.5 text-[#7A6F55] transition-transform" />
         }
-        <span className="text-sm font-semibold text-[#F5F5F5]">{group.label}</span>
-        <span className="text-xs text-[#4B5563] font-medium ml-1">({group.count})</span>
+        <span className="text-sm font-semibold text-[#E8DFCE]">{group.label}</span>
+        <span className="text-xs text-[#5C5340] font-medium ml-1">({group.count})</span>
       </button>
 
       <div

@@ -128,18 +128,18 @@ export default async function KorusMetricsPage() {
 
 function KorusGuestLogin() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0F0F0F]">
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1410]">
       <div className="w-full max-w-sm px-4">
         <div className="mb-8 text-center">
-          <div className="w-10 h-10 rounded-[8px] bg-[#008080] flex items-center justify-center mx-auto mb-3 text-lg">🌏</div>
-          <h1 className="text-xl font-bold text-[#F5F5F5]">KORUS Group</h1>
-          <p className="text-sm text-[#A0A0A0] mt-1">Board Dashboard</p>
+          <div className="w-10 h-10 rounded-none bg-[#3E7A70] flex items-center justify-center mx-auto mb-3 font-mono text-base font-medium text-[#E8DFCE]">K</div>
+          <h1 className="font-display text-xl font-medium text-[#E8DFCE]">KORUS Group</h1>
+          <p className="text-sm text-[#A79B78] mt-1">Board Dashboard</p>
         </div>
         <form action="/api/auth/guest" method="post" className="space-y-4">
           <input type="password" name="password" placeholder="Access password"
-            className="w-full px-4 py-3 rounded-[8px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]" />
+            className="w-full px-4 py-3 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]" />
           <button type="submit"
-            className="w-full py-3 rounded-[8px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm font-medium hover:bg-[#222222] transition-all">
+            className="w-full py-3 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm font-medium hover:bg-[#2F241A] transition-all">
             Access Dashboard
           </button>
         </form>

@@ -33,11 +33,11 @@ const TABS = [
 type TabId = typeof TABS[number]['id']
 
 const STATUS_COLORS: Record<string, string> = {
-  Planning: 'text-[#3B82F6] bg-[rgba(59,130,246,0.12)]',
-  Active: 'text-[#22C55E] bg-[rgba(34,197,94,0.12)]',
-  'On Hold': 'text-[#F59E0B] bg-[rgba(245,158,11,0.12)]',
-  Completed: 'text-[#6B7280] bg-[rgba(107,114,128,0.12)]',
-  Archived: 'text-[#4B5563] bg-[rgba(75,85,99,0.12)]',
+  Planning: 'text-[#5F7A72] bg-[rgba(95,122,114,0.12)]',
+  Active: 'text-[#7D9B5E] bg-[rgba(125,155,94,0.12)]',
+  'On Hold': 'text-[#C9962E] bg-[rgba(201,150,46,0.12)]',
+  Completed: 'text-[#7A6F55] bg-[rgba(122,111,85,0.12)]',
+  Archived: 'text-[#5C5340] bg-[rgba(92,83,64,0.12)]',
 }
 
 const CONTACT_ROLES = ['Team', 'Client', 'Contractor', 'Supplier', 'Consultant']
@@ -185,22 +185,22 @@ export function ProjectDetailClient({
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Back link */}
-      <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm text-[#6B7280] hover:text-[#F5F5F5] mb-6 transition-colors">
+      <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm text-[#7A6F55] hover:text-[#E8DFCE] mb-6 transition-colors">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Projects
       </Link>
 
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-start gap-3 mb-2">
-          <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight flex-1">{project.name}</h1>
+          <h1 className="font-display text-[26px] font-medium text-[#E8DFCE] flex-1">{project.name}</h1>
           {project.status && (
-            <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium shrink-0 mt-1', STATUS_COLORS[project.status] ?? 'text-[#A0A0A0] bg-[rgba(255,255,255,0.06)]')}>
+            <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium shrink-0 mt-1', STATUS_COLORS[project.status] ?? 'text-[#A79B78] bg-[rgba(167,155,120,0.13)]')}>
               {project.status}
             </span>
           )}
         </div>
         {area && (
-          <Link href={`/areas`} className="inline-flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors mb-2">
+          <Link href={`/areas`} className="inline-flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors mb-2">
             <span>{area.icon}</span>
             <span>{area.name}</span>
           </Link>
@@ -219,9 +219,9 @@ export function ProjectDetailClient({
               : '—' },
           { label: 'Notes', value: String(projectNotes.length) },
         ].map(s => (
-          <div key={s.label} className="p-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-            <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">{s.label}</p>
-            <p className="text-lg font-bold text-[#F5F5F5] font-mono">{s.value}</p>
+          <div key={s.label} className="p-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">{s.label}</p>
+            <p className="text-lg font-bold text-[#E8DFCE] font-mono">{s.value}</p>
           </div>
         ))}
       </div>
@@ -230,17 +230,17 @@ export function ProjectDetailClient({
       {projectTasks.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-[#6B7280]">Overall progress</span>
-            <span className="text-xs font-mono text-[#A0A0A0]">{progress}%</span>
+            <span className="text-xs text-[#7A6F55]">Overall progress</span>
+            <span className="text-xs font-mono text-[#A79B78]">{progress}%</span>
           </div>
-          <div className="h-2 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
-            <div className="h-full rounded-full bg-[#22C55E] transition-all" style={{ width: `${progress}%` }} />
+          <div className="h-2 rounded-full bg-[rgba(167,155,120,0.13)] overflow-hidden">
+            <div className="h-full rounded-full bg-[#7D9B5E] transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-[rgba(255,255,255,0.06)] mb-6 overflow-x-auto">
+      <div className="flex items-center gap-1 border-b border-[rgba(167,155,120,0.13)] mb-6 overflow-x-auto">
         {TABS.map(tab => {
           const Icon = tab.icon
           return (
@@ -250,17 +250,17 @@ export function ProjectDetailClient({
               className={cn(
                 'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors',
                 activeTab === tab.id
-                  ? 'border-[#F5F5F5] text-[#F5F5F5]'
-                  : 'border-transparent text-[#6B7280] hover:text-[#A0A0A0]'
+                  ? 'border-[#E8DFCE] text-[#E8DFCE]'
+                  : 'border-transparent text-[#7A6F55] hover:text-[#A79B78]'
               )}
             >
               <Icon className="w-3.5 h-3.5" />
               {tab.label}
               {tab.id === 'tasks' && projectTasks.length > 0 && (
-                <span className="text-xs font-mono text-[#6B7280] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded-full">{projectTasks.length}</span>
+                <span className="text-xs font-mono text-[#7A6F55] bg-[rgba(167,155,120,0.13)] px-1.5 py-0.5 rounded-full">{projectTasks.length}</span>
               )}
               {tab.id === 'team' && projectContacts.length > 0 && (
-                <span className="text-xs font-mono text-[#6B7280] bg-[rgba(255,255,255,0.06)] px-1.5 py-0.5 rounded-full">{projectContacts.length}</span>
+                <span className="text-xs font-mono text-[#7A6F55] bg-[rgba(167,155,120,0.13)] px-1.5 py-0.5 rounded-full">{projectContacts.length}</span>
               )}
             </button>
           )
@@ -272,8 +272,8 @@ export function ProjectDetailClient({
         <div className="space-y-4">
           {/* Description */}
           {project.description && (
-            <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-              <h3 className="text-xs text-[#6B7280] uppercase tracking-wide mb-2">Description</h3>
+            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-2">Description</h3>
               <div className="text-sm [&_.bn-editor]:pointer-events-none">
                 <BlockEditor initialContent={project.description} onChange={() => {}} className="[&_.bn-editor]:min-h-0" />
               </div>
@@ -283,29 +283,29 @@ export function ProjectDetailClient({
           {/* Quick info */}
           <div className="grid grid-cols-2 gap-3">
             {project.endDate && (
-              <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">End Date</p>
-                <p className="text-sm text-[#F5F5F5]">{formatDate(project.endDate)}</p>
+              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+                <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">End Date</p>
+                <p className="text-sm text-[#E8DFCE]">{formatDate(project.endDate)}</p>
               </div>
             )}
             {area && (
-              <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">Area</p>
-                <p className="text-sm text-[#F5F5F5]">{area.icon} {area.name}</p>
+              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+                <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">Area</p>
+                <p className="text-sm text-[#E8DFCE]">{area.icon} {area.name}</p>
               </div>
             )}
             {project.region && (
-              <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">Region</p>
-                <p className="text-sm text-[#F5F5F5]">{project.region}</p>
+              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+                <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">Region</p>
+                <p className="text-sm text-[#E8DFCE]">{project.region}</p>
               </div>
             )}
             {project.slackChannelName && (
-              <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-                <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">Slack Channel</p>
+              <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+                <p className="text-xs text-[#7A6F55] uppercase tracking-wide mb-1">Slack Channel</p>
                 <a
                   href={project.slackChannelId ? `slack://channel?team=&id=${project.slackChannelId}` : '#'}
-                  className="inline-flex items-center gap-1.5 text-sm text-[#4A90E2] hover:text-[#74B0F4] transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm text-[#5F7A72] hover:text-[#6E8B7E] transition-colors"
                   title="Open in Slack"
                 >
                   <Hash className="w-3.5 h-3.5" />
@@ -317,10 +317,10 @@ export function ProjectDetailClient({
           </div>
 
           {/* Milestones */}
-          <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+          <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-[#F5F5F5]">Milestones</h3>
-              <span className="text-xs text-[#6B7280]">{milestones.filter(m => m.status === 'completed').length}/{milestones.length} done</span>
+              <h3 className="text-sm font-semibold text-[#E8DFCE]">Milestones</h3>
+              <span className="text-xs text-[#7A6F55]">{milestones.filter(m => m.status === 'completed').length}/{milestones.length} done</span>
             </div>
 
             {milestones.length > 0 && (
@@ -332,27 +332,27 @@ export function ProjectDetailClient({
                       <button
                         onClick={() => toggleMilestone(m)}
                         className={cn(
-                          'w-5 h-5 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors',
+                          'w-5 h-5 rounded-none border flex items-center justify-center shrink-0 transition-colors',
                           m.status === 'completed'
-                            ? 'bg-[#22C55E] border-[#22C55E]'
-                            : 'border-[rgba(255,255,255,0.16)] hover:border-[rgba(255,255,255,0.30)]'
+                            ? 'bg-[#7D9B5E] border-[#7D9B5E]'
+                            : 'border-[rgba(167,155,120,0.35)] hover:border-[rgba(167,155,120,0.66)]'
                         )}
                       >
-                        {m.status === 'completed' && <Check className="w-3 h-3 text-white" />}
+                        {m.status === 'completed' && <Check className="w-3 h-3 text-[#E8DFCE]" />}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <span className={cn('text-sm', m.status === 'completed' ? 'line-through text-[#6B7280]' : overdue ? 'text-[#EF4444]' : 'text-[#F5F5F5]')}>
+                        <span className={cn('text-sm', m.status === 'completed' ? 'line-through text-[#7A6F55]' : overdue ? 'text-[#C0452E]' : 'text-[#E8DFCE]')}>
                           {m.title}
                         </span>
                         {m.date && (
-                          <span className={cn('text-xs ml-2', overdue ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
+                          <span className={cn('text-xs ml-2', overdue ? 'text-[#C0452E]' : 'text-[#7A6F55]')}>
                             {formatDate(m.date)}{overdue ? ' · Overdue' : ''}
                           </span>
                         )}
                       </div>
                       <button
                         onClick={() => deleteMilestone(m.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#EF4444] transition-all"
+                        className="opacity-0 group-hover:opacity-100 p-1 text-[#7A6F55] hover:text-[#C0452E] transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -369,18 +369,18 @@ export function ProjectDetailClient({
                 onChange={e => setNewMilestoneTitle(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addMilestone() }}
                 placeholder="Add milestone..."
-                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+                className="flex-1 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
               />
               <input
                 type="date"
                 value={newMilestoneDate}
                 onChange={e => setNewMilestoneDate(e.target.value)}
-                className="px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none [color-scheme:dark]"
+                className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none [color-scheme:dark]"
               />
               <button
                 onClick={addMilestone}
                 disabled={addingMilestone || !newMilestoneTitle.trim()}
-                className="p-2 rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -388,8 +388,8 @@ export function ProjectDetailClient({
           </div>
 
           {/* Links */}
-          <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-            <h3 className="text-sm font-semibold text-[#F5F5F5] mb-4">Links</h3>
+          <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <h3 className="text-sm font-semibold text-[#E8DFCE] mb-4">Links</h3>
 
             {/* Preset buttons */}
             <div className="flex items-center gap-2 flex-wrap mb-3">
@@ -397,7 +397,7 @@ export function ProjectDetailClient({
                 <button
                   key={preset.title}
                   onClick={() => addBookmark(preset.title, preset.url)}
-                  className="text-xs px-2.5 py-1 rounded-full border border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#F5F5F5] hover:border-[rgba(255,255,255,0.10)] transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-full border border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#E8DFCE] hover:border-[rgba(167,155,120,0.22)] transition-colors"
                 >
                   + {preset.title}
                 </button>
@@ -408,15 +408,15 @@ export function ProjectDetailClient({
               <div className="space-y-1.5 mb-3">
                 {bookmarks.map(b => (
                   <div key={b.id} className="flex items-center gap-2 group">
-                    <ExternalLink className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+                    <ExternalLink className="w-3.5 h-3.5 text-[#7A6F55] shrink-0" />
                     <a href={b.url} target="_blank" rel="noopener noreferrer"
-                      className="flex-1 text-sm text-[#F5F5F5] hover:text-[#A0A0A0] truncate transition-colors">
+                      className="flex-1 text-sm text-[#E8DFCE] hover:text-[#A79B78] truncate transition-colors">
                       {b.title}
                     </a>
-                    <span className="text-xs text-[#4B5563] truncate max-w-[120px] hidden sm:block">{b.url}</span>
+                    <span className="text-xs text-[#5C5340] truncate max-w-[120px] hidden sm:block">{b.url}</span>
                     <button
                       onClick={() => deleteBookmark(b.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#EF4444] transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-[#7A6F55] hover:text-[#C0452E] transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -431,19 +431,19 @@ export function ProjectDetailClient({
                 value={newBookmarkTitle}
                 onChange={e => setNewBookmarkTitle(e.target.value)}
                 placeholder="Title"
-                className="w-28 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+                className="w-28 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
               />
               <input
                 value={newBookmarkUrl}
                 onChange={e => setNewBookmarkUrl(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addBookmark() }}
                 placeholder="https://..."
-                className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] placeholder-[#4B5563] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+                className="flex-1 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] placeholder-[#5C5340] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
               />
               <button
                 onClick={() => addBookmark()}
                 disabled={!newBookmarkTitle.trim() || !newBookmarkUrl.trim()}
-                className="p-2 rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -454,34 +454,34 @@ export function ProjectDetailClient({
 
       {/* Tasks tab */}
       {activeTab === 'tasks' && (
-        <div className="rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] overflow-hidden">
+        <div className="rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] overflow-hidden">
           {projectTasks.length === 0 ? (
-            <p className="text-sm text-[#4B5563] text-center py-12">No tasks linked to this project.</p>
+            <p className="text-sm text-[#5C5340] text-center py-12">No tasks linked to this project.</p>
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[rgba(255,255,255,0.06)]">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Title</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#6B7280] uppercase tracking-wide">Due</th>
-                  <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide">⚡</th>
-                  <th className="px-2 py-3 text-center text-xs font-medium text-[#6B7280] uppercase tracking-wide">⭐</th>
+                <tr className="border-b border-[rgba(167,155,120,0.13)]">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Title</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">Due</th>
+                  <th className="px-2 py-3 text-center text-xs font-medium text-[#7A6F55] uppercase tracking-wide">⚡</th>
+                  <th className="px-2 py-3 text-center text-xs font-medium text-[#7A6F55] uppercase tracking-wide">⭐</th>
                 </tr>
               </thead>
               <tbody>
                 {projectTasks.map(task => (
-                  <tr key={task.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-0">
-                    <td className="px-4 py-2.5"><span className="text-sm text-[#F5F5F5]">{task.title}</span></td>
+                  <tr key={task.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-0">
+                    <td className="px-4 py-2.5"><span className="text-sm text-[#E8DFCE]">{task.title}</span></td>
                     <td className="px-4 py-2.5">
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{task.status}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">{task.status}</span>
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className={cn('text-xs', task.dueDate && isOverdue(task.dueDate) ? 'text-[#EF4444]' : 'text-[#6B7280]')}>
+                      <span className={cn('text-xs', task.dueDate && isOverdue(task.dueDate) ? 'text-[#C0452E]' : 'text-[#7A6F55]')}>
                         {task.dueDate ? formatDate(task.dueDate) : '—'}
                       </span>
                     </td>
-                    <td className="px-2 py-2.5 text-center">{task.urgent && <Zap className="w-3.5 h-3.5 text-[#EF4444] mx-auto" />}</td>
-                    <td className="px-2 py-2.5 text-center">{task.important && <Star className="w-3.5 h-3.5 text-[#F59E0B] mx-auto" />}</td>
+                    <td className="px-2 py-2.5 text-center">{task.urgent && <Zap className="w-3.5 h-3.5 text-[#C0452E] mx-auto" />}</td>
+                    <td className="px-2 py-2.5 text-center">{task.important && <Star className="w-3.5 h-3.5 text-[#C9962E] mx-auto" />}</td>
                   </tr>
                 ))}
               </tbody>
@@ -494,15 +494,15 @@ export function ProjectDetailClient({
       {activeTab === 'notes' && (
         <div className="space-y-3">
           {projectNotes.length === 0 ? (
-            <p className="text-sm text-[#4B5563] text-center py-12">No notes linked to this project.</p>
+            <p className="text-sm text-[#5C5340] text-center py-12">No notes linked to this project.</p>
           ) : projectNotes.map(note => (
-            <div key={note.id} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+            <div key={note.id} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
               <div className="flex items-center gap-2 mb-1">
-                {note.pinned && <span className="text-xs text-[#F59E0B]">📌 Pinned</span>}
-                <h3 className="text-sm font-medium text-[#F5F5F5]">{note.title}</h3>
+                {note.pinned && <span className="text-xs text-[#C9962E]">📌 Pinned</span>}
+                <h3 className="text-sm font-medium text-[#E8DFCE]">{note.title}</h3>
               </div>
-              {note.contentPlaintext && <p className="text-xs text-[#6B7280] line-clamp-2">{note.contentPlaintext}</p>}
-              <p className="text-xs text-[#4B5563] mt-1">{formatDate(note.createdAt.toISOString())}</p>
+              {note.contentPlaintext && <p className="text-xs text-[#7A6F55] line-clamp-2">{note.contentPlaintext}</p>}
+              <p className="text-xs text-[#5C5340] mt-1">{formatDate(note.createdAt.toISOString())}</p>
             </div>
           ))}
         </div>
@@ -513,39 +513,39 @@ export function ProjectDetailClient({
         <div className="space-y-4">
           {/* Contact cards */}
           {projectContacts.length === 0 ? (
-            <p className="text-sm text-[#4B5563] text-center py-8">No team contacts yet.</p>
+            <p className="text-sm text-[#5C5340] text-center py-8">No team contacts yet.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {projectContacts.map(pc => {
                 const c = pc.contact!
                 return (
-                  <div key={pc.id} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] group">
+                  <div key={pc.id} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] group">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-sm font-medium text-[#F5F5F5]">{c.name}</p>
-                        <p className="text-xs text-[#6B7280]">{pc.role} {c.company ? `· ${c.company}` : ''}</p>
+                        <p className="text-sm font-medium text-[#E8DFCE]">{c.name}</p>
+                        <p className="text-xs text-[#7A6F55]">{pc.role} {c.company ? `· ${c.company}` : ''}</p>
                       </div>
                       <button
                         onClick={() => removeContact(pc.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-[#6B7280] hover:text-[#EF4444] transition-all"
+                        className="opacity-0 group-hover:opacity-100 p-1 text-[#7A6F55] hover:text-[#C0452E] transition-all"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                     <div className="flex items-center gap-3 flex-wrap">
                       {(c.mobile ?? c.phone) && (
-                        <a href={`tel:${c.mobile ?? c.phone}`} className="text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+                        <a href={`tel:${c.mobile ?? c.phone}`} className="text-xs text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
                           {c.mobile ?? c.phone}
                         </a>
                       )}
                       {c.email && (
-                        <a href={`mailto:${c.email}`} className="text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+                        <a href={`mailto:${c.email}`} className="text-xs text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
                           {c.email}
                         </a>
                       )}
                       <button
                         onClick={() => downloadVCF(c)}
-                        className="text-xs text-[#4B5563] hover:text-[#A0A0A0] transition-colors ml-auto"
+                        className="text-xs text-[#5C5340] hover:text-[#A79B78] transition-colors ml-auto"
                       >
                         ↓ VCF
                       </button>
@@ -558,13 +558,13 @@ export function ProjectDetailClient({
 
           {/* Add contact */}
           {workspaceContacts.length > 0 && (
-            <div className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-              <h3 className="text-xs text-[#6B7280] uppercase tracking-wide mb-3">Add Contact</h3>
+            <div className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+              <h3 className="text-xs text-[#7A6F55] uppercase tracking-wide mb-3">Add Contact</h3>
               <div className="flex items-center gap-2">
                 <select
                   value={addContactId}
                   onChange={e => setAddContactId(e.target.value)}
-                  className="flex-1 px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none"
+                  className="flex-1 px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
                 >
                   <option value="">— Select contact —</option>
                   {workspaceContacts
@@ -575,14 +575,14 @@ export function ProjectDetailClient({
                 <select
                   value={addContactRole}
                   onChange={e => setAddContactRole(e.target.value)}
-                  className="px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none appearance-none"
+                  className="px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none appearance-none"
                 >
                   {CONTACT_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
                 <button
                   onClick={addContact}
                   disabled={!addContactId || addingContact}
-                  className="px-3 py-2 rounded-[6px] bg-[#222222] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] text-sm hover:bg-[rgba(255,255,255,0.08)] disabled:opacity-40 transition-colors"
+                  className="px-3 py-2 rounded-none bg-[#2F241A] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] text-sm hover:bg-[rgba(167,155,120,0.18)] disabled:opacity-40 transition-colors"
                 >
                   Add
                 </button>
@@ -594,8 +594,8 @@ export function ProjectDetailClient({
 
       {activeTab === 'documents' && (
         <div className="text-center py-16">
-          <FileText className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
-          <p className="text-sm text-[#4B5563]">Documents coming soon.</p>
+          <FileText className="w-8 h-8 text-[#5C5340] mx-auto mb-3" />
+          <p className="text-sm text-[#5C5340]">Documents coming soon.</p>
         </div>
       )}
 
@@ -603,22 +603,22 @@ export function ProjectDetailClient({
         <div className="space-y-3">
           {projectBases.length === 0 ? (
             <div className="text-center py-16">
-              <Database className="w-8 h-8 text-[#4B5563] mx-auto mb-3" />
-              <p className="text-sm text-[#4B5563]">No bases linked to this project yet.</p>
-              <Link href="/bases" className="mt-2 inline-block text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors">
+              <Database className="w-8 h-8 text-[#5C5340] mx-auto mb-3" />
+              <p className="text-sm text-[#5C5340]">No bases linked to this project yet.</p>
+              <Link href="/bases" className="mt-2 inline-block text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors">
                 Go to Bases to create one and link it here →
               </Link>
             </div>
           ) : projectBases.map(base => (
             <Link key={base.id} href={`/bases/${base.id}`}
-              className="flex items-center gap-3 p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all group">
-              <Database className="w-4 h-4 text-[#4B5563] shrink-0 group-hover:text-[#6B7280] transition-colors" />
+              className="flex items-center gap-3 p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all group">
+              <Database className="w-4 h-4 text-[#5C5340] shrink-0 group-hover:text-[#7A6F55] transition-colors" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#F5F5F5] truncate">{base.name}</p>
-                {base.description && <p className="text-xs text-[#6B7280] truncate">{base.description}</p>}
+                <p className="text-sm font-medium text-[#E8DFCE] truncate">{base.name}</p>
+                {base.description && <p className="text-xs text-[#7A6F55] truncate">{base.description}</p>}
               </div>
               {base.isPublic && (
-                <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(34,197,94,0.12)] text-[#22C55E] shrink-0">Shared</span>
+                <span className="text-xs px-1.5 py-0.5 rounded-none bg-[rgba(125,155,94,0.12)] text-[#7D9B5E] shrink-0">Shared</span>
               )}
             </Link>
           ))}

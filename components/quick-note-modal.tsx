@@ -84,14 +84,14 @@ export function QuickNoteModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
-      <div className="relative w-full max-w-lg bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] overflow-hidden">
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={() => setOpen(false)} />
+      <div className="relative w-full max-w-lg bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-[rgba(255,255,255,0.06)]">
-          <StickyNote className="w-4 h-4 text-[#6B7280] shrink-0" />
-          <span className="text-sm font-semibold text-[#F5F5F5] flex-1">Quick Note</span>
-          <kbd className="hidden sm:inline text-xs text-[#4B5563] px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.06)]">⌘⇧N</kbd>
-          <button onClick={() => setOpen(false)} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors ml-1">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[rgba(167,155,120,0.13)]">
+          <StickyNote className="w-4 h-4 text-[#7A6F55] shrink-0" />
+          <span className="text-sm font-semibold text-[#E8DFCE] flex-1">Quick Note</span>
+          <kbd className="hidden sm:inline text-xs text-[#5C5340] px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.09)] border border-[rgba(167,155,120,0.13)]">⌘⇧N</kbd>
+          <button onClick={() => setOpen(false)} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors ml-1">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -102,10 +102,10 @@ export function QuickNoteModal() {
           <select
             value={wsId}
             onChange={e => setWsId(e.target.value as WorkspaceId)}
-            className="w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] text-sm outline-none focus:border-[rgba(255,255,255,0.16)]"
+            className="w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#A79B78] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]"
           >
             {WORKSPACES.map(ws => (
-              <option key={ws.id} value={ws.id}>{ws.icon} {ws.name}</option>
+              <option key={ws.id} value={ws.id}>{ws.name}</option>
             ))}
           </select>
 
@@ -116,7 +116,7 @@ export function QuickNoteModal() {
             onChange={e => setTitle(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); /* focus content */ } }}
             placeholder="Note title…"
-            className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563] font-medium"
+            className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340] font-medium"
           />
 
           {/* Content */}
@@ -125,17 +125,17 @@ export function QuickNoteModal() {
             onChange={e => setContent(e.target.value)}
             placeholder="Start writing…"
             rows={5}
-            className="w-full px-3 py-2.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563] resize-none"
+            className="w-full px-3 py-2.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340] resize-none"
           />
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(255,255,255,0.06)]">
-          <button onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)]">
+          <button onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
           <button
             onClick={() => void handleSave()}
             disabled={saving}
-            className="px-4 py-2 rounded-[6px] bg-[#F5F5F5] text-[#0F0F0F] text-sm font-medium hover:bg-white transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save Note'}
           </button>

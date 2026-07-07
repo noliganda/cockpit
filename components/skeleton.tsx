@@ -4,7 +4,7 @@ function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'animate-pulse rounded-[6px] bg-[rgba(255,255,255,0.05)]',
+        'animate-pulse rounded-none bg-[rgba(167,155,120,0.11)]',
         className
       )}
     />
@@ -22,7 +22,7 @@ export function PageSkeleton() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+          <div key={i} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
             <Skeleton className="h-4 w-20 mb-3" />
             <Skeleton className="h-8 w-16" />
           </div>
@@ -31,7 +31,7 @@ export function PageSkeleton() {
       {/* Content rows */}
       <div className="space-y-2">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+          <div key={i} className="flex items-center gap-4 p-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
             <Skeleton className="h-4 w-4 shrink-0" />
             <Skeleton className="h-4 flex-1" />
             <Skeleton className="h-4 w-20 shrink-0" />
@@ -52,7 +52,7 @@ export function ListSkeleton({ count = 6 }: { count?: number }) {
       </div>
       <div className="space-y-2">
         {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
+          <div key={i} className="flex items-center gap-4 p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
             <Skeleton className="h-4 flex-1" />
             <Skeleton className="h-5 w-16 rounded-full" />
             <Skeleton className="h-4 w-20" />
@@ -72,7 +72,7 @@ export function CardGridSkeleton({ count = 6 }: { count?: number }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="p-4 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] space-y-3">
+          <div key={i} className="p-4 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] space-y-3">
             <Skeleton className="h-5 w-3/4" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-1/2" />

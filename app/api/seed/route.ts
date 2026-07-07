@@ -4,9 +4,9 @@ import { workspaces, areas, users } from '@/lib/db/schema'
 import { getSession, hashPassword } from '@/lib/auth'
 
 const DEFAULT_WORKSPACES = [
-  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#D4A017', icon: '🎬' },
-  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#008080', icon: '🌏' },
-  { id: 'personal', name: 'Personal', slug: 'personal', color: '#F97316', icon: '👤' },
+  { id: 'byron-film', name: 'Byron Film', slug: 'byron-film', color: '#C99A1F', icon: '🎬' },
+  { id: 'korus', name: 'KORUS Group', slug: 'korus', color: '#3E7A70', icon: '🌏' },
+  { id: 'personal', name: 'Personal', slug: 'personal', color: '#C96F2E', icon: '👤' },
 ]
 
 const DEFAULT_AREAS: Array<{ workspaceId: string; name: string; icon: string; order: number }> = [

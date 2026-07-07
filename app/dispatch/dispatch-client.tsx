@@ -54,9 +54,9 @@ interface StatusPayload {
 }
 
 const WORKSPACE_ACCENT: Record<string, string> = {
-  'byron-film': '#D4A017',
-  'korus': '#008080',
-  'personal': '#F97316',
+  'byron-film': '#C99A1F',
+  'korus': '#3E7A70',
+  'personal': '#C96F2E',
 }
 
 function timeAgo(iso: string | null): string {
@@ -77,17 +77,17 @@ function idle(ms: number): string {
 }
 
 const QUEUE_STATUS_COLOR: Record<string, string> = {
-  queued: '#A0A0A0',
-  claimed: '#F59E0B',
-  running: '#3B82F6',
+  queued: '#A79B78',
+  claimed: '#C9962E',
+  running: '#5F7A72',
 }
 
 function StatCard({ label, value, sublabel, accent }: { label: string; value: string | number; sublabel?: string; accent?: string }) {
   return (
-    <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] p-4">
+    <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none p-4">
       <div className="font-mono text-[28px] font-semibold tabular-nums leading-none" style={accent ? { color: accent } : undefined}>{value}</div>
-      <div className="mt-2 text-xs text-[#A0A0A0]">{label}</div>
-      {sublabel && <div className="mt-0.5 text-[11px] text-[#6B7280]">{sublabel}</div>}
+      <div className="mt-2 text-xs text-[#A79B78]">{label}</div>
+      {sublabel && <div className="mt-0.5 text-[11px] text-[#7A6F55]">{sublabel}</div>}
     </div>
   )
 }
@@ -143,8 +143,8 @@ export function DispatchClient() {
 
   if (!data) {
     return error
-      ? <div className="p-8 text-sm text-[#EF4444]">Failed to load dispatch status: {error}</div>
-      : <div className="p-8 text-sm text-[#6B7280]">Loading dispatch status…</div>
+      ? <div className="p-8 text-sm text-[#C0452E]">Failed to load dispatch status: {error}</div>
+      : <div className="p-8 text-sm text-[#7A6F55]">Loading dispatch status…</div>
   }
 
   const { counts } = data.queue
@@ -157,41 +157,41 @@ export function DispatchClient() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-[-0.02em] text-[#F5F5F5]">Dispatch</h1>
+          <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Dispatch</h1>
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
             data.dispatchEnabled
-              ? 'text-[#22C55E] border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.08)]'
-              : 'text-[#6B7280] border-[rgba(255,255,255,0.10)] bg-[#141414]'
+              ? 'text-[#7D9B5E] border-[rgba(125,155,94,0.3)] bg-[rgba(125,155,94,0.08)]'
+              : 'text-[#7A6F55] border-[rgba(167,155,120,0.22)] bg-[#211913]'
           }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${data.dispatchEnabled ? 'bg-[#22C55E]' : 'bg-[#4B5563]'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${data.dispatchEnabled ? 'bg-[#7D9B5E]' : 'bg-[#5C5340]'}`} />
             {data.dispatchEnabled ? 'engine on' : 'engine off (this host)'}
           </span>
           {data.state.paused && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium text-[#F59E0B] border border-[rgba(245,158,11,0.3)] bg-[rgba(245,158,11,0.08)]">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium text-[#C9962E] border border-[rgba(201,150,46,0.3)] bg-[rgba(201,150,46,0.08)]">
               <Pause size={11} strokeWidth={2} />
               paused{data.state.pausedBy ? ` by ${data.state.pausedBy}` : ''}{data.state.pausedAt ? ` ${timeAgo(data.state.pausedAt)}` : ''}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-[#6B7280]">cycle {timeAgo(data.state.lastCycleAt)} · cascade {timeAgo(data.state.lastCascadeAt)}</span>
+          <span className="text-[11px] text-[#7A6F55]">cycle {timeAgo(data.state.lastCycleAt)} · cascade {timeAgo(data.state.lastCascadeAt)}</span>
           <button
             onClick={() => togglePause(!data.state.paused)}
             disabled={toggling}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-[6px] transition-colors disabled:opacity-40 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium border rounded-none transition-colors disabled:opacity-40 ${
               data.state.paused
-                ? 'bg-[rgba(34,197,94,0.08)] border-[rgba(34,197,94,0.3)] text-[#22C55E] hover:bg-[rgba(34,197,94,0.14)]'
-                : 'bg-[#1A1A1A] border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222]'
+                ? 'bg-[rgba(125,155,94,0.08)] border-[rgba(125,155,94,0.3)] text-[#7D9B5E] hover:bg-[rgba(125,155,94,0.14)]'
+                : 'bg-[#281E16] border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A]'
             }`}
           >
             {/* Amber icon differentiates this fleet-wide control from the
                 visually-identical Refresh button beside it. */}
-            {data.state.paused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} className="text-[#F59E0B]" />}
+            {data.state.paused ? <Play size={14} strokeWidth={1.5} /> : <Pause size={14} strokeWidth={1.5} className="text-[#C9962E]" />}
             {data.state.paused ? 'Resume dispatching' : 'Pause dispatching'}
           </button>
           <button
             onClick={() => load(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors"
           >
             <RefreshCw size={14} strokeWidth={1.5} className={refreshing ? 'animate-spin' : ''} />
             Refresh
@@ -200,13 +200,13 @@ export function DispatchClient() {
       </div>
 
       {actionError && (
-        <div className="mb-4 flex items-center justify-between px-3 py-2 text-[12px] text-[#EF4444] bg-[rgba(239,68,68,0.06)] border border-[rgba(239,68,68,0.25)] rounded-[6px]">
+        <div className="mb-4 flex items-center justify-between px-3 py-2 text-[12px] text-[#C0452E] bg-[rgba(192,69,46,0.06)] border border-[rgba(192,69,46,0.25)] rounded-none">
           <span>{actionError}</span>
-          <button onClick={() => setActionError(null)} className="ml-3 text-[#6B7280] hover:text-[#F5F5F5]">dismiss</button>
+          <button onClick={() => setActionError(null)} className="ml-3 text-[#7A6F55] hover:text-[#E8DFCE]">dismiss</button>
         </div>
       )}
       {error && (
-        <div className="mb-4 px-3 py-2 text-[12px] text-[#F59E0B] bg-[rgba(245,158,11,0.06)] border border-[rgba(245,158,11,0.25)] rounded-[6px]">
+        <div className="mb-4 px-3 py-2 text-[12px] text-[#C9962E] bg-[rgba(201,150,46,0.06)] border border-[rgba(201,150,46,0.25)] rounded-none">
           Last refresh failed ({error}) — showing previous data; retrying automatically.
         </div>
       )}
@@ -216,16 +216,16 @@ export function DispatchClient() {
         <StatCard label="Queued" value={counts.queued} sublabel="awaiting a cycle" />
         <StatCard label="Claimed" value={counts.claimed} sublabel="cycle in flight" />
         <StatCard label="Running" value={counts.running} sublabel="harness working" />
-        <StatCard label="Stale" value={staleCount} sublabel="past adapter threshold" accent={staleCount > 0 ? '#EF4444' : undefined} />
+        <StatCard label="Stale" value={staleCount} sublabel="past adapter threshold" accent={staleCount > 0 ? '#C0452E' : undefined} />
         <StatCard label="Active sessions" value={data.activeSessions.length} sublabel="operator × task" />
       </div>
 
       {/* Operators */}
-      <h2 className="text-base font-semibold text-[#F5F5F5] mb-3">Operators</h2>
-      <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] overflow-hidden mb-8">
+      <h2 className="text-base font-semibold text-[#E8DFCE] mb-3">Operators</h2>
+      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden mb-8">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-[0.02em] text-[#6B7280] border-b border-[rgba(255,255,255,0.04)]">
+            <tr className="text-left text-xs uppercase tracking-[0.02em] text-[#7A6F55] border-b border-[rgba(167,155,120,0.09)]">
               <th className="px-3 py-2.5 font-medium">Operator</th>
               <th className="px-3 py-2.5 font-medium hidden md:table-cell">Adapter</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
@@ -235,55 +235,55 @@ export function DispatchClient() {
           </thead>
           <tbody>
             {data.operators.map(op => (
-              <tr key={op.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-b-0 hover:bg-[#1A1A1A]">
+              <tr key={op.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#281E16]">
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-2">
-                    <Bot size={16} strokeWidth={1.5} className="text-[#6B7280]" />
-                    <span className="text-[#F5F5F5]">{op.name}</span>
-                    <span className="font-mono text-[11px] text-[#6B7280]">{op.id}</span>
+                    <Bot size={16} strokeWidth={1.5} className="text-[#7A6F55]" />
+                    <span className="text-[#E8DFCE]">{op.name}</span>
+                    <span className="font-mono text-[11px] text-[#7A6F55]">{op.id}</span>
                   </div>
                 </td>
                 <td className="px-3 py-2.5 hidden md:table-cell">
-                  <span className="font-mono text-[12px] text-[#A0A0A0]">{op.adapterType ?? '—'}</span>
+                  <span className="font-mono text-[12px] text-[#A79B78]">{op.adapterType ?? '—'}</span>
                   {op.adapterType && !op.adapterRegistered && (
-                    <span className="ml-2 text-[11px] text-[#F59E0B]">unregistered</span>
+                    <span className="ml-2 text-[11px] text-[#C9962E]">unregistered</span>
                   )}
                 </td>
                 <td className="px-3 py-2.5">
                   {op.status === 'active' ? (
-                    <span className="text-[#22C55E] text-[12px]">active</span>
+                    <span className="text-[#7D9B5E] text-[12px]">active</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[#F59E0B] text-[12px]">
+                    <span className="inline-flex items-center gap-1 text-[#C9962E] text-[12px]">
                       <PauseCircle size={13} strokeWidth={1.5} />
                       {op.status}{op.pauseReason ? ` · ${op.pauseReason}` : ''}
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2.5 font-mono text-[12px] tabular-nums text-[#A0A0A0]">{op.activeRunCount}/{op.maxConcurrent}</td>
+                <td className="px-3 py-2.5 font-mono text-[12px] tabular-nums text-[#A79B78]">{op.activeRunCount}/{op.maxConcurrent}</td>
                 <td className="px-3 py-2.5 font-mono text-[12px] tabular-nums hidden md:table-cell">
                   {op.budgetMonthlyCents > 0 ? (
-                    <span className={op.spentMonthlyCents >= op.budgetMonthlyCents ? 'text-[#EF4444]' : 'text-[#A0A0A0]'}>
+                    <span className={op.spentMonthlyCents >= op.budgetMonthlyCents ? 'text-[#C0452E]' : 'text-[#A79B78]'}>
                       ${(op.spentMonthlyCents / 100).toFixed(2)} / ${(op.budgetMonthlyCents / 100).toFixed(2)}
                     </span>
                   ) : (
-                    <span className="text-[#A0A0A0]">unmetered</span>
+                    <span className="text-[#A79B78]">unmetered</span>
                   )}
                 </td>
               </tr>
             ))}
             {data.operators.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-[#6B7280] text-sm">No agent operators registered</td></tr>
+              <tr><td colSpan={5} className="px-3 py-8 text-center text-[#7A6F55] text-sm">No agent operators registered</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       {/* Queue */}
-      <h2 className="text-base font-semibold text-[#F5F5F5] mb-3">Wakeup queue</h2>
-      <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] overflow-hidden mb-8">
+      <h2 className="text-base font-semibold text-[#E8DFCE] mb-3">Wakeup queue</h2>
+      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden mb-8">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs uppercase tracking-[0.02em] text-[#6B7280] border-b border-[rgba(255,255,255,0.04)]">
+            <tr className="text-left text-xs uppercase tracking-[0.02em] text-[#7A6F55] border-b border-[rgba(167,155,120,0.09)]">
               <th className="px-3 py-2.5 font-medium">Task</th>
               <th className="px-3 py-2.5 font-medium hidden md:table-cell">Operator</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
@@ -293,52 +293,52 @@ export function DispatchClient() {
           </thead>
           <tbody>
             {data.queue.items.map(item => (
-              <tr key={item.id} className="border-b border-[rgba(255,255,255,0.04)] last:border-b-0 hover:bg-[#1A1A1A]">
+              <tr key={item.id} className="border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#281E16]">
                 <td className="px-3 py-2.5">
                   <div className="flex items-center gap-2">
                     {item.task && (
-                      <span className="w-1 h-4 rounded-full shrink-0" style={{ background: WORKSPACE_ACCENT[item.task.workspaceId] ?? '#4B5563' }} />
+                      <span className="w-1 h-4 rounded-full shrink-0" style={{ background: WORKSPACE_ACCENT[item.task.workspaceId] ?? '#5C5340' }} />
                     )}
-                    <span className="text-[#F5F5F5] truncate max-w-[360px]">{item.task?.title ?? '(no task)'}</span>
+                    <span className="text-[#E8DFCE] truncate max-w-[360px]">{item.task?.title ?? '(no task)'}</span>
                   </div>
                 </td>
-                <td className="px-3 py-2.5 font-mono text-[12px] text-[#A0A0A0] hidden md:table-cell">{item.operatorId}</td>
+                <td className="px-3 py-2.5 font-mono text-[12px] text-[#A79B78] hidden md:table-cell">{item.operatorId}</td>
                 <td className="px-3 py-2.5">
-                  <span className="text-[12px]" style={{ color: QUEUE_STATUS_COLOR[item.status] ?? '#A0A0A0' }}>{item.status}</span>
+                  <span className="text-[12px]" style={{ color: QUEUE_STATUS_COLOR[item.status] ?? '#A79B78' }}>{item.status}</span>
                   {item.isStale && (
-                    <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-[#EF4444]">
+                    <span className="ml-2 inline-flex items-center gap-1 text-[11px] text-[#C0452E]">
                       <AlertTriangle size={12} strokeWidth={1.5} /> stale
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2.5 text-[12px] text-[#6B7280] hidden md:table-cell">{item.source}</td>
-                <td className="px-3 py-2.5 font-mono text-[12px] tabular-nums text-[#A0A0A0]">{idle(item.idleMs)}</td>
+                <td className="px-3 py-2.5 text-[12px] text-[#7A6F55] hidden md:table-cell">{item.source}</td>
+                <td className="px-3 py-2.5 font-mono text-[12px] tabular-nums text-[#A79B78]">{idle(item.idleMs)}</td>
               </tr>
             ))}
             {data.queue.items.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-8 text-center text-[#6B7280] text-sm">Queue is empty — nothing waiting to dispatch</td></tr>
+              <tr><td colSpan={5} className="px-3 py-8 text-center text-[#7A6F55] text-sm">Queue is empty — nothing waiting to dispatch</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
       {/* Active sessions */}
-      <h2 className="text-base font-semibold text-[#F5F5F5] mb-3">Active sessions</h2>
-      <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] overflow-hidden">
+      <h2 className="text-base font-semibold text-[#E8DFCE] mb-3">Active sessions</h2>
+      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none overflow-hidden">
         {data.activeSessions.length === 0 ? (
-          <div className="px-3 py-8 text-center text-[#6B7280] text-sm">No harness is working a task right now</div>
+          <div className="px-3 py-8 text-center text-[#7A6F55] text-sm">No harness is working a task right now</div>
         ) : (
           <ul>
             {data.activeSessions.map(s => (
-              <li key={s.id} className="flex items-center justify-between px-3 py-2.5 border-b border-[rgba(255,255,255,0.04)] last:border-b-0 hover:bg-[#1A1A1A]">
+              <li key={s.id} className="flex items-center justify-between px-3 py-2.5 border-b border-[rgba(167,155,120,0.09)] last:border-b-0 hover:bg-[#281E16]">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Send size={14} strokeWidth={1.5} className="text-[#6B7280] shrink-0" />
-                  <span className="text-sm text-[#F5F5F5] truncate">{s.task?.title ?? s.taskId}</span>
+                  <Send size={14} strokeWidth={1.5} className="text-[#7A6F55] shrink-0" />
+                  <span className="text-sm text-[#E8DFCE] truncate">{s.task?.title ?? s.taskId}</span>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                  <span className="font-mono text-[11px] text-[#6B7280]">{s.operatorId} · {s.adapterType}</span>
-                  {s.sessionDisplayId && <span className="font-mono text-[11px] text-[#4B5563]">{s.sessionDisplayId}</span>}
-                  <span className="text-[11px] text-[#6B7280]">checkpoint {timeAgo(s.lastCheckpointAt)}</span>
+                  <span className="font-mono text-[11px] text-[#7A6F55]">{s.operatorId} · {s.adapterType}</span>
+                  {s.sessionDisplayId && <span className="font-mono text-[11px] text-[#5C5340]">{s.sessionDisplayId}</span>}
+                  <span className="text-[11px] text-[#7A6F55]">checkpoint {timeAgo(s.lastCheckpointAt)}</span>
                 </div>
               </li>
             ))}

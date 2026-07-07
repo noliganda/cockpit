@@ -32,19 +32,19 @@ export function slugify(text: string): string {
 
 export function getWorkspaceColor(workspaceId: string): string {
   const colors: Record<string, string> = {
-    'byron-film': '#D4A017',
-    'korus': '#008080',
-    'personal': '#F97316',
+    'byron-film': '#C99A1F',
+    'korus': '#3E7A70',
+    'personal': '#C96F2E',
   }
-  return colors[workspaceId] ?? '#6B7280'
+  return colors[workspaceId] ?? '#7A6F55'
 }
 
 export function getPriorityColor(priority: string | null | undefined): string {
   const colors: Record<string, string> = {
-    urgent: '#EF4444',
-    high: '#F59E0B',
-    medium: '#3B82F6',
-    low: '#6B7280',
+    urgent: '#C0452E',
+    high: '#C9962E',
+    medium: '#5F7A72',
+    low: '#7A6F55',
   }
-  return colors[priority ?? 'medium'] ?? '#6B7280'
+  return colors[priority ?? 'medium'] ?? '#7A6F55'
 }

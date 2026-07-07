@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 // Dynamic import to avoid SSR issues with BlockNote
 const NoteEditor = dynamic(() => import('./note-editor').then(m => ({ default: m.NoteEditor })), {
   ssr: false,
-  loading: () => <div className="flex-1 flex items-center justify-center"><p className="text-sm text-[#4B5563]">Loading editor…</p></div>,
+  loading: () => <div className="flex-1 flex items-center justify-center"><p className="text-sm text-[#5C5340]">Loading editor…</p></div>,
 })
 
 interface SimpleItem { id: string; name: string }
@@ -63,62 +63,62 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] w-full max-w-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(255,255,255,0.06)]">
-          <h2 className="text-sm font-semibold text-[#F5F5F5]">Share note</h2>
-          <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors"><X className="w-4 h-4" /></button>
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={onClose} />
+      <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none w-full max-w-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)]">
+          <h2 className="text-sm font-semibold text-[#E8DFCE]">Share note</h2>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="p-4 space-y-2">
           <button
             onClick={copyMarkdown}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] text-sm text-[#F5F5F5] transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
           >
-            <Copy className="w-4 h-4 text-[#6B7280] shrink-0" />
+            <Copy className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span>Copy as Markdown</span>
           </button>
           <button
             onClick={openEmail}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] text-sm text-[#F5F5F5] transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
           >
-            <Mail className="w-4 h-4 text-[#6B7280] shrink-0" />
+            <Mail className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span>Send via Email</span>
           </button>
           <button
             onClick={openWhatsApp}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] text-sm text-[#F5F5F5] transition-colors text-left"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] text-sm text-[#E8DFCE] transition-colors text-left"
           >
-            <MessageCircle className="w-4 h-4 text-[#6B7280] shrink-0" />
+            <MessageCircle className="w-4 h-4 text-[#7A6F55] shrink-0" />
             <span>Share via WhatsApp</span>
           </button>
 
           {/* Download with format picker */}
-          <div className="flex items-center gap-2 px-4 py-3 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-            <FileDown className="w-4 h-4 text-[#6B7280] shrink-0" />
-            <span className="text-sm text-[#F5F5F5] flex-1">Download as</span>
+          <div className="flex items-center gap-2 px-4 py-3 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+            <FileDown className="w-4 h-4 text-[#7A6F55] shrink-0" />
+            <span className="text-sm text-[#E8DFCE] flex-1">Download as</span>
             <div className="flex gap-1">
               <button
                 onClick={() => setDownloadFormat('md')}
                 className={cn(
-                  'px-2 py-0.5 text-xs rounded-[4px] border transition-colors',
+                  'px-2 py-0.5 text-xs rounded-none border transition-colors',
                   downloadFormat === 'md'
-                    ? 'bg-[#222222] border-[rgba(255,255,255,0.16)] text-[#F5F5F5]'
-                    : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                    ? 'bg-[#2F241A] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
+                    : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
                 )}
               >.md</button>
               <button
                 onClick={() => setDownloadFormat('txt')}
                 className={cn(
-                  'px-2 py-0.5 text-xs rounded-[4px] border transition-colors',
+                  'px-2 py-0.5 text-xs rounded-none border transition-colors',
                   downloadFormat === 'txt'
-                    ? 'bg-[#222222] border-[rgba(255,255,255,0.16)] text-[#F5F5F5]'
-                    : 'border-[rgba(255,255,255,0.06)] text-[#6B7280] hover:text-[#A0A0A0]'
+                    ? 'bg-[#2F241A] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
+                    : 'border-[rgba(167,155,120,0.13)] text-[#7A6F55] hover:text-[#A79B78]'
                 )}
               >.txt</button>
             </div>
             <button
               onClick={download}
-              className="px-2.5 py-1 text-xs bg-[#F5F5F5] text-[#0F0F0F] rounded-[4px] font-medium hover:bg-white transition-colors ml-1"
+              className="px-2.5 py-1 text-xs bg-[#E8DFCE] text-[#1A1410] rounded-none font-medium hover:bg-[#E8DFCE] transition-colors ml-1"
             >
               Download
             </button>
@@ -133,13 +133,13 @@ function ShareModal({ note, onClose }: { note: Note; onClose: () => void }) {
 function DeleteConfirmModal({ onConfirm, onClose }: { onConfirm: () => void; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] rounded-[12px] p-6 max-w-sm w-full">
-        <h2 className="text-sm font-semibold text-[#F5F5F5] mb-2">Delete this note?</h2>
-        <p className="text-xs text-[#6B7280] mb-4">This cannot be undone.</p>
+      <div className="absolute inset-0 bg-[rgba(15,11,8,0.7)]" onClick={onClose} />
+      <div className="relative bg-[#281E16] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
+        <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete this note?</h2>
+        <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
         <div className="flex gap-2 justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors">Cancel</button>
-          <button onClick={onConfirm} className="px-4 py-2 text-sm font-medium bg-[#EF4444] text-white rounded-[6px] hover:bg-red-500 transition-colors">Delete</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 text-sm font-medium bg-[#C0452E] text-[#E8DFCE] rounded-none hover:bg-red-500 transition-colors">Delete</button>
         </div>
       </div>
     </div>
@@ -162,17 +162,17 @@ function MetaSelect({
   const selected = options.find(o => o.id === value)
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-[#4B5563] w-14 shrink-0">{label}</span>
+      <span className="text-xs text-[#5C5340] w-14 shrink-0">{label}</span>
       <select
         value={value ?? ''}
         onChange={e => onChange(e.target.value || null)}
-        className="text-xs bg-transparent border-0 outline-none text-[#6B7280] hover:text-[#A0A0A0] cursor-pointer"
+        className="text-xs bg-transparent border-0 outline-none text-[#7A6F55] hover:text-[#A79B78] cursor-pointer"
       >
         <option value="">—</option>
         {options.map(o => <option key={o.id} value={o.id}>{o.name}</option>)}
       </select>
       {selected && (
-        <span className="text-xs px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">{selected.name}</span>
+        <span className="text-xs px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.13)] text-[#A79B78]">{selected.name}</span>
       )}
     </div>
   )
@@ -289,38 +289,38 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
     <div className="flex h-full">
       {/* Note list sidebar — hidden on mobile when editor is open */}
       <div className={cn(
-        'shrink-0 border-r border-[rgba(255,255,255,0.06)] flex flex-col',
+        'shrink-0 border-r border-[rgba(167,155,120,0.13)] flex flex-col',
         'w-full md:w-64',
         mobileShowEditor ? 'hidden md:flex' : 'flex'
       )}>
-        <div className="p-3 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between">
-          <h1 className="text-sm font-semibold text-[#F5F5F5]">Notes</h1>
+        <div className="p-3 border-b border-[rgba(167,155,120,0.13)] flex items-center justify-between">
+          <h1 className="text-sm font-semibold text-[#E8DFCE]">Notes</h1>
           <button onClick={handleCreate} disabled={creating}
-            className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#141414] transition-colors">
+            className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913] transition-colors">
             <Plus className="w-4 h-4" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
           {sorted.length === 0 ? (
-            <p className="text-xs text-[#4B5563] text-center py-8">No notes yet</p>
+            <p className="text-xs text-[#5C5340] text-center py-8">No notes yet</p>
           ) : sorted.map(note => {
             const badge = getNoteBadge(note)
             return (
               <button key={note.id} onClick={() => { setSelectedId(note.id); setMobileShowEditor(true) }}
                 className={cn(
-                  'w-full text-left px-3 py-2.5 rounded-[6px] mb-1 transition-colors group',
-                  selectedId === note.id ? 'bg-[#1A1A1A]' : 'hover:bg-[#141414]'
+                  'w-full text-left px-3 py-2.5 rounded-none mb-1 transition-colors group',
+                  selectedId === note.id ? 'bg-[#281E16]' : 'hover:bg-[#211913]'
                 )}
                 style={selectedId === note.id ? { borderLeft: `2px solid ${workspace.color}`, paddingLeft: '10px' } : undefined}
               >
                 <div className="flex items-center gap-1 mb-0.5">
-                  {note.pinned && <Pin className="w-3 h-3 text-[#6B7280] shrink-0" />}
-                  <p className="text-xs font-medium text-[#F5F5F5] truncate flex-1">{note.title || 'Untitled'}</p>
+                  {note.pinned && <Pin className="w-3 h-3 text-[#7A6F55] shrink-0" />}
+                  <p className="text-xs font-medium text-[#E8DFCE] truncate flex-1">{note.title || 'Untitled'}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <p className="text-xs text-[#4B5563]">{formatRelativeDate(note.updatedAt)}</p>
+                  <p className="text-xs text-[#5C5340]">{formatRelativeDate(note.updatedAt)}</p>
                   {badge && (
-                    <span className="text-xs px-1.5 py-0 rounded bg-[rgba(255,255,255,0.06)] text-[#6B7280] truncate max-w-[80px]">{badge}</span>
+                    <span className="text-xs px-1.5 py-0 rounded-none bg-[rgba(167,155,120,0.13)] text-[#7A6F55] truncate max-w-[80px]">{badge}</span>
                   )}
                 </div>
               </button>
@@ -337,10 +337,10 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
         {selectedNote ? (
           <>
             {/* Note header */}
-            <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-[rgba(255,255,255,0.06)]">
+            <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-[rgba(167,155,120,0.13)]">
               <button
                 onClick={() => setMobileShowEditor(false)}
-                className="md:hidden w-8 h-8 flex items-center justify-center rounded text-[#6B7280] hover:text-[#F5F5F5] mr-2 shrink-0"
+                className="md:hidden w-8 h-8 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] mr-2 shrink-0"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
@@ -348,28 +348,28 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
                 key={selectedNote.id}
                 defaultValue={selectedNote.title}
                 onBlur={e => handleTitleChange(selectedNote.id, e.target.value)}
-                className="bg-transparent text-lg font-bold text-[#F5F5F5] outline-none flex-1 min-w-0"
+                className="bg-transparent text-lg font-bold text-[#E8DFCE] outline-none flex-1 min-w-0"
                 placeholder="Untitled"
               />
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setShowShare(true)}
-                  className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#141414] transition-colors"
+                  className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913] transition-colors"
                   title="Share note"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => handlePin(selectedNote.id, !selectedNote.pinned)}
-                  className={cn('w-7 h-7 flex items-center justify-center rounded-[6px] transition-colors',
-                    selectedNote.pinned ? 'text-[#F5F5F5] bg-[rgba(255,255,255,0.08)]' : 'text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#141414]'
+                  className={cn('w-7 h-7 flex items-center justify-center rounded-none transition-colors',
+                    selectedNote.pinned ? 'text-[#E8DFCE] bg-[rgba(167,155,120,0.18)]' : 'text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#211913]'
                   )}
                 >
                   <Pin className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="w-7 h-7 flex items-center justify-center rounded-[6px] text-[#6B7280] hover:text-[#EF4444] hover:bg-[#141414] transition-colors"
+                  className="w-7 h-7 flex items-center justify-center rounded-none text-[#7A6F55] hover:text-[#C0452E] hover:bg-[#211913] transition-colors"
                   title="Delete note"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -379,8 +379,8 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
 
             {/* Metadata row */}
             {(projects.length > 0 || areas.length > 0 || sprints.length > 0) && (
-              <div className="flex items-center gap-4 px-4 md:px-6 py-2 border-b border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.01)] flex-wrap">
-                <Tag className="w-3 h-3 text-[#4B5563] shrink-0" />
+              <div className="flex items-center gap-4 px-4 md:px-6 py-2 border-b border-[rgba(167,155,120,0.13)] bg-[rgba(167,155,120,0.02)] flex-wrap">
+                <Tag className="w-3 h-3 text-[#5C5340] shrink-0" />
                 <MetaSelect
                   label="Project"
                   value={selectedNote.projectId}
@@ -414,9 +414,9 @@ export function NotesClient({ initialNotes, workspaceId, projects = [], areas = 
         ) : (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-sm text-[#4B5563] mb-3">No note selected</p>
+              <p className="text-sm text-[#5C5340] mb-3">No note selected</p>
               <button onClick={handleCreate}
-                className="px-4 py-2 text-sm font-medium bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] rounded-[6px] hover:bg-[#222222] transition-colors">
+                className="px-4 py-2 text-sm font-medium bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] rounded-none hover:bg-[#2F241A] transition-colors">
                 Create your first note
               </button>
             </div>

@@ -43,21 +43,21 @@ export function SprintBurndown({ totalTasks, completedTasks, startDate, endDate 
   const data = buildBurndownData(totalTasks, completedTasks, startDate ?? null, endDate ?? null)
 
   return (
-    <div className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)]">
-      <h3 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-wide mb-4">Burndown Chart</h3>
+    <div className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)]">
+      <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide mb-4">Burndown Chart</h3>
       <ResponsiveContainer width="100%" height={160}>
         <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-          <XAxis dataKey="day" tick={{ fill: "#6B7280", fontSize: 10 }} axisLine={false} tickLine={false} interval={Math.floor(data.length / 5)} />
-          <YAxis tick={{ fill: "#6B7280", fontSize: 10 }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="day" tick={{ fill: "#7A6F55", fontSize: 10 }} axisLine={false} tickLine={false} interval={Math.floor(data.length / 5)} />
+          <YAxis tick={{ fill: "#7A6F55", fontSize: 10 }} axisLine={false} tickLine={false} />
           <Tooltip
-            contentStyle={{ background: "#222222", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 6, color: "#F5F5F5", fontSize: 12 }}
+            contentStyle={{ background: "#2F241A", border: "1px solid rgba(167,155,120,0.22)", borderRadius: 0, color: "#E8DFCE", fontSize: 12 }}
           />
-          <Legend wrapperStyle={{ fontSize: 11, color: "#6B7280" }} />
+          <Legend wrapperStyle={{ fontSize: 11, color: "#7A6F55" }} />
           <Line
             type="monotone"
             dataKey="ideal"
             name="Ideal"
-            stroke="#4B5563"
+            stroke="#5C5340"
             strokeWidth={1.5}
             strokeDasharray="4 4"
             dot={false}
@@ -66,7 +66,7 @@ export function SprintBurndown({ totalTasks, completedTasks, startDate, endDate 
             type="monotone"
             dataKey="actual"
             name="Actual"
-            stroke="#22C55E"
+            stroke="#7D9B5E"
             strokeWidth={2}
             dot={false}
             connectNulls={false}
@@ -74,11 +74,11 @@ export function SprintBurndown({ totalTasks, completedTasks, startDate, endDate 
         </LineChart>
       </ResponsiveContainer>
       <div className="flex items-center gap-4 mt-2">
-        <p className="text-xs text-[#6B7280]">
-          <span className="font-mono text-[#F5F5F5]">{completedTasks}</span> / {totalTasks} tasks complete
+        <p className="text-xs text-[#7A6F55]">
+          <span className="font-mono text-[#E8DFCE]">{completedTasks}</span> / {totalTasks} tasks complete
         </p>
-        <p className="text-xs text-[#6B7280]">
-          <span className="font-mono text-[#F5F5F5]">{totalTasks - completedTasks}</span> remaining
+        <p className="text-xs text-[#7A6F55]">
+          <span className="font-mono text-[#E8DFCE]">{totalTasks - completedTasks}</span> remaining
         </p>
       </div>
     </div>

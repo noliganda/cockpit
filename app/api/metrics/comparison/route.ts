@@ -7,17 +7,17 @@ import { getSession, getGuestSession } from '@/lib/auth'
 const ACCESS_LEVELS: Record<string, { label: string; systems: string[]; color: string }> = {
   'byron-film': {
     label: 'Byron Film',
-    color: '#3B82F6',
+    color: '#5F7A72',
     systems: ['Gmail', 'Notion', 'CRM', 'Xero', 'Google Drive', 'Calendar'],
   },
   personal: {
     label: 'Personal',
-    color: '#10B981',
+    color: '#7D9B5E',
     systems: ['Gmail', 'Calendar', 'Google Drive'],
   },
   korus: {
     label: 'KORUS',
-    color: '#F97316',
+    color: '#C96F2E',
     systems: ['Notion (read-only)', 'Dashboard'],
   },
 }

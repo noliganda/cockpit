@@ -8,7 +8,7 @@ interface CustomCheckboxProps {
   onChange?: (checked: boolean) => void
   onClick?: (e: React.MouseEvent) => void
   className?: string
-  /** Workspace accent color — e.g. '#D4A017' for BF, '#008080' for KORUS, '#F97316' for personal */
+  /** Workspace accent color — e.g. '#C99A1F' for BF, '#3E7A70' for KORUS, '#C96F2E' for personal */
   accentColor?: string
 }
 
@@ -33,7 +33,7 @@ export function CustomCheckbox({
         type="button"
         onClick={handleClick}
         className={cn(
-          'inline-flex items-center justify-center flex-shrink-0 rounded-[3px] transition-all w-3.5 h-3.5 cursor-pointer border',
+          'inline-flex items-center justify-center flex-shrink-0 rounded-none transition-all w-3.5 h-3.5 cursor-pointer border',
           className
         )}
         style={
@@ -43,7 +43,7 @@ export function CustomCheckbox({
         }
         aria-label={checked ? 'Checked' : 'Unchecked'}
       >
-        {checked && <Check className="w-2.5 h-2.5 stroke-[3]" style={{ color: '#0A0A0A' }} />}
+        {checked && <Check className="w-2.5 h-2.5 stroke-[3]" style={{ color: '#140F0B' }} />}
       </button>
     )
   }
@@ -54,17 +54,17 @@ export function CustomCheckbox({
       type="button"
       onClick={handleClick}
       className={cn(
-        'inline-flex items-center justify-center flex-shrink-0 rounded-[3px] transition-all',
+        'inline-flex items-center justify-center flex-shrink-0 rounded-none transition-all',
         'w-3.5 h-3.5 cursor-pointer border',
         checked
-          ? 'bg-[#E5E5E5] border-[#E5E5E5]'
-          : 'bg-transparent border-[rgba(255,255,255,0.35)] hover:border-[rgba(255,255,255,0.60)]',
+          ? 'bg-[#E8DFCE] border-[#E8DFCE]'
+          : 'bg-transparent border-[rgba(167,155,120,0.77)] hover:border-[rgba(167,155,120,0.9)]',
         className
       )}
       aria-label={checked ? 'Checked' : 'Unchecked'}
     >
       {checked && (
-        <Check className="w-2.5 h-2.5 text-[#0A0A0A] stroke-[3]" />
+        <Check className="w-2.5 h-2.5 text-[#140F0B] stroke-[3]" />
       )}
     </button>
   )

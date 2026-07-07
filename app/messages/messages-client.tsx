@@ -21,9 +21,9 @@ export interface CommItemView {
 }
 
 const WS_COLORS: Record<string, string> = {
-  'byron-film': '#D4A017',
-  korus: '#008080',
-  personal: '#F97316',
+  'byron-film': '#C99A1F',
+  korus: '#3E7A70',
+  personal: '#C96F2E',
 }
 const WS_LABELS: Record<string, string> = {
   'byron-film': 'Byron Film',
@@ -32,13 +32,13 @@ const WS_LABELS: Record<string, string> = {
 }
 
 const CLASSIFICATION_STYLES: Record<string, { color: string; label: string }> = {
-  'needs-reply': { color: '#3B82F6', label: 'Needs reply' },
-  invoice: { color: '#F59E0B', label: 'Invoice' },
-  newsletter: { color: '#6B7280', label: 'Newsletter' },
-  notification: { color: '#8B5CF6', label: 'Notification' },
-  fyi: { color: '#A0A0A0', label: 'FYI' },
-  spam: { color: '#6B7280', label: 'Spam' },
-  unknown: { color: '#6B7280', label: 'Unknown' },
+  'needs-reply': { color: '#5F7A72', label: 'Needs reply' },
+  invoice: { color: '#C9962E', label: 'Invoice' },
+  newsletter: { color: '#7A6F55', label: 'Newsletter' },
+  notification: { color: '#9B6B4F', label: 'Notification' },
+  fyi: { color: '#A79B78', label: 'FYI' },
+  spam: { color: '#7A6F55', label: 'Spam' },
+  unknown: { color: '#7A6F55', label: 'Unknown' },
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -81,9 +81,9 @@ function relativeTime(iso: string) {
 }
 
 function WorkspacePill({ workspaceId }: { workspaceId: string }) {
-  const color = WS_COLORS[workspaceId] ?? '#6B7280'
+  const color = WS_COLORS[workspaceId] ?? '#7A6F55'
   return (
-    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0"
+    <span className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded-none uppercase tracking-[0.15em] shrink-0"
       style={{ background: `${color}22`, color }}>
       {WS_LABELS[workspaceId] ?? workspaceId}
     </span>
@@ -93,7 +93,7 @@ function WorkspacePill({ workspaceId }: { workspaceId: string }) {
 function ClassificationBadge({ classification }: { classification: string }) {
   const s = CLASSIFICATION_STYLES[classification] ?? CLASSIFICATION_STYLES.unknown
   return (
-    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0"
+    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-none shrink-0"
       style={{ background: `${s.color}1A`, color: s.color }}>
       {s.label}
     </span>
@@ -104,10 +104,10 @@ function FilterChip({ active, label, color, onClick }: { active: boolean; label:
   return (
     <button
       onClick={onClick}
-      className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+      className={`text-xs px-2.5 py-1 rounded-none border transition-all ${
         active
-          ? 'text-[#F5F5F5] border-[rgba(255,255,255,0.16)] bg-[#1A1A1A]'
-          : 'text-[#6B7280] border-[rgba(255,255,255,0.06)] hover:text-[#A0A0A0] hover:border-[rgba(255,255,255,0.10)]'
+          ? 'text-[#E8DFCE] border-[rgba(167,155,120,0.35)] bg-[#281E16]'
+          : 'text-[#7A6F55] border-[rgba(167,155,120,0.13)] hover:text-[#A79B78] hover:border-[rgba(167,155,120,0.22)]'
       }`}
       style={active && color ? { color, borderColor: `${color}50`, background: `${color}14` } : undefined}
     >
@@ -122,35 +122,35 @@ function MessageCard({ item }: { item: CommItemView }) {
   return (
     <div
       data-msg-item={item.externalId}
-      className={`relative rounded-[8px] border border-[rgba(255,255,255,0.06)] bg-[#141414] px-4 py-3 hover:border-[rgba(255,255,255,0.10)] transition-colors ${
+      className={`relative rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913] px-4 py-3 hover:border-[rgba(167,155,120,0.22)] transition-colors ${
         item.urgency === 'low' ? 'opacity-70' : ''
       }`}
     >
       {item.urgency === 'interrupt' && (
-        <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[#EF4444]" title="Interrupt" />
+        <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-[#C0452E]" title="Interrupt" />
       )}
       <div className="flex items-start gap-3">
-        <SourceIcon className="w-3.5 h-3.5 mt-0.5 text-[#6B7280] shrink-0" />
+        <SourceIcon className="w-3.5 h-3.5 mt-0.5 text-[#7A6F55] shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-[#F5F5F5] truncate max-w-[16rem]">{item.sender}</span>
+            <span className="text-sm font-medium text-[#E8DFCE] truncate max-w-[16rem]">{item.sender}</span>
             <WorkspacePill workspaceId={item.workspaceId} />
             <ClassificationBadge classification={item.classification} />
             {item.draftStatus === 'awaiting-review' && (
-              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-[rgba(245,158,11,0.12)] text-[#F59E0B] shrink-0">
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-none bg-[rgba(201,150,46,0.12)] text-[#C9962E] shrink-0">
                 Draft awaiting review
               </span>
             )}
           </div>
-          <p className="text-sm text-[#D1D5DB] truncate mt-0.5">{item.subject}</p>
-          <p className="text-xs text-[#6B7280] mt-1 line-clamp-2">{item.preview}</p>
+          <p className="text-sm text-[#C9BEA3] truncate mt-0.5">{item.subject}</p>
+          <p className="text-xs text-[#7A6F55] mt-1 line-clamp-2">{item.preview}</p>
           {(action || item.linkedTaskId) && (
             <div className="flex items-center gap-3 mt-1.5">
-              {action && <span className="text-[11px] text-[#4B5563]">{action}</span>}
+              {action && <span className="text-[11px] text-[#5C5340]">{action}</span>}
               {item.linkedTaskId && (
                 <Link
                   href={`/tasks?workspace=${item.workspaceId}&task=${item.linkedTaskId}`}
-                  className="inline-flex items-center gap-1 text-[11px] text-[#3B82F6] hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#5F7A72] hover:underline"
                 >
                   <Link2 className="w-3 h-3" /> Linked task
                 </Link>
@@ -158,7 +158,7 @@ function MessageCard({ item }: { item: CommItemView }) {
             </div>
           )}
         </div>
-        <span className="text-[11px] text-[#4B5563] font-mono shrink-0" title={new Date(item.messageTs).toLocaleString()}>
+        <span className="text-[11px] text-[#5C5340] font-mono shrink-0" title={new Date(item.messageTs).toLocaleString()}>
           {relativeTime(item.messageTs)}
         </span>
       </div>
@@ -227,9 +227,9 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      <div className="px-6 pt-6 pb-4 border-b border-[rgba(255,255,255,0.06)]">
-        <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Messages</h1>
-        <p className="text-xs text-[#6B7280] mt-1">
+      <div className="px-6 pt-6 pb-4 border-b border-[rgba(167,155,120,0.13)]">
+        <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Messages</h1>
+        <p className="text-xs text-[#7A6F55] mt-1">
           Digest items published by the Email PA — previews only, the mailbox stays the source of truth.
         </p>
         <div className="flex flex-col gap-2 mt-4">
@@ -248,7 +248,7 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
             ))}
             <button
               onClick={() => setShowHidden(!showHidden)}
-              className="inline-flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#A0A0A0] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors"
             >
               {showHidden ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
               {showHidden ? 'Hide newsletters & spam' : `Show newsletters & spam${hiddenCount ? ` (${hiddenCount})` : ''}`}
@@ -260,24 +260,24 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
       <div className="flex-1 flex flex-col lg:flex-row gap-6 p-6">
         {/* Drafts rail — top on mobile, right rail on desktop */}
         <aside data-drafts-rail className="lg:order-2 lg:w-72 shrink-0">
-          <div className="rounded-[12px] border border-[rgba(255,255,255,0.06)] bg-[#141414]">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.06)]">
-              <span className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-widest">Drafts awaiting review</span>
+          <div className="rounded-none border border-[rgba(167,155,120,0.13)] bg-[#211913]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(167,155,120,0.13)]">
+              <span className="text-xs font-semibold text-[#A79B78] uppercase tracking-widest">Drafts awaiting review</span>
               {initialDrafts.length > 0 && (
-                <span className="text-xs font-mono text-[#F59E0B]">{initialDrafts.length}</span>
+                <span className="text-xs font-mono text-[#C9962E]">{initialDrafts.length}</span>
               )}
             </div>
             <div className="px-4 py-2">
               {initialDrafts.length === 0 ? (
-                <p className="text-xs text-[#4B5563] py-3 text-center">No drafts waiting — inbox zero on replies.</p>
+                <p className="text-xs text-[#5C5340] py-3 text-center">No drafts waiting — inbox zero on replies.</p>
               ) : (
                 initialDrafts.map((d) => (
-                  <div key={d.id} data-draft-item={d.externalId} className="py-2.5 border-b border-[rgba(255,255,255,0.04)] last:border-0">
+                  <div key={d.id} data-draft-item={d.externalId} className="py-2.5 border-b border-[rgba(167,155,120,0.09)] last:border-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-[#F5F5F5] truncate">{d.sender}</span>
-                      <span className="text-[10px] font-mono text-[#4B5563] shrink-0">{relativeTime(d.messageTs)}</span>
+                      <span className="text-xs font-medium text-[#E8DFCE] truncate">{d.sender}</span>
+                      <span className="text-[10px] font-mono text-[#5C5340] shrink-0">{relativeTime(d.messageTs)}</span>
                     </div>
-                    <p className="text-xs text-[#6B7280] truncate mt-0.5">{d.subject}</p>
+                    <p className="text-xs text-[#7A6F55] truncate mt-0.5">{d.subject}</p>
                     <WorkspacePill workspaceId={d.workspaceId} />
                   </div>
                 ))
@@ -290,19 +290,19 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
         <div className="flex-1 min-w-0 lg:order-1">
           {dayGroups.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Inbox className="w-6 h-6 text-[#4B5563] mb-3" />
-              <p className="text-sm text-[#6B7280]">No messages yet. Digest items arrive automatically from the Email PA.</p>
+              <Inbox className="w-6 h-6 text-[#5C5340] mb-3" />
+              <p className="text-sm text-[#7A6F55]">No messages yet. Digest items arrive automatically from the Email PA.</p>
             </div>
           ) : (
             <div className="space-y-6">
               {dayGroups.map(({ day, runs }) => (
                 <section key={day} data-day-group={day}>
-                  <h2 className="text-xs font-semibold text-[#A0A0A0] uppercase tracking-widest mb-2">{dayLabel(day)}</h2>
+                  <h2 className="text-xs font-semibold text-[#A79B78] uppercase tracking-widest mb-2">{dayLabel(day)}</h2>
                   <div className="space-y-4">
                     {runs.map(([runId, runItems]) => (
                       <div key={runId} data-run-group={runId} className="space-y-1.5">
                         {runs.length > 1 && (
-                          <p className="text-[10px] text-[#4B5563] font-mono pl-1">
+                          <p className="text-[10px] text-[#5C5340] font-mono pl-1">
                             run {runId.length > 24 ? `${runId.slice(0, 24)}…` : runId} · {runItems.length} item{runItems.length === 1 ? '' : 's'}
                           </p>
                         )}
@@ -317,7 +317,7 @@ export function MessagesClient({ initialItems, initialDrafts }: { initialItems: 
                   <button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="text-xs px-4 py-2 rounded-[8px] border border-[rgba(255,255,255,0.06)] text-[#A0A0A0] hover:border-[rgba(255,255,255,0.10)] hover:text-[#F5F5F5] transition-all disabled:opacity-50"
+                    className="text-xs px-4 py-2 rounded-none border border-[rgba(167,155,120,0.13)] text-[#A79B78] hover:border-[rgba(167,155,120,0.22)] hover:text-[#E8DFCE] transition-all disabled:opacity-50"
                   >
                     {loadingMore ? 'Loading…' : 'Load older messages'}
                   </button>

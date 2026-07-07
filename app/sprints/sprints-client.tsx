@@ -79,10 +79,10 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-[#F5F5F5] tracking-tight">Sprints</h1>
+        <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">Sprints</h1>
         <button
           onClick={openDialog}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] bg-[#1A1A1A] border border-[rgba(255,255,255,0.06)] text-sm text-[#F5F5F5] hover:border-[rgba(255,255,255,0.12)] hover:bg-[#222] transition-all"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none bg-[#281E16] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] hover:border-[rgba(167,155,120,0.26)] hover:bg-[#2F241A] transition-all"
         >
           <Plus className="w-3.5 h-3.5" />
           New Sprint
@@ -91,7 +91,7 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
 
       {sprints.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-sm text-[#4B5563]">No sprints yet.</p>
+          <p className="text-sm text-[#5C5340]">No sprints yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -104,24 +104,24 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
               <Link
                 key={sprint.id}
                 href={`/sprints/${sprint.id}`}
-                className="p-5 rounded-[8px] bg-[#141414] border border-[rgba(255,255,255,0.06)] hover:border-[rgba(255,255,255,0.10)] hover:bg-[#1A1A1A] transition-all block"
+                className="p-5 rounded-none bg-[#211913] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#281E16] transition-all block"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="text-sm font-semibold text-[#F5F5F5]">{sprint.name}</h3>
-                    {sprint.goal && <p className="text-xs text-[#6B7280] mt-0.5">{sprint.goal}</p>}
+                    <h3 className="text-sm font-semibold text-[#E8DFCE]">{sprint.name}</h3>
+                    {sprint.goal && <p className="text-xs text-[#7A6F55] mt-0.5">{sprint.goal}</p>}
                   </div>
                   {sprint.status && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.06)] text-[#A0A0A0]">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">
                       {sprint.status}
                     </span>
                   )}
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <span className="text-xs text-[#6B7280]">{sprintTasks.length} tasks</span>
-                  {sprint.startDate && <span className="text-xs text-[#6B7280]">{formatDate(sprint.startDate)}</span>}
-                  {sprint.endDate && <span className="text-xs text-[#6B7280]">→ {formatDate(sprint.endDate)}</span>}
-                  <span className="text-xs font-mono text-[#A0A0A0]">{progress}% done</span>
+                  <span className="text-xs text-[#7A6F55]">{sprintTasks.length} tasks</span>
+                  {sprint.startDate && <span className="text-xs text-[#7A6F55]">{formatDate(sprint.startDate)}</span>}
+                  {sprint.endDate && <span className="text-xs text-[#7A6F55]">→ {formatDate(sprint.endDate)}</span>}
+                  <span className="text-xs font-mono text-[#A79B78]">{progress}% done</span>
                 </div>
               </Link>
             )
@@ -133,15 +133,15 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
       {dialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[rgba(15,11,8,0.7)] backdrop-blur-sm"
             onClick={closeDialog}
           />
-          <div className="relative z-10 w-full max-w-md rounded-[10px] bg-[#141414] border border-[rgba(255,255,255,0.08)] p-6">
+          <div className="relative z-10 w-full max-w-md rounded-none bg-[#211913] border border-[rgba(167,155,120,0.18)] p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-base font-semibold text-[#F5F5F5]">New Sprint</h2>
+              <h2 className="text-base font-semibold text-[#E8DFCE]">New Sprint</h2>
               <button
                 onClick={closeDialog}
-                className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+                className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -150,8 +150,8 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
             <form onSubmit={handleCreate} className="space-y-4">
               {/* Sprint Name */}
               <div>
-                <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">
-                  Sprint Name <span className="text-[#EF4444]">*</span>
+                <label className="block text-xs font-medium text-[#A79B78] mb-1.5">
+                  Sprint Name <span className="text-[#C0452E]">*</span>
                 </label>
                 <input
                   type="text"
@@ -159,49 +159,49 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Sprint 1 — Launch Prep"
                   required
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#0F0F0F] border border-[rgba(255,255,255,0.08)] text-sm text-[#F5F5F5] placeholder:text-[#4B5563] focus:outline-none focus:border-[rgba(255,255,255,0.20)] transition-colors"
+                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors"
                 />
               </div>
 
               {/* Start Date */}
               <div>
-                <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">
-                  Start Date <span className="text-[#EF4444]">*</span>
+                <label className="block text-xs font-medium text-[#A79B78] mb-1.5">
+                  Start Date <span className="text-[#C0452E]">*</span>
                 </label>
                 <input
                   type="date"
                   value={form.startDate}
                   onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#0F0F0F] border border-[rgba(255,255,255,0.08)] text-sm text-[#F5F5F5] focus:outline-none focus:border-[rgba(255,255,255,0.20)] transition-colors [color-scheme:dark]"
+                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors [color-scheme:dark]"
                 />
               </div>
 
               {/* End Date */}
               <div>
-                <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">
-                  End Date <span className="text-[#EF4444]">*</span>
+                <label className="block text-xs font-medium text-[#A79B78] mb-1.5">
+                  End Date <span className="text-[#C0452E]">*</span>
                 </label>
                 <input
                   type="date"
                   value={form.endDate}
                   onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
                   required
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#0F0F0F] border border-[rgba(255,255,255,0.08)] text-sm text-[#F5F5F5] focus:outline-none focus:border-[rgba(255,255,255,0.20)] transition-colors [color-scheme:dark]"
+                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors [color-scheme:dark]"
                 />
               </div>
 
               {/* Goal */}
               <div>
-                <label className="block text-xs font-medium text-[#A0A0A0] mb-1.5">
-                  Goal <span className="text-[#4B5563]">(optional)</span>
+                <label className="block text-xs font-medium text-[#A79B78] mb-1.5">
+                  Goal <span className="text-[#5C5340]">(optional)</span>
                 </label>
                 <textarea
                   value={form.goal}
                   onChange={e => setForm(f => ({ ...f, goal: e.target.value }))}
                   placeholder="What do you want to achieve in this sprint?"
                   rows={3}
-                  className="w-full px-3 py-2 rounded-[6px] bg-[#0F0F0F] border border-[rgba(255,255,255,0.08)] text-sm text-[#F5F5F5] placeholder:text-[#4B5563] focus:outline-none focus:border-[rgba(255,255,255,0.20)] transition-colors resize-none"
+                  className="w-full px-3 py-2 rounded-none bg-[#1A1410] border border-[rgba(167,155,120,0.18)] text-sm text-[#E8DFCE] placeholder:text-[#5C5340] focus:outline-none focus:border-[rgba(167,155,120,0.44)] transition-colors resize-none"
                 />
               </div>
 
@@ -209,14 +209,14 @@ export function SprintsClient({ initialSprints, workspaceId, allTasks }: Sprints
                 <button
                   type="button"
                   onClick={closeDialog}
-                  className="px-3 py-1.5 rounded-[6px] text-sm text-[#6B7280] hover:text-[#F5F5F5] transition-colors"
+                  className="px-3 py-1.5 rounded-none text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving || !form.name.trim() || !form.startDate || !form.endDate}
-                  className="px-4 py-1.5 rounded-[6px] bg-[#F5F5F5] text-[#0F0F0F] text-sm font-medium hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-4 py-1.5 rounded-none bg-[#E8DFCE] text-[#1A1410] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Creating…' : 'Create Sprint'}
                 </button>

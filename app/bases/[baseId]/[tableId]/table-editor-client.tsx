@@ -86,14 +86,14 @@ const COLUMN_TYPES: { value: ColumnType; label: string; Icon: React.ComponentTyp
 ]
 
 const WORKSPACE_COLORS: Record<string, string> = {
-  byron_film: '#D4A017',
-  korus: '#008080',
-  personal: '#F97316',
+  byron_film: '#C99A1F',
+  korus: '#3E7A70',
+  personal: '#C96F2E',
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-sm outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]'
-const labelCls = 'block text-xs text-[#6B7280] uppercase tracking-wide mb-1.5'
+  'w-full px-3 py-2 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]'
+const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
 // ─── Column type icon ─────────────────────────────────────────────────────────
 
@@ -129,11 +129,11 @@ function AddColumnDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#141414] border border-[rgba(255,255,255,0.06)] rounded-[8px] w-full max-w-sm p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,11,8,0.7)] backdrop-blur-sm">
+      <div className="bg-[#211913] border border-[rgba(167,155,120,0.13)] rounded-none w-full max-w-sm p-6">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-[#F5F5F5]">Add Column</h2>
-          <button onClick={onClose} className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors">
+          <h2 className="text-base font-semibold text-[#E8DFCE]">Add Column</h2>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -157,10 +157,10 @@ function AddColumnDialog({
                 <button
                   key={value}
                   onClick={() => setType(value)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-[6px] text-sm border transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-none text-sm border transition-colors ${
                     type === value
-                      ? 'bg-[#222222] border-[rgba(255,255,255,0.16)] text-[#F5F5F5]'
-                      : 'bg-[#0A0A0A] border-[rgba(255,255,255,0.06)] text-[#A0A0A0] hover:text-[#F5F5F5]'
+                      ? 'bg-[#2F241A] border-[rgba(167,155,120,0.35)] text-[#E8DFCE]'
+                      : 'bg-[#140F0B] border-[rgba(167,155,120,0.13)] text-[#A79B78] hover:text-[#E8DFCE]'
                   }`}
                 >
                   <Icon size={13} />
@@ -185,14 +185,14 @@ function AddColumnDialog({
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-[6px] text-sm text-[#A0A0A0] hover:text-[#F5F5F5] transition-colors"
+            className="px-4 py-2 rounded-none text-sm text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleAdd}
             disabled={!name.trim() || saving}
-            className="px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors disabled:opacity-40"
           >
             {saving ? 'Adding…' : 'Add Column'}
           </button>
@@ -249,10 +249,10 @@ function CellEditor({
         }}
       >
         <div
-          className="w-4 h-4 rounded border flex items-center justify-center transition-colors"
-          style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(255,255,255,0.16)', background: '#0A0A0A' }}
+          className="w-4 h-4 rounded-none border flex items-center justify-center transition-colors"
+          style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(167,155,120,0.35)', background: '#140F0B' }}
         >
-          {checked && <Check size={10} className="text-black" />}
+          {checked && <Check size={10} className="text-[#1A1410]" />}
         </div>
       </button>
     )
@@ -266,7 +266,7 @@ function CellEditor({
         value={val as string}
         onChange={(e) => setVal(e.target.value)}
         onBlur={commit}
-        className="w-full h-full bg-[#0A0A0A] border border-[rgba(255,255,255,0.16)] text-[#F5F5F5] text-xs px-2 outline-none rounded-[4px]"
+        className="w-full h-full bg-[#140F0B] border border-[rgba(167,155,120,0.35)] text-[#E8DFCE] text-xs px-2 outline-none rounded-none"
       >
         <option value="">— none —</option>
         {choices.map((c) => (
@@ -287,7 +287,7 @@ function CellEditor({
         if (e.key === 'Enter') commit()
         if (e.key === 'Escape') onCancel()
       }}
-      className="w-full h-full bg-[#0A0A0A] border border-[rgba(255,255,255,0.16)] text-[#F5F5F5] text-xs px-2 outline-none font-mono rounded-[4px]"
+      className="w-full h-full bg-[#140F0B] border border-[rgba(167,155,120,0.35)] text-[#E8DFCE] text-xs px-2 outline-none font-mono rounded-none"
     />
   )
 }
@@ -296,16 +296,16 @@ function CellEditor({
 
 function CellDisplay({ value, column, accentColor }: { value: unknown; column: UserColumn; accentColor: string }) {
   if (value == null || value === '') {
-    return <span className="text-[#4B5563]">—</span>
+    return <span className="text-[#5C5340]">—</span>
   }
   if (column.columnType === 'boolean') {
     const checked = value === true || value === 'true'
     return (
       <div
-        className="w-4 h-4 rounded border flex items-center justify-center"
-        style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(255,255,255,0.16)', background: 'transparent' }}
+        className="w-4 h-4 rounded-none border flex items-center justify-center"
+        style={checked ? { background: accentColor, borderColor: accentColor } : { borderColor: 'rgba(167,155,120,0.35)', background: 'transparent' }}
       >
-        {checked && <Check size={10} className="text-black" />}
+        {checked && <Check size={10} className="text-[#1A1410]" />}
       </div>
     )
   }
@@ -316,7 +316,7 @@ function CellDisplay({ value, column, accentColor }: { value: unknown; column: U
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}
-        className="text-[#3B82F6] hover:underline truncate block max-w-full"
+        className="text-[#5F7A72] hover:underline truncate block max-w-full"
       >
         {String(value)}
       </a>
@@ -324,7 +324,7 @@ function CellDisplay({ value, column, accentColor }: { value: unknown; column: U
   }
   if (column.columnType === 'select') {
     return (
-      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] bg-[#222222] text-[#A0A0A0] border border-[rgba(255,255,255,0.06)]">
+      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] bg-[#2F241A] text-[#A79B78] border border-[rgba(167,155,120,0.13)]">
         {String(value)}
       </span>
     )
@@ -347,7 +347,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
   const [globalFilter, setGlobalFilter] = useState('')
   const [deleting, setDeleting] = useState(false)
 
-  const accentColor = WORKSPACE_COLORS[base?.workspace ?? ''] ?? '#D4A017'
+  const accentColor = WORKSPACE_COLORS[base?.workspace ?? ''] ?? '#C99A1F'
 
   // ── Load data ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -446,13 +446,13 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
         <button
           type="button"
           onClick={() => allSelected ? setSelected(new Set()) : setSelected(new Set(rows.map((r) => r.id)))}
-          className="w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors flex-shrink-0"
+          className="w-3.5 h-3.5 rounded-none border flex items-center justify-center transition-colors flex-shrink-0"
           style={allSelected
             ? { background: accentColor, borderColor: accentColor }
             : { background: 'transparent', borderColor: accentColor, opacity: 0.6 }
           }
         >
-          {allSelected && <Check size={10} className="text-black stroke-[3]" />}
+          {allSelected && <Check size={10} className="text-[#1A1410] stroke-[3]" />}
         </button>
       ),
       cell: ({ row }) => {
@@ -469,13 +469,13 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                 return next
               })
             }}
-            className="w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center transition-colors flex-shrink-0"
+            className="w-3.5 h-3.5 rounded-none border flex items-center justify-center transition-colors flex-shrink-0"
             style={isSelected
               ? { background: accentColor, borderColor: accentColor }
               : { background: 'transparent', borderColor: accentColor, opacity: 0.6 }
             }
           >
-            {isSelected && <Check size={10} className="text-black stroke-[3]" />}
+            {isSelected && <Check size={10} className="text-[#1A1410] stroke-[3]" />}
           </button>
         )
       },
@@ -498,13 +498,13 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                 onClick={() => updateCell(rowId, col.id, !checked)}
               >
                 <div
-                  className="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0"
+                  className="w-4 h-4 rounded-none border flex items-center justify-center flex-shrink-0"
                   style={checked
                     ? { background: accentColor, borderColor: accentColor }
-                    : { borderColor: 'rgba(255,255,255,0.22)', background: 'transparent' }
+                    : { borderColor: 'rgba(167,155,120,0.48)', background: 'transparent' }
                   }
                 >
-                  {checked && <Check size={10} className="text-black" />}
+                  {checked && <Check size={10} className="text-[#1A1410]" />}
                 </div>
               </div>
             )
@@ -558,8 +558,8 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
   if (loading) {
     return (
       <div className="p-6">
-        <div className="h-8 w-48 bg-[#1A1A1A] rounded animate-pulse mb-4" />
-        <div className="h-64 bg-[#141414] rounded-[8px] animate-pulse" />
+        <div className="h-8 w-48 bg-[#281E16] rounded-none animate-pulse mb-4" />
+        <div className="h-64 bg-[#211913] rounded-none animate-pulse" />
       </div>
     )
   }
@@ -573,35 +573,35 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
 
   return (
     // h-full (not min-h-screen) so the layout's scroll container controls height
-    <div className="flex flex-col h-full bg-[#0F0F0F]">
+    <div className="flex flex-col h-full bg-[#1A1410]">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[rgba(255,255,255,0.06)] flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[rgba(167,155,120,0.13)] flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           {/* Back to parent (project/area) */}
           {backToParent && (
             <>
               <Link
                 href={backToParent.href}
-                className="flex items-center gap-1.5 text-xs text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0"
+                className="flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0"
               >
                 <backToParent.Icon size={12} />
                 {backToParent.label}
               </Link>
-              <span className="text-[#4B5563] text-xs">/</span>
+              <span className="text-[#5C5340] text-xs">/</span>
             </>
           )}
           {/* Back to base list */}
           <Link
             href={`/bases/${baseId}`}
-            className="text-[#6B7280] hover:text-[#F5F5F5] transition-colors shrink-0"
+            className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0"
             title="Back to base"
           >
             <ArrowLeft size={15} />
           </Link>
           <div className="min-w-0">
-            <h1 className="text-sm font-semibold text-[#F5F5F5] truncate">{table?.name ?? 'Table'}</h1>
+            <h1 className="text-sm font-semibold text-[#E8DFCE] truncate">{table?.name ?? 'Table'}</h1>
             {table?.description && (
-              <p className="text-xs text-[#6B7280] truncate">{table.description}</p>
+              <p className="text-xs text-[#7A6F55] truncate">{table.description}</p>
             )}
           </div>
         </div>
@@ -613,7 +613,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
               <button
                 key={fmt}
                 onClick={() => downloadExport(fmt)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-[6px] text-xs text-[#6B7280] hover:text-[#F5F5F5] hover:bg-[#1A1A1A] border border-transparent hover:border-[rgba(255,255,255,0.06)] transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-none text-xs text-[#7A6F55] hover:text-[#E8DFCE] hover:bg-[#281E16] border border-transparent hover:border-[rgba(167,155,120,0.13)] transition-colors"
               >
                 <Download size={11} />
                 {fmt.toUpperCase()}
@@ -626,7 +626,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             <button
               onClick={deleteSelectedRows}
               disabled={deleting}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] text-xs bg-[#EF4444]/10 border border-[#EF4444]/20 text-[#EF4444] hover:bg-[#EF4444]/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs bg-[#C0452E]/10 border border-[#C0452E]/20 text-[#C0452E] hover:bg-[#C0452E]/20 transition-colors"
             >
               <Trash2 size={11} />
               Delete {selected.size}
@@ -636,18 +636,18 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
       </div>
 
       {/* ── Toolbar ────────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(255,255,255,0.04)] flex-shrink-0">
+      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-[rgba(167,155,120,0.09)] flex-shrink-0">
         <div className="relative flex-1 max-w-xs">
-          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#4B5563]" />
+          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#5C5340]" />
           <input
             type="text"
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder="Search rows…"
-            className="w-full pl-7 pr-3 py-1.5 rounded-[6px] bg-[#0A0A0A] border border-[rgba(255,255,255,0.06)] text-[#F5F5F5] text-xs outline-none focus:border-[rgba(255,255,255,0.16)] placeholder:text-[#4B5563]"
+            className="w-full pl-7 pr-3 py-1.5 rounded-none bg-[#140F0B] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-xs outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
           />
         </div>
-        <span className="text-xs text-[#4B5563]">
+        <span className="text-xs text-[#5C5340]">
           {tanTable.getFilteredRowModel().rows.length} rows
         </span>
       </div>
@@ -656,14 +656,14 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
       <div className="flex-1 overflow-auto">
         {columns.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full py-20 text-center">
-            <div className="text-[#4B5563] mb-3">
+            <div className="text-[#5C5340] mb-3">
               <Plus size={32} />
             </div>
-            <p className="text-sm text-[#6B7280] mb-1">No columns yet</p>
-            <p className="text-xs text-[#4B5563] mb-4">Add columns to start building your table</p>
+            <p className="text-sm text-[#7A6F55] mb-1">No columns yet</p>
+            <p className="text-xs text-[#5C5340] mb-4">Add columns to start building your table</p>
             <button
               onClick={() => setShowAddCol(true)}
-              className="px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+              className="px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
             >
               Add first column
             </button>
@@ -679,15 +679,15 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
             </colgroup>
 
             {/* Header */}
-            <thead className="sticky top-0 z-10 bg-[#0F0F0F]">
+            <thead className="sticky top-0 z-10 bg-[#1A1410]">
               {tanTable.getHeaderGroups().map((hg) => (
-                <tr key={hg.id} className="border-b border-[rgba(255,255,255,0.06)]">
+                <tr key={hg.id} className="border-b border-[rgba(167,155,120,0.13)]">
                   {hg.headers.map((header) => {
                     const col = columns.find((c) => c.id === header.id)
                     return (
                       <th
                         key={header.id}
-                        className="text-left px-3 py-2.5 text-[#6B7280] font-medium tracking-wide border-r border-[rgba(255,255,255,0.04)] last:border-r-0 select-none"
+                        className="text-left px-3 py-2.5 text-[#7A6F55] font-medium tracking-wide border-r border-[rgba(167,155,120,0.09)] last:border-r-0 select-none"
                         style={{ width: header.getSize() }}
                       >
                         <div className="flex items-center gap-1.5 group/col">
@@ -703,7 +703,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                           {col && (
                             <button
                               onClick={() => deleteColumn(col.id, col.name)}
-                              className="opacity-0 group-hover/col:opacity-100 transition-opacity ml-auto text-[#4B5563] hover:text-[#EF4444]"
+                              className="opacity-0 group-hover/col:opacity-100 transition-opacity ml-auto text-[#5C5340] hover:text-[#C0452E]"
                             >
                               <X size={10} />
                             </button>
@@ -716,7 +716,7 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                   <th className="px-2 py-2.5 text-center">
                     <button
                       onClick={() => setShowAddCol(true)}
-                      className="text-[#4B5563] hover:text-[#F5F5F5] transition-colors"
+                      className="text-[#5C5340] hover:text-[#E8DFCE] transition-colors"
                       title="Add column"
                     >
                       <Plus size={13} />
@@ -732,13 +732,13 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                 <tr>
                   <td colSpan={columns.length + 2} className="py-12 text-center">
                     {globalFilter ? (
-                      <span className="text-[#4B5563]">No rows match your search</span>
+                      <span className="text-[#5C5340]">No rows match your search</span>
                     ) : (
                       <div className="flex flex-col items-center gap-3">
-                        <span className="text-sm text-[#6B7280]">No rows yet</span>
+                        <span className="text-sm text-[#7A6F55]">No rows yet</span>
                         <button
                           onClick={addRow}
-                          className="flex items-center gap-2 px-4 py-2 rounded-[6px] text-sm bg-[#1A1A1A] border border-[rgba(255,255,255,0.10)] text-[#F5F5F5] hover:bg-[#222222] transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 rounded-none text-sm bg-[#281E16] border border-[rgba(167,155,120,0.22)] text-[#E8DFCE] hover:bg-[#2F241A] transition-colors"
                         >
                           <Plus size={14} />
                           Add first row
@@ -751,14 +751,14 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
                 tanTable.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`border-b border-[rgba(255,255,255,0.04)] hover:bg-[#141414] transition-colors ${
-                      selected.has(row.original.id) ? 'bg-[#141414]' : ''
+                    className={`border-b border-[rgba(167,155,120,0.09)] hover:bg-[#211913] transition-colors ${
+                      selected.has(row.original.id) ? 'bg-[#211913]' : ''
                     }`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td
                         key={cell.id}
-                        className="px-3 py-2 border-r border-[rgba(255,255,255,0.04)] last:border-r-0 overflow-hidden"
+                        className="px-3 py-2 border-r border-[rgba(167,155,120,0.09)] last:border-r-0 overflow-hidden"
                         style={{ height: '36px', maxWidth: '200px' }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -775,10 +775,10 @@ export default function TableEditorClient({ baseId, tableId }: { baseId: string;
 
       {/* ── Add Row footer — always visible at bottom ───────────────────────── */}
       {columns.length > 0 && (
-        <div className="flex-shrink-0 border-t border-[rgba(255,255,255,0.06)] bg-[#0F0F0F] px-4 py-2">
+        <div className="flex-shrink-0 border-t border-[rgba(167,155,120,0.13)] bg-[#1A1410] px-4 py-2">
           <button
             onClick={addRow}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-[6px] text-xs text-[#A0A0A0] hover:text-[#F5F5F5] hover:bg-[#1A1A1A] transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-none text-xs text-[#A79B78] hover:text-[#E8DFCE] hover:bg-[#281E16] transition-colors"
           >
             <Plus size={13} />
             Add Row

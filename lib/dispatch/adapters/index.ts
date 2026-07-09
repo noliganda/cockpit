@@ -8,12 +8,14 @@ import { hermesOneshotAdapter } from './hermes-oneshot'
 import { hermesDelegateAdapter } from './hermes-delegate'
 import { hermesTmuxAdapter } from './hermes-tmux'
 import { claudeTmuxAdapter } from './claude-tmux'
+import { herdrAdapter } from './herdr'
 
 const adapters = new Map<string, HarnessAdapter>([
   [hermesOneshotAdapter.type, hermesOneshotAdapter],
   [hermesDelegateAdapter.type, hermesDelegateAdapter],
   [hermesTmuxAdapter.type, hermesTmuxAdapter],
   [claudeTmuxAdapter.type, claudeTmuxAdapter],
+  [herdrAdapter.type, herdrAdapter],
 ])
 
 export function getAdapter(type: string | null): HarnessAdapter | null {

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Cockpit⇄Twenty sync worker (task c68df6e1). Runs on the Mac Mini only.
+  Install:
+    cp scripts/crm/com.noliganda.cockpit-twenty-sync.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.noliganda.cockpit-twenty-sync.plist
+  Trigger manually:  launchctl start com.noliganda.cockpit-twenty-sync
+  Log:               ~/Library/Logs/cockpit-twenty-sync.log
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.noliganda.cockpit-twenty-sync</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/agentsmyth/workspaces/dev/cockpit/scripts/crm/run-twenty-worker.sh</string>
+        <string>both</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>900</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/agentsmyth/Library/Logs/cockpit-twenty-sync.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/agentsmyth/Library/Logs/cockpit-twenty-sync.log</string>
+    <key>ThrottleInterval</key>
+    <integer>120</integer>
+</dict>
+</plist>

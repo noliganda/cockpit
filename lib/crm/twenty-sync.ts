@@ -109,14 +109,22 @@ export class TwentyClient {
     return TwentyClient.one(await this.request('PATCH', `/rest/people/${id}`, patch))
   }
 
-  /** Page through people, newest first, invoking `onPage` per page. */
-  async eachPerson(onPage: (people: TwentyPerson[]) => Promise<void> | void, pageSize = 200): Promise<void> {
+  /**
+   * Page through people, newest-updated first, invoking `onPage` per page.
+   * If `onPage` returns `false`, paging stops — lets the reconcile worker bail
+   * as soon as it walks past its "updated since" cutoff.
+   */
+  async eachPerson(
+    onPage: (people: TwentyPerson[]) => Promise<boolean | void> | boolean | void,
+    pageSize = 200,
+  ): Promise<void> {
     let cursor: string | null = null
     for (;;) {
       let path = `/rest/people?limit=${pageSize}&order_by=updatedAt[DescNullsLast]`
       if (cursor) path += `&starting_after=${encodeURIComponent(cursor)}`
       const resp = await this.request<{ data: { people: TwentyPerson[] }; pageInfo?: { hasNextPage?: boolean; endCursor?: string } }>('GET', path)
-      await onPage(resp.data.people)
+      const cont = await onPage(resp.data.people)
+      if (cont === false) return
       const info = resp.pageInfo ?? {}
       if (!info.hasNextPage || !info.endCursor) return
       cursor = info.endCursor

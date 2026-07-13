@@ -269,9 +269,16 @@ export const contacts = pgTable('contacts', {
   nextReachDate: date('next_reach_date'),
   tags: text('tags').array().default([]),
   source: text('source'),
+  // Twenty CRM link (Cockpit ⇄ Twenty sync — task c68df6e1). twentyPersonId is the
+  // strong idempotency key; vcardUid is the Baïkal-origin fallback match.
+  twentyPersonId: text('twenty_person_id'),
+  vcardUid: text('vcard_uid'),
+  twentySyncedAt: timestamp('twenty_synced_at', { withTimezone: true }),
   ...timestamps,
 }, (t) => [
   index('contacts_workspace_idx').on(t.workspaceId),
+  index('contacts_twenty_person_idx').on(t.twentyPersonId),
+  index('contacts_vcard_uid_idx').on(t.vcardUid),
 ])
 
 export const organisations = pgTable('organisations', {

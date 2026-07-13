@@ -8,13 +8,16 @@
  *               (create/patch, matched by twentyPersonId → vcardUid → email).
  *   inbound   — reconcile: page Twenty people (newest-updated first) and upsert
  *               into Cockpit, catching any webhook that was missed or 500'd.
- *               Bounded by --since=<hours> (stops once it walks past the cutoff).
+ *               By DEFAULT bounded by the sync high-water mark (max twenty_synced_at)
+ *               minus a margin — so a fresh install imports NO history, only changes
+ *               since it started tracking. --since=<hours> overrides the window;
+ *               --backfill mirrors the entire Twenty address book (deliberate, opt-in).
  *
  * Both directions diff before writing, so this is idempotent and loop-safe.
  *
  * Env: DATABASE_URL (self-loaded from .env.local, repo convention), TWENTY_OM_API_KEY
  * (injected from SOPS by the launchd entrypoint — never in .env.local).
- * Run: scripts/crm/run-twenty-worker.sh [both|outbound|inbound] [--since=H] [--dry-run]
+ * Run: scripts/crm/run-twenty-worker.sh [both|outbound|inbound] [--since=H|--backfill] [--dry-run]
  */
 import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
@@ -55,21 +58,26 @@ function loadEnvLocal(): void {
 
 interface Args {
   mode: 'both' | 'outbound' | 'inbound'
-  sinceHours: number
+  sinceHours: number | null // null → derive cutoff from the sync watermark
+  backfill: boolean
   dryRun: boolean
 }
 
 function parseArgs(argv: string[]): Args {
   let mode: Args['mode'] = 'both'
-  let sinceHours = 26 // overlap a daily cadence with margin
+  let sinceHours: number | null = null
+  let backfill = false
   let dryRun = false
   for (const a of argv) {
     if (a === 'both' || a === 'outbound' || a === 'inbound') mode = a
     else if (a === '--dry-run') dryRun = true
-    else if (a.startsWith('--since=')) sinceHours = Number(a.slice('--since='.length)) || sinceHours
+    else if (a === '--backfill') backfill = true
+    else if (a.startsWith('--since=')) sinceHours = Number(a.slice('--since='.length)) || null
   }
-  return { mode, sinceHours, dryRun }
+  return { mode, sinceHours, backfill, dryRun }
 }
+
+const MARGIN_MS = 15 * 60_000 // re-scan a little before the watermark, for safety
 
 const stamp = (): string => new Date().toISOString()
 
@@ -94,8 +102,7 @@ async function outboundPass(sync: Sync, client: TwentyClientT, workspace: string
   )
 }
 
-async function inboundPass(sync: Sync, client: TwentyClientT, twentyWorkspaceId: string, sinceHours: number, dryRun: boolean): Promise<void> {
-  const cutoff = Date.now() - sinceHours * 3600_000
+async function inboundPass(sync: Sync, client: TwentyClientT, twentyWorkspaceId: string, cutoffMs: number, label: string, dryRun: boolean): Promise<void> {
   const counts: Record<InboundAction | 'failed', number> = { created: 0, updated: 0, unchanged: 0, detached: 0, failed: 0 }
   let scanned = 0
 
@@ -103,7 +110,7 @@ async function inboundPass(sync: Sync, client: TwentyClientT, twentyWorkspaceId:
     for (const p of people) {
       // newest-first ordering → the first record older than the cutoff ends the walk
       const updatedMs = p.updatedAt ? new Date(p.updatedAt).getTime() : NaN
-      if (Number.isFinite(updatedMs) && updatedMs < cutoff) return false
+      if (Number.isFinite(updatedMs) && updatedMs < cutoffMs) return false
       scanned++
       if (dryRun) continue
       try {
@@ -118,13 +125,13 @@ async function inboundPass(sync: Sync, client: TwentyClientT, twentyWorkspaceId:
   })
 
   console.log(
-    `[${stamp()}] inbound: scanned=${scanned} (since ${sinceHours}h) → created=${counts.created} updated=${counts.updated} unchanged=${counts.unchanged} failed=${counts.failed}`,
+    `[${stamp()}] inbound: scanned=${scanned} (${label}) → created=${counts.created} updated=${counts.updated} unchanged=${counts.unchanged} failed=${counts.failed}`,
   )
 }
 
 async function main(): Promise<void> {
   loadEnvLocal()
-  const { mode, sinceHours, dryRun } = parseArgs(process.argv.slice(2))
+  const { mode, sinceHours, backfill, dryRun } = parseArgs(process.argv.slice(2))
 
   // Deferred so loadEnvLocal() runs before lib/db reads DATABASE_URL.
   const sync = await import('@/lib/crm/twenty-sync')
@@ -132,10 +139,28 @@ async function main(): Promise<void> {
   const workspace = cockpitWorkspaceForTwenty(TWENTY_OM_WORKSPACE_ID)
 
   const client = new sync.TwentyClient()
-  console.log(`[${stamp()}] twenty-worker start — mode=${mode} since=${sinceHours}h dryRun=${dryRun} base=${client.base} workspace=${workspace}`)
+  console.log(`[${stamp()}] twenty-worker start — mode=${mode} ${backfill ? 'backfill' : sinceHours != null ? `since=${sinceHours}h` : 'watermark'} dryRun=${dryRun} base=${client.base} workspace=${workspace}`)
 
   if (mode === 'both' || mode === 'outbound') await outboundPass(sync, client, workspace, dryRun)
-  if (mode === 'both' || mode === 'inbound') await inboundPass(sync, client, TWENTY_OM_WORKSPACE_ID, sinceHours, dryRun)
+
+  if (mode === 'both' || mode === 'inbound') {
+    // Resolve the reconcile cutoff. Default: sync watermark (nothing historical on a
+    // fresh install). --backfill: mirror everything. --since=H: fixed lookback window.
+    let cutoffMs: number
+    let label: string
+    if (backfill) {
+      cutoffMs = -Infinity
+      label = 'backfill: all people'
+    } else if (sinceHours != null) {
+      cutoffMs = Date.now() - sinceHours * 3600_000
+      label = `since ${sinceHours}h`
+    } else {
+      const wm = await sync.inboundWatermark(workspace)
+      cutoffMs = wm ? wm.getTime() - MARGIN_MS : Date.now()
+      label = wm ? `since watermark ${wm.toISOString()}` : 'fresh install → no history'
+    }
+    await inboundPass(sync, client, TWENTY_OM_WORKSPACE_ID, cutoffMs, label, dryRun)
+  }
 
   console.log(`[${stamp()}] twenty-worker done`)
 }

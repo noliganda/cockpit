@@ -61,9 +61,19 @@ launchctl start com.noliganda.cockpit-twenty-sync     # trigger a run now
 tail -f ~/Library/Logs/cockpit-twenty-sync.log        # watch
 # manual / ad-hoc (from repo root):
 scripts/crm/run-twenty-worker.sh outbound             # push Cockpit → Twenty only
-scripts/crm/run-twenty-worker.sh inbound --since=48   # reconcile last 48h
+scripts/crm/run-twenty-worker.sh inbound              # reconcile since the sync watermark
+scripts/crm/run-twenty-worker.sh inbound --since=48   # reconcile a fixed 48h window
+scripts/crm/run-twenty-worker.sh inbound --backfill   # ⚠️ mirror the ENTIRE Twenty book into Cockpit
 scripts/crm/run-twenty-worker.sh both --dry-run       # preview, no writes
 ```
+
+### Reconcile window — why it defaults to the watermark
+
+Reconcile is a **safety net for missed webhooks**, not a backfill. By default it only
+looks at Twenty changes newer than the sync high-water mark (`max(twenty_synced_at)`),
+so a fresh install imports **nothing historical** — it starts tracking from "now" and
+catches anything the webhook drops thereafter. The full Twenty→Cockpit mirror is the
+explicit, opt-in `--backfill` (it will create a contact per Twenty person — ~2.7k for OM).
 
 ## Secrets
 
@@ -83,7 +93,9 @@ Note: Twenty's REST `DELETE` is a **hard delete** → emits `person.destroyed`
 
 ## Scope note
 
-The reconcile mirrors *edited* Twenty people into Cockpit as intended ("Cockpit's CRM
-section shows the same contacts", decision doc §A1). In steady state the Baïkal bridge
-makes no edits, so no mass mirroring occurs — but a bulk Twenty change would flow a large
-batch of contacts into Cockpit. Scope to Cockpit-originated contacts here if that's not wanted.
+Decision doc §A1 wants Cockpit's CRM to eventually show the same contacts as Twenty.
+That initial full mirror is **not** automatic — run `inbound --backfill` once, deliberately,
+when you want OM's ~2.7k Baïkal contacts pulled into Cockpit's `personal` workspace. Until
+then the sync only tracks contacts touched from "now" forward (watermark default), plus
+anything you create/edit on either side. Company/organisation objects and `tags`/non-LinkedIn
+socials are not synced yet (person only; no matching Twenty custom fields provisioned).

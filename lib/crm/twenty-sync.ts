@@ -353,6 +353,20 @@ export async function contactsPendingOutbound(workspaceId: string): Promise<Cont
     )
 }
 
+/**
+ * High-water mark for inbound reconcile: the newest twenty_synced_at in the
+ * workspace. Reconcile only looks at Twenty changes AFTER this, so a fresh install
+ * (null → caller treats as "now") imports no history — the deliberate full mirror
+ * is the worker's explicit --backfill mode, never a silent side effect.
+ */
+export async function inboundWatermark(workspaceId: string): Promise<Date | null> {
+  const [row] = await db
+    .select({ m: sql<string | null>`max(${contacts.twentySyncedAt})` })
+    .from(contacts)
+    .where(eq(contacts.workspaceId, workspaceId))
+  return row?.m ? new Date(row.m) : null
+}
+
 /** Contacts that carry a Twenty link — the inbound reconcile candidate set. */
 export async function linkedContacts(workspaceId: string): Promise<ContactRow[]> {
   return db

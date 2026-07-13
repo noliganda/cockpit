@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
   }
 
   const [nameSingular, action] = (body.eventName ?? '').split('.')
+  console.log(`[crm/webhooks/twenty] event=${body.eventName ?? '?'} recordId=${body.record?.id ?? '—'}`)
   if (nameSingular !== 'person') {
     // We only sync people for now — ack so Twenty marks it delivered.
     return NextResponse.json({ ok: true, ignored: body.eventName ?? null })
@@ -73,7 +74,8 @@ export async function POST(req: NextRequest) {
   if (!record?.id) return NextResponse.json({ error: 'missing_record' }, { status: 400 })
 
   try {
-    if (action === 'deleted') {
+    // Twenty emits `person.deleted` (soft) and `person.destroyed` (hard) — both detach.
+    if (action === 'deleted' || action === 'destroyed') {
       const result = await detachDeletedPerson(record.id, { via: 'webhook' })
       return NextResponse.json({ ok: true, ...result })
     }

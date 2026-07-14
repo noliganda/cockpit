@@ -1,72 +1,85 @@
-# Cockpit — Contacts Rolodex Cleanup (old custom CRM removal) — Spec
+# Cockpit — Contacts Rolodex Cleanup + One-Way Twenty Sync — Spec
 
-**Status:** active (all decisions resolved by Oli 2026-07-15)
-**Owner:** dev/cockpit session (dispatched by PM session; Cockpit task to be created at dispatch)
-**Brief:** Oli, 2026-07-15 — the Contacts section still carries the pre-Twenty custom CRM (pipeline board, organisations). Strip it to a pure Rolodex. **Descope decision (Oli, same day): Twenty stays entirely separate from Cockpit — no new CRM section, no projection.** Twenty's own UI (tailnet `:8443`) is the CRM UI.
-**Companion spec:** `dev/crm/SPEC-2026-07-15-enrichment-signals-d365.md` (the CRM data plane — enrichment/signals happen in Twenty, not here).
+**Status:** active (amended 2026-07-15 after Oli-approved challenge: Rolodex becomes a read-only directory; sync becomes one-way inbound)
+**Owner:** dev/cockpit session (dispatched by PM session; bind the Cockpit task given at dispatch)
+**Brief:** Oli, 2026-07-15 — the Contacts section still carries the pre-Twenty custom CRM (pipeline board, organisations). Strip it to a pure Rolodex. **Descope:** Twenty stays entirely separate from Cockpit — no new CRM section; Twenty's own UI (tailnet `:8443`) is the CRM UI. **Amendment:** the person-sync cycle is broken — Cockpit becomes a read-only view.
+**Companion spec:** `dev/crm/SPEC-2026-07-15-enrichment-signals-d365.md` (data plane; defines the topology rule this spec implements the Cockpit side of).
 **Last updated:** 2026-07-15
+
+## The topology rule this spec enforces
+
+The sync graph is **acyclic**: Baïkal → Twenty → Cockpit. **One writable home per field** — identity (name/emails/phones) = Contacts app only; CRM state = Twenty only; Cockpit writes no person data. Why: today Cockpit⇄Twenty is two-way, and a phone edited in the Cockpit Rolodex gets pushed to Twenty, reverted by the Baïkal bridge within 30 min, and the revert pulled back into Cockpit — the edit silently evaporates. Cycles are where churn and pollution come from; this spec removes Cockpit's write leg entirely.
 
 ## Scope
 
-**In:** route/label fix (`/crm` → `/contacts`) · Rolodex cleanup — remove every old-custom-CRM surface (pipeline board, organisations, stage batch-ops) from UI, API, and schema (with snapshot safeguards).
-**Out:** any new CRM section in Cockpit (descoped — Oli 2026-07-15) · Twenty→Neon projections · changes to the existing Twenty person sync (**KEEP, untouched** — it is what keeps the Rolodex aligned with Baïkal via Twenty; if Oli ever wants Twenty *fully* unplugged from Cockpit, that is a separate explicit decision, not this spec) · enrichment/signals/D365 (data-plane spec).
+**In:** route/label fix (`/crm` → `/contacts`) · Rolodex cleanup (remove every old-custom-CRM surface) · `organisations` snapshot + drop · **sync simplification: remove the outbound (Cockpit→Twenty) leg; Rolodex person data becomes read-only** · dashboard quick-add removal.
+**Out:** any CRM section in Cockpit (descoped) · changes to the inbound webhook/reconcile beyond deleting outbound code · enrichment/signals/D365 (data-plane spec).
 
-**The naming trap this fixes:** today the sidebar item "Contacts" routes to `/crm` (`components/sidebar.tsx:28`) and the palette calls the same page "Go to CRM". After this spec: `/contacts` = the Rolodex; **no `/crm` route exists in Cockpit at all** — CRM lives in Twenty.
+**The naming trap this fixes:** the sidebar item "Contacts" routes to `/crm` (`components/sidebar.tsx:28`) and the palette calls it "Go to CRM". After this spec: `/contacts` = the Rolodex; **no `/crm` route exists in Cockpit** — CRM lives in Twenty.
 
 ## Approach
 
 **Phase A — route/label fix.**
-Move `app/crm/` → `app/contacts/` (page, client, `[id]`, loading). Sidebar `NAV_ITEMS`: "Contacts" → `/contacts`. Command palette `QUICK_ACTIONS`: "Go to CRM" → "Go to Contacts" (`/contacts`). Redirect `/crm` and `/crm/[id]` → `/contacts` equivalents (bookmarks/muscle memory). Update `lib/search.ts` / `components/search-overlay.tsx` if they carry the route.
+Move `app/crm/` → `app/contacts/` (page, client, `[id]`, loading). Sidebar `NAV_ITEMS`: "Contacts" → `/contacts`. Command palette: "Go to CRM" → "Go to Contacts". Redirect `/crm` and `/crm/[id]` → `/contacts` equivalents. Grep the repo for other hardcoded `/crm` links (`lib/search.ts`, `components/search-overlay.tsx`, …).
 
 **Phase B — Rolodex cleanup (REMOVE the old custom CRM; per PM recon 2026-07-15).**
 Remove:
 - Pipeline (Kanban) tab + drag logic — `crm-client.tsx:1092-1192, 531-549, 617-624`
 - Organisations tab + dialogs — `crm-client.tsx:350-514, 973-1090`
-- `organisations` table + `app/api/organisations/*` — **only after** a one-off snapshot + reconcile: export all `organisations` rows to a JSON snapshot committed under `docs/archive/`, match by normalized name against Twenty companies (658 exist from ORG mapping), report unmatched entries to Oli **before** dropping
+- `organisations` table + `app/api/organisations/*` — **snapshot then drop, no reconcile**: export all rows to a JSON snapshot committed under `docs/archive/`, then drop. (The data predates Twenty; the ORG mapping already derived 658 companies from the *current* address book — matching stale rows has near-zero yield. The snapshot is the recovery path.)
 - `PIPELINE_STAGES` (`types/index.ts:29`) + stray `PipelineStage` type (`:403`)
-- Batch pipeline-stage endpoint (`app/api/contacts/batch/route.ts` PATCH; keep batch DELETE)
+- Batch pipeline-stage endpoint (`app/api/contacts/batch/route.ts` PATCH)
 - Pipeline Stage row on the contact detail page; `pipelineStage` cell in KORUS metrics (`korus-metrics-client.tsx:238`)
 
-Keep: `contacts` table + CRUD · VCF export (useful Rolodex feature) · dashboard quick-add · `project_contacts` linking · **the entire Twenty sync** (`lib/crm/twenty-mapping.ts`, `lib/crm/twenty-sync.ts`, `app/api/crm/webhooks/twenty/route.ts` — the webhook route path may stay as-is; it's an API surface, not UI) · Mini worker + launchd.
+Keep: `contacts` table · VCF export · `project_contacts` linking + `projects.clientId/leadGenId/projectManagerId` pickers · the inbound Twenty sync (webhook + reconcile) · Mini worker + launchd (minus its outbound section, Phase C).
 
-**DO-NOT-DROP (sync dependency):** `contacts.pipeline_stage`, `next_reach_date`, `source`, `company`, and the `twenty_*`/`vcard_uid` link columns — `lib/crm/twenty-mapping.ts` reads/writes them; dropping breaks the Twenty sync or blanks Twenty custom fields. They simply stop being rendered in the Rolodex UI. Pipeline *ownership* moves to Twenty.
+**DO-NOT-DROP (sync dependency):** `contacts.pipeline_stage`, `next_reach_date`, `source`, `company`, and the `twenty_*`/`vcard_uid` link columns — `lib/crm/twenty-mapping.ts` reads them inbound; they simply stop being rendered/edited.
+
+**Phase C — one-way sync + read-only Rolodex.**
+- **Delete the outbound leg:** `pushContactToTwenty` + `contactsPendingOutbound` in `lib/crm/twenty-sync.ts` and the outbound section of `scripts/crm/twenty-worker.ts`. Keep webhook receiver + inbound reconcile untouched. Grep for any other callers before deleting.
+- **Rolodex UI/API becomes read-only for synced person fields** (name/emails/phones/jobTitle/company/linkedin/source): display only. **Cockpit-local fields stay editable** — `notes`, `tags` (their writable home IS Cockpit; they never sync). Trim the API surface to match: no person create, no PATCH of synced fields, no delete; PATCH restricted to notes/tags; batch endpoints reduced accordingly. Project linking untouched (it writes `project_contacts`, not person data).
+- **Remove the dashboard "New Contact" quick-add** (`app/dashboard/dashboard-client.tsx:213`); replace with a hint: contacts are born in the Contacts app and appear here within ~45 min (bridge 30 min + reconcile 15 min).
+- **Existing unlinked local rows** (manually created pre-cleanup, no `twenty_person_id`): leave them, render a subtle "local" badge; cleanup is a later, separate decision.
 
 ## Milestones
 
 | # | Milestone | Owner | Evidence |
 |---|-----------|-------|----------|
 | 1 | `/contacts` live, labels/routes consistent, old `/crm` links redirect | dev/cockpit | deploy URL + click-through |
-| 2 | Rolodex clean: no pipeline/orgs UI; orgs snapshot committed; unmatched-orgs report to Oli | dev/cockpit | commit + snapshot file + report |
-| 3 | `organisations` table + API dropped after Oli acknowledges the report | dev/cockpit | migration commit |
+| 2 | Rolodex clean: no pipeline/orgs UI; orgs snapshot committed; table dropped | dev/cockpit | commits + snapshot file in docs/archive/ |
+| 3 | One-way sync live: outbound code deleted; Rolodex read-only for synced fields; quick-add removed | dev/cockpit | worker log (inbound-only run) + commit |
 
 ## Acceptance Criteria
 
-- [ ] Sidebar/palette say "Contacts" and point at `/contacts`; no Cockpit route or nav item says "CRM".
-- [ ] Rolodex renders zero pipeline/organisation UI; contact create/edit/delete + VCF export + project linking still work.
-- [ ] Twenty sync unbroken after cleanup: a worker run shows inbound+outbound OK; editing a linked contact in Cockpit still updates Twenty (and vice versa).
-- [ ] `organisations` dropped ONLY after snapshot committed + unmatched report acknowledged by Oli.
+- [ ] Sidebar/palette say "Contacts" → `/contacts`; no Cockpit route or nav item says "CRM"; old `/crm` URLs redirect.
+- [ ] Rolodex renders zero pipeline/organisation UI; VCF export and project linking still work.
+- [ ] No UI or API path can write a synced person field (verify: attempt returns 4xx/absent); notes/tags editing still works.
+- [ ] Outbound sync code deleted (`pushContactToTwenty` has zero references); a worker run completes inbound-only; editing a person in Twenty still lands in Cockpit.
+- [ ] `organisations` table + API dropped, JSON snapshot committed FIRST (verify snapshot row count = table row count at export).
+- [ ] `docs/current/integrations/twenty-crm-sync.md` updated: one-way inbound, `/contacts` route, quick-add removal noted.
 - [ ] Build/lint green on main; each phase = its own commit(s).
 
 ## Dependencies & Inputs
 
 - PM recon report 2026-07-15 (file/line inventory above) — the KEEP/REMOVE map.
-- `docs/current/integrations/twenty-crm-sync.md` — the sync contract this spec must not break; update its "UI" references from `/crm` to `/contacts`.
-- Twenty companies list (for the org reconcile) — read via the Mini worker's client or a one-off script on the Mini (Twenty is tailnet-only; Vercel can't reach it).
+- Companion data-plane spec §Topology rule — the contract this implements.
+- Deploy via the existing Vercel flow; the Mini worker change ships via the existing launchd job (no plist change expected).
 
 ## Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|------------|
-| Dropping shared columns breaks Twenty sync | High if careless | Sync churn / blanked Twenty fields | DO-NOT-DROP list; acceptance test on sync round-trip |
-| Org rows lost that Twenty doesn't have | Medium | Data loss | Snapshot + reconcile + Oli-acknowledged report BEFORE drop |
-| Route rename breaks bookmarks/integrations | Low | Annoyance | Redirects in Phase A; grep repo for hardcoded `/crm` links |
+| Outbound code referenced somewhere unexpected | Low | Build break | Grep all callers before delete; build+lint gate |
+| A workflow relied on editing contacts in Cockpit | Low | Oli annoyance | Contacts app is the documented home; local notes/tags still editable |
+| Orgs snapshot misses data | Low | Data loss | Row-count check snapshot vs table before drop |
+| Route rename breaks bookmarks | Low | Annoyance | Redirects in Phase A |
 
 ## Open Questions
 
-None — resolved by Oli, 2026-07-15: **D2 = no CRM section in Cockpit**; Twenty stays entirely separate (its UI is the CRM). The existing person sync stays (it feeds the Rolodex); unplugging it would be a new, explicit decision.
+None — descope + amendments Oli-approved 2026-07-15 (no CRM section; one-way sync; read-only Rolodex; snapshot-then-drop orgs).
 
 ---
 
 ## For Agents
 
-This spec is the contract. Build to it, one phase per Cockpit task, commit straight to main, evidence per milestone. If a question comes up that's not covered, `block` with one exact ask — don't invent. Never touch `lib/crm/*` sync semantics.
+This spec is the contract. Build to it, one phase per commit-set, straight to main, evidence per milestone. Milestones are `cockpit-task log` lines, never `done`. If a question comes up that's not covered, `block` with one exact ask — don't invent. Never touch the inbound sync semantics (`lib/crm/twenty-mapping.ts` field maps).

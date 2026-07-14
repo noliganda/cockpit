@@ -13,7 +13,7 @@ const QUICK_ACTIONS = [
   { id: 'projects', label: 'Go to Projects', href: '/projects', icon: FolderOpen },
   { id: 'calendar', label: 'Go to Calendar', href: '/calendar', icon: Hash },
   { id: 'kanban', label: 'Open Kanban', href: '/tasks/kanban', icon: Hash },
-  { id: 'crm', label: 'Go to CRM', href: '/crm', icon: Hash },
+  { id: 'contacts', label: 'Go to Contacts', href: '/contacts', icon: Hash },
   { id: 'notes', label: 'Go to Notes', href: '/notes', icon: Hash },
   { id: 'metrics', label: 'Go to Metrics', href: '/metrics', icon: Hash },
   { id: 'settings', label: 'Settings', href: '/settings', icon: Hash },

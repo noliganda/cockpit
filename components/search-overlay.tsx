@@ -28,7 +28,7 @@ const TYPE_ROUTES: Record<string, (id: string) => string> = {
   task: (id) => `/tasks?highlight=${id}`,
   project: (id) => `/projects/${id}`,
   note: (id) => `/notes?note=${id}`,
-  contact: (id) => `/crm/${id}`,
+  contact: (id) => `/contacts/${id}`,
   activity: () => '/logs',
   log: () => '/logs',
 }

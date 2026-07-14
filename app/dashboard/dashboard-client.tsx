@@ -344,7 +344,7 @@ export function DashboardClient({
   const STAT_CARDS = [
     { label: 'Open Tasks', value: stats.openTasks, icon: CheckSquare, color: workspace.color, href: `/tasks?workspace=${ws}&filter=active` },
     { label: 'Active Projects', value: stats.activeProjects, icon: FolderOpen, color: '#7D9B5E', href: `/projects?workspace=${ws}&status=Active` },
-    { label: 'Contacts', value: stats.contactCount, icon: Users, color: '#5F7A72', href: `/crm?workspace=${ws}` },
+    { label: 'Contacts', value: stats.contactCount, icon: Users, color: '#5F7A72', href: `/contacts?workspace=${ws}` },
     { label: 'Overdue', value: stats.overdueItems, icon: AlertCircle, color: stats.overdueItems > 0 ? '#C0452E' : '#7A6F55', href: `/tasks?workspace=${ws}&filter=overdue` },
   ]
 

@@ -24,8 +24,8 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <Link href="/crm" className="inline-flex items-center gap-1.5 text-sm text-[#7A6F55] hover:text-[#E8DFCE] mb-6 transition-colors">
-        <ArrowLeft className="w-3.5 h-3.5" /> Back to CRM
+      <Link href="/contacts" className="inline-flex items-center gap-1.5 text-sm text-[#7A6F55] hover:text-[#E8DFCE] mb-6 transition-colors">
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to Contacts
       </Link>
 
       <div className="mb-6">

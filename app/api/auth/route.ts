@@ -26,23 +26,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, role: user.role })
     }
 
-    // Legacy password-only login (backward compat)
+    // Legacy password-only login (backward compat). Requires AUTH_PASSWORD_HASH —
+    // the old hardcoded-default password was a backdoor and has been removed.
     if (body.password) {
       const hash = process.env.AUTH_PASSWORD_HASH
-      if (!hash) {
-        const bcrypt = await import('bcryptjs')
-        const defaultHash = await bcrypt.default.hash('opsdb2026', 12)
-        const valid = await verifyPassword(body.password, defaultHash)
-        if (valid) {
-          await setSessionCookie('authenticated')
-          return NextResponse.json({ success: true })
-        }
-      } else {
-        const valid = await verifyPassword(body.password, hash)
-        if (valid) {
-          await setSessionCookie('authenticated')
-          return NextResponse.json({ success: true })
-        }
+      if (hash && (await verifyPassword(body.password, hash))) {
+        await setSessionCookie({ userId: 'admin', email: 'admin@local', role: 'admin' })
+        return NextResponse.json({ success: true })
       }
     }
 

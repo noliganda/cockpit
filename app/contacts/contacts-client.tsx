@@ -1,12 +1,9 @@
 'use client'
-import { useState, useCallback, useMemo, useRef } from 'react'
-import { createPortal } from 'react-dom'
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
-import { User, Building2, Plus, X, Search, Linkedin, Instagram, Globe, ExternalLink, Download, Trash2, ChevronDown } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { User, Plus, X, Search, Linkedin, Instagram, Globe, Download, Trash2 } from 'lucide-react'
 import { CustomCheckbox } from '@/components/custom-checkbox'
 import { cn } from '@/lib/utils'
-import type { Contact, Organisation, WorkspaceId } from '@/types'
-import { PIPELINE_STAGES } from '@/types'
+import type { Contact, WorkspaceId } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
 
@@ -43,40 +40,6 @@ function downloadVCF(selected: Contact[]) {
     : 'contacts-export.vcf'
   a.click()
 }
-
-// ─── Portal Dropdown ─────────────────────────────────────────────────────────
-function PortalDropdown({
-  anchorRef,
-  isOpen,
-  onClose,
-  children,
-  minWidth = 160,
-}: {
-  anchorRef: React.RefObject<HTMLElement | null>
-  isOpen: boolean
-  onClose: () => void
-  children: React.ReactNode
-  minWidth?: number
-}) {
-  if (!isOpen || typeof document === 'undefined') return null
-  const rect = anchorRef.current?.getBoundingClientRect()
-  if (!rect) return null
-
-  return createPortal(
-    <>
-      <div className="fixed inset-0 z-40" onClick={onClose} />
-      <div
-        className="fixed z-50 bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none overflow-hidden"
-        style={{ top: rect.bottom + 4, left: rect.left, minWidth }}
-      >
-        {children}
-      </div>
-    </>,
-    document.body
-  )
-}
-
-const PIPELINE_STAGES_LIST = [...PIPELINE_STAGES]
 
 // ─── Shared Input Styles ───────────────────────────────────────────────────
 const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
@@ -129,7 +92,6 @@ type ContactForm = {
   firstName: string
   lastName: string
   role: string
-  organisationId: string
   mobile: string
   email: string
   address: string
@@ -137,7 +99,6 @@ type ContactForm = {
   instagramUrl: string
   facebookUrl: string
   portfolioUrl: string
-  pipelineStage: string
   tags: string[]
   nextReachDate: string
   notes: string
@@ -147,7 +108,6 @@ const emptyContactForm = (): ContactForm => ({
   firstName: '',
   lastName: '',
   role: '',
-  organisationId: '',
   mobile: '',
   email: '',
   address: '',
@@ -155,7 +115,6 @@ const emptyContactForm = (): ContactForm => ({
   instagramUrl: '',
   facebookUrl: '',
   portfolioUrl: '',
-  pipelineStage: '',
   tags: [],
   nextReachDate: '',
   notes: '',
@@ -166,7 +125,6 @@ function contactToForm(c: Contact): ContactForm {
     firstName: c.firstName ?? '',
     lastName: c.lastName ?? '',
     role: c.role ?? '',
-    organisationId: c.organisationId ?? '',
     mobile: c.mobile ?? '',
     email: c.email ?? '',
     address: c.address ?? '',
@@ -174,7 +132,6 @@ function contactToForm(c: Contact): ContactForm {
     instagramUrl: c.instagramUrl ?? '',
     facebookUrl: c.facebookUrl ?? '',
     portfolioUrl: c.portfolioUrl ?? '',
-    pipelineStage: c.pipelineStage ?? '',
     tags: c.tags ?? [],
     nextReachDate: c.nextReachDate ?? '',
     notes: c.notes ?? '',
@@ -185,14 +142,12 @@ function contactToForm(c: Contact): ContactForm {
 function ContactDialog({
   mode,
   contact,
-  organisations,
   workspaceId,
   onClose,
   onSave,
 }: {
   mode: 'create' | 'edit'
   contact?: Contact
-  organisations: Organisation[]
   workspaceId: WorkspaceId
   onClose: () => void
   onSave: (c: Contact) => void
@@ -242,7 +197,7 @@ function ContactDialog({
         {/* Body */}
         <div className="overflow-y-auto flex-1 px-5 py-4">
           <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-            {/* Row 1: First/Last Name */}
+            {/* Row 1: First / Last Name */}
             <div>
               <label className={labelCls}>First Name</label>
               <input className={inputCls} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="First name" />
@@ -251,75 +206,53 @@ function ContactDialog({
               <label className={labelCls}>Last Name</label>
               <input className={inputCls} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Last name" />
             </div>
-            {/* Row 2: Position / Organisation */}
+            {/* Row 2: Position / Mobile */}
             <div>
               <label className={labelCls}>Position / Title</label>
               <input className={inputCls} value={form.role} onChange={e => set('role', e.target.value)} placeholder="e.g. Director" />
             </div>
             <div>
-              <label className={labelCls}>Organisation</label>
-              <select
-                className={inputCls}
-                value={form.organisationId}
-                onChange={e => set('organisationId', e.target.value)}
-              >
-                <option value="">— None —</option>
-                {organisations.map(org => (
-                  <option key={org.id} value={org.id}>{org.name}</option>
-                ))}
-              </select>
-            </div>
-            {/* Row 3: Mobile / Email */}
-            <div>
               <label className={labelCls}>Mobile</label>
               <input className={inputCls} type="tel" value={form.mobile} onChange={e => set('mobile', e.target.value)} placeholder="+61 4xx xxx xxx" />
             </div>
+            {/* Row 3: Email / LinkedIn */}
             <div>
               <label className={labelCls}>Email</label>
               <input className={inputCls} type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="email@example.com" />
+            </div>
+            <div>
+              <label className={labelCls}>LinkedIn URL</label>
+              <input className={inputCls} value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/…" />
             </div>
             {/* Row 4: Address (full width) */}
             <div className="col-span-2">
               <label className={labelCls}>Address</label>
               <input className={inputCls} value={form.address} onChange={e => set('address', e.target.value)} placeholder="Full address" />
             </div>
-            {/* Row 5: LinkedIn / Instagram */}
-            <div>
-              <label className={labelCls}>LinkedIn URL</label>
-              <input className={inputCls} value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/…" />
-            </div>
+            {/* Row 5: Instagram / Facebook */}
             <div>
               <label className={labelCls}>Instagram URL</label>
               <input className={inputCls} value={form.instagramUrl} onChange={e => set('instagramUrl', e.target.value)} placeholder="https://instagram.com/…" />
             </div>
-            {/* Row 6: Facebook / Portfolio */}
             <div>
               <label className={labelCls}>Facebook URL</label>
               <input className={inputCls} value={form.facebookUrl} onChange={e => set('facebookUrl', e.target.value)} placeholder="https://facebook.com/…" />
             </div>
+            {/* Row 6: Portfolio / Next Reach Date */}
             <div>
               <label className={labelCls}>Portfolio / Website URL</label>
               <input className={inputCls} value={form.portfolioUrl} onChange={e => set('portfolioUrl', e.target.value)} placeholder="https://…" />
             </div>
-            {/* Row 7: Pipeline Stage / Tags */}
-            <div>
-              <label className={labelCls}>Pipeline Stage</label>
-              <select className={inputCls} value={form.pipelineStage} onChange={e => set('pipelineStage', e.target.value)}>
-                <option value="">— None —</option>
-                {PIPELINE_STAGES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>Tags</label>
-              <TagsInput value={form.tags} onChange={v => setForm(prev => ({ ...prev, tags: v }))} />
-            </div>
-            {/* Row 8: Next Reach Date */}
             <div>
               <label className={labelCls}>Next Reach Date</label>
               <input className={inputCls} type="date" value={form.nextReachDate} onChange={e => set('nextReachDate', e.target.value)} />
             </div>
-            <div />
-            {/* Row 9: Notes (full width) */}
+            {/* Row 7: Tags (full width) */}
+            <div className="col-span-2">
+              <label className={labelCls}>Tags</label>
+              <TagsInput value={form.tags} onChange={v => setForm(prev => ({ ...prev, tags: v }))} />
+            </div>
+            {/* Row 8: Notes (full width) */}
             <div className="col-span-2">
               <label className={labelCls}>Notes</label>
               <textarea
@@ -347,212 +280,14 @@ function ContactDialog({
   )
 }
 
-// ─── Organisation Form ─────────────────────────────────────────────────────
-type OrgForm = {
-  name: string
-  industry: string
-  size: string
-  website: string
-  email: string
-  phone: string
-  address: string
-  pipelineStage: string
-  tags: string[]
-  notes: string
-}
-
-const emptyOrgForm = (): OrgForm => ({
-  name: '',
-  industry: '',
-  size: '',
-  website: '',
-  email: '',
-  phone: '',
-  address: '',
-  pipelineStage: '',
-  tags: [],
-  notes: '',
-})
-
-function orgToForm(o: Organisation): OrgForm {
-  return {
-    name: o.name,
-    industry: o.industry ?? '',
-    size: o.size ?? '',
-    website: o.website ?? '',
-    email: o.email ?? '',
-    phone: o.phone ?? '',
-    address: o.address ?? '',
-    pipelineStage: o.pipelineStage ?? '',
-    tags: o.tags ?? [],
-    notes: o.notes ?? '',
-  }
-}
-
-// ─── Organisation Dialog ───────────────────────────────────────────────────
-function OrgDialog({
-  mode,
-  org,
-  workspaceId,
-  onClose,
-  onSave,
-}: {
-  mode: 'create' | 'edit'
-  org?: Organisation
-  workspaceId: WorkspaceId
-  onClose: () => void
-  onSave: (o: Organisation) => void
-}) {
-  const [form, setForm] = useState<OrgForm>(org ? orgToForm(org) : emptyOrgForm())
-  const [saving, setSaving] = useState(false)
-
-  const set = (field: keyof OrgForm, val: string | string[]) =>
-    setForm(prev => ({ ...prev, [field]: val }))
-
-  const handleSave = async () => {
-    if (!form.name.trim()) { toast.error('Name required'); return }
-    setSaving(true)
-    const payload = { ...form, workspaceId }
-    try {
-      const url = mode === 'create' ? '/api/organisations' : `/api/organisations/${org!.id}`
-      const method = mode === 'create' ? 'POST' : 'PATCH'
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      if (!res.ok) throw new Error('Failed')
-      const saved = await res.json() as Organisation
-      onSave(saved)
-      toast.success(mode === 'create' ? 'Organisation created' : 'Organisation saved')
-      onClose()
-    } catch {
-      toast.error('Failed to save organisation')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <DialogOverlay onClose={onClose}>
-      <div className="relative w-full sm:max-w-xl bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
-          <h2 className="text-sm font-semibold text-[#E8DFCE]">{mode === 'create' ? 'New Organisation' : 'Edit Organisation'}</h2>
-          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
-        </div>
-        <div className="overflow-y-auto flex-1 px-5 py-4">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-            {/* Row 1: Name (full) */}
-            <div className="col-span-2">
-              <label className={labelCls}>Organisation Name</label>
-              <input className={inputCls} value={form.name} onChange={e => set('name', e.target.value)} placeholder="Organisation name" />
-            </div>
-            {/* Row 2: Industry / Size */}
-            <div>
-              <label className={labelCls}>Industry</label>
-              <input className={inputCls} value={form.industry} onChange={e => set('industry', e.target.value)} placeholder="e.g. Film & TV" />
-            </div>
-            <div>
-              <label className={labelCls}>Size (employees)</label>
-              <input className={inputCls} value={form.size} onChange={e => set('size', e.target.value)} placeholder="e.g. 10–50" />
-            </div>
-            {/* Row 3: Website / Email */}
-            <div>
-              <label className={labelCls}>Website</label>
-              <input className={inputCls} value={form.website} onChange={e => set('website', e.target.value)} placeholder="https://…" />
-            </div>
-            <div>
-              <label className={labelCls}>Email</label>
-              <input className={inputCls} type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="info@org.com" />
-            </div>
-            {/* Row 4: Phone / Address */}
-            <div>
-              <label className={labelCls}>Phone</label>
-              <input className={inputCls} type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+61 2 …" />
-            </div>
-            <div>
-              <label className={labelCls}>Address</label>
-              <input className={inputCls} value={form.address} onChange={e => set('address', e.target.value)} placeholder="Full address" />
-            </div>
-            {/* Row 5: Pipeline Stage / Tags */}
-            <div>
-              <label className={labelCls}>Pipeline Stage</label>
-              <select className={inputCls} value={form.pipelineStage} onChange={e => set('pipelineStage', e.target.value)}>
-                <option value="">— None —</option>
-                {PIPELINE_STAGES_LIST.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>Tags</label>
-              <TagsInput value={form.tags} onChange={v => setForm(prev => ({ ...prev, tags: v }))} />
-            </div>
-            {/* Row 6: Notes (full) */}
-            <div className="col-span-2">
-              <label className={labelCls}>Notes</label>
-              <textarea
-                className={cn(inputCls, 'resize-none h-24')}
-                value={form.notes}
-                onChange={e => set('notes', e.target.value)}
-                placeholder="Any notes…"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
-          >
-            {saving ? 'Saving…' : mode === 'create' ? 'Create Organisation' : 'Save Changes'}
-          </button>
-        </div>
-      </div>
-    </DialogOverlay>
-  )
-}
-
-// ─── CRMClient ─────────────────────────────────────────────────────────────
-interface CRMClientProps {
+// ─── Contacts Client ───────────────────────────────────────────────────────
+interface ContactsClientProps {
   contacts: Contact[]
-  organisations: Organisation[]
   workspaceId: WorkspaceId
 }
 
-type Tab = 'contacts' | 'organisations' | 'pipeline'
-
-export function CRMClient({ contacts: initialContacts, organisations: initialOrgs, workspaceId }: CRMClientProps) {
-  const [tab, setTab] = useState<Tab>('contacts')
+export function ContactsClient({ contacts: initialContacts, workspaceId }: ContactsClientProps) {
   const [contacts, setContacts] = useState(initialContacts)
-  const [organisations, setOrganisations] = useState(initialOrgs)
-  const { workspace } = useWorkspace()
-
-  const handleDragEnd = useCallback(async (result: DropResult) => {
-    if (!result.destination) return
-    const newStage = result.destination.droppableId
-    const contactId = result.draggableId
-
-    setContacts(prev => prev.map(c =>
-      c.id === contactId ? { ...c, pipelineStage: newStage } : c
-    ))
-
-    try {
-      await fetch(`/api/contacts/${contactId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pipelineStage: newStage }),
-      })
-    } catch {
-      setContacts(initialContacts)
-    }
-  }, [initialContacts])
-
-  const TABS: { id: Tab; label: string }[] = [
-    { id: 'contacts', label: 'Contacts' },
-    { id: 'organisations', label: 'Organisations' },
-    { id: 'pipeline', label: 'Pipeline' },
-  ]
 
   return (
     <div className="flex flex-col h-full">
@@ -572,56 +307,15 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="px-4 md:px-6 mt-4 border-b border-[rgba(167,155,120,0.13)]">
-        <div className="flex gap-0">
-          {TABS.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={cn(
-                'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors',
-                tab === t.id
-                  ? 'text-[#E8DFCE] border-current'
-                  : 'text-[#7A6F55] border-transparent hover:text-[#A79B78]'
-              )}
-              style={tab === t.id ? { color: workspace.color, borderColor: workspace.color } : undefined}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tab Content */}
+      {/* Directory */}
       <div className="flex-1 overflow-auto p-4 md:p-6">
-        {tab === 'contacts' && (
-          <ContactsTab
-            contacts={contacts}
-            organisations={organisations}
-            workspaceId={workspaceId}
-            onAdd={c => setContacts(prev => [c, ...prev])}
-            onUpdate={c => setContacts(prev => prev.map(x => x.id === c.id ? c : x))}
-            onDelete={ids => setContacts(prev => prev.filter(x => !ids.includes(x.id)))}
-          />
-        )}
-        {tab === 'organisations' && (
-          <OrgsTab
-            organisations={organisations}
-            contacts={contacts}
-            workspaceId={workspaceId}
-            onAdd={o => setOrganisations(prev => [o, ...prev])}
-            onUpdate={o => setOrganisations(prev => prev.map(x => x.id === o.id ? o : x))}
-          />
-        )}
-        {tab === 'pipeline' && (
-          <PipelineTab
-            contacts={contacts}
-            stages={PIPELINE_STAGES_LIST}
-            onDragEnd={handleDragEnd}
-            workspaceColor={workspace.color}
-          />
-        )}
+        <ContactsTab
+          contacts={contacts}
+          workspaceId={workspaceId}
+          onAdd={c => setContacts(prev => [c, ...prev])}
+          onUpdate={c => setContacts(prev => prev.map(x => x.id === c.id ? c : x))}
+          onDelete={ids => setContacts(prev => prev.filter(x => !ids.includes(x.id)))}
+        />
       </div>
     </div>
   )
@@ -630,14 +324,12 @@ export function CRMClient({ contacts: initialContacts, organisations: initialOrg
 // ─── ContactsTab ───────────────────────────────────────────────────────────
 function ContactsTab({
   contacts,
-  organisations,
   workspaceId,
   onAdd,
   onUpdate,
   onDelete,
 }: {
   contacts: Contact[]
-  organisations: Organisation[]
   workspaceId: WorkspaceId
   onAdd: (c: Contact) => void
   onUpdate: (c: Contact) => void
@@ -653,8 +345,6 @@ function ContactsTab({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [lastClickedIdx, setLastClickedIdx] = useState<number | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [batchStageOpen, setBatchStageOpen] = useState(false)
-  const batchStageRef = useRef<HTMLButtonElement>(null)
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -695,20 +385,6 @@ function ContactsTab({
     }
   }
 
-  async function batchSetStage(stage: string) {
-    const ids = Array.from(selectedIds)
-    await fetch('/api/contacts/batch', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids, updates: { pipelineStage: stage } }),
-    })
-    // Optimistically update via onUpdate — trigger a page refresh instead
-    ids.forEach(id => {
-      const c = contacts.find(x => x.id === id)
-      if (c) onUpdate({ ...c, pipelineStage: stage })
-    })
-  }
-
   async function batchDelete() {
     const ids = Array.from(selectedIds)
     await fetch('/api/contacts/batch', {
@@ -746,28 +422,6 @@ function ContactsTab({
       {selectedCount > 0 && (
         <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.22)]">
           <span className="text-xs text-[#A79B78] font-medium mr-1">{selectedCount} selected</span>
-
-          {/* Change Pipeline Stage */}
-          <div className="relative">
-            <button
-              ref={batchStageRef}
-              onClick={() => setBatchStageOpen(v => !v)}
-              className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
-            >
-              Pipeline Stage <ChevronDown className="w-3 h-3" />
-            </button>
-            <PortalDropdown anchorRef={batchStageRef} isOpen={batchStageOpen} onClose={() => setBatchStageOpen(false)}>
-              {PIPELINE_STAGES_LIST.map(s => (
-                <button
-                  key={s}
-                  onClick={() => { setBatchStageOpen(false); void batchSetStage(s) }}
-                  className="w-full text-left px-3 py-1.5 text-xs text-[#A79B78] hover:bg-[rgba(167,155,120,0.09)] hover:text-[#E8DFCE] transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </PortalDropdown>
-          </div>
 
           {/* Export VCF */}
           <button
@@ -818,7 +472,7 @@ function ContactsTab({
                       accentColor={accentColor}
                     />
                   </th>
-                  {['Name', 'Position', 'Mobile', 'Email', 'Links', 'Pipeline Stage'].map(h => (
+                  {['Name', 'Position', 'Mobile', 'Email', 'Links'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
@@ -882,13 +536,6 @@ function ContactsTab({
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-2.5">
-                      {contact.pipelineStage ? (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">{contact.pipelineStage}</span>
-                      ) : (
-                        <span className="text-sm text-[#5C5340]">—</span>
-                      )}
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -919,9 +566,6 @@ function ContactsTab({
                   >
                     {contact.name}
                   </p>
-                  {contact.pipelineStage && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78] shrink-0">{contact.pipelineStage}</span>
-                  )}
                 </div>
                 {contact.role && <p className="text-xs text-[#7A6F55] mb-1 ml-5">{contact.role}</p>}
                 {contact.email && <p className="text-xs text-[#A79B78] ml-5">{contact.email}</p>}
@@ -950,7 +594,6 @@ function ContactsTab({
       {showCreate && (
         <ContactDialog
           mode="create"
-          organisations={organisations}
           workspaceId={workspaceId}
           onClose={() => setShowCreate(false)}
           onSave={onAdd}
@@ -960,233 +603,11 @@ function ContactsTab({
         <ContactDialog
           mode="edit"
           contact={editing}
-          organisations={organisations}
           workspaceId={workspaceId}
           onClose={() => setEditing(null)}
           onSave={onUpdate}
         />
       )}
     </>
-  )
-}
-
-// ─── OrgsTab ───────────────────────────────────────────────────────────────
-function OrgsTab({
-  organisations,
-  contacts,
-  workspaceId,
-  onAdd,
-  onUpdate,
-}: {
-  organisations: Organisation[]
-  contacts: Contact[]
-  workspaceId: WorkspaceId
-  onAdd: (o: Organisation) => void
-  onUpdate: (o: Organisation) => void
-}) {
-  const [search, setSearch] = useState('')
-  const [showCreate, setShowCreate] = useState(false)
-  const [editing, setEditing] = useState<Organisation | null>(null)
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    if (!q) return organisations
-    return organisations.filter(o =>
-      o.name.toLowerCase().includes(q) ||
-      (o.industry ?? '').toLowerCase().includes(q)
-    )
-  }, [organisations, search])
-
-  return (
-    <>
-      {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
-          <input
-            className="w-full pl-8 pr-3 py-2 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] text-sm text-[#E8DFCE] outline-none focus:border-[rgba(167,155,120,0.35)] placeholder:text-[#5C5340]"
-            placeholder="Search organisations…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" /> New Organisation
-        </button>
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <Building2 className="w-8 h-8 text-[#5C5340] mx-auto mb-3" />
-          <p className="text-sm text-[#5C5340]">{search ? 'No organisations match your search' : 'No organisations yet'}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map(org => {
-            const linkedCount = contacts.filter(c => c.organisationId === org.id).length
-            return (
-              <div
-                key={org.id}
-                className="p-4 rounded-none bg-[#1A1510] border border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)] hover:bg-[#201A14] transition-all cursor-pointer"
-                onClick={() => setEditing(org)}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-semibold text-[#E8DFCE] leading-snug">{org.name}</p>
-                  {org.pipelineStage && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78] ml-2 shrink-0">{org.pipelineStage}</span>
-                  )}
-                </div>
-                {org.industry && (
-                  <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.09)] text-[#7A6F55] mb-2">{org.industry}</span>
-                )}
-                <div className="space-y-1">
-                  {org.website && (
-                    <a
-                      href={org.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#A79B78] transition-colors"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      {org.website.replace(/^https?:\/\//, '')}
-                    </a>
-                  )}
-                  {org.size && (
-                    <p className="text-xs text-[#7A6F55]">{org.size} employees</p>
-                  )}
-                </div>
-                <div className="mt-3 pt-3 border-t border-[rgba(167,155,120,0.09)]">
-                  <span className="text-xs text-[#5C5340]">{linkedCount} contact{linkedCount !== 1 ? 's' : ''}</span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {showCreate && (
-        <OrgDialog
-          mode="create"
-          workspaceId={workspaceId}
-          onClose={() => setShowCreate(false)}
-          onSave={onAdd}
-        />
-      )}
-      {editing && (
-        <OrgDialog
-          mode="edit"
-          org={editing}
-          workspaceId={workspaceId}
-          onClose={() => setEditing(null)}
-          onSave={onUpdate}
-        />
-      )}
-    </>
-  )
-}
-
-// ─── PipelineTab ───────────────────────────────────────────────────────────
-function PipelineTab({
-  contacts,
-  stages,
-  onDragEnd,
-  workspaceColor,
-}: {
-  contacts: Contact[]
-  stages: string[]
-  onDragEnd: (result: DropResult) => Promise<void>
-  workspaceColor: string
-}) {
-  const today = new Date().toISOString().split('T')[0]
-
-  if (contacts.length === 0) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-sm text-[#5C5340]">No contacts in pipeline</p>
-        <p className="text-xs text-[#5C5340] mt-1">Add contacts to see them in the pipeline</p>
-      </div>
-    )
-  }
-
-  const getContactsForStage = (stage: string) =>
-    contacts.filter(c => c.pipelineStage === stage || (!c.pipelineStage && stage === stages[0]))
-
-  return (
-    <DragDropContext onDragEnd={(r) => { void onDragEnd(r) }}>
-      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[400px]">
-        {stages.map(stage => {
-          const stageContacts = getContactsForStage(stage)
-          return (
-            <div key={stage} className="flex-shrink-0 w-56">
-              <div className="flex items-center gap-2 mb-3 px-1">
-                <h3 className="text-xs font-semibold text-[#A79B78] uppercase tracking-wide flex-1">{stage}</h3>
-                <span className="text-xs font-mono text-[#5C5340]">{stageContacts.length}</span>
-              </div>
-              <Droppable droppableId={stage}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      'min-h-[200px] rounded-none p-2 transition-colors',
-                      snapshot.isDraggingOver
-                        ? 'bg-[rgba(167,155,120,0.09)]'
-                        : 'bg-[rgba(167,155,120,0.04)]'
-                    )}
-                    style={snapshot.isDraggingOver
-                      ? { border: `1px solid ${workspaceColor}40` }
-                      : { border: '1px solid rgba(167,155,120,0.09)' }}
-                  >
-                    {stageContacts.map((contact, index) => {
-                      const isPast = contact.nextReachDate && contact.nextReachDate < today
-
-                      return (
-                        <Draggable key={contact.id} draggableId={contact.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={cn(
-                                'p-3 mb-2 last:mb-0 rounded-none bg-[#1A1510] border cursor-grab active:cursor-grabbing transition-all',
-                                snapshot.isDragging
-                                  ? 'border-[rgba(167,155,120,0.35)]'
-                                  : 'border-[rgba(167,155,120,0.13)] hover:border-[rgba(167,155,120,0.22)]'
-                              )}
-                            >
-                              <p className="text-sm font-medium text-[#E8DFCE] mb-0.5">{contact.name}</p>
-                              {contact.company && (
-                                <p className="text-xs text-[#7A6F55]">{contact.company}</p>
-                              )}
-                              {contact.nextReachDate && (
-                                <p className={cn('text-xs mt-1', isPast ? 'text-red-400' : 'text-amber-400')}>
-                                  Follow up: {contact.nextReachDate}
-                                </p>
-                              )}
-                              {contact.tags && contact.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1.5">
-                                  {contact.tags.slice(0, 2).map(tag => (
-                                    <span key={tag} className="text-xs px-1.5 py-0.5 rounded-none bg-[rgba(167,155,120,0.13)] text-[#7A6F55]">{tag}</span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </Draggable>
-                      )
-                    })}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </div>
-          )
-        })}
-      </div>
-    </DragDropContext>
   )
 }

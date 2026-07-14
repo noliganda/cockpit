@@ -223,19 +223,18 @@ export function KorusMetricsClient({ metrics, recentActivity, allProjects, allCo
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[rgba(167,155,120,0.13)]">
-                  {['Candidate', 'Role', 'Stage', 'Source'].map(h => (
+                  {['Candidate', 'Role', 'Source'].map(h => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[#7A6F55] uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {allContacts.filter(c => c.tags?.includes('candidate') || c.tags?.includes('recruitment')).length === 0 ? (
-                  <tr><td colSpan={4} className="px-4 py-8 text-center text-sm text-[#5C5340]">No candidates tracked yet</td></tr>
+                  <tr><td colSpan={3} className="px-4 py-8 text-center text-sm text-[#5C5340]">No candidates tracked yet</td></tr>
                 ) : allContacts.filter(c => c.tags?.includes('candidate') || c.tags?.includes('recruitment')).map(c => (
                   <tr key={c.id} className="border-b border-[rgba(167,155,120,0.09)] hover:bg-[rgba(167,155,120,0.04)]">
                     <td className="px-4 py-2.5 text-sm text-[#E8DFCE]">{c.name}</td>
                     <td className="px-4 py-2.5 text-xs text-[#A79B78]">{c.role ?? '—'}</td>
-                    <td className="px-4 py-2.5"><span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">{c.pipelineStage ?? 'Active'}</span></td>
                     <td className="px-4 py-2.5 text-xs text-[#7A6F55]">{c.source ?? '—'}</td>
                   </tr>
                 ))}

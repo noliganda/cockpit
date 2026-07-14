@@ -26,8 +26,6 @@ export type TaskStatus = typeof TASK_STATUSES[number]
 
 export const PROJECT_STATUSES = ['Planning', 'Active', 'On Hold', 'Completed', 'Archived'] as const
 
-export const PIPELINE_STAGES = ['Lead', 'Qualified', 'Proposal', 'Signature', 'Won', 'Lost', 'On Hold'] as const
-
 // ── Operator types ───────────────────────────────────────────────────────────
 
 export type OperatorType = 'human' | 'agent'
@@ -226,23 +224,6 @@ export interface Contact {
   updatedAt: Date
 }
 
-export interface Organisation {
-  id: string
-  workspaceId: string
-  name: string
-  industry?: string | null
-  website?: string | null
-  phone?: string | null
-  email?: string | null
-  address?: string | null
-  notes?: string | null
-  pipelineStage?: string | null
-  tags?: string[] | null
-  size?: string | null
-  createdAt: Date
-  updatedAt: Date
-}
-
 export interface Note {
   id: string
   workspaceId: string
@@ -400,7 +381,6 @@ export interface AgentAction {
 }
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent'
-export type PipelineStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
 
 // ── Intake types ─────────────────────────────────────────────────────────────
 

@@ -281,24 +281,6 @@ export const contacts = pgTable('contacts', {
   index('contacts_vcard_uid_idx').on(t.vcardUid),
 ])
 
-export const organisations = pgTable('organisations', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  workspaceId: text('workspace_id').notNull(),
-  name: text('name').notNull(),
-  industry: text('industry'),
-  website: text('website'),
-  phone: text('phone'),
-  email: text('email'),
-  address: text('address'),
-  notes: text('notes'),
-  pipelineStage: text('pipeline_stage'),
-  tags: text('tags').array().default([]),
-  size: text('size'),
-  ...timestamps,
-}, (t) => [
-  index('orgs_workspace_idx').on(t.workspaceId),
-])
-
 export const notes = pgTable('notes', {
   id: uuid('id').defaultRandom().primaryKey(),
   workspaceId: text('workspace_id').notNull(),

@@ -1,0 +1,24 @@
+{
+  "table": "organisations",
+  "exported_at": "2026-07-15",
+  "row_count": 1,
+  "note": "Snapshot before drop per SPEC-2026-07-15-contacts-crm-split. Predates Twenty; recovery path only.",
+  "rows": [
+    {
+      "id": "aa9635f8-e526-49dc-baed-b4b36d709730",
+      "workspace_id": "byron-film",
+      "name": "ACME",
+      "industry": "off",
+      "website": "lksdf.com",
+      "phone": "78239131",
+      "email": "hey@oliviermarcolin.com",
+      "address": "",
+      "notes": "",
+      "pipeline_stage": "Lead",
+      "tags": [],
+      "size": "12",
+      "created_at": "2026-03-01T19:51:58.833Z",
+      "updated_at": "2026-03-01T19:51:58.833Z"
+    }
+  ]
+}

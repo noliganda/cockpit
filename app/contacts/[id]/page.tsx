@@ -18,7 +18,6 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
     { label: 'Company', value: contact.company },
     { label: 'Role', value: contact.role },
     { label: 'Address', value: contact.address },
-    { label: 'Pipeline Stage', value: contact.pipelineStage },
     { label: 'Source', value: contact.source },
   ].filter(f => f.value)
 
@@ -30,9 +29,6 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
       <div className="mb-6">
         <h1 className="font-display text-[26px] font-medium text-[#E8DFCE]">{contact.name}</h1>
-        {contact.pipelineStage && (
-          <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-[rgba(167,155,120,0.13)] text-[#A79B78]">{contact.pipelineStage}</span>
-        )}
       </div>
 
       {/* Contact links */}

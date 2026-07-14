@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { contacts, organisations } from '@/lib/db/schema'
+import { contacts } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import type { WorkspaceId } from '@/types'
-import { CRMClient } from './crm-client'
+import { ContactsClient } from './contacts-client'
 
-export default async function CRMPage({
+export default async function ContactsPage({
   searchParams,
 }: {
   searchParams: Promise<{ workspace?: string }>
@@ -17,14 +17,15 @@ export default async function CRMPage({
   const { workspace } = await searchParams
   const workspaceId = (workspace ?? 'byron-film') as WorkspaceId
 
-  const [allContacts, allOrgs] = await Promise.all([
-    db.select().from(contacts).where(eq(contacts.workspaceId, workspaceId)).orderBy(desc(contacts.createdAt)),
-    db.select().from(organisations).where(eq(organisations.workspaceId, workspaceId)).orderBy(desc(organisations.createdAt)),
-  ])
+  const allContacts = await db
+    .select()
+    .from(contacts)
+    .where(eq(contacts.workspaceId, workspaceId))
+    .orderBy(desc(contacts.createdAt))
 
   return (
     <div className="flex flex-col h-full">
-      <CRMClient key={workspaceId} contacts={allContacts} organisations={allOrgs} workspaceId={workspaceId} />
+      <ContactsClient key={workspaceId} contacts={allContacts} workspaceId={workspaceId} />
     </div>
   )
 }

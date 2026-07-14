@@ -1,11 +1,15 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { User, Plus, X, Search, Linkedin, Instagram, Globe, Download, Trash2 } from 'lucide-react'
+import { User, X, Search, Linkedin, Instagram, Globe, Download } from 'lucide-react'
 import { CustomCheckbox } from '@/components/custom-checkbox'
 import { cn } from '@/lib/utils'
 import type { Contact, WorkspaceId } from '@/types'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { toast } from 'sonner'
+
+// The Rolodex is a READ-ONLY view of contacts synced in from Twenty
+// (Baïkal → Twenty → Cockpit). Person fields are never editable here; only the two
+// Cockpit-local fields — notes and tags — can be edited (they never sync back).
 
 // ─── VCF Generation ─────────────────────────────────────────────────────────
 function escapeVcf(s: string) {
@@ -45,6 +49,18 @@ function downloadVCF(selected: Contact[]) {
 const inputCls = 'w-full px-3 py-2.5 rounded-none bg-[#0F0C09] border border-[rgba(167,155,120,0.13)] text-[#E8DFCE] text-sm outline-none focus:border-[rgba(167,155,120,0.35)]'
 const labelCls = 'block text-xs text-[#7A6F55] uppercase tracking-wide mb-1.5'
 
+// ─── Local badge (rows with no Twenty link) ────────────────────────────────
+function LocalBadge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn('inline-flex items-center text-[10px] font-mono uppercase tracking-wide text-[#7A6F55] border border-[rgba(167,155,120,0.22)] px-1 py-px', className)}
+      title="Local contact — created in Cockpit, not linked to Twenty"
+    >
+      local
+    </span>
+  )
+}
+
 // ─── Tag Multi-Select ──────────────────────────────────────────────────────
 function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   const [input, setInput] = useState('')
@@ -62,6 +78,7 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (v: string[
             <button onClick={() => onChange(value.filter(t => t !== tag))} className="hover:text-[#E8DFCE]"><X className="w-2.5 h-2.5" /></button>
           </span>
         ))}
+        {value.length === 0 && <span className="text-xs text-[#5C5340]">No tags</span>}
       </div>
       <div className="flex gap-1">
         <input
@@ -87,192 +104,141 @@ function DialogOverlay({ children, onClose }: { children: React.ReactNode; onClo
   )
 }
 
-// ─── Contact Form State ────────────────────────────────────────────────────
-type ContactForm = {
-  firstName: string
-  lastName: string
-  role: string
-  mobile: string
-  email: string
-  address: string
-  linkedinUrl: string
-  instagramUrl: string
-  facebookUrl: string
-  portfolioUrl: string
-  tags: string[]
-  nextReachDate: string
-  notes: string
+// ─── Contact Panel (read-only person fields + editable notes/tags) ─────────
+function ReadOnlyRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-4">
+      <span className="text-xs text-[#7A6F55] uppercase tracking-wide w-28 shrink-0 pt-0.5">{label}</span>
+      <span className="text-sm text-[#E8DFCE] break-words min-w-0">{value}</span>
+    </div>
+  )
 }
 
-const emptyContactForm = (): ContactForm => ({
-  firstName: '',
-  lastName: '',
-  role: '',
-  mobile: '',
-  email: '',
-  address: '',
-  linkedinUrl: '',
-  instagramUrl: '',
-  facebookUrl: '',
-  portfolioUrl: '',
-  tags: [],
-  nextReachDate: '',
-  notes: '',
-})
-
-function contactToForm(c: Contact): ContactForm {
-  return {
-    firstName: c.firstName ?? '',
-    lastName: c.lastName ?? '',
-    role: c.role ?? '',
-    mobile: c.mobile ?? '',
-    email: c.email ?? '',
-    address: c.address ?? '',
-    linkedinUrl: c.linkedinUrl ?? '',
-    instagramUrl: c.instagramUrl ?? '',
-    facebookUrl: c.facebookUrl ?? '',
-    portfolioUrl: c.portfolioUrl ?? '',
-    tags: c.tags ?? [],
-    nextReachDate: c.nextReachDate ?? '',
-    notes: c.notes ?? '',
-  }
-}
-
-// ─── Contact Dialog ────────────────────────────────────────────────────────
-function ContactDialog({
-  mode,
+function ContactPanel({
   contact,
-  workspaceId,
   onClose,
   onSave,
 }: {
-  mode: 'create' | 'edit'
-  contact?: Contact
-  workspaceId: WorkspaceId
+  contact: Contact
   onClose: () => void
   onSave: (c: Contact) => void
 }) {
-  const [form, setForm] = useState<ContactForm>(contact ? contactToForm(contact) : emptyContactForm())
+  const [notes, setNotes] = useState(contact.notes ?? '')
+  const [tags, setTags] = useState<string[]>(contact.tags ?? [])
   const [saving, setSaving] = useState(false)
+  const isLocal = !contact.twentyPersonId
 
-  const set = (field: keyof ContactForm, val: string | string[]) =>
-    setForm(prev => ({ ...prev, [field]: val }))
+  const dirty = notes !== (contact.notes ?? '') ||
+    JSON.stringify(tags) !== JSON.stringify(contact.tags ?? [])
 
   const handleSave = async () => {
-    if (!form.firstName && !form.lastName) {
-      toast.error('First name or last name required')
-      return
-    }
     setSaving(true)
-    const name = [form.firstName, form.lastName].filter(Boolean).join(' ')
-    const payload = { ...form, name, workspaceId }
     try {
-      const url = mode === 'create' ? '/api/contacts' : `/api/contacts/${contact!.id}`
-      const method = mode === 'create' ? 'POST' : 'PATCH'
-      const res = await fetch(url, {
-        method,
+      const res = await fetch(`/api/contacts/${contact.id}`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ notes, tags }),
       })
       if (!res.ok) throw new Error('Failed')
       const saved = await res.json() as Contact
       onSave(saved)
-      toast.success(mode === 'create' ? 'Contact created' : 'Contact saved')
+      toast.success('Saved')
       onClose()
     } catch {
-      toast.error('Failed to save contact')
+      toast.error('Failed to save')
     } finally {
       setSaving(false)
     }
   }
 
+  const fields: [string, string | null | undefined][] = [
+    ['Position', contact.role],
+    ['Company', contact.company],
+    ['Email', contact.email],
+    ['Mobile', contact.mobile],
+    ['Phone', contact.phone],
+    ['Address', contact.address],
+    ['Source', contact.source],
+    ['Next reach', contact.nextReachDate],
+  ]
+  const shownFields = fields.filter(([, v]) => v) as [string, string][]
+
+  const links: [string, string][] = [
+    contact.linkedinUrl ? ['LinkedIn', contact.linkedinUrl] : null,
+    contact.instagramUrl ? ['Instagram', contact.instagramUrl] : null,
+    contact.facebookUrl ? ['Facebook', contact.facebookUrl] : null,
+    contact.portfolioUrl ? ['Portfolio', contact.portfolioUrl] : null,
+    contact.website ? ['Website', contact.website] : null,
+  ].filter(Boolean) as [string, string][]
+
   return (
     <DialogOverlay onClose={onClose}>
-      <div className="relative w-full sm:max-w-2xl bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
+      <div className="relative w-full sm:max-w-lg bg-[#201A14] border border-[rgba(167,155,120,0.22)] sm:rounded-none rounded-t-[16px] flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
-          <h2 className="text-sm font-semibold text-[#E8DFCE]">{mode === 'create' ? 'New Contact' : 'Edit Contact'}</h2>
-          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors"><X className="w-4 h-4" /></button>
+        <div className="flex items-start justify-between px-5 py-4 border-b border-[rgba(167,155,120,0.13)] shrink-0">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[#E8DFCE] truncate">{contact.name}</h2>
+              {isLocal && <LocalBadge />}
+            </div>
+            <p className="text-[11px] text-[#5C5340] font-mono mt-0.5">
+              {isLocal ? 'Local · not synced to Twenty' : 'Synced from Twenty · read-only'}
+            </p>
+          </div>
+          <button onClick={onClose} className="text-[#7A6F55] hover:text-[#E8DFCE] transition-colors shrink-0 ml-3"><X className="w-4 h-4" /></button>
         </div>
+
         {/* Body */}
-        <div className="overflow-y-auto flex-1 px-5 py-4">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-            {/* Row 1: First / Last Name */}
-            <div>
-              <label className={labelCls}>First Name</label>
-              <input className={inputCls} value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="First name" />
+        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-5">
+          {/* Read-only person fields */}
+          {shownFields.length > 0 && (
+            <div className="space-y-3">
+              {shownFields.map(([label, value]) => (
+                <ReadOnlyRow key={label} label={label} value={value} />
+              ))}
             </div>
-            <div>
-              <label className={labelCls}>Last Name</label>
-              <input className={inputCls} value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Last name" />
+          )}
+
+          {/* Links */}
+          {links.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {links.map(([label, url]) => (
+                <a key={label} href={url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">
+                  {label === 'LinkedIn' ? <Linkedin className="w-3.5 h-3.5" /> : label === 'Instagram' ? <Instagram className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
+                  {label}
+                </a>
+              ))}
             </div>
-            {/* Row 2: Position / Mobile */}
-            <div>
-              <label className={labelCls}>Position / Title</label>
-              <input className={inputCls} value={form.role} onChange={e => set('role', e.target.value)} placeholder="e.g. Director" />
-            </div>
-            <div>
-              <label className={labelCls}>Mobile</label>
-              <input className={inputCls} type="tel" value={form.mobile} onChange={e => set('mobile', e.target.value)} placeholder="+61 4xx xxx xxx" />
-            </div>
-            {/* Row 3: Email / LinkedIn */}
-            <div>
-              <label className={labelCls}>Email</label>
-              <input className={inputCls} type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="email@example.com" />
-            </div>
-            <div>
-              <label className={labelCls}>LinkedIn URL</label>
-              <input className={inputCls} value={form.linkedinUrl} onChange={e => set('linkedinUrl', e.target.value)} placeholder="https://linkedin.com/in/…" />
-            </div>
-            {/* Row 4: Address (full width) */}
-            <div className="col-span-2">
-              <label className={labelCls}>Address</label>
-              <input className={inputCls} value={form.address} onChange={e => set('address', e.target.value)} placeholder="Full address" />
-            </div>
-            {/* Row 5: Instagram / Facebook */}
-            <div>
-              <label className={labelCls}>Instagram URL</label>
-              <input className={inputCls} value={form.instagramUrl} onChange={e => set('instagramUrl', e.target.value)} placeholder="https://instagram.com/…" />
-            </div>
-            <div>
-              <label className={labelCls}>Facebook URL</label>
-              <input className={inputCls} value={form.facebookUrl} onChange={e => set('facebookUrl', e.target.value)} placeholder="https://facebook.com/…" />
-            </div>
-            {/* Row 6: Portfolio / Next Reach Date */}
-            <div>
-              <label className={labelCls}>Portfolio / Website URL</label>
-              <input className={inputCls} value={form.portfolioUrl} onChange={e => set('portfolioUrl', e.target.value)} placeholder="https://…" />
-            </div>
-            <div>
-              <label className={labelCls}>Next Reach Date</label>
-              <input className={inputCls} type="date" value={form.nextReachDate} onChange={e => set('nextReachDate', e.target.value)} />
-            </div>
-            {/* Row 7: Tags (full width) */}
-            <div className="col-span-2">
-              <label className={labelCls}>Tags</label>
-              <TagsInput value={form.tags} onChange={v => setForm(prev => ({ ...prev, tags: v }))} />
-            </div>
-            {/* Row 8: Notes (full width) */}
-            <div className="col-span-2">
-              <label className={labelCls}>Notes</label>
-              <textarea
-                className={cn(inputCls, 'resize-none h-24')}
-                value={form.notes}
-                onChange={e => set('notes', e.target.value)}
-                placeholder="Any notes…"
-              />
-            </div>
+          )}
+
+          {/* Editable: Tags */}
+          <div>
+            <label className={labelCls}>Tags <span className="normal-case text-[#5C5340]">(editable)</span></label>
+            <TagsInput value={tags} onChange={setTags} />
+          </div>
+
+          {/* Editable: Notes */}
+          <div>
+            <label className={labelCls}>Notes <span className="normal-case text-[#5C5340]">(editable)</span></label>
+            <textarea
+              className={cn(inputCls, 'resize-none h-28')}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="Cockpit-local notes — never synced back to Twenty…"
+            />
           </div>
         </div>
+
         {/* Footer */}
         <div className="flex justify-end gap-2 px-5 py-4 border-t border-[rgba(167,155,120,0.13)] shrink-0">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Close</button>
           <button
             onClick={handleSave}
-            disabled={saving}
-            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-50"
+            disabled={saving || !dirty}
+            className="px-4 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors disabled:opacity-40"
           >
-            {saving ? 'Saving…' : mode === 'create' ? 'Create Contact' : 'Save Changes'}
+            {saving ? 'Saving…' : 'Save Notes & Tags'}
           </button>
         </div>
       </div>
@@ -286,7 +252,7 @@ interface ContactsClientProps {
   workspaceId: WorkspaceId
 }
 
-export function ContactsClient({ contacts: initialContacts, workspaceId }: ContactsClientProps) {
+export function ContactsClient({ contacts: initialContacts }: ContactsClientProps) {
   const [contacts, setContacts] = useState(initialContacts)
 
   return (
@@ -311,10 +277,7 @@ export function ContactsClient({ contacts: initialContacts, workspaceId }: Conta
       <div className="flex-1 overflow-auto p-4 md:p-6">
         <ContactsTab
           contacts={contacts}
-          workspaceId={workspaceId}
-          onAdd={c => setContacts(prev => [c, ...prev])}
           onUpdate={c => setContacts(prev => prev.map(x => x.id === c.id ? c : x))}
-          onDelete={ids => setContacts(prev => prev.filter(x => !ids.includes(x.id)))}
         />
       </div>
     </div>
@@ -324,27 +287,19 @@ export function ContactsClient({ contacts: initialContacts, workspaceId }: Conta
 // ─── ContactsTab ───────────────────────────────────────────────────────────
 function ContactsTab({
   contacts,
-  workspaceId,
-  onAdd,
   onUpdate,
-  onDelete,
 }: {
   contacts: Contact[]
-  workspaceId: WorkspaceId
-  onAdd: (c: Contact) => void
   onUpdate: (c: Contact) => void
-  onDelete?: (ids: string[]) => void
 }) {
   const { workspace } = useWorkspace()
   const accentColor = workspace.color
   const [search, setSearch] = useState('')
-  const [showCreate, setShowCreate] = useState(false)
-  const [editing, setEditing] = useState<Contact | null>(null)
+  const [viewing, setViewing] = useState<Contact | null>(null)
 
-  // Batch selection
+  // Batch selection — for VCF export only (the Rolodex has no destructive actions)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [lastClickedIdx, setLastClickedIdx] = useState<number | null>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -385,21 +340,9 @@ function ContactsTab({
     }
   }
 
-  async function batchDelete() {
-    const ids = Array.from(selectedIds)
-    await fetch('/api/contacts/batch', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
-    })
-    setSelectedIds(new Set())
-    setShowDeleteConfirm(false)
-    onDelete?.(ids)
-  }
-
   return (
     <>
-      {/* Search + New */}
+      {/* Search */}
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1 max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5C5340]" />
@@ -410,15 +353,9 @@ function ContactsTab({
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-none bg-[#E8DFCE] text-[#14100C] text-sm font-medium hover:bg-[#E8DFCE] transition-colors shrink-0"
-        >
-          <Plus className="w-3.5 h-3.5" /> New Contact
-        </button>
       </div>
 
-      {/* Batch Toolbar */}
+      {/* Batch Toolbar — export only */}
       {selectedCount > 0 && (
         <div className="mb-4 flex items-center gap-2 flex-wrap px-4 py-2.5 rounded-none bg-[#201A14] border border-[rgba(167,155,120,0.22)]">
           <span className="text-xs text-[#A79B78] font-medium mr-1">{selectedCount} selected</span>
@@ -432,14 +369,6 @@ function ContactsTab({
             className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#A79B78] hover:text-[#E8DFCE] transition-colors"
           >
             <Download className="w-3 h-3" /> Export VCF
-          </button>
-
-          {/* Delete */}
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-none bg-[#272018] border border-[rgba(167,155,120,0.18)] text-[#C0452E] hover:bg-[rgba(192,69,46,0.10)] transition-colors"
-          >
-            <Trash2 className="w-3 h-3" /> Delete
           </button>
 
           {/* Deselect All */}
@@ -485,7 +414,7 @@ function ContactsTab({
                       'border-b border-[rgba(167,155,120,0.09)] last:border-0 hover:bg-[rgba(167,155,120,0.04)] cursor-pointer',
                       selectedIds.has(contact.id) && 'bg-[rgba(167,155,120,0.07)]'
                     )}
-                    onClick={() => setEditing(contact)}
+                    onClick={() => setViewing(contact)}
                   >
                     <td className="px-3 py-2.5" onClick={e => e.stopPropagation()}>
                       <CustomCheckbox
@@ -495,8 +424,9 @@ function ContactsTab({
                       />
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className="text-sm text-[#E8DFCE] hover:text-[#E8DFCE] transition-colors">
-                        {contact.name}
+                      <span className="inline-flex items-center gap-2">
+                        <span className="text-sm text-[#E8DFCE]">{contact.name}</span>
+                        {!contact.twentyPersonId && <LocalBadge />}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-sm text-[#A79B78]">{contact.role ?? '—'}</td>
@@ -561,10 +491,11 @@ function ContactsTab({
                     />
                   </div>
                   <p
-                    className="text-sm font-medium text-[#E8DFCE] flex-1 cursor-pointer"
-                    onClick={() => setEditing(contact)}
+                    className="text-sm font-medium text-[#E8DFCE] flex-1 cursor-pointer inline-flex items-center gap-2"
+                    onClick={() => setViewing(contact)}
                   >
                     {contact.name}
+                    {!contact.twentyPersonId && <LocalBadge />}
                   </p>
                 </div>
                 {contact.role && <p className="text-xs text-[#7A6F55] mb-1 ml-5">{contact.role}</p>}
@@ -576,35 +507,10 @@ function ContactsTab({
         </>
       )}
 
-      {/* Delete confirmation */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[rgba(10,8,6,0.7)]" onClick={() => setShowDeleteConfirm(false)} />
-          <div className="relative bg-[#201A14] border border-[rgba(167,155,120,0.22)] rounded-none p-6 max-w-sm w-full">
-            <h2 className="text-sm font-semibold text-[#E8DFCE] mb-2">Delete {selectedCount} contact{selectedCount !== 1 ? 's' : ''}?</h2>
-            <p className="text-xs text-[#7A6F55] mb-4">This cannot be undone.</p>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 text-sm text-[#7A6F55] hover:text-[#E8DFCE] transition-colors">Cancel</button>
-              <button onClick={() => void batchDelete()} className="px-4 py-2 text-sm font-medium bg-[#C0452E] text-[#E8DFCE] rounded-none hover:bg-red-500 transition-colors">Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showCreate && (
-        <ContactDialog
-          mode="create"
-          workspaceId={workspaceId}
-          onClose={() => setShowCreate(false)}
-          onSave={onAdd}
-        />
-      )}
-      {editing && (
-        <ContactDialog
-          mode="edit"
-          contact={editing}
-          workspaceId={workspaceId}
-          onClose={() => setEditing(null)}
+      {viewing && (
+        <ContactPanel
+          contact={viewing}
+          onClose={() => setViewing(null)}
           onSave={onUpdate}
         />
       )}

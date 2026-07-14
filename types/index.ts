@@ -220,6 +220,7 @@ export interface Contact {
   nextReachDate?: string | null
   tags?: string[] | null
   source?: string | null
+  twentyPersonId?: string | null
   createdAt: Date
   updatedAt: Date
 }

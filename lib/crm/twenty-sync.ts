@@ -1,16 +1,18 @@
 /**
- * Cockpit ⇄ Twenty CRM sync engine (task c68df6e1).
+ * Twenty CRM → Cockpit sync engine (task c68df6e1; one-way inbound since the
+ * 2026-07-15 contacts/CRM split — the Cockpit→Twenty leg was deleted).
  *
- * Thin Twenty REST client + the two idempotent, loop-safe sync directions:
- *   inbound  — upsertContactFromTwentyPerson: a Twenty person → a Cockpit contact
- *   outbound — pushContactToTwenty: a Cockpit contact → a Twenty person
+ * Thin Twenty REST client + the single idempotent, loop-safe sync direction:
+ *   inbound — upsertContactFromTwentyPerson: a Twenty person → a Cockpit contact
  *
- * Both directions diff before they write (see twenty-mapping), so an echo of our
- * own change produces no write and the loop dies on the first bounce. Matching
- * precedence is always twentyPersonId (strong) → vcardUid (Baïkal key) → email.
+ * Inbound diffs before it writes (see twenty-mapping), so an echo of Twenty's own
+ * state produces no write. Matching precedence is always twentyPersonId (strong)
+ * → vcardUid (Baïkal key) → email. Cockpit never writes person data back: the
+ * sync graph is acyclic (Baïkal → Twenty → Cockpit); the Rolodex is a read-only
+ * view, with only Cockpit-local notes/tags editable here.
  *
  * Used by both the Vercel webhook receiver (app/api/crm/webhooks/twenty) and the
- * Mini reconcile/outbound worker (scripts/crm/twenty-worker.ts).
+ * Mini reconcile worker (scripts/crm/twenty-worker.ts).
  */
 import { and, eq, isNotNull, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
@@ -18,12 +20,9 @@ import { contacts } from '@/lib/db/schema'
 import { logActivity } from '@/lib/activity'
 import {
   type TwentyPerson,
-  type ContactLike,
   cockpitWorkspaceForTwenty,
   personToContact,
-  contactToPerson,
   contactNeedsUpdate,
-  personNeedsUpdate,
 } from '@/lib/crm/twenty-mapping'
 
 // ---- REST client ----------------------------------------------------------
@@ -274,84 +273,7 @@ export async function detachDeletedPerson(
   return { action: 'unchanged', contactId: null, personId }
 }
 
-// ---- outbound: Cockpit contact → Twenty person ----------------------------
-
-export type OutboundAction = 'created' | 'updated' | 'unchanged'
-
-export interface OutboundResult {
-  action: OutboundAction
-  personId: string | null
-  contactId: string
-}
-
-/**
- * Push a Cockpit contact into Twenty. Resolves the target person by
- * twentyPersonId → vcardUid → email, creating one if none exists. Idempotent:
- * PATCHes only when a field actually differs. Returns the resolved person id so
- * the caller can persist it back onto the contact (breaks the search next time).
- */
-export async function pushContactToTwenty(
-  client: TwentyClient,
-  contact: ContactLike & { id: string; twentyPersonId?: string | null; workspaceId?: string },
-): Promise<OutboundResult> {
-  const payload = contactToPerson(contact)
-
-  let person: TwentyPerson | null = null
-  if (contact.twentyPersonId) person = await client.getPerson(contact.twentyPersonId)
-  if (!person && contact.vcardUid) person = await client.findByVcardUid(contact.vcardUid.trim())
-  if (!person && contact.email) person = await client.findByEmail(contact.email.trim())
-
-  if (!person) {
-    const created = await client.createPerson(payload)
-    const personId = created?.id ?? null
-    if (personId) {
-      await db
-        .update(contacts)
-        .set({ twentyPersonId: personId, twentySyncedAt: new Date() })
-        .where(eq(contacts.id, contact.id))
-    }
-    await logCrm(contact.workspaceId ?? 'personal', 'contact_synced_out', contact.id, contact.name, {
-      action: 'created', personId,
-    })
-    return { action: 'created', personId, contactId: contact.id }
-  }
-
-  if (!personNeedsUpdate(person, contact)) {
-    if (contact.twentyPersonId !== person.id) {
-      await db
-        .update(contacts)
-        .set({ twentyPersonId: person.id, twentySyncedAt: new Date() })
-        .where(eq(contacts.id, contact.id))
-    }
-    return { action: 'unchanged', personId: person.id, contactId: contact.id }
-  }
-
-  const updated = await client.updatePerson(person.id, payload)
-  await db
-    .update(contacts)
-    .set({ twentyPersonId: person.id, twentySyncedAt: new Date() })
-    .where(eq(contacts.id, contact.id))
-  await logCrm(contact.workspaceId ?? 'personal', 'contact_synced_out', contact.id, contact.name, {
-    action: 'updated', personId: updated?.id ?? person.id,
-  })
-  return { action: 'updated', personId: updated?.id ?? person.id, contactId: contact.id }
-}
-
-/** Contacts changed in Cockpit since their last Twenty sync — the outbound work-list. */
-export async function contactsPendingOutbound(workspaceId: string): Promise<ContactRow[]> {
-  return db
-    .select()
-    .from(contacts)
-    .where(
-      and(
-        eq(contacts.workspaceId, workspaceId),
-        // never pushed, or edited in Cockpit after the last reconcile
-        sql`(${contacts.twentySyncedAt} is null or ${contacts.updatedAt} > ${contacts.twentySyncedAt})`,
-        // must have something to match/create on
-        sql`(${contacts.twentyPersonId} is not null or ${contacts.email} is not null or ${contacts.vcardUid} is not null)`,
-      ),
-    )
-}
+// ---- inbound reconcile helpers --------------------------------------------
 
 /**
  * High-water mark for inbound reconcile: the newest twenty_synced_at in the

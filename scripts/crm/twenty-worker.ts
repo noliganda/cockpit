@@ -1,23 +1,23 @@
 /**
- * Cockpit ⇄ Twenty reconcile + outbound worker (task c68df6e1).
+ * Twenty → Cockpit reconcile worker (task c68df6e1). Inbound-only since the
+ * 2026-07-15 contacts/CRM split — the outbound (Cockpit→Twenty) pass was deleted;
+ * Cockpit is a read-only view and never writes person data back.
  *
  * Runs on the Mac Mini (launchd, every 15 min) — NOT on Vercel, because Twenty is
- * tailnet-only and the public app can't reach it. Two passes:
+ * tailnet-only and the public app can't reach it. One pass:
  *
- *   outbound  — push Cockpit contacts changed since their last sync INTO Twenty
- *               (create/patch, matched by twentyPersonId → vcardUid → email).
- *   inbound   — reconcile: page Twenty people (newest-updated first) and upsert
- *               into Cockpit, catching any webhook that was missed or 500'd.
- *               By DEFAULT bounded by the sync high-water mark (max twenty_synced_at)
- *               minus a margin — so a fresh install imports NO history, only changes
- *               since it started tracking. --since=<hours> overrides the window;
- *               --backfill mirrors the entire Twenty address book (deliberate, opt-in).
+ *   inbound — reconcile: page Twenty people (newest-updated first) and upsert
+ *             into Cockpit, catching any webhook that was missed or 500'd.
+ *             By DEFAULT bounded by the sync high-water mark (max twenty_synced_at)
+ *             minus a margin — so a fresh install imports NO history, only changes
+ *             since it started tracking. --since=<hours> overrides the window;
+ *             --backfill mirrors the entire Twenty address book (deliberate, opt-in).
  *
- * Both directions diff before writing, so this is idempotent and loop-safe.
+ * Inbound diffs before writing, so this is idempotent and loop-safe.
  *
  * Env: DATABASE_URL (self-loaded from .env.local, repo convention), TWENTY_OM_API_KEY
  * (injected from SOPS by the launchd entrypoint — never in .env.local).
- * Run: scripts/crm/run-twenty-worker.sh [both|outbound|inbound] [--since=H|--backfill] [--dry-run]
+ * Run: scripts/crm/run-twenty-worker.sh [--since=H|--backfill] [--dry-run]
  */
 import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
@@ -28,7 +28,6 @@ import type * as SyncMod from '@/lib/crm/twenty-sync'
 
 type TwentyClientT = InstanceType<typeof SyncMod.TwentyClient>
 type Sync = typeof SyncMod
-type OutboundAction = 'created' | 'updated' | 'unchanged'
 type InboundAction = 'created' | 'updated' | 'unchanged' | 'detached'
 
 /**
@@ -57,50 +56,28 @@ function loadEnvLocal(): void {
 }
 
 interface Args {
-  mode: 'both' | 'outbound' | 'inbound'
   sinceHours: number | null // null → derive cutoff from the sync watermark
   backfill: boolean
   dryRun: boolean
 }
 
 function parseArgs(argv: string[]): Args {
-  let mode: Args['mode'] = 'both'
   let sinceHours: number | null = null
   let backfill = false
   let dryRun = false
   for (const a of argv) {
-    if (a === 'both' || a === 'outbound' || a === 'inbound') mode = a
-    else if (a === '--dry-run') dryRun = true
+    // A legacy positional mode token (both|inbound|outbound) is accepted but ignored —
+    // the worker is inbound-only now; the launchd entrypoint still passes one.
+    if (a === '--dry-run') dryRun = true
     else if (a === '--backfill') backfill = true
     else if (a.startsWith('--since=')) sinceHours = Number(a.slice('--since='.length)) || null
   }
-  return { mode, sinceHours, backfill, dryRun }
+  return { sinceHours, backfill, dryRun }
 }
 
 const MARGIN_MS = 15 * 60_000 // re-scan a little before the watermark, for safety
 
 const stamp = (): string => new Date().toISOString()
-
-async function outboundPass(sync: Sync, client: TwentyClientT, workspace: string, dryRun: boolean): Promise<void> {
-  const pending = await sync.contactsPendingOutbound(workspace)
-  const counts: Record<OutboundAction | 'failed', number> = { created: 0, updated: 0, unchanged: 0, failed: 0 }
-  for (const c of pending) {
-    if (dryRun) {
-      console.log(`  would push ${c.id} "${c.name}" (twentyPersonId=${c.twentyPersonId ?? '—'})`)
-      continue
-    }
-    try {
-      const r = await sync.pushContactToTwenty(client, c)
-      counts[r.action]++
-    } catch (err) {
-      counts.failed++
-      console.error(`  push failed ${c.id} "${c.name}":`, err instanceof Error ? err.message : err)
-    }
-  }
-  console.log(
-    `[${stamp()}] outbound: ${pending.length} pending → created=${counts.created} updated=${counts.updated} unchanged=${counts.unchanged} failed=${counts.failed}`,
-  )
-}
 
 async function inboundPass(sync: Sync, client: TwentyClientT, twentyWorkspaceId: string, cutoffMs: number, label: string, dryRun: boolean): Promise<void> {
   const counts: Record<InboundAction | 'failed', number> = { created: 0, updated: 0, unchanged: 0, detached: 0, failed: 0 }
@@ -131,7 +108,7 @@ async function inboundPass(sync: Sync, client: TwentyClientT, twentyWorkspaceId:
 
 async function main(): Promise<void> {
   loadEnvLocal()
-  const { mode, sinceHours, backfill, dryRun } = parseArgs(process.argv.slice(2))
+  const { sinceHours, backfill, dryRun } = parseArgs(process.argv.slice(2))
 
   // Deferred so loadEnvLocal() runs before lib/db reads DATABASE_URL.
   const sync = await import('@/lib/crm/twenty-sync')
@@ -139,28 +116,24 @@ async function main(): Promise<void> {
   const workspace = cockpitWorkspaceForTwenty(TWENTY_OM_WORKSPACE_ID)
 
   const client = new sync.TwentyClient()
-  console.log(`[${stamp()}] twenty-worker start — mode=${mode} ${backfill ? 'backfill' : sinceHours != null ? `since=${sinceHours}h` : 'watermark'} dryRun=${dryRun} base=${client.base} workspace=${workspace}`)
+  console.log(`[${stamp()}] twenty-worker start — inbound ${backfill ? 'backfill' : sinceHours != null ? `since=${sinceHours}h` : 'watermark'} dryRun=${dryRun} base=${client.base} workspace=${workspace}`)
 
-  if (mode === 'both' || mode === 'outbound') await outboundPass(sync, client, workspace, dryRun)
-
-  if (mode === 'both' || mode === 'inbound') {
-    // Resolve the reconcile cutoff. Default: sync watermark (nothing historical on a
-    // fresh install). --backfill: mirror everything. --since=H: fixed lookback window.
-    let cutoffMs: number
-    let label: string
-    if (backfill) {
-      cutoffMs = -Infinity
-      label = 'backfill: all people'
-    } else if (sinceHours != null) {
-      cutoffMs = Date.now() - sinceHours * 3600_000
-      label = `since ${sinceHours}h`
-    } else {
-      const wm = await sync.inboundWatermark(workspace)
-      cutoffMs = wm ? wm.getTime() - MARGIN_MS : Date.now()
-      label = wm ? `since watermark ${wm.toISOString()}` : 'fresh install → no history'
-    }
-    await inboundPass(sync, client, TWENTY_OM_WORKSPACE_ID, cutoffMs, label, dryRun)
+  // Resolve the reconcile cutoff. Default: sync watermark (nothing historical on a
+  // fresh install). --backfill: mirror everything. --since=H: fixed lookback window.
+  let cutoffMs: number
+  let label: string
+  if (backfill) {
+    cutoffMs = -Infinity
+    label = 'backfill: all people'
+  } else if (sinceHours != null) {
+    cutoffMs = Date.now() - sinceHours * 3600_000
+    label = `since ${sinceHours}h`
+  } else {
+    const wm = await sync.inboundWatermark(workspace)
+    cutoffMs = wm ? wm.getTime() - MARGIN_MS : Date.now()
+    label = wm ? `since watermark ${wm.toISOString()}` : 'fresh install → no history'
   }
+  await inboundPass(sync, client, TWENTY_OM_WORKSPACE_ID, cutoffMs, label, dryRun)
 
   console.log(`[${stamp()}] twenty-worker done`)
 }

@@ -14,5 +14,6 @@ cd "$REPO"
 TWENTY_OM_API_KEY="$(sops -d --extract '["TWENTY_OM_API_KEY"]' "$WORKSPACE_SECRETS")"
 export TWENTY_OM_API_KEY
 
-# Default to a full both-direction pass; args override (e.g. `outbound`, `--since=48`).
-exec "$REPO/node_modules/.bin/tsx" "$REPO/scripts/crm/twenty-worker.ts" "${@:-both}"
+# Inbound-only reconcile pass (Twenty → Cockpit); args override (e.g. `--since=48`,
+# `--backfill`, `--dry-run`). A legacy mode token is accepted but ignored.
+exec "$REPO/node_modules/.bin/tsx" "$REPO/scripts/crm/twenty-worker.ts" "${@:-inbound}"

@@ -197,44 +197,9 @@ function NewProjectModal({ defaultWs, onClose, onCreated }: { defaultWs: Workspa
   )
 }
 
-function NewContactModal({ defaultWs, onClose, onCreated }: { defaultWs: WorkspaceId; onClose: () => void; onCreated: () => void }) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [wsId, setWsId] = useState<WorkspaceId>(defaultWs)
-  const [saving, setSaving] = useState(false)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!name.trim()) return
-    setSaving(true)
-    try {
-      const body: Record<string, string> = { name: name.trim(), workspaceId: wsId }
-      if (email.trim()) body.email = email.trim()
-      const res = await fetch('/api/contacts', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (res.ok) { toast.success('Contact created'); onCreated(); onClose() }
-      else toast.error('Failed to create contact')
-    } catch { toast.error('Error') } finally { setSaving(false) }
-  }
-
-  return (
-    <QuickModal title="New Contact" onClose={onClose} onSubmit={handleSubmit} saving={saving} submitLabel="Create Contact">
-      <div>
-        <label className={labelCls}>Full name</label>
-        <input autoFocus type="text" value={name} onChange={e => setName(e.target.value)}
-          placeholder="Name" className={inputCls} required />
-      </div>
-      <div>
-        <label className={labelCls}>Email <span className="normal-case text-[#5C5340]">(optional)</span></label>
-        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="email@example.com" className={inputCls} />
-      </div>
-      <WorkspaceSelect value={wsId} onChange={setWsId} />
-    </QuickModal>
-  )
-}
+// Contacts are no longer created in Cockpit: the Rolodex is a read-only view synced
+// in from Twenty (Baïkal → Twenty → Cockpit). New contacts are added in the address
+// book; the dashboard just links to /contacts. (Quick-add removed 2026-07-15.)
 
 // ── Live clock ────────────────────────────────────────────────────────────────
 function LiveClock() {
@@ -289,7 +254,7 @@ export function DashboardClient({
   const router = useRouter()
   const ws = (workspaceId ?? wsId) as WorkspaceId
 
-  const [modal, setModal] = useState<'task' | 'project' | 'contact' | null>(null)
+  const [modal, setModal] = useState<'task' | 'project' | null>(null)
   const [upcomingTab, setUpcomingTab] = useState<'tasks' | 'events'>('tasks')
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [eventsLoading, setEventsLoading] = useState(false)
@@ -354,7 +319,6 @@ export function DashboardClient({
     <>
       {modal === 'task' && <NewTaskModal defaultWs={ws} onClose={() => setModal(null)} onCreated={refresh} />}
       {modal === 'project' && <NewProjectModal defaultWs={ws} onClose={() => setModal(null)} onCreated={refresh} />}
-      {modal === 'contact' && <NewContactModal defaultWs={ws} onClose={() => setModal(null)} onCreated={refresh} />}
 
       <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
 
@@ -380,11 +344,13 @@ export function DashboardClient({
             <button onClick={() => window.dispatchEvent(new Event('quick-note-open'))} className={btnCls}>
               <FileText className="w-3.5 h-3.5" />New Note
             </button>
-            <button onClick={() => setModal('contact')} className={btnCls}>
-              <Users className="w-3.5 h-3.5" />New Contact
-            </button>
           </div>
         </div>
+
+        {/* Contacts are synced in from the address book — no quick-add here */}
+        <p className="text-[11px] text-[#5C5340] font-mono -mt-2">
+          Contacts are added in your address book and appear here within ~45 min (sync + reconcile).
+        </p>
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

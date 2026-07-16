@@ -137,7 +137,7 @@ Add adapter + dispatch config so the engine knows HOW to spawn each operator.
 
 ```sql
 -- drizzle/0010_operator_dispatch_config.sql
-ALTER TABLE operators ADD COLUMN IF NOT EXISTS adapter_type TEXT;  -- 'hermes-delegate' | 'hermes-tmux' | 'claude-tmux' | 'hermes-oneshot'
+ALTER TABLE operators ADD COLUMN IF NOT EXISTS adapter_type TEXT;  -- 'hermes-delegate' | 'hermes-tmux' | 'claude-tmux' | 'hermes-oneshot' | 'herdr' (added 2026-07-09)
 ALTER TABLE operators ADD COLUMN IF NOT EXISTS dispatch_config JSONB NOT NULL DEFAULT '{}';
 -- dispatch_config holds adapter-specific params: tmux session name, workdir, model, toolsets, etc.
 ALTER TABLE operators ADD COLUMN IF NOT EXISTS max_concurrent INTEGER NOT NULL DEFAULT 1;
@@ -242,6 +242,16 @@ cockpit-wiring.md) so Claude Code self-registers.
 
 **`hermes-oneshot.ts`** — `hermes chat -q "<prompt>"` fire-and-forget. Best for
 short research/lookup tasks. No session continuity.
+
+**`herdr.ts`** (+ `herdr-common.ts`, added 2026-07-09) — steers an agent pane via
+herdr's socket-API CLI; named by transport, not agent (herdr detects the harness
+per pane, so one adapter covers any harness). Upgrades over the tmux adapters:
+idle precondition (refuses to steer a busy agent — doubles as a recursive-steer
+guard), literal `agent send` + separate Enter (no `[Pasted text]` fragility), and
+submission *confirmed* via agent-status + task-id read-back. Gates on submission,
+not completion (fire-and-forget contract preserved). `dispatch_config` targets a
+herdr pane/agent instead of a tmux session. Journal:
+`docs/journal/2026-07-09-herdr-dispatch-adapter.md`.
 
 **Adapter selection:** `operator.adapterType` field determines which adapter.
 Future: a task could override (`task.metadata.preferredAdapter`).
